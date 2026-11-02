@@ -1,0 +1,30 @@
+/* =========================================================
+   US OPEN — TEMA (colores y fuentes). Se carga después de base.css:
+   cualquier regla de base.css se puede sobrescribir aquí.
+   Las fuentes de Google se enlazan desde sitio.json (fuentes).
+   ========================================================= */
+:root {
+    --bg: #fbf7e6;            /* marfil con un toque amarillo */
+    --surface: #fffdf5;
+    --text: #1d2420;          /* tinta verde muy oscura */
+    --text-soft: #4a4d48;
+    --grey: #7b7a72;
+    --border: #ebe1c3;
+    --accent: #0f4a37;        /* verde profundo */
+    --on-accent: #f6f1e7;     /* texto sobre --accent */
+    --clay: #b0532f;          /* terracota (tierra batida) */
+    --gold: #a88a57;          /* dorado apagado para detalles */
+    --header-bg: rgba(251, 247, 230, 0.94);
+    --panel-bg: rgba(251, 247, 230, 0.98);
+    --overlay: rgba(20, 26, 22, 0.72);
+    --skeleton-a: #f3ebd0;
+    --skeleton-b: #ebe1c3;
+    --serif: "Cormorant Garamond", "Cormorant", Georgia, "Times New Roman", serif;
+    --sans: "Jost", -apple-system, system-ui, "Segoe UI", sans-serif;
+}
+
+/* Logo propio (mismo tamaño de archivo que el de RG) */
+img.header-logo[src*="logo_web02.png"] { height: 90px; max-height: 90px; }
+@media (max-width: 480px) {
+    img.header-logo[src*="logo_web02.png"] { height: 77px; max-height: 77px; }
+}

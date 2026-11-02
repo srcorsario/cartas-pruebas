@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>US Open Menu</title>
     <link rel="icon" type="image/png" href="imagenes/icon.png">
-    <!-- NUEVO (28 agosto): igual que script.js, style.css necesita su propio ?v= de cache-busting
-         — hasta ahora no lo tenía, así que un cambio de CSS podía tardar hasta 10 minutos en
-         llegar al navegador del cliente aunque el archivo en GitHub ya fuera el nuevo. IMPORTANTE:
-         cada vez que se suba un style.css nuevo, hay que subir también este número. -->
-    <link rel="stylesheet" href="style.css?v=5">
+    <meta name="theme-color" content="#fbf7e6">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Jost:wght@300;400;500&amp;display=swap">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="base.css?v=361550ae">
+    <link rel="stylesheet" href="tema.css?v=0549d278">
 </head>
 <body>
     <header>
@@ -74,13 +76,9 @@
         <button id="next-btn" class="nav-btn" onclick="changePhoto(1); event.stopPropagation();">❯</button>
     </div>
 
-    <!-- NUEVO (26 agosto): ?v= de cache-busting en script.js — sin esto, el navegador (sobre
-         todo en móvil) puede seguir sirviendo una copia antigua cacheada de script.js aunque el
-         archivo en GitHub ya sea el nuevo, igual que ya pasaba con la imagen del vino "El
-         Tenista" antes de que se le añadiera su propio ?v=. IMPORTANTE: cada vez que se suba un
-         script.js nuevo, hay que subir también este número (basta con que cambie, no hace falta
-         que coincida con APP_VERSION de dentro del script) — si no, esta protección no sirve de
-         nada porque el navegador seguirá viendo la misma URL de siempre. -->
-    <script src="script.js?v=1.6.2-usopen"></script>
+    <!-- Generado por construir.ps1: no editar aquí sino en nucleo/ y restaurantes/. -->
+    <script>window.CARTA_BUILD = {"restaurante":"usopen","entorno":"pruebas","v":"20261102110056"};</script>
+    <script src="restaurante.js?v=fcfbd712"></script>
+    <script src="script.js?v=f11befb2"></script>
 </body>
 </html>
