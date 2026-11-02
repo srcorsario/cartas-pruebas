@@ -2,6 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
+  "guardado": "2026-11-02T14:50:49.621Z",
   "ocultas": ["pizzas"],
   "platos": [
     {
@@ -5121,7 +5122,7 @@
     },
     {
         "id": "12101", "activa": "no", "precio": "8.50", "precioMedia": "",
-        "carpeta": "entrantes", "archivo": "",
+        "carpeta": "entrantes", "archivo": "patatas_bravas_con_salsa_brava_y_alioli01.webp",
         "alergenos": ["HUEVO", "VEGETARIANO"], "opcionesInactivas": [],
         "nombre": {
             "ES": "Patatas bravas con salsa brava y alioli",

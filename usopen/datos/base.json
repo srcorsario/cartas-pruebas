@@ -94,7 +94,7 @@
 {"id":"11005","activa":"si","precio":"2.50","precioMedia":"","carpeta":"cervezas","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"30a79c17d398"},
 {"id":"11006","activa":"si","precio":"3.50","precioMedia":"","carpeta":"cervezas","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"eee956cef740"},
 {"id":"11007","activa":"si","precio":"2.70","precioMedia":"","carpeta":"cervezas","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"49fd9252bbfd"},
-{"id":"12101","activa":"no","precio":"8.50","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["HUEVO","VEGETARIANO"],"opcionesInactivas":[],"h":"4c945bae2aeb"},
+{"id":"12101","activa":"no","precio":"8.50","precioMedia":"","carpeta":"entrantes","archivo":"patatas_bravas_con_salsa_brava_y_alioli01.webp","alergenos":["HUEVO","VEGETARIANO"],"opcionesInactivas":[],"h":"e5d8db546cba"},
 {"id":"12102","activa":"no","precio":"14.50","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["GLUTEN","CRUSTACEO","HUEVO","PESCADO","CACAHUETE","SOJA","LACTOSA","FRUTOSCASCARA","APIO","MOSTAZA","SESAMO"],"opcionesInactivas":[],"h":"8caedeb141b5"},
 {"id":"12103","activa":"no","precio":"18.50","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["CRUSTACEO","HUEVO","PESCADO","LACTOSA"],"opcionesInactivas":[],"h":"dda8e79f32a5"},
 {"id":"12104","activa":"no","precio":"14.50","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["GLUTEN","LACTOSA","HUEVO","CACAHUETE","FRUTOSCASCARA","CRUSTACEO","APIO","MOSTAZA","SOJA","SESAMO"],"opcionesInactivas":[],"h":"74738584836f"},
