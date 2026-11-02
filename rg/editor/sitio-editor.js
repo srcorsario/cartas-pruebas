@@ -1,0 +1,1 @@
+window.EDITOR_SITIO = {"restaurante":"rg","titulo":"RG Menu","modo":"restaurante001","repo":"srcorsario/cartas-pruebas","ruta":"rg/datos.json","entorno":"pruebas","claveToken":"editor.rg.pruebas.token"};
