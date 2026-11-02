@@ -699,3 +699,31 @@ img.header-logo[src*="negro.png"] {
     .info-desc { font-size: 22px; }
     .info-qa { font-size: 17px; }
 }
+
+/* ---------------------------------------------------------
+   Precio de media ración (1/2 | Entero) y notas informativas
+   (ver PRECIO_MEDIA y R.notasInformativas en script.js)
+   --------------------------------------------------------- */
+.price-box-dual { display: flex; }
+.price-box-dual .price-cell {
+    display: inline-block;
+    min-width: 4.1em;
+    text-align: right;
+}
+.price-box-dual .price-cell + .price-cell { margin-left: 0.5em; }
+.price-columns-header { padding: 0 0 6px; }
+.price-columns-header .price-cell small {
+    font-family: var(--sans);
+    font-size: 0.55em;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey);
+}
+.item-row-nota .item-content { text-align: center; }
+.item-row-nota .name-selected {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--text-soft);
+}
+.item-row-nota .alergenos-list { justify-content: center; }

@@ -7,11 +7,15 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.0.0';
+const APP_VERSION = 'v4.2.0';
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
 const LIVE_CSV_ENDPOINT = (R.datos && R.datos.vivo) || '';
+// v4.2: datos.tipo 'json' -> la carta sale de un archivo propio (datos.json, generado con
+// PASAR_A_JSON.bat) en vez de Google Sheets. 'sheets' (por defecto) = como siempre.
+const DATOS_TIPO = (R.datos && R.datos.tipo) || 'sheets';
+const DATOS_ARCHIVO = (R.datos && R.datos.archivo) || 'datos.json';
 const ESSENTIAL_LANGS = (R.idiomas && R.idiomas.esenciales) || ['ES', 'EN', 'DE', 'FR', 'IT'];
 const RTL_LANGS = (R.idiomas && R.idiomas.rtl) || ['AR'];
 
@@ -226,6 +230,13 @@ const ALERGENOS_INFO_COL_DERECHA = [
 // Frase de aviso debajo de la leyenda -- propuesta por Claude, pendiente de que el usuario la
 // confirme o la sustituya por un texto propio (misma que en Club House). ACTUALIZADO: traducida
 // a los 26 idiomas a petición del usuario.
+// Cabecera "1/2 | Entero" de las pestañas donde algún plato tiene precio de media ración
+// (columna PRECIO_MEDIA de la hoja). Si la hoja no tiene esa columna, no aparece nunca.
+const PRECIO_COLUMNAS_TEXTO = {
+    media: { ES: "1/2", EN: "Half", DE: "Halb", FR: "1/2", IT: "1/2", RU: "Половина", NL: "Half", PL: "Połowa", SV: "Halv", NO: "Halv", DA: "Halv", FI: "Puolikas", PT: "Meia", RO: "Jumătate", HU: "Fél", CS: "Půl", EL: "Μισή", TR: "Yarım", AR: "نصف", ZH: "半份", JA: "ハーフ", KO: "하프", CA: "1/2", EU: "Erdia", GL: "Media", VA: "1/2" },
+    entero: { ES: "Entero", EN: "Whole", DE: "Ganz", FR: "Entier", IT: "Intero", RU: "Целая", NL: "Heel", PL: "Cała", SV: "Hel", NO: "Hel", DA: "Hel", FI: "Kokonainen", PT: "Inteira", RO: "Întreagă", HU: "Egész", CS: "Celá", EL: "Ολόκληρη", TR: "Tam", AR: "كامل", ZH: "整份", JA: "フル", KO: "풀", CA: "Sencer", EU: "Osoa", GL: "Enteira", VA: "Sencer" }
+};
+
 const ALERGENOS_AVISO_TEXTO = {
     ES: 'Si padece alguna alergia o intolerancia alimentaria, por favor infórmenos antes de realizar su pedido. Estaremos encantados de ayudarle a elegir las mejores opciones.',
     EN: 'If you have any food allergy or intolerance, please let us know before placing your order. We will be happy to help you choose the best options.',
@@ -323,6 +334,29 @@ async function init() {
         // vez quitada una categoría no habría forma de "recuperarla" si luego resulta que sigue
         // activa de verdad).
         const categoriesListOriginal = categoriesList.slice();
+
+        // v4.2: carta desde datos.json (un solo fetch, todos los idiomas, ocultas incluidas).
+        // Si fallara y hay endpoint de Sheets configurado, sigue con el flujo de siempre.
+        if (DATOS_TIPO === 'json') {
+            try {
+                const { platos, ocultas } = await cargarDatosJson();
+                allData = platos;
+                idsGlobalesDesactivados = ocultas;
+                categoriesList = categoriesListOriginal.filter(c => !ocultas.has(c.id));
+                if (!categoriesList.some(c => c.id === currentCat)) {
+                    currentCat = categoriesList.length > 0 ? categoriesList[0].id : currentCat;
+                }
+                renderCategories();
+                renderMenu();
+                updateLanguageUI();
+                managePreload();
+                setupScrollListener();
+                return;
+            } catch (e) {
+                console.error('[datos.json] No se pudo cargar:', e.message);
+                if (!LIVE_CSV_ENDPOINT && !CSV_URL) return;
+            }
+        }
 
         // NUEVO: se pide en paralelo con la carga de platos (no depende de ella) para no
         // añadir latencia al primer render.
@@ -681,6 +715,7 @@ function parseCSV(text) {
         const item = {
             id: idVal,
             precio: (get('PRECIO') || '0').replace(',', '.'),
+            precioMedia: (get('PRECIO_MEDIA') || '').replace(',', '.'),
             activa: (get('ACTIVA') || '').toUpperCase(),
             carpeta: get('CARPETA') || '',
             archivo: get('ARCHIVO_FOTO') || '',
@@ -711,6 +746,39 @@ function parseCSV(text) {
         rows.push(item);
     }
     return rows;
+}
+
+// v4.2: lee datos.json y lo deja con la misma forma que parseCSV (nombre_xx / info_xx en
+// minúsculas, todos los idiomas presentes aunque vacíos -> isLangLoaded() siempre true).
+// El ?v= lo pone construir.ps1 (hash de datos.json): solo cambia cuando cambia el archivo.
+async function cargarDatosJson() {
+    const v = BUILD.vDatos || Date.now();
+    const response = await fetch(`${DATOS_ARCHIVO}?v=${v}`);
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const j = await response.json();
+    const lista = (v) => Array.isArray(v) ? v : (v ? String(v).split(',') : []);
+    const platos = (j.platos || []).filter(p => p && p.id !== undefined && p.id !== '').map(p => {
+        const it = {
+            id: String(p.id),
+            precio: String(p.precio == null || p.precio === '' ? '0' : p.precio).replace(',', '.'),
+            precioMedia: String(p.precioMedia == null ? '' : p.precioMedia).replace(',', '.'),
+            activa: String(p.activa == null ? '' : p.activa).toUpperCase(),
+            carpeta: p.carpeta || '',
+            archivo: p.archivo || '',
+            alergenos: lista(p.alergenos).map(x => String(x).trim()).filter(x => x),
+            opcionesInactivas: lista(p.opcionesInactivas).map(x => parseInt(x, 10)).filter(n => !isNaN(n)),
+            hash: ''
+        };
+        Object.keys(IDIOMAS).forEach(l => {
+            const k = l.toLowerCase();
+            const n = p.nombre && p.nombre[l];
+            const inf = p.info && p.info[l];
+            it[`nombre_${k}`] = n ? String(n) : '';
+            it[`info_${k}`] = !inf ? '' : (typeof inf === 'string' ? inf : JSON.stringify(inf));
+        });
+        return it;
+    });
+    return { platos, ocultas: new Set((j.ocultas || []).map(String)) };
 }
 
 // NUEVO: pide al endpoint en vivo solo las columnas de los idiomas indicados.
@@ -960,6 +1028,16 @@ function renderMenu() {
     const titulo = (o) => `<h3 class="sub-category-title">${txtConES(o)}</h3>`;
     const grupos = catObj.grupos || [];
 
+    // Precio de media ración: si algún plato de la pestaña lo tiene, todas sus filas llevan dos
+    // columnas (1/2 | Entero) con una cabecera encima, alineada con ellas.
+    const dual = filtered.some(item => parseFloat(item.precioMedia) > 0);
+    const o = { dual };
+    if (dual) {
+        grid.innerHTML += `<div class="item-row price-columns-header"><div class="item-content"></div>` +
+            `<div class="price-box price-box-dual"><span class="price-cell"><small>${txt(PRECIO_COLUMNAS_TEXTO.media)}</small></span>` +
+            `<span class="price-cell"><small>${txt(PRECIO_COLUMNAS_TEXTO.entero)}</small></span></div></div>`;
+    }
+
     if (grupos.length && catObj.modoGrupos === 'secuencial') {
         // Recorre los platos en orden y pone el título de su grupo cada vez que cambia
         // (vinos por zona). Un plato sin grupo se pinta sin título y no corta el bloque.
@@ -971,7 +1049,7 @@ function renderMenu() {
                 const t = txtConES(g.nombre);
                 if (t !== tituloActual) { grid.innerHTML += titulo(g.nombre); tituloActual = t; }
             }
-            grid.innerHTML += generateItemHtml(item);
+            grid.innerHTML += generateItemHtml(item, o);
         });
     } else if (grupos.length) {
         // "bloques": primero los platos que no caen en ningún grupo (sin título) y después cada
@@ -984,14 +1062,14 @@ function renderMenu() {
             const i = grupos.findIndex(gr => enRangos(idNum, gr.rangos));
             (i >= 0 ? porGrupo[i] : sueltos).push(item);
         });
-        sueltos.forEach(item => { grid.innerHTML += generateItemHtml(item); });
+        sueltos.forEach(item => { grid.innerHTML += generateItemHtml(item, o); });
         grupos.forEach((g, i) => {
             if (porGrupo[i].length === 0) return;
             grid.innerHTML += titulo(g.nombre);
-            porGrupo[i].forEach(item => { grid.innerHTML += generateItemHtml(item); });
+            porGrupo[i].forEach(item => { grid.innerHTML += generateItemHtml(item, o); });
         });
     } else {
-        filtered.forEach(item => { grid.innerHTML += generateItemHtml(item); });
+        filtered.forEach(item => { grid.innerHTML += generateItemHtml(item, o); });
     }
 
     // Anexos: platos de OTROS rangos que se añaden al final de la pestaña con su título
@@ -1000,7 +1078,7 @@ function renderMenu() {
         const items = allData.filter(item => enRangos(parseInt(item.id, 10), anx.rangos) && item.activa === 'SI');
         if (items.length === 0) return;
         grid.innerHTML += titulo(anx.nombre);
-        items.forEach(item => { grid.innerHTML += generateItemHtml(item, { sinPrecioHasta: anx.sinPrecioHasta }); });
+        items.forEach(item => { grid.innerHTML += generateItemHtml(item, { dual, sinPrecioHasta: anx.sinPrecioHasta }); });
     });
 }
 
@@ -1012,6 +1090,9 @@ function b64ToUtf8(str) { return decodeURIComponent(escape(atob(str))); }
 // MODIFICADO: Lógica para incluir el icono de información dinámico y el manejo del popup de preguntas/respuestas
 // opts.sinPrecioHasta: los platos con ID <= ese número no muestran precio (anexos tipo
 // guarniciones, donde las incluidas van sin precio y las de pago con él).
+// opts.dual: dos columnas de precio (1/2 | Entero), ver renderMenu.
+// R.notasInformativas: IDs que no son platos sino avisos (p. ej. "Opción de pan sin gluten"):
+// se pintan centrados a todo el ancho y sin precio.
 function generateItemHtml(item, opts = {}) {
     // MODIFICADO (paridad con US Open): además del "Nombre // Detalle" de siempre (una sola
     // pareja de "//", usado para la uva de los vinos), ahora se admiten VARIAS palabras entre
@@ -1049,6 +1130,11 @@ function generateItemHtml(item, opts = {}) {
 
     const ocultarPrecio = opts.sinPrecioHasta !== undefined && parseInt(item.id, 10) <= opts.sinPrecioHasta;
     const price = ocultarPrecio ? '' : (parseFloat(item.precio) > 0 ? `${parseFloat(item.precio).toFixed(2)}€` : ''); 
+    const precioMedia = ocultarPrecio ? '' : (parseFloat(item.precioMedia) > 0 ? `${parseFloat(item.precioMedia).toFixed(2)}€` : '');
+    const esNota = (R.notasInformativas || []).includes(parseInt(item.id, 10));
+    const priceBoxHtml = esNota ? ''
+        : opts.dual ? `<div class="price-box price-box-dual"><span class="price-cell">${precioMedia}</span><span class="price-cell">${price}</span></div>`
+        : `<div class="price-box">${price}</div>`;
     const alergenosHtml = item.alergenos.map(a => `<img src="imagenes/alergenos/${a}.webp" loading="lazy" onerror="this.style.display='none'">`).join('');  
      
     let photoIcon = ''; 
@@ -1093,7 +1179,7 @@ function generateItemHtml(item, opts = {}) {
     const infoPlacement = `${currentData.name}${photoIcon ? ' ' + photoIcon : ''}${infoIconHtml ? ' ' + infoIconHtml : ''}`;
 
     return ` 
-    <div class="item-row"> 
+    <div class="item-row${esNota ? ' item-row-nota' : ''}"> 
         <div class="item-content" ${clickAction} ${clickableStyle}> 
             <span class="name-selected">
                 ${infoPlacement}
@@ -1106,7 +1192,7 @@ function generateItemHtml(item, opts = {}) {
             </span>` : ''}
             <div class="alergenos-list">${alergenosHtml}</div> 
         </div> 
-        <div class="price-box">${price}</div> 
+        ${priceBoxHtml}
         ${tenistaThumbHtml}
     </div>`;
 }
