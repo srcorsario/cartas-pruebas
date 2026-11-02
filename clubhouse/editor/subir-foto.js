@@ -1,10 +1,13 @@
 // =========================================================================================
-// subir-foto.js — "📷 Subir foto" en la ficha del plato (editor dentro de la web).
-//   Elige una imagen (jpg, png, webp, gif, avif, bmp... lo que abra el navegador), la reduce
-//   para que no pese (lado largo máx. MAX_LADO px) y la pasa a WebP en el propio navegador.
-//   La sube a GitHub junto a datos.json:  <web>/imagenes/<carpeta>/<nombre>0N.webp
-//   (N = 1..4; la web enseña la 01 como principal y 02-04 en la galería del plato).
-//   Si el navegador no sabe crear WebP (Safari antiguo) usa el codificador libwebp de jSquash.
+// subir-foto.js — "📷 Fotos del plato" en la ficha del plato (editor dentro de la web).
+//   Gestor de las fotos de un plato en GitHub, junto a datos.json:
+//     activas:      <web>/imagenes/<carpeta>/<nombre>01.webp … 04.webp
+//     desactivadas: <web>/imagenes/<carpeta>/desactivadas/<nombre>0N.webp (la web no las ve)
+//   La web busca primero la 01 y luego 02, 03, 04 seguidas (se para en el primer hueco), así
+//   que al guardar las activas SIEMPRE se renumeran 01, 02, 03… sin huecos.
+//   Añadir: cualquier imagen que abra el navegador -> máx. MAX_LADO px -> WebP (si el navegador
+//   no sabe crear WebP, con el codificador libwebp de jSquash). Mover, desactivar, eliminar y
+//   cambiar el nombre se guardan juntos en UN commit (Git Data API).
 // Lo inserta construir.ps1 en <web>/editor/. Usa el token de la sesión (login.html).
 // =========================================================================================
 (function () {
@@ -14,36 +17,79 @@
 
     var MAX_LADO = 1600, CALIDAD = 0.82, MAX_FOTOS = 4;
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
-    var API = 'https://api.github.com/repos/' + S.repo + '/contents/';
+    var REPO = 'https://api.github.com/repos/' + S.repo;
     var dirWeb = S.ruta.replace(/[^/]*$/, '');   // carpeta de datos.json en el repo = la web
+    var DESACT = 'desactivadas';
 
+    // ---------- GitHub ----------
     function token() {
         try { return sessionStorage.getItem(S.claveToken) || localStorage.getItem(S.claveToken) || ''; } catch (e) { return ''; }
     }
-    function gh(ruta, opciones) {
+    async function api(ruta, opciones, crudo) {
         opciones = opciones || {};
-        opciones.cache = 'no-store';
-        opciones.headers = { Authorization: 'Bearer ' + token(), Accept: 'application/vnd.github+json' };
-        return fetch(API + ruta.split('/').map(encodeURIComponent).join('/'), opciones).then(function (r) {
-            if (r.status === 401 && window.AccesoEditor) window.AccesoEditor.caducado();
-            return r;
+        var r = await fetch(REPO + ruta, {
+            method: opciones.method || 'GET', cache: 'no-store', body: opciones.body ? JSON.stringify(opciones.body) : undefined,
+            headers: { Authorization: 'Bearer ' + token(), Accept: crudo ? 'application/vnd.github.raw' : 'application/vnd.github+json' }
         });
+        if (r.status === 401 && window.AccesoEditor) window.AccesoEditor.caducado();
+        return r;
     }
+    var codRuta = function (p) { return p.split('/').map(encodeURIComponent).join('/'); };
+    async function listar(carpetaRepo) {
+        var r = await api('/contents/' + codRuta(carpetaRepo));
+        if (r.status === 404) return [];
+        if (!r.ok) throw new Error('GitHub HTTP ' + r.status + ' leyendo ' + carpetaRepo);
+        var j = await r.json();
+        return Array.isArray(j) ? j.filter(function (f) { return f.type === 'file'; }) : [];
+    }
+    var ramaCache = null;
+    async function rama() {
+        if (ramaCache) return ramaCache;
+        var r = await api('');
+        if (!r.ok) throw new Error('GitHub HTTP ' + r.status);
+        ramaCache = (await r.json()).default_branch || 'main';
+        return ramaCache;
+    }
+    // cambios: [{ path, sha }] (sha null = borrar). Un solo commit; reintenta si otro guardó a la vez.
+    async function commit(cambios, mensaje) {
+        var b = await rama();
+        for (var intento = 0; intento < 4; intento++) {
+            var ref = await api('/git/ref/heads/' + encodeURIComponent(b));
+            if (!ref.ok) throw new Error('GitHub HTTP ' + ref.status + ' (rama)');
+            var padre = (await ref.json()).object.sha;
+            var com = await api('/git/commits/' + padre);
+            var arbolBase = (await com.json()).tree.sha;
+            var arbol = await api('/git/trees', { method: 'POST', body: {
+                base_tree: arbolBase,
+                tree: cambios.map(function (c) { return { path: c.path, mode: '100644', type: 'blob', sha: c.sha }; })
+            } });
+            if (!arbol.ok) throw new Error('GitHub HTTP ' + arbol.status + ' (árbol)');
+            var nuevo = await api('/git/commits', { method: 'POST', body: { message: mensaje, tree: (await arbol.json()).sha, parents: [padre] } });
+            if (!nuevo.ok) throw new Error('GitHub HTTP ' + nuevo.status + ' (commit)');
+            var act = await api('/git/refs/heads/' + encodeURIComponent(b), { method: 'PATCH', body: { sha: (await nuevo.json()).sha } });
+            if (act.ok) return;
+            if (act.status !== 422 && act.status !== 409) throw new Error('GitHub HTTP ' + act.status + ' (guardar)');
+        }
+        throw new Error('Otro dispositivo está guardando a la vez. Vuelve a intentarlo.');
+    }
+    async function subirBlob(blob) {
+        var b64 = await new Promise(function (ok, ko) {
+            var fr = new FileReader();
+            fr.onload = function () { ok(String(fr.result).split(',')[1]); };
+            fr.onerror = ko; fr.readAsDataURL(blob);
+        });
+        var r = await api('/git/blobs', { method: 'POST', body: { content: b64, encoding: 'base64' } });
+        if (!r.ok) throw new Error('GitHub HTTP ' + r.status + ' (subir foto)');
+        return (await r.json()).sha;
+    }
+
+    // ---------- utilidades ----------
     function slug(t) {
         return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
             .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
     }
     function kb(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.round(n / 1024) + ' KB'; }
-    function blobAB64(blob) {
-        return new Promise(function (ok, ko) {
-            var fr = new FileReader();
-            fr.onload = function () { ok(String(fr.result).split(',')[1]); };
-            fr.onerror = ko;
-            fr.readAsDataURL(blob);
-        });
-    }
-
-    // ---------- plato abierto en la ficha (variables de app.js) ----------
+    function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
     function platoActual() {
         try {
             /* global platoEditandoId, esNuevoPlato, datosTempNuevo, datosLocales */
@@ -61,7 +107,7 @@
         return await new Promise(function (ok, ko) {
             var img = new Image(), url = URL.createObjectURL(file);
             img.onload = function () { URL.revokeObjectURL(url); ok(img); };
-            img.onerror = function () { URL.revokeObjectURL(url); ko(new Error('El navegador no reconoce ese archivo como imagen' + (/hei[cf]/i.test(file.name) ? ' (HEIC del iPhone: en Ajustes > Cámara > Formatos elige "Más compatible", o hazle una captura)' : '') + '.')); };
+            img.onerror = function () { URL.revokeObjectURL(url); ko(new Error('El navegador no reconoce "' + file.name + '" como imagen' + (/hei[cf]/i.test(file.name) ? ' (HEIC del iPhone: en Ajustes > Cámara > Formatos elige "Más compatible", o hazle una captura)' : '') + '.')); };
             img.src = url;
         });
     }
@@ -80,104 +126,179 @@
             var buf = await mod.default(cx.getImageData(0, 0, cw, ch), { quality: Math.round(CALIDAD * 100) });
             blob = new Blob([buf], { type: 'image/webp' });
         }
-        return { blob: blob, ancho: cw, alto: ch, anchoOrig: w, altoOrig: h };
+        return { blob: blob, info: w + '×' + h + ' (' + kb(file.size) + ') → ' + cw + '×' + ch + ', ' + kb(blob.size) };
     }
 
     // ---------- ventana ----------
-    var css = '#sf-fondo{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px}' +
-        '#sf-caja{background:#fff;color:#1f2328;border-radius:12px;max-width:440px;width:100%;padding:20px;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;max-height:92vh;overflow:auto}' +
-        '#sf-caja h3{margin:0 0 12px;font-size:1.1rem}#sf-caja img{display:block;max-width:100%;max-height:260px;margin:0 auto 10px;border-radius:8px}' +
-        '#sf-caja label{display:block;font-size:.8rem;color:#555;margin:10px 0 4px}#sf-caja input[type=text],#sf-caja select{width:100%;padding:8px;border:1px solid #ccc;border-radius:7px;font:inherit}' +
-        '#sf-caja .sf-info{font-size:.82rem;color:#555}#sf-caja .sf-msg{min-height:1.2em;margin-top:10px;font-size:.85rem}' +
-        '#sf-caja .sf-bot{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}#sf-caja button{padding:9px 14px;border-radius:8px;border:0;cursor:pointer;font:600 14px system-ui,sans-serif}' +
-        '#sf-caja .sf-ok{background:#16a34a;color:#fff}#sf-caja .sf-no{background:#e5e7eb}#sf-caja button:disabled{opacity:.5;cursor:progress}' +
+    var CSS = '#sf-fondo{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px}' +
+        '#sf-caja{background:#fff;color:#1f2328;border-radius:12px;max-width:720px;width:100%;padding:20px;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;max-height:92vh;overflow:auto}' +
+        '#sf-caja h3{margin:0 0 4px;font-size:1.1rem}#sf-caja h4{margin:16px 0 8px;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#6b6f76}' +
+        '#sf-caja .sf-sub{font-size:.82rem;color:#6b6f76;margin:0 0 12px}' +
+        '#sf-caja input[type=text]{padding:7px 9px;border:1px solid #ccc;border-radius:7px;font:inherit;width:220px}' +
+        '.sf-rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}' +
+        '.sf-foto{border:1px solid #e3e0d8;border-radius:10px;padding:6px;background:#faf9f6;display:flex;flex-direction:column;gap:6px}' +
+        '.sf-foto.nueva{border-color:#16a34a}.sf-foto .sf-img{aspect-ratio:4/3;background:#eee center/cover no-repeat;border-radius:7px}' +
+        '.sf-foto .sf-num{font-weight:700;font-size:.82rem}.sf-foto .sf-num small{font-weight:400;color:#6b6f76}' +
+        '.sf-acc{display:flex;flex-wrap:wrap;gap:4px}.sf-acc button{flex:1 1 auto;padding:4px 6px;border:1px solid #d6d2c6;border-radius:6px;background:#fff;cursor:pointer;font-size:.78rem}' +
+        '.sf-acc button:disabled{opacity:.35;cursor:default}.sf-acc .peligro{color:#b42318}' +
+        '.sf-vacio{color:#6b6f76;font-size:.85rem;padding:6px 0}' +
+        '#sf-msg{min-height:1.2em;margin-top:12px;font-size:.85rem}' +
+        '.sf-bot{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}.sf-bot button{padding:9px 14px;border-radius:8px;border:0;cursor:pointer;font:600 14px system-ui,sans-serif}' +
+        '.sf-ok{background:#16a34a;color:#fff}.sf-no{background:#e5e7eb}.sf-add{background:#1f2328;color:#fff;margin-right:auto}.sf-bot button:disabled{opacity:.5;cursor:progress}' +
         '.sf-btn{margin-top:6px;padding:5px 9px;border-radius:7px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;font-size:.78rem;white-space:nowrap}';
 
-    async function huecos(carpeta, base) {
-        var ocupados = {};
-        try {
-            var r = await gh(dirWeb + 'imagenes/' + carpeta);
-            if (r.ok) (await r.json()).forEach(function (f) {
-                var m = f.name.match(/^(.*)0(\d)\.webp$/i);
-                if (m && m[1] === base) ocupados[m[2]] = f.sha;
-            });
-        } catch (e) { }
-        return ocupados;
-    }
-
-    async function dialogo(file) {
+    async function gestor() {
         var p = platoActual();
         if (!p) { alert('Abre primero la ficha de un plato.'); return; }
         var carpeta = String(p.carpeta || '').trim();
         if (!carpeta) { alert('Este plato no tiene carpeta de fotos (columna Carpeta).'); return; }
-        var actual = (document.getElementById('edit-imagen') || {}).value || p.imagen || '';
-        var m = String(actual).match(/^(.*)0\d\.webp$/i);
-        var base = m ? m[1] : slug((document.getElementById('edit-es') || {}).value || p.es || ('plato_' + p.id));
+        var campo = document.getElementById('edit-imagen');
+        var actual = (campo && campo.value) || p.imagen || '';
+        var mm = String(actual).match(/^(.*)0\d\.webp$/i);
+        var baseOriginal = mm ? mm[1] : '';
+        var base = baseOriginal || slug((document.getElementById('edit-es') || {}).value || p.es || ('plato_' + p.id));
+        var dirAct = dirWeb + 'imagenes/' + carpeta + '/', dirDes = dirAct + DESACT + '/';
 
         var fondo = document.createElement('div');
         fondo.id = 'sf-fondo';
-        fondo.innerHTML = '<div id="sf-caja"><h3>📷 Subir foto</h3><div class="sf-info">Preparando la imagen…</div></div>';
+        fondo.innerHTML = '<div id="sf-caja"><h3>📷 Fotos del plato</h3><p class="sf-sub">Cargando…</p></div>';
         document.body.appendChild(fondo);
         var caja = fondo.querySelector('#sf-caja');
-        var cerrar = function () { fondo.remove(); };
+        var urls = [];
+        var cerrar = function () { urls.forEach(URL.revokeObjectURL); fondo.remove(); };
 
-        var res;
-        try { res = await aWebp(file); }
-        catch (e) { caja.innerHTML = '<h3>📷 Subir foto</h3><p class="sf-msg" style="color:#b42318">' + (e.message || e) + '</p><div class="sf-bot"><button class="sf-no">Cerrar</button></div>'; caja.querySelector('.sf-no').onclick = cerrar; return; }
-        var urlPrev = URL.createObjectURL(res.blob);
-        var ocupados = await huecos(carpeta, base);
-        var libre = 1; while (ocupados[libre] && libre < MAX_FOTOS) libre++;
-        if (!actual) libre = 1;
-        var opciones = '';
-        for (var i = 1; i <= MAX_FOTOS; i++) opciones += '<option value="' + i + '"' + (i === libre ? ' selected' : '') + '>' + i + (i === 1 ? ' — principal' : ' — galería') + (ocupados[i] ? ' (sustituye la que hay)' : '') + '</option>';
+        // Estado: listas de { path (original o null), sha, blob?, info? }
+        var activas = [], desact = [], originales = [];
+        try {
+            var patron = baseOriginal ? new RegExp('^' + baseOriginal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '0(\\d)\\.webp$', 'i') : null;
+            if (patron) {
+                var a = await listar(dirAct.slice(0, -1)), d = await listar(dirDes.slice(0, -1));
+                a.forEach(function (f) { var m = f.name.match(patron); if (m) activas.push({ n: +m[1], path: f.path, sha: f.sha }); });
+                d.forEach(function (f) { var m = f.name.match(patron); if (m) desact.push({ n: +m[1], path: f.path, sha: f.sha }); });
+                activas.sort(function (x, y) { return x.n - y.n; }); desact.sort(function (x, y) { return x.n - y.n; });
+                originales = activas.concat(desact).map(function (x) { return { path: x.path, sha: x.sha }; });
+                // Miniaturas (se cargan en segundo plano)
+                activas.concat(desact).forEach(function (x) {
+                    api('/contents/' + codRuta(x.path), {}, true).then(function (r) { return r.ok ? r.blob() : null; }).then(function (bl) {
+                        if (!bl) return; x.url = URL.createObjectURL(bl); urls.push(x.url); if (!guardando && document.body.contains(fondo)) pintar();
+                    }).catch(function () { });
+                });
+            }
+        } catch (e) { caja.querySelector('.sf-sub').textContent = 'No se pudieron leer las fotos: ' + e.message; return; }
 
-        caja.innerHTML = '<h3>📷 Subir foto</h3><img alt="" src="' + urlPrev + '">' +
-            '<div class="sf-info">' + res.anchoOrig + '×' + res.altoOrig + ' (' + kb(file.size) + ') → <b>' + res.ancho + '×' + res.alto + ' WebP, ' + kb(res.blob.size) + '</b></div>' +
-            '<label>Nombre del archivo</label><input type="text" id="sf-base" value="' + base + '">' +
-            '<label>Foto nº</label><select id="sf-num">' + opciones + '</select>' +
-            '<div class="sf-info" style="margin-top:6px">Se guarda en imagenes/' + carpeta + '/</div>' +
-            '<p class="sf-msg" id="sf-msg"></p>' +
-            '<div class="sf-bot"><button class="sf-no">Cancelar</button><button class="sf-ok">Subir</button></div>';
-        caja.querySelector('.sf-no').onclick = function () { URL.revokeObjectURL(urlPrev); cerrar(); };
-        caja.querySelector('#sf-base').oninput = async function () {
-            this.value = slug(this.value);
-        };
-        caja.querySelector('.sf-ok').onclick = async function () {
-            var btn = this, msg = caja.querySelector('#sf-msg');
-            var b = slug(caja.querySelector('#sf-base').value), n = +caja.querySelector('#sf-num').value;
-            if (!b) { msg.textContent = 'Falta el nombre.'; return; }
-            btn.disabled = true; msg.style.color = '#555'; msg.textContent = 'Subiendo…';
-            try {
-                var ruta = dirWeb + 'imagenes/' + carpeta + '/' + b + '0' + n + '.webp';
-                var previo = await gh(ruta);
-                var cuerpo = { message: 'Foto ' + b + '0' + n + '.webp (plato ' + p.id + ')', content: await blobAB64(res.blob) };
-                if (previo.ok) cuerpo.sha = (await previo.json()).sha;
-                var r = await gh(ruta, { method: 'PUT', body: JSON.stringify(cuerpo) });
-                if (!r.ok) throw new Error('GitHub HTTP ' + r.status);
-                var campo = document.getElementById('edit-imagen');
-                if (campo && (n === 1 || !campo.value)) campo.value = b + '01.webp';
-                msg.style.color = '#15803d';
-                msg.textContent = '✔ Subida. ' + (n === 1 ? 'Pulsa "Aplicar Cambios" y "Guardar cambios en web".' : 'Ya sale en la galería del plato.') + ' Puede tardar 1-2 min en verse.';
-                btn.textContent = 'Hecho'; btn.disabled = false;
-                btn.onclick = function () { URL.revokeObjectURL(urlPrev); cerrar(); };
-            } catch (e) {
-                msg.style.color = '#b42318'; msg.textContent = 'No se pudo subir: ' + (e.message || e);
-                btn.disabled = false;
+        var huecosAviso = activas.length && activas.some(function (x, i) { return x.n !== i + 1; });
+        var entrada = document.createElement('input');
+        entrada.type = 'file'; entrada.accept = 'image/*'; entrada.multiple = true; entrada.style.display = 'none';
+        fondo.appendChild(entrada);
+        var guardando = false;
+
+        function tarjeta(x, i, esActiva) {
+            var n = esActiva ? i + 1 : null;
+            var nombre = esActiva ? (n === 1 ? '01 <small>principal</small>' : '0' + n + ' <small>galería</small>') : '<small>desactivada</small>';
+            var acc = esActiva
+                ? '<button data-a="izq" ' + (i === 0 ? 'disabled' : '') + ' title="Antes">◀</button>' +
+                  '<button data-a="der" ' + (i === activas.length - 1 ? 'disabled' : '') + ' title="Después">▶</button>' +
+                  (i > 0 ? '<button data-a="pri" title="Poner como principal (01)">★ 01</button>' : '') +
+                  '<button data-a="off" title="La web deja de mostrarla (se guarda aparte)">Desactivar</button>' +
+                  '<button data-a="del" class="peligro">Eliminar</button>'
+                : '<button data-a="on" ' + (activas.length >= MAX_FOTOS ? 'disabled title="Ya hay 4 activas"' : '') + '>Activar</button>' +
+                  '<button data-a="del" class="peligro">Eliminar</button>';
+            return '<div class="sf-foto' + (x.blob ? ' nueva' : '') + '" data-l="' + (esActiva ? 'a' : 'd') + '" data-i="' + i + '">' +
+                '<div class="sf-img" style="background-image:url(' + (x.url || '') + ')"></div>' +
+                '<div class="sf-num">' + nombre + (x.blob ? ' <small>· nueva</small>' : '') + '</div>' +
+                (x.info ? '<div class="sf-num"><small>' + esc(x.info) + '</small></div>' : '') +
+                '<div class="sf-acc">' + acc + '</div></div>';
+        }
+        function pintar() {
+            caja.innerHTML = '<h3>📷 Fotos del plato</h3>' +
+                '<p class="sf-sub">imagenes/' + esc(carpeta) + '/ · la web enseña la 01 y luego 02, 03, 04 seguidas. Al guardar se renumeran sin huecos.' +
+                (huecosAviso ? ' <b style="color:#b45309">Había huecos en la numeración: se corrigen al guardar.</b>' : '') + '</p>' +
+                '<label style="font-size:.82rem;color:#555">Nombre de las fotos: </label><input type="text" id="sf-base" value="' + esc(base) + '"> <small style="color:#6b6f76">→ ' + esc(base) + '01.webp…</small>' +
+                '<h4>En la web (' + activas.length + '/' + MAX_FOTOS + ')</h4>' +
+                (activas.length ? '<div class="sf-rejilla">' + activas.map(function (x, i) { return tarjeta(x, i, true); }).join('') + '</div>' : '<div class="sf-vacio">Ninguna: el plato sale sin 📸 en la web.</div>') +
+                (desact.length ? '<h4>Desactivadas</h4><div class="sf-rejilla">' + desact.map(function (x, i) { return tarjeta(x, i, false); }).join('') + '</div>' : '') +
+                '<p id="sf-msg"></p>' +
+                '<div class="sf-bot"><button class="sf-add" ' + (activas.length >= MAX_FOTOS ? 'disabled' : '') + '>＋ Añadir fotos</button>' +
+                '<button class="sf-no">Cancelar</button><button class="sf-ok">Guardar</button></div>';
+            caja.querySelector('#sf-base').oninput = function () { base = slug(this.value) || base; };
+            caja.querySelector('#sf-base').onchange = function () { pintar(); };
+            caja.querySelector('.sf-no').onclick = function () { if (!guardando) cerrar(); };
+            caja.querySelector('.sf-add').onclick = function () { entrada.click(); };
+            caja.querySelector('.sf-ok').onclick = guardar;
+            caja.querySelectorAll('.sf-foto button').forEach(function (b) {
+                b.onclick = function () {
+                    var t = b.closest('.sf-foto'), lista = t.dataset.l === 'a' ? activas : desact, i = +t.dataset.i, x = lista[i];
+                    switch (b.dataset.a) {
+                        case 'izq': lista.splice(i, 1); lista.splice(i - 1, 0, x); break;
+                        case 'der': lista.splice(i, 1); lista.splice(i + 1, 0, x); break;
+                        case 'pri': lista.splice(i, 1); lista.unshift(x); break;
+                        case 'off': activas.splice(i, 1); desact.push(x); break;
+                        case 'on': desact.splice(i, 1); activas.push(x); break;
+                        case 'del': if (!confirm('¿Eliminar esta foto del todo?')) return; lista.splice(i, 1); break;
+                    }
+                    pintar();
+                };
+            });
+        }
+        entrada.onchange = async function () {
+            var files = Array.prototype.slice.call(entrada.files); entrada.value = '';
+            var msg = caja.querySelector('#sf-msg');
+            for (var k = 0; k < files.length; k++) {
+                if (activas.length >= MAX_FOTOS) { msg.style.color = '#b45309'; msg.textContent = 'Máximo ' + MAX_FOTOS + ' fotos activas: desactiva o elimina alguna.'; break; }
+                msg.style.color = '#555'; msg.textContent = 'Preparando ' + files[k].name + '…';
+                try {
+                    var r = await aWebp(files[k]);
+                    var u = URL.createObjectURL(r.blob); urls.push(u);
+                    activas.push({ blob: r.blob, url: u, info: r.info });
+                    pintar();
+                } catch (e) { msg = caja.querySelector('#sf-msg'); msg.style.color = '#b42318'; msg.textContent = e.message || String(e); return; }
             }
         };
+
+        async function guardar() {
+            var btn = caja.querySelector('.sf-ok'), msg = caja.querySelector('#sf-msg');
+            base = slug(caja.querySelector('#sf-base').value) || base;
+            guardando = true; btn.disabled = true; msg.style.color = '#555'; msg.textContent = 'Guardando…';
+            try {
+                for (var k = 0; k < activas.concat(desact).length; k++) {
+                    var x = activas.concat(desact)[k];
+                    if (x.blob && !x.sha) { msg.textContent = 'Subiendo foto nueva…'; x.sha = await subirBlob(x.blob); }
+                }
+                var finales = {};
+                activas.forEach(function (x, i) { finales[dirAct + base + '0' + (i + 1) + '.webp'] = x.sha; });
+                desact.forEach(function (x, i) { finales[dirDes + base + '0' + (i + 1) + '.webp'] = x.sha; });
+                var cambios = [];
+                originales.forEach(function (o) { if (!(o.path in finales)) cambios.push({ path: o.path, sha: null }); });
+                Object.keys(finales).forEach(function (path) {
+                    var o = originales.find(function (q) { return q.path === path; });
+                    if (!o || o.sha !== finales[path]) cambios.push({ path: path, sha: finales[path] });
+                });
+                if (cambios.length) { msg.textContent = 'Guardando en GitHub…'; await commit(cambios, 'Fotos ' + base + ' (plato ' + p.id + ')'); }
+                var nuevoCampo = activas.length ? base + '01.webp' : '';
+                var cambiaCampo = campo && campo.value !== nuevoCampo;
+                if (campo) campo.value = nuevoCampo;
+                msg.style.color = '#15803d';
+                msg.textContent = '✔ ' + (cambios.length ? 'Fotos guardadas.' : 'Sin cambios en las fotos.') +
+                    (cambiaCampo ? ' "Nombre Imagen" ahora es "' + (nuevoCampo || 'vacío') + '": pulsa Aplicar Cambios y Guardar cambios en web.' : '') +
+                    (cambios.length ? ' En la web, en 1-2 min.' : '');
+                caja.querySelector('.sf-bot').innerHTML = '<button class="sf-ok">Cerrar</button>';
+                caja.querySelector('.sf-ok').onclick = cerrar;
+            } catch (e) {
+                msg.style.color = '#b42318'; msg.textContent = 'No se pudo guardar: ' + (e.message || e);
+                btn.disabled = false;
+            }
+            guardando = false;
+        }
+        pintar();
     }
 
     document.addEventListener('DOMContentLoaded', function () {
         var campo = document.getElementById('edit-imagen');
         if (!campo) return;
-        var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
-        var entrada = document.createElement('input');
-        entrada.type = 'file'; entrada.accept = 'image/*'; entrada.style.display = 'none';
-        entrada.onchange = function () { var f = entrada.files[0]; entrada.value = ''; if (f) dialogo(f); };
+        var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
         var btn = document.createElement('button');
-        btn.type = 'button'; btn.className = 'sf-btn'; btn.textContent = '📷 Subir foto';
-        btn.onclick = function () { entrada.click(); };
+        btn.type = 'button'; btn.className = 'sf-btn'; btn.textContent = '📷 Fotos del plato';
+        btn.onclick = gestor;
         campo.insertAdjacentElement('afterend', btn);
-        campo.parentNode.appendChild(entrada);
     });
 })();
