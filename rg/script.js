@@ -15,7 +15,9 @@ const LIVE_CSV_ENDPOINT = (R.datos && R.datos.vivo) || '';
 // v4.2: datos.tipo 'json' -> la carta sale de un archivo propio (datos.json, generado con
 // PASAR_A_JSON.bat) en vez de Google Sheets. 'sheets' (por defecto) = como siempre.
 const DATOS_TIPO = (R.datos && R.datos.tipo) || 'sheets';
-const DATOS_ARCHIVO = (R.datos && R.datos.archivo) || 'datos.json';
+// Carpeta con base.json (sin textos) + un <idioma>.json por idioma (la genera construir.ps1 y el
+// editor al guardar, a partir de datos.json). Así se cargan por etapas igual que con Sheets.
+const DATOS_CARPETA = (R.datos && R.datos.carpeta) || 'datos/';
 const ESSENTIAL_LANGS = (R.idiomas && R.idiomas.esenciales) || ['ES', 'EN', 'DE', 'FR', 'IT'];
 const RTL_LANGS = (R.idiomas && R.idiomas.rtl) || ['AR'];
 
@@ -299,6 +301,10 @@ function generateAlergenosPageHtml() {
 // no actualizado, etc.) devuelve un Set vacío — es decir, se muestran TODAS las pestañas, el
 // mismo comportamiento de siempre. Nunca debe poder romper la carga del menú.
 async function fetchCategoriasDeshabilitadas() {
+    if (DATOS_TIPO === 'json') {
+        try { return new Set(((await jsonBase()).ocultas || []).map(String)); }
+        catch (e) { console.warn('[Pestañas] base.json no disponible, se muestran todas:', e.message); return new Set(); }
+    }
     try {
         const url = `${LIVE_CSV_ENDPOINT}?accion=categorias&zx=${Date.now()}`;
         const response = await fetch(url, { cache: 'no-store' });
@@ -335,31 +341,6 @@ async function init() {
         // activa de verdad).
         const categoriesListOriginal = categoriesList.slice();
 
-        // v4.2: carta desde datos.json (un solo fetch, todos los idiomas, ocultas incluidas).
-        // Si fallara y hay endpoint de Sheets configurado, sigue con el flujo de siempre.
-        if (DATOS_TIPO === 'json') {
-            try {
-                const { platos, ocultas } = await cargarDatosJson();
-                allData = platos;
-                idsGlobalesDesactivados = ocultas;
-                categoriesList = categoriesListOriginal.filter(c => !ocultas.has(c.id));
-                if (!categoriesList.some(c => c.id === currentCat)) {
-                    currentCat = categoriesList.length > 0 ? categoriesList[0].id : currentCat;
-                }
-                renderCategories();
-                renderMenu();
-                updateLanguageUI();
-                managePreload();
-                setupScrollListener();
-                return;
-            } catch (e) {
-                console.error('[datos.json] No se pudo cargar:', e.message);
-                if (!LIVE_CSV_ENDPOINT && !CSV_URL) return;
-            }
-        }
-
-        // NUEVO: se pide en paralelo con la carga de platos (no depende de ella) para no
-        // añadir latencia al primer render.
         const categoriasPromise = fetchCategoriasDeshabilitadas();
 
         // NUEVO (27 agosto, recordar último estado de toggles): antes de saber la respuesta real
@@ -429,15 +410,24 @@ async function init() {
             return;
         }
 
-        const idiomasEtapa1 = Array.from(new Set([currentLang, 'ES']));
+        // v4.2: etapa 1 = idioma del móvil + los "primeros" (por defecto ES y EN; restaurante.js
+        // idiomas.primeros). Etapa 2 = idiomas.esenciales. Etapa 3 = el resto (no en 2G/3G/ahorro).
+        const PRIMEROS = (R.idiomas && R.idiomas.primeros) || ['ES', 'EN'];
+        const idiomasEtapa1 = Array.from(new Set([currentLang, ...PRIMEROS]));
 
         try {
             allData = await fetchAndParseCsv(idiomasEtapa1);
         } catch (e) {
-            console.warn('[Carga por etapas] Fallo en el endpoint en vivo, usando CSV completo de reserva:', e.message);
-            const response = await fetch(CSV_URL);
-            const csvText = await response.text();
-            allData = parseCSV(csvText);
+            if (DATOS_TIPO === 'json') {
+                console.warn('[datos] Fallo cargando, reintento en 2 s:', e.message);
+                await new Promise(r => setTimeout(r, 2000));
+                allData = await fetchAndParseCsv(idiomasEtapa1);
+            } else {
+                console.warn('[Carga por etapas] Fallo en el endpoint en vivo, usando CSV completo de reserva:', e.message);
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                allData = parseCSV(csvText);
+            }
         }
 
         // MODIFICADO (22 agosto, velocidad de apertura): antes se esperaba SIEMPRE a "categorias"
@@ -748,41 +738,61 @@ function parseCSV(text) {
     return rows;
 }
 
-// v4.2: lee datos.json y lo deja con la misma forma que parseCSV (nombre_xx / info_xx en
-// minúsculas, todos los idiomas presentes aunque vacíos -> isLangLoaded() siempre true).
-// El ?v= lo pone construir.ps1 (hash de datos.json): solo cambia cuando cambia el archivo.
-async function cargarDatosJson() {
-    const v = BUILD.vDatos || Date.now();
-    const response = await fetch(`${DATOS_ARCHIVO}?v=${v}`);
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const j = await response.json();
-    const lista = (v) => Array.isArray(v) ? v : (v ? String(v).split(',') : []);
-    const platos = (j.platos || []).filter(p => p && p.id !== undefined && p.id !== '').map(p => {
-        const it = {
-            id: String(p.id),
-            precio: String(p.precio == null || p.precio === '' ? '0' : p.precio).replace(',', '.'),
-            precioMedia: String(p.precioMedia == null ? '' : p.precioMedia).replace(',', '.'),
-            activa: String(p.activa == null ? '' : p.activa).toUpperCase(),
-            carpeta: p.carpeta || '',
-            archivo: p.archivo || '',
-            alergenos: lista(p.alergenos).map(x => String(x).trim()).filter(x => x),
-            opcionesInactivas: lista(p.opcionesInactivas).map(x => parseInt(x, 10)).filter(n => !isNaN(n)),
-            hash: ''
-        };
-        Object.keys(IDIOMAS).forEach(l => {
-            const k = l.toLowerCase();
-            const n = p.nombre && p.nombre[l];
-            const inf = p.info && p.info[l];
-            it[`nombre_${k}`] = n ? String(n) : '';
-            it[`info_${k}`] = !inf ? '' : (typeof inf === 'string' ? inf : JSON.stringify(inf));
+// =========================================================================================
+// v4.2 — DATOS EN JSON (datos.tipo 'json'). Sustituyen a las 4 peticiones a Apps Script con la
+// misma forma de resultado que parseCSV, así el resto (etapas por idioma, caché local, hashes,
+// changeLanguage) funciona igual. Archivos: datos/base.json y datos/<idioma>.json.
+// cache:'no-cache' = el navegador revalida (304 si no cambió): barato con mala cobertura.
+// =========================================================================================
+let _jsonBase = null;
+const _jsonIdiomas = {};
+function jsonBase() {
+    if (!_jsonBase) {
+        _jsonBase = fetch(`${DATOS_CARPETA}base.json`, { cache: 'no-cache' })
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status + ' en base.json'); return r.json(); })
+            .catch(e => { _jsonBase = null; throw e; });
+    }
+    return _jsonBase;
+}
+function jsonIdioma(l) {
+    const k = l.toLowerCase();
+    if (!_jsonIdiomas[k]) {
+        _jsonIdiomas[k] = fetch(`${DATOS_CARPETA}${k}.json`, { cache: 'no-cache' })
+            .then(r => { if (r.status === 404) return {}; if (!r.ok) throw new Error('HTTP ' + r.status + ' en ' + k + '.json'); return r.json(); })
+            .catch(e => { delete _jsonIdiomas[k]; throw e; });
+    }
+    return _jsonIdiomas[k];
+}
+function jsonFilaBase(p) {
+    return {
+        id: String(p.id),
+        precio: String(p.precio == null || p.precio === '' ? '0' : p.precio).replace(',', '.'),
+        precioMedia: String(p.precioMedia == null ? '' : p.precioMedia).replace(',', '.'),
+        activa: String(p.activa == null ? '' : p.activa).toUpperCase(),
+        carpeta: p.carpeta || '',
+        archivo: p.archivo || '',
+        alergenos: (p.alergenos || []).map(x => String(x).trim()).filter(x => x),
+        opcionesInactivas: (p.opcionesInactivas || []).map(x => parseInt(x, 10)).filter(n => !isNaN(n)),
+        hash: p.h || ''
+    };
+}
+async function jsonFilas(langs, ids) {
+    const [base, ...textos] = await Promise.all([jsonBase(), ...langs.map(jsonIdioma)]);
+    const filtro = ids ? new Set(ids.map(String)) : null;
+    return (base.platos || []).filter(p => !filtro || filtro.has(String(p.id))).map(p => {
+        const it = jsonFilaBase(p);
+        langs.forEach((l, i) => {
+            const t = textos[i][p.id] || [];
+            it[`nombre_${l.toLowerCase()}`] = t[0] || '';
+            it[`info_${l.toLowerCase()}`] = t[1] || '';
         });
         return it;
     });
-    return { platos, ocultas: new Set((j.ocultas || []).map(String)) };
 }
 
 // NUEVO: pide al endpoint en vivo solo las columnas de los idiomas indicados.
 async function fetchAndParseCsv(langs) {
+    if (DATOS_TIPO === 'json') return jsonFilas(langs);
     const idiomasParam = langs.join(',');
     const url = `${LIVE_CSV_ENDPOINT}?accion=csv&idiomas=${encodeURIComponent(idiomasParam)}&zx=${Date.now()}`;
     const response = await fetch(url, { cache: 'no-store' });
@@ -905,6 +915,7 @@ function guardarTogglesCacheLocal(idsDeshabilitados) {
 // pocos KB pensada únicamente para comprobar qué ha cambiado, no para renderizar nada con ella
 // directamente (los nombre_*/info_* de estas filas vendrán "undefined", como espera parseCSV).
 async function fetchHashesBase() {
+    if (DATOS_TIPO === 'json') return jsonFilas([]);
     const url = `${LIVE_CSV_ENDPOINT}?accion=csv&soloBase=1&zx=${Date.now()}`;
     const response = await fetch(url, { cache: 'no-store' });
     if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -915,6 +926,7 @@ async function fetchHashesBase() {
 // Pide el contenido completo (columnas base + los idiomas indicados) de solo las filas cuyo ID
 // esté en la lista — para traer SOLO lo que ha cambiado, tras compararlo con fetchHashesBase.
 async function fetchFilasPorId(ids, langs) {
+    if (DATOS_TIPO === 'json') return (ids && ids.length) ? jsonFilas(langs, ids) : [];
     if (!ids || ids.length === 0) return [];
     const idiomasParam = langs.join(',');
     const idsParam = ids.join(',');
