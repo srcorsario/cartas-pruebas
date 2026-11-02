@@ -1,4 +1,4 @@
-{"ocultas":["pizzas"],"platos":[
+{"ocultas":["pizzas","sugerencias"],"platos":[
 {"id":"1","activa":"no","precio":"0.00","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"fc021d8e98ee"},
 {"id":"2","activa":"no","precio":"0.00","precioMedia":"","carpeta":"ensaladas","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"777a1818f9b1"},
 {"id":"3","activa":"no","precio":"0.00","precioMedia":"","carpeta":"","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"39739e12e01b"},
