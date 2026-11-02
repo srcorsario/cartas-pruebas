@@ -18,6 +18,15 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
 
 (function () {
     'use strict';
+    // Editor dentro de la web (cartas, EDITOR_SITIO): solo la carta de ese restaurante, sus menús
+    // guardados (menus-especiales.json, ver almacen-json.js) y su logo en la cabecera impresa.
+    // "logoMenu" opcional en "editor" de sitio.json; si no, RG usa el de siempre y US Open el suyo.
+    const SITIO_ME = window.EDITOR_SITIO || null;
+    const NOMBRE_ME = SITIO_ME
+        ? ((typeof getModoAlias === 'function' && getModoAlias(SITIO_ME.modo)) || SITIO_ME.titulo || SITIO_ME.restaurante)
+        : 'RG';
+    const LOGO_MENU_ME = (SITIO_ME && SITIO_ME.logoMenu) ||
+        ((SITIO_ME && SITIO_ME.modo === 'restaurante002' && typeof LOGO_RESTAURANTE002 !== 'undefined') ? LOGO_RESTAURANTE002 : 'logo_RG_REST_recorte.png');
 
     // =================================================================================
     // ESTADO DEL MÓDULO
@@ -282,9 +291,12 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
         try {
             // "Mis Platos" (platosManuales, ver más abajo) se pide en PARALELO con las 2 cartas --
             // es independiente de ellas y así no añade tiempo de carga extra.
+            // Editor dentro de la web (cartas): solo la carta de SU restaurante.
+            const cargarModo = (m) => (typeof window.cargarYCachearModo === 'function' && (!SITIO_ME || SITIO_ME.modo === m))
+                ? window.cargarYCachearModo(m) : Promise.resolve(null);
             const resultados = await Promise.all([
-                (typeof window.cargarYCachearModo === 'function') ? window.cargarYCachearModo('restaurante001') : Promise.resolve(null),
-                (typeof window.cargarYCachearModo === 'function') ? window.cargarYCachearModo('restaurante002') : Promise.resolve(null),
+                cargarModo('restaurante001'),
+                cargarModo('restaurante002'),
                 listarPlatosManuales()
             ]);
             datosRG = resultados[0];
@@ -770,7 +782,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
                     <p id="me-modal-subtitulo" style="margin:0 0 14px 0; font-size:0.82rem; color:#777;"></p>
                     <div class="me-fila" style="margin-bottom:12px;">
                         <input type="text" id="me-modal-buscar" class="input-estandar" style="flex:2;min-width:200px;margin-bottom:0;" placeholder="Buscar por nombre..." oninput="MenuEspecial.filtrarModalLista()">
-                        <select id="me-modal-filtro-restaurante" class="input-estandar" style="flex:0 0 170px;margin-bottom:0;" onchange="MenuEspecial.filtrarModalLista()">
+                        <select id="me-modal-filtro-restaurante" class="input-estandar" style="flex:0 0 170px;margin-bottom:0;${SITIO_ME ? 'display:none;' : ''}" onchange="MenuEspecial.filtrarModalLista()">
                             <option value="">RG y US Open</option>
                             <option value="restaurante001">Solo RG</option>
                             <option value="restaurante002">Solo US Open</option>
@@ -821,7 +833,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
                     <label class="label-seccion">Nombre del menú <span style="font-weight:500;text-transform:none;color:#999;">(aparecerá impreso como título del menú)</span></label>
                     <input type="text" id="me-nombre" class="input-estandar" style="margin-bottom:0;" placeholder="Ej: Boda García — 20 septiembre" value="${escHtml(menuActual.nombre)}" oninput="MenuEspecial.actualizarNombre(this.value)">
                 </div>
-                <label class="me-check-label"><input type="checkbox" ${menuActual.logo ? 'checked' : ''} onchange="MenuEspecial.toggleLogo(this.checked)"> 🎾 Logos cabecera (Rafa Nadal + RG)</label>
+                <label class="me-check-label"><input type="checkbox" ${menuActual.logo ? 'checked' : ''} onchange="MenuEspecial.toggleLogo(this.checked)"> 🎾 Logos cabecera (Rafa Nadal + ${SITIO_ME ? NOMBRE_ME : 'RG'})</label>
                 <label class="me-check-label"><input type="checkbox" ${menuActual.mostrarNombre ? 'checked' : ''} onchange="MenuEspecial.toggleMostrarNombre(this.checked)"> 📝 Imprimir nombre</label>
                 <label class="me-check-label"><input type="checkbox" ${menuActual.idiomas.es ? 'checked' : ''} onchange="MenuEspecial.toggleIdioma('es', this.checked)"> 🇪🇸 Español</label>
                 <label class="me-check-label"><input type="checkbox" ${menuActual.idiomas.en ? 'checked' : ''} onchange="MenuEspecial.toggleIdioma('en', this.checked)"> 🇬🇧 Inglés</label>
@@ -850,7 +862,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
             ${sec.activo ? `
             <div style="margin-top:12px;">
                 <div class="me-fila" style="margin-bottom:10px;">
-                    <button class="btn btn-secondary" onclick="MenuEspecial.abrirModalPlatos('comida', '${info.key}')">🔍 Elegir platos de la carta (RG / US Open)...</button>
+                    <button class="btn btn-secondary" onclick="MenuEspecial.abrirModalPlatos('comida', '${info.key}')">🔍 Elegir platos de la carta (${SITIO_ME ? NOMBRE_ME : 'RG / US Open'})...</button>
                 </div>
                 <div class="me-fila" style="margin-bottom:10px;">
                     <input type="text" id="me-input-manual-comida-${info.key}" class="input-estandar" style="flex:2;min-width:200px;margin-bottom:0;" placeholder="¿No está en la carta? Escríbelo aquí...">
@@ -902,7 +914,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
                     ? `<span class="me-plato-tag me-tag-mis-platos">Mis Platos</span>`
                     : p.ambos
                         ? `<span class="me-plato-tag me-tag-ambos">RG + US Open</span>`
-                        : (p.modo === 'restaurante002' ? `<span class="me-plato-tag me-tag-us">US Open</span>` : `<span class="me-plato-tag me-tag-rg">RG</span>`);
+                        : SITIO_ME ? '' : (p.modo === 'restaurante002' ? `<span class="me-plato-tag me-tag-us">US Open</span>` : `<span class="me-plato-tag me-tag-rg">RG</span>`);
             const nombre = (conEn && p.en) ? `${escHtml(p.es)} <span style="color:#999;">/ ${escHtml(p.en)}</span>` : escHtml(p.es);
             return `<div class="me-plato-row">
                 <span class="me-plato-nombre">${tag}${nombre}</span>
@@ -1075,7 +1087,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
             ? `<span class="me-plato-tag me-tag-mis-platos">Mis Platos</span>`
             : p.ambos
                 ? `<span class="me-plato-tag me-tag-ambos">RG + US Open</span>`
-                : (p.modo === 'restaurante002' ? `<span class="me-plato-tag me-tag-us">US Open</span>` : `<span class="me-plato-tag me-tag-rg">RG</span>`);
+                : SITIO_ME ? '' : (p.modo === 'restaurante002' ? `<span class="me-plato-tag me-tag-us">US Open</span>` : `<span class="me-plato-tag me-tag-rg">RG</span>`);
         const btnBorrar = esMisPlatos
             ? `<button type="button" class="me-btn-borrar-mis-platos" title="Quitar de Mis Platos" onclick="event.preventDefault(); event.stopPropagation(); MenuEspecial.eliminarPlatoManualDeBiblioteca(${JSON.stringify(p.id)});">🗑️</button>`
             : '';
@@ -1615,7 +1627,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
         // Garros Restaurant. El checkbox "logo" activa/desactiva la cabecera entera.
         const logoHtml = menu.logo ? `<div class="me-print-cabecera">
                 <div class="me-print-cab-izq"><img src="logo_bull_RN.png" class="me-print-bull" alt="Rafa Nadal"><div class="me-print-rn-texto">RAFA NADAL</div><div class="me-print-rn-sub">ACADEMY</div></div>
-                <div class="me-print-cab-der"><img src="logo_RG_REST_recorte.png" class="me-print-logo" alt="Roland Garros Restaurant"></div>
+                <div class="me-print-cab-der"><img src="${LOGO_MENU_ME}" class="me-print-logo" alt="${NOMBRE_ME}"></div>
             </div>` : '';
         // El nombre del menú (imprimir es opcional, checkbox "📝 Imprimir nombre") va arriba del
         // todo dentro del marco, centrado, en naranja y grande.
@@ -1987,7 +1999,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
         if (!menuActual) menuActual = nuevoMenuVacio();
 
         const yaEstabanListos = indicesListos;
-        if (!yaEstabanListos) mostrarCargando(true, '🍽️ Cargando cartas de RG y US Open...');
+        if (!yaEstabanListos) mostrarCargando(true, SITIO_ME ? '🍽️ Cargando la carta de ' + NOMBRE_ME + '...' : '🍽️ Cargando cartas de RG y US Open...');
         try {
             // 25 sept: si precargarEnSegundoPlano() ya lanzó listarMenus() al arrancar la web,
             // se reutiliza esa MISMA petición en curso (menusGuardadosPromesa) en vez de pedirla
