@@ -1,0 +1,30 @@
+/* =========================================================
+   CLUB HOUSE — TEMA (colores y fuentes). Se carga después de base.css:
+   cualquier regla de base.css se puede sobrescribir aquí.
+   Las fuentes de Google se enlazan desde sitio.json (fuentes).
+   ========================================================= */
+:root {
+    --bg: #f4f7f0;            /* marfil con un toque verde */
+    --surface: #fbfdf9;
+    --text: #1d2420;          /* tinta verde muy oscura */
+    --text-soft: #4a4d48;
+    --grey: #7b7a72;
+    --border: #dae4d4;
+    --accent: #0f4a37;        /* verde profundo */
+    --on-accent: #f6f1e7;     /* texto sobre --accent */
+    --clay: #b0532f;          /* terracota (tierra batida) */
+    --gold: #a88a57;          /* dorado apagado para detalles */
+    --header-bg: rgba(244, 247, 240, 0.94);
+    --panel-bg: rgba(244, 247, 240, 0.98);
+    --overlay: rgba(20, 26, 22, 0.72);
+    --skeleton-a: #e8efe2;
+    --skeleton-b: #dae4d4;
+    --serif: "Cormorant Garamond", "Cormorant", Georgia, "Times New Roman", serif;
+    --sans: "Jost", -apple-system, system-ui, "Segoe UI", sans-serif;
+}
+
+/* Logo propio (apaisado) */
+img.header-logo[src*="logo-clubhouse.png"] { height: 56px; max-height: 56px; }
+@media (max-width: 480px) {
+    img.header-logo[src*="logo-clubhouse.png"] { height: 46px; max-height: 46px; }
+}
