@@ -2,7 +2,8 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "ocultas": [],
+  "guardado": "2026-11-02T11:02:08.565Z",
+  "ocultas": ["alergenos"],
   "platos": [
     {
         "id": "1", "activa": "no", "precio": "0.00", "precioMedia": "",
