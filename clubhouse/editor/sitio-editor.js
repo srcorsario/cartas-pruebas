@@ -1,0 +1,1 @@
+window.EDITOR_SITIO = {"restaurante":"clubhouse","titulo":"Club House Menu","modo":"restaurante001","repo":"srcorsario/cartas-pruebas","ruta":"clubhouse/datos.json","entorno":"pruebas","claveToken":"editor.clubhouse.pruebas.token"};

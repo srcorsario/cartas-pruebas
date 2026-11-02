@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Acceso al editor</title>
+<script src="sitio-editor.js?v=331529f1"></script>
+<style>
+  :root { --fondo:#f4f1ea; --carta:#fff; --texto:#1f2328; --suave:#6b6f76; --borde:#d9d4c7; --acento:#1f2328; --error:#b42318; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo:#16171a; --carta:#202226; --texto:#ecebe7; --suave:#9a9ca3; --borde:#3a3d44; --acento:#ecebe7; --error:#ff8a7a; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:16px; background:var(--fondo); color:var(--texto);
+         font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  form { width:100%; max-width:360px; background:var(--carta); border:1px solid var(--borde); border-radius:14px; padding:28px 24px; }
+  h1 { margin:0 0 2px; font-size:1.35rem; font-weight:650; letter-spacing:-.01em; }
+  .sub { margin:0 0 22px; color:var(--suave); font-size:.9rem; }
+  .ent { display:inline-block; margin-left:6px; background:#f59e0b; color:#111; border-radius:999px; padding:1px 8px; font-size:.7rem; font-weight:700; vertical-align:middle; }
+  label { display:block; font-size:.8rem; color:var(--suave); margin:0 0 6px; }
+  input[type=text], input[type=password] { width:100%; padding:11px 12px; margin:0 0 16px; border:1px solid var(--borde); border-radius:9px;
+         background:transparent; color:var(--texto); font:inherit; }
+  input:focus { outline:2px solid var(--acento); outline-offset:1px; }
+  .recordar { display:flex; gap:8px; align-items:center; font-size:.88rem; color:var(--suave); margin:0 0 20px; cursor:pointer; }
+  button { width:100%; padding:12px; border:0; border-radius:9px; background:var(--acento); color:var(--carta); font:600 1rem system-ui,sans-serif; cursor:pointer; }
+  button:disabled { opacity:.55; cursor:progress; }
+  .msg { min-height:1.3em; margin:14px 0 0; font-size:.88rem; color:var(--error); }
+  .msg.info { color:var(--suave); }
+  .pie { margin:18px 0 0; text-align:center; font-size:.82rem; }
+  .pie a { color:var(--suave); }
+</style>
+</head>
+<body>
+<form id="f" autocomplete="on">
+  <h1 id="titulo">Editor</h1>
+  <p class="sub">Acceso al editor de la carta</p>
+  <label for="u">Usuario</label>
+  <input id="u" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+  <label for="p">Contraseña</label>
+  <input id="p" type="password" autocomplete="current-password" required>
+  <label class="recordar"><input id="r" type="checkbox"> Recordar en este dispositivo</label>
+  <button id="b" type="submit">Entrar</button>
+  <p class="msg" id="m" role="alert"></p>
+  <p class="pie"><a href="../">Ver la carta</a></p>
+</form>
+<script>
+(function () {
+  'use strict';
+  var S = window.EDITOR_SITIO || {};
+  var $ = function (id) { return document.getElementById(id); };
+  $('titulo').innerHTML = '';
+  $('titulo').appendChild(document.createTextNode(S.titulo || 'Editor'));
+  if (S.entorno === 'pruebas') $('titulo').insertAdjacentHTML('beforeend', '<span class="ent">PRUEBAS</span>');
+  document.title = 'Acceso · ' + (S.titulo || 'Editor');
+
+  function mensaje(t, info) { $('m').textContent = t || ''; $('m').className = 'msg' + (info ? ' info' : ''); }
+  var motivo = new URLSearchParams(location.search).get('motivo');
+  if (motivo) mensaje(motivo);
+  if (!window.crypto || !crypto.subtle) mensaje('Este navegador no permite el acceso (hace falta https).');
+
+  var b64 = function (t) { return Uint8Array.from(atob(t), function (c) { return c.charCodeAt(0); }); };
+  var utf8 = function (t) { return new TextEncoder().encode(t); };
+  function unir() {
+    var partes = Array.prototype.slice.call(arguments), n = 0, o = 0;
+    partes.forEach(function (p) { n += p.length; });
+    var r = new Uint8Array(n);
+    partes.forEach(function (p) { r.set(p, o); o += p.length; });
+    return r;
+  }
+  // Bloque cifrado: AES-256-CBC con clave[0..31] + HMAC-SHA256 con clave[32..63] sobre (contexto|iv|datos).
+  async function abrir(clave64, contexto, bloque) {
+    var mk = await crypto.subtle.importKey('raw', clave64.slice(32, 64), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+    var iv = b64(bloque.iv), datos = b64(bloque.datos);
+    var ok = await crypto.subtle.verify('HMAC', mk, b64(bloque.mac), unir(utf8(contexto), iv, datos));
+    if (!ok) return null;
+    var ek = await crypto.subtle.importKey('raw', clave64.slice(0, 32), { name: 'AES-CBC' }, false, ['decrypt']);
+    return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-CBC', iv: iv }, ek, datos));
+  }
+  async function derivar(pass, sal, iter) {
+    var k = await crypto.subtle.importKey('raw', utf8(pass.normalize('NFC')), 'PBKDF2', false, ['deriveBits']);
+    return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: b64(sal), iterations: iter }, k, 512));
+  }
+
+  $('f').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    var usuario = $('u').value.trim().toLowerCase(), pass = $('p').value;
+    if (!usuario || !pass) return;
+    $('b').disabled = true; mensaje('Comprobando…', true);
+    try {
+      var r = await fetch('usuarios.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) throw new Error('Este editor aún no tiene usuarios.');
+      var bd = await r.json();
+      var e = bd.usuarios && bd.usuarios[usuario];
+      var maestra = e && await abrir(await derivar(pass, e.sal, bd.iteraciones), 'usuario:' + usuario + '\n', e);
+      if (!maestra) { await new Promise(function (ok) { setTimeout(ok, 600); }); throw new Error('Usuario o contraseña incorrectos.'); }
+      var plano = await abrir(maestra, 'secreto\n', bd.secreto);
+      if (!plano) throw new Error('Los datos de acceso están dañados. Vuelve a crear los usuarios.');
+      var sec = JSON.parse(new TextDecoder().decode(plano));
+
+      // ¿El token de GitHub sigue valiendo para el repo de la carta?
+      var g = await fetch('https://api.github.com/repos/' + S.repo, { cache: 'no-store', headers: { Authorization: 'Bearer ' + sec.token, Accept: 'application/vnd.github+json' } });
+      if (g.status === 401) throw new Error('Contraseña correcta, pero el token de GitHub ha caducado. Avisa al administrador (USUARIOS.bat → renovar token).');
+      if (g.status === 404 || g.status === 403) throw new Error('Contraseña correcta, pero el token no tiene acceso a ' + S.repo + '. Avisa al administrador.');
+      if (g.ok) { var info = await g.json(); if (info.permissions && info.permissions.push === false) throw new Error('El token solo puede leer ' + S.repo + ', no guardar. Avisa al administrador.'); }
+
+      var recordar = $('r').checked;
+      var guardar = recordar ? localStorage : sessionStorage, otro = recordar ? sessionStorage : localStorage;
+      [S.claveToken, S.claveToken + '.usuario'].forEach(function (k) { try { otro.removeItem(k); } catch (x) { } });
+      guardar.setItem(S.claveToken, sec.token);
+      guardar.setItem(S.claveToken + '.usuario', usuario);
+      if (Array.isArray(sec.gemini) && sec.gemini.length) {
+        var act = []; try { act = JSON.parse(localStorage.getItem('geminiKeys') || '[]') || []; } catch (x) { }
+        sec.gemini.forEach(function (k) { if (k && act.indexOf(k) < 0) act.push(k); });
+        localStorage.setItem('geminiKeys', JSON.stringify(act));
+      }
+      mensaje('Entrando…', true);
+      location.replace('index.html');
+    } catch (err) {
+      mensaje(err.message || String(err));
+      $('b').disabled = false;
+    }
+  });
+  $('u').focus();
+})();
+</script>
+</body>
+</html>

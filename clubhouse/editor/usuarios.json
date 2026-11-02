@@ -1,0 +1,17 @@
+{
+    "formato":  1,
+    "iteraciones":  310000,
+    "secreto":  {
+                    "iv":  "xo6M0PfPgeczJpR1K/ZM6g==",
+                    "datos":  "GTf3gCN8Jueo6DpDJcI9c6/5bbC7VnX2Y6TBxLEW4T/w8bQlOVPHgXGtIsLJkkVLnPMZfJP7mfY9ug9ZMjau9L+1ES7+roKGDVAmUN9ECQuYJn6mlHcSu3ocCPib9YZuZZtCyiJGHfAT/zCGDP4omNCSRGtm/GLg3Ykd9gkJPZss5U/C4Q5Z7iTeUjLMzDnp5Ljm7W3DpMu0alFgqczZ3PSg58QUKSOOTuYt7M1A16mVgEHbUqGr4KwRl2QT2KwAW8Msighd9F7d4wEH7QD0i43HxphD2DG2BoCBQDC9cvOLmeXvsTSWdUgTBgbB3Ker1xs0AFb34oAuEpOhp8F1ZmLu5h9lSGch9uMqj64jxhm/5+4UVLoquW7j8fPna8A14Rk4PVq05ETI57qF7/De7IF/2mWBdqBkziECX8BLSGiBIX74QEix4mbxwdvicEUjsI9qJt44eet55cRIlP6gRhkv9gxGMLNMnzZBB3dsRBediS541/cX3DWo+F3Y2oTLEr1bD7GJXoGC+RNtKB6/juO/vdbONS40aZb/mQJVxVdj3pS90b5A7cviLvFF90FytcTHceakZyuoqmrNvX5mebhqn3ihr8vK6LkkxB7hN81N53mqD84jo0puGw9eEXs1T70r0GHNE1T7m9LzbE/aoxuHpspSHIyzHrsqiylZp9E+fWYmuGduDzycagUNVHSfzEuGPywPNStkWW8dwSlxO6J/0buCs0jBKRu46y/ZIK61efaoW1u3lhFlEo1MKrgYni/JZ+i1vjIyAizxLi3I/6lmRjRaHn5dSMx2Z6KSSeiE9MXN1meQ9Ux1dGrkkcVTGYjIO6cGKRgaVm44CgMd+l07NAxGqtAx7WCpv8A2jatc6f5H5foAcqb8Kkcrp1TIi+OM7CKGdkKhBNrpDRv+2GP30OG+SfXTKgJMUXwhUYpiYg/+CL7lU3s4Hqe2ZN96",
+                    "mac":  "V8e1mn1aTjv9cGIeOPHYeimcKwerIZCmzLrYvLk8bp0="
+                },
+    "usuarios":  {
+                     "clubhouseadmin":  {
+                                            "sal":  "xYxtCz3WJubrZl/Pxo0Sdg==",
+                                            "iv":  "x5e93CjwRbvaZeiZAzwSWw==",
+                                            "datos":  "ToOSy9SmtWE4RntXzRRcDa9pCi5gk6KSQ2ky6A6r/5ea2YQTSTA55QAII/mc7MNbr2FQsBRYSznOK5XNq2DgvF8Tqetyb3LXPex01vCy7VU=",
+                                            "mac":  "nxcUcbO2/M2G7OEl7jNWOgPVOR4cj0QkUz3eSDhDbdw="
+                                        }
+                 }
+}

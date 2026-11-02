@@ -1,0 +1,1240 @@
+/* Web Editor Pro - Styles CSS - Version 1.2.2 */
+:root { 
+    --primario: #e67e22; 
+    --fondo: #f4f7f6; 
+    --texto: #2c3e50; 
+    --verde: #27ae60; 
+    --rojo: #e74c3c; 
+}
+
+body { 
+    font-family: 'Montserrat', sans-serif; 
+    background: var(--fondo); 
+    margin: 0; 
+    padding: 10px 5px 140px; 
+    color: var(--texto); 
+}
+
+.app-container { width: 100%; max-width: 1800px; margin: 0 auto; }
+
+/* MODIFICADO: Header adaptado para logos laterales (Tamaño duplicado) */
+.header-admin { 
+    background: white; padding: 10px 20px; border-radius: 10px; 
+    margin-bottom: 15px; border-bottom: 4px solid var(--primario); 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.header-center-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header-logo {
+    width: auto;
+    height: 160px; /* MODIFICADO: Aumentado a 160px (el doble) */
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+#status-carga { 
+    font-size: 0.75rem; padding: 8px; border-radius: 5px; 
+    margin-bottom: 10px; font-weight: bold; text-align: center; 
+}
+
+.status-ok { background: #d4edda; color: #155724; }
+.status-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+/* NUEVO: ESTILOS PARA LAS PESTAÑAS */
+.tabs-container {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+}
+
+.tab-btn {
+    padding: 12px 20px;
+    background: #eee;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    color: #7f8c8d;
+    margin-right: 5px;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: white;
+    color: var(--primario);
+    border-bottom: 2px solid white;
+    margin-bottom: -2px;
+}
+
+.tab-content {
+    display: none; /* Por defecto oculto, el JS lo controla */
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* NUEVO: SCOPE DEL TEMA OSCURO PARA EL PANEL PRO */
+.pro-panel {
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 20px;
+    border-radius: 0 0 10px 10px;
+    border: 1px solid #334155;
+    border-top: none;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.pro-panel .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; }
+.pro-panel input, .pro-panel textarea, .pro-panel select { background-color: #334155; border: 1px solid #475569; color: white; border-radius: 4px; padding: 6px 12px; }
+.pro-panel input:focus { outline: 2px solid #3b82f6; }
+.pro-panel .btn { padding: 5px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+.pro-panel .btn-primary { background-color: #2563eb; color: white; }
+.pro-panel .btn-primary:hover { background-color: #1d4ed8; }
+.pro-panel .btn-success { background-color: #16a34a; color: white; }
+.pro-panel .btn-success:hover { background-color: #15803d; }
+.pro-panel .btn-danger { background-color: #dc2626; color: white; }
+.pro-panel .btn-danger:hover { background-color: #b91c1c; }
+.pro-panel .btn-secondary { background-color: #475569; color: white; }
+.pro-panel .btn-secondary:hover { background-color: #334155; }
+
+/* NUEVO: fix de scroll del Monitor de Sistema — sin altura máxima ni min-height:0, un flex item con
+   overflow:auto no se recorta nunca por debajo del tamaño de su contenido (bug clásico de flexbox), así
+   que el log seguía creciendo y empujaba todo lo de abajo en vez de mostrar la barra de scroll interna. */
+.c-consola { max-height: 420px; min-height: 0; }
+#consola { background-color: #020617; font-family: monospace; font-size: 13px; color: #38bdf8; overflow-y: auto; padding: 10px; border-radius: 6px; border: 1px solid #1e293b; flex: 1; min-height: 0; }
+
+.pro-panel table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+.pro-panel th, .pro-panel td { padding: 10px; border: 1px solid #334155; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pro-panel th { background-color: #1e293b; color: #94a3b8; font-weight: 600; }
+.pro-panel tr:nth-child(even) { background-color: #1e293b; }
+.pro-panel tr:hover { background-color: #334155; }
+
+/* NUEVO: ESTILOS PARA LA PESTAÑA DE SUGERENCIAS (Estilo Carta Real Roland Garros) */
+.sugerencias-panel {
+    position: relative;
+    background: white;
+    padding: 40px 50px;
+    border-radius: 0 0 10px 10px;
+    border: 1px solid #ddd;
+    border-top: none;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+/* NUEVO: Fila superior con Título y Logo */
+.sugerencias-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.sugerencias-titulo-dia {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--texto);
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* NUEVO: Imagen del logo real más grande */
+.sugerencias-logo-img {
+    width: 120px;
+    height: auto;
+}
+
+/* NUEVO: Subcabecera con la imagen de texto original */
+.sugerencias-subheader {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--texto);
+    padding-bottom: 15px;
+}
+
+.sugerencias-header-img {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    display: inline-block;
+}
+
+.sugerencias-seccion {
+    margin-bottom: 30px;
+}
+
+.sugerencias-seccion-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primario);
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+.sugerencias-plato {
+    display: flex;
+    align-items: baseline; /* Alinea la base del texto perfectamente */
+    margin-bottom: 12px;
+}
+
+.sugerencias-plato-nombres {
+    flex: 0 0 auto;
+    max-width: 75%;
+}
+
+.sugerencias-nombre-es {
+    font-weight: 600;
+    color: var(--texto);
+    font-size: 0.95rem;
+}
+
+.sugerencias-nombre-en {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+/* MODIFICADO: Línea de puntos estilo menú de restaurante */
+.sugerencias-puntos {
+    flex: 1;
+    border-bottom: 1px dotted #aaa;
+    margin: 0 8px;
+    position: relative;
+    top: -4px; /* Ajuste fino para alinear con la base del nombre */
+}
+
+.sugerencias-precio {
+    flex: 0 0 auto;
+    font-weight: 700;
+    color: var(--texto);
+    font-size: 1rem;
+}
+
+/* MODIFICADO: Separador visual elegante entre entrantes y principales */
+.sugerencias-separador {
+    height: 20px;
+    margin: 30px 0;
+    border-bottom: 1px solid var(--primario);
+}
+
+/* NUEVO: Footer legal de alérgenos y QR real */
+.sugerencias-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.sugerencias-aviso {
+    flex: 1;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    line-height: 1.6;
+    padding-right: 20px;
+}
+
+/* MODIFICADO: QR más grande */
+.sugerencias-qr {
+    width: 140px;
+    height: 140px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* NUEVO: Imagen del QR real */
+.sugerencias-qr-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.categoria-tarjeta { 
+    background: white; border-radius: 12px; margin-bottom: 20px; 
+    overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+}
+
+.categoria-titulo { 
+    background: var(--primario); color: white; padding: 10px 15px; 
+    font-weight: 700; text-transform: uppercase; font-size: 0.8rem; 
+}
+
+.categoria-titulo-clicable {
+    display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;
+}
+.categoria-flecha { font-size: 0.7rem; transition: transform 0.2s ease; display: inline-block; width: 10px; }
+.categoria-contador {
+    margin-left: auto; background: rgba(255,255,255,0.25); border-radius: 10px;
+    padding: 1px 8px; font-size: 0.7rem; font-weight: 600;
+}
+
+/* NUEVO: interruptor de activar/desactivar la pestaña completa en la web pública, en la
+   cabecera del acordeón (a la derecha del contador, gracias al margin-left:auto de arriba).
+   Reutiliza .switch-container/.slider-switch (el mismo interruptor que ya usa cada plato),
+   solo un poco más pequeño para que encaje en la cabecera compacta. flex-shrink:0 evita que
+   se deforme si el nombre de la categoría es largo. */
+.switch-pestana { flex-shrink: 0; transform: scale(0.8); }
+
+/* NUEVO: barra "Ajustes generales" — interruptores de fotos/info para TODA la web (no por
+   categoría), fija encima del acordeón de secciones. Reutiliza .switch-container/.slider-switch. */
+.ajustes-generales-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
+    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 14px;
+}
+.ajustes-generales-titulo { font-size: 0.8rem; font-weight: 700; color: #555; }
+.ajustes-generales-item { display: flex; align-items: center; gap: 8px; }
+.ajustes-generales-label { font-size: 0.85rem; font-weight: 600; color: #444; }
+
+/* NUEVO: contenido colapsable de cada categoría (efecto acordeón). Colapsada por defecto
+   (max-height:0 + overflow hidden), se despliega al añadir la clase .expandida. El tope de
+   max-height es generoso a propósito para no cortar categorías largas al expandir. */
+.categoria-contenido {
+    max-height: 0; overflow: hidden; transition: max-height 0.25s ease;
+}
+.categoria-contenido.expandida { max-height: 6000px; }
+
+/* NUEVO: segundo nivel de acordeón, anidado dentro de .categoria-contenido, para las
+   categorías con muchos platos que se agrupan por subcategoría (ver cat.subAcordeon en
+   estructuras.js / renderizar() en app.js — de momento "Sugerencias"). Mismo patrón visual
+   que .categoria-*, pero más compacto y con menos contraste para que se note el anidado. */
+.subcategoria-tarjeta {
+    margin: 10px 12px; border: 1px solid #e6e6e6; border-radius: 8px; overflow: hidden;
+}
+.subcategoria-titulo {
+    background: #f4f5f7; color: #2c3e50; padding: 9px 12px;
+    font-weight: 700; text-transform: uppercase; font-size: 0.72rem;
+}
+.subcategoria-titulo-clicable {
+    display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+}
+.subcategoria-flecha { font-size: 0.65rem; transition: transform 0.2s ease; display: inline-block; width: 10px; }
+.subcategoria-contador {
+    margin-left: auto; background: rgba(0,0,0,0.08); border-radius: 10px;
+    padding: 1px 8px; font-size: 0.65rem; font-weight: 600;
+}
+.subcategoria-contenido {
+    max-height: 0; overflow: hidden; transition: max-height 0.25s ease;
+}
+.subcategoria-contenido.expandida { max-height: 6000px; }
+
+.plato-item { display: flex; padding: 12px; border-bottom: 1px solid #f1f2f6; gap: 10px; align-items: center; }
+.plato-info { flex: 1; min-width: 0; }
+.plato-nombre {
+    font-weight: 600; font-size: 0.9rem; display: block; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+}
+/* NUEVO: segunda línea con lo que va tras el/los separador/es "//" del nombre (uva del vino,
+   u opciones/ingredientes intercambiables del plato), antes solo visible dentro del editor. */
+.plato-detalle {
+    font-style: italic; font-size: 0.78rem; color: #7f8c8d; display: block; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; margin-top: 1px;
+}
+
+.plato-meta-footer { display: flex; align-items: center; gap: 8px; flex-shrink: 0; min-width: 210px; justify-content: flex-end; }
+
+.btn-config { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 8px; cursor: pointer; }
+.btn-orden { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; cursor: pointer; font-size: 0.85rem; }
+.btn-nav { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; cursor: pointer; font-size: 0.85rem; }
+.btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-add-float { 
+    position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; 
+    background: var(--primario); color: white; border-radius: 50%; border: none; 
+    font-size: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; cursor: pointer; 
+}
+
+.btn-guardar-main { 
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+    background: #2c3e50; color: white; padding: 18px; border-radius: 50px; 
+    border: none; font-weight: 700; width: 90%; max-width: 450px; z-index: 1000; cursor: pointer; 
+}
+
+/* --- ESTILOS DEL SWITCH / BARRITA ACTIVADORA --- */
+.switch-container {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    cursor: pointer;
+}
+.switch-container input { opacity: 0; width: 0; height: 0; }
+.slider-switch {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 24px;
+}
+.slider-switch:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+input:checked + .slider-switch { background-color: var(--verde); }
+input:checked + .slider-switch:before { transform: translateX(18px); }
+
+/* Modales e Interfaz de Pantalla Completa del Editor */
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); overflow-y: auto; }
+.modal-content { background: white; width: 96%; max-width: 1000px; margin: 15px auto; border-radius: 15px; padding: 25px; box-sizing: border-box; }
+
+.modal-full-layout {
+    width: 100% !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    display: flex;
+    gap: 25px;
+    padding: 20px !important;
+    overflow: hidden;
+}
+
+.modal-col-izquierda {
+    flex: 0 0 75%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 15px;
+    border-right: 1px solid #eee;
+}
+
+.modal-col-derecha {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    justify-content: flex-start;
+}
+
+.input-group { margin-bottom: 15px; }
+.label-seccion { display: block; font-size: 0.75rem; font-weight: 700; color: var(--primario); text-transform: uppercase; margin-bottom: 8px; }
+
+.input-row-lang { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.lang-tag { background: #34495e; color: white; padding: 8px; border-radius: 5px; font-weight: bold; font-size: 0.8rem; width: 35px; text-align: center; flex-shrink: 0; }
+.input-estandar { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 5px; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; }
+
+.input-nombre-corto { padding: 8px 10px; font-size: 0.9rem; max-height: 38px; }
+.input-uvas { background: #fff9f4; border: 1px dashed var(--primario); margin-top: 4px; font-size: 0.8rem; padding: 6px 10px; }
+
+/* NUEVO: modo "Plato con ingredientes" (checkbox + lista editable de opciones) — ver
+   toggleModoIngredientes()/renderIngredientesPlato() en app.js. */
+.checkbox-label-ingredientes { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 600; color: var(--texto); cursor: pointer; padding: 8px 0; }
+.checkbox-label-ingredientes input[type="checkbox"] { width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+
+.ingredientes-lista { display: flex; flex-direction: column; gap: 8px; max-height: 40vh; overflow-y: auto; margin-bottom: 10px; }
+.ingrediente-fila { display: flex; align-items: center; gap: 6px; }
+.input-ingrediente { flex: 1; margin-bottom: 0 !important; padding: 8px 10px; font-size: 0.85rem; }
+.input-ingrediente-vacio { border-color: var(--rojo, #e74c3c); background: #fff5f5; }
+.ingrediente-activo-toggle { flex-shrink: 0; width: 34px; height: 34px; border-radius: 8px; border: 1px solid #ddd; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: background 0.2s, border-color 0.2s; }
+.ingrediente-activo-toggle.selected { background: var(--verde, #27ae60); border-color: var(--verde, #27ae60); }
+.btn-eliminar-ingrediente { flex-shrink: 0; width: 34px; height: 34px; border-radius: 8px; border: none; background: #fdecea; color: var(--rojo, #e74c3c); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.btn-eliminar-ingrediente:hover { background: #f8d7d3; }
+.btn-add-ingrediente { width: 100%; padding: 9px; background: #eef7f0; color: var(--verde, #27ae60); border: 1px dashed var(--verde, #27ae60); border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: background 0.2s; }
+.btn-add-ingrediente:hover { background: #e0f2e5; }
+.ingredientes-vacio { font-size: 0.8rem; color: #888; font-style: italic; margin: 4px 0 10px; }
+
+.panel-control-precio { display: flex; flex-wrap: wrap; gap: 12px; width: 100%; align-items: flex-start; margin-bottom: 15px; }
+.input-precio-super-mini { flex: 0 0 90px !important; }
+.input-precio-mini { text-align: center; font-weight: bold; padding: 8px; }
+.input-imagen-flexible { flex: 1; }
+
+.alergenos-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); 
+    gap: 6px; 
+    margin-top: 5px;
+    max-height: 45vh;
+    overflow-y: auto;
+}
+
+.alergeno-btn { 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    padding: 8px 4px; 
+    font-size: 0.68rem; 
+    text-align: center; 
+    cursor: pointer; 
+    background: #fff; 
+    font-weight: 600; 
+    color: var(--texto);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    text-transform: uppercase;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.alergeno-btn:hover { background: #fdfefe; border-color: #bbb; }
+.alergeno-btn.selected { background: var(--primario); color: white; border-color: var(--primario); box-shadow: 0 2px 5px rgba(230, 126, 34, 0.3); }
+
+/* NUEVO: icono real (imagenes/alergenos/<CODIGO>.webp) en vez de emoji — mismo icono que ya
+   se ve en la web pública, para reconocerlo de un vistazo al activar/desactivar. */
+.alergeno-btn img { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+
+/* NUEVO: rueda de "Opciones del plato" (sabores/ingredientes activables entre "//.../ /") —
+   mismo look que los botones de alérgenos, para que se reconozca como el mismo tipo de control. */
+.opciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+    gap: 6px;
+    margin-top: 5px;
+    max-height: 30vh;
+    overflow-y: auto;
+}
+.opcion-btn {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px 6px;
+    font-size: 0.7rem;
+    text-align: center;
+    cursor: pointer;
+    background: #fff;
+    font-weight: 600;
+    color: var(--texto);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.opcion-btn:hover { background: #fdfefe; border-color: #bbb; }
+.opcion-btn.selected { background: var(--verde, #27ae60); color: white; border-color: var(--verde, #27ae60); box-shadow: 0 2px 5px rgba(39, 174, 96, 0.3); }
+
+.btn-traductor-magico { width: 100%; padding: 12px; background: #9b59b6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px 0; }
+.btn-traductor-magico:disabled { background: #bdc3c7; cursor: not-allowed; }
+
+.btn-traducir-en { 
+    width: 100%; padding: 10px; background: #34495e; color: white; border: none; border-radius: 8px; 
+    font-weight: bold; cursor: pointer; margin: 5px 0 2px; font-size: 0.9rem; transition: background 0.2s; 
+}
+.btn-traducir-en:hover { background: #2c3e50; }
+.btn-traducir-en:disabled { background: #bdc3c7; cursor: not-allowed; }
+
+.langs-fluid-container { display: flex; flex-direction: column; padding: 5px 0; background: transparent; }
+
+.modal-acciones-footer { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 15px; }
+.btn-modal-aceptar { background: var(--verde); color: white; padding: 15px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; }
+.btn-modal-cancelar { background: #eee; color: var(--texto); padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; }
+
+/* NUEVO: botón de eliminar plato — mismo tamaño/forma que los otros botones de modal, pero en
+   rojo (--rojo, el mismo tono que ya usa .btn-delete-key para las API Keys) para diferenciarlo
+   claramente de "Aplicar Cambios"/"Cancelar" y dejar claro que es una acción destructiva. */
+.btn-modal-eliminar { background: var(--rojo); color: white; padding: 12px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; }
+.btn-modal-eliminar:hover { background: #c0392b; }
+
+/* --- ESTILOS: PANEL DE API KEYS --- */
+.api-keys-manager { margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; text-align: left; }
+.api-keys-inputs { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-end; }
+.api-keys-inputs .input-estandar { margin-bottom: 0; font-size: 0.85rem; padding: 8px; resize: vertical; font-family: inherit; }
+.btn-add-key { background: var(--primario); color: white; border: none; border-radius: 6px; padding: 8px 15px; font-weight: bold; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+.btn-add-key:hover { background: #d35400; }
+.api-keys-list { display: flex; gap: 8px; align-items: center; }
+.select-keys { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; background: white; font-family: 'Montserrat', sans-serif; font-size: 0.8rem; color: var(--texto); cursor: pointer; }
+.select-keys:disabled { background: #f1f2f6; cursor: not-allowed; }
+.btn-delete-key { background: var(--rojo); color: white; border: none; border-radius: 6px; width: 35px; height: 35px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.btn-delete-key:hover { background: #c0392b; }
+
+/* --- ESTILOS: MODAL DE TRADUCCIONES INGLÉS --- */
+#modal-traduccion-en { justify-content: center; align-items: center; }
+.modal-box-en { width: 95vw; height: 85vh; max-width: none; max-height: none; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px; padding: 40px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+.opciones-en-scroll { flex: 1; display: flex; flex-direction: column; gap: 25px; margin: 25px 0; min-height: 0; }
+.footer-box-en { margin-top: auto; padding-top: 20px; border-top: 1px solid #eee; }
+.opcion-en-btn { width: 100%; flex: 1; text-align: left; padding: 0 35px; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 1.4rem; font-family: 'Montserrat', sans-serif; color: var(--texto); display: flex; flex-direction: column; justify-content: center; }
+.opcion-en-btn:hover { border-color: var(--primario); background: #fff9f4; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(230, 126, 34, 0.1); }
+.opcion-en-btn.selected { border-color: var(--primario); background: #fff4ec; font-weight: 600; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.2); transform: translateY(0); }
+.opcion-en-label { display: block; font-size: 0.85rem; color: var(--primario); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+
+/* --- ESTILOS: SELECTOR DE CROQUETAS --- */
+.croquetas-grid { margin-top: 5px; }
+.croqueta-category { margin-bottom: 10px; }
+.croqueta-cat-title { font-size: 0.7rem; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+.croqueta-cat-title.carne { color: #c0392b; }
+.croqueta-cat-title.pescado { color: #2980b9; }
+.croqueta-cat-title.vegetariana { color: #27ae60; }
+
+.croqueta-cat-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.croqueta-btn { 
+    border: 1px solid #ddd; border-radius: 8px; padding: 8px 10px; font-size: 0.75rem; 
+    text-align: center; cursor: pointer; background: #fff; font-weight: 600; color: var(--texto);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.croqueta-btn.carne { border-color: #e6b0aa; color: #c0392b; }
+.croqueta-btn.pescado { border-color: #a9cce3; color: #2980b9; }
+.croqueta-btn.vegetariana { border-color: #a9dfbf; color: #27ae60; }
+
+.croqueta-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.croqueta-btn.selected.carne { background: #c0392b; color: white; border-color: #c0392b; }
+.croqueta-btn.selected.pescado { background: #2980b9; color: white; border-color: #2980b9; }
+.croqueta-btn.selected.vegetariana { background: #27ae60; color: white; border-color: #27ae60; }
+
+
+/* ======================================================= */
+/* --- NUEVO: ESTILOS PARA EL ORGANIZADOR DE IDS --- */
+/* ======================================================= */
+
+.org-container {
+    background: white;
+    border-radius: 0 0 10px 10px;
+    border: 1px solid #ddd;
+    border-top: none;
+    padding: 20px;
+}
+
+.org-header {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.org-tab-btn {
+    padding: 8px 16px;
+    background: #f1f2f6;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    transition: all 0.2s;
+}
+
+.org-tab-btn:hover {
+    background: #e2e8f0;
+}
+
+.org-tab-btn.active-org-tab {
+    background: var(--primario);
+    color: white;
+    border-color: var(--primario);
+}
+
+.org-table-wrapper {
+    max-height: 70vh;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.org-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    table-layout: fixed; /* MODIFICADO: Forzar respeto estricto de los anchos de cabecera */
+}
+
+.org-table th {
+    background: #f8f9fa;
+    padding: 12px 8px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--texto);
+    border-bottom: 2px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.org-table td {
+    padding: 8px;
+    border-bottom: 1px solid #f1f2f6;
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+.org-table tr:hover {
+    background-color: #fdfdfd;
+}
+
+.org-table input[type="number"],
+.org-table input[type="text"] {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    box-sizing: border-box;
+}
+
+/* NUEVO: ESTILOS PARA LOS BOTONES DE ACCIÓN DEL ORGANIZADOR */
+.org-action-btns {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}
+
+.org-btn-icon {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    line-height: 1;
+}
+
+.org-btn-add {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.org-btn-add:hover {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.org-btn-del {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.org-btn-del:hover {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+/* MODIFICADO: Ajustado el tamaño de los inputs numéricos para caber 6 dígitos exactos */
+.org-table input[type="number"] {
+    max-width: 100%; /* El table-layout fixed ya controla el ancho desde el th */
+    text-align: center;
+}
+
+/* NUEVO: Contenedor del nombre para evitar que el texto empuje la celda */
+.org-td-name {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%; /* CORREGIDO: En lugar de max-width: 0 que colapsaba el input, usamos width: 100% */
+}
+
+.org-td-name input {
+    flex: 1;
+    min-width: 0;
+}
+
+.org-table input:focus {
+    outline: none;
+    border-color: var(--primario);
+    box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.2);
+}
+
+.org-level-0 > td {
+    background-color: #fef9f4;
+    font-weight: 700;
+    color: var(--primario);
+}
+
+.org-level-1 > td {
+    padding-left: 20px;
+    background-color: #ffffff;
+}
+
+
+/* ======================================================= */
+/* --- MEDIA QUERIES: ADAPTACIÓN MÓVIL (Max-width 768px) --- */
+/* ======================================================= */
+
+@media (max-width: 768px) {
+    /* --- General --- */
+    body { padding: 5px 5px 130px; }
+    
+    /* --- Header Mobile --- */
+    .header-admin {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    /* NUEVO: en móvil, los dos logos van lado a lado en la fila de arriba (RG a la
+       izquierda, US Open a la derecha) usando "order", sin tocar el DOM ni la versión de
+       escritorio; el bloque central (título + panel de pestañas) baja a su propia fila
+       completa debajo, centrado. */
+    .header-logo-left { order: 1; }
+    .header-logo-right { order: 2; }
+
+    .header-center-wrapper {
+        order: 3;
+        width: 100%;
+        flex-basis: 100%;
+    }
+
+    .header-logo {
+        height: 100px; /* MODIFICADO: Aumentado a 100px (el doble del móvil anterior) */
+    }
+
+    /* NUEVO: centra el panel de "👁️ Pestañas" (y el status-carga si llegara a mostrarse)
+       bajo el título, en vez de quedar pegado a la izquierda por el justify-content por
+       defecto del flex row. */
+    .header-status-row {
+        justify-content: center;
+    }
+
+    .api-keys-inputs, .api-keys-list { flex-direction: column; }
+    .btn-delete-key { width: 100%; height: 35px; }
+
+    /* --- Listado Principal (MÓVIL OPTIMIZADO) --- */
+    .btn-config {
+        display: none !important;
+    }
+
+    .plato-orden-btns {
+        display: none !important;
+    }
+
+    .plato-info > div:last-child {
+        display: none !important;
+    }
+
+    .plato-item {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 12px 15px;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .plato-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .plato-nombre {
+        font-size: 0.95rem;
+        margin: 0;
+        padding-right: 10px;
+    }
+
+    .plato-detalle {
+        font-size: 0.75rem;
+        padding-right: 10px;
+    }
+
+    .plato-meta-footer {
+        min-width: unset;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #f1f2f6;
+    }
+    
+    .plato-meta-footer > div:first-child small {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #555;
+    }
+
+    /* --- Modal Editor Principal (MÓVIL) --- */
+    .modal-full-layout {
+        flex-direction: column; 
+        height: auto !important; 
+        min-height: 100vh;
+        overflow-y: visible !important; 
+        padding: 20px 15px !important;
+        gap: 15px;
+    }
+
+    .modal-col-izquierda {
+        flex: none;
+        width: 100%;
+        height: auto;
+        overflow-y: visible;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding-right: 0;
+        padding-bottom: 20px;
+    }
+
+    .modal-col-derecha {
+        flex: none;
+        width: 100%;
+        height: auto;
+        overflow-y: visible;
+    }
+    
+    .alergenos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+        max-height: none; 
+    }
+
+    /* --- Modal Traducción Inglés (MÓVIL) --- */
+    .modal-box-en {
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
+        padding: 20px 15px;
+    }
+
+    .opciones-en-scroll {
+        flex: 1;
+        gap: 15px;
+        margin: 15px 0;
+        overflow-y: auto; 
+    }
+
+    .opcion-en-btn {
+        padding: 20px 15px; 
+        font-size: 1.1rem;
+    }
+
+    .footer-box-en {
+        padding-top: 15px;
+    }
+
+    /* --- Botones Flotantes (MÓVIL) --- */
+    .btn-add-float {
+        bottom: 80px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        font-size: 28px;
+    }
+    
+    .btn-guardar-main {
+        width: 95%;
+        padding: 14px;
+    }
+
+    /* --- Pestaña Sugerencias (MÓVIL) --- */
+    .sugerencias-panel {
+        padding: 20px;
+    }
+    
+    /* NUEVO: Ajuste del layout en móvil */
+    .sugerencias-top-row {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .sugerencias-logo-img {
+        width: 90px;
+    }
+    
+    .sugerencias-footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .sugerencias-aviso {
+        padding-right: 0;
+        margin-bottom: 20px;
+    }
+
+    /* NUEVO: Ajuste responsive para la tabla del organizador en móviles */
+    .org-table th:nth-child(4), 
+    .org-table td:nth-child(4) {
+        display: none; /* Oculta la columna Carpeta en móviles para dar espacio a Acciones y texto */
+    }
+    .org-table th:nth-child(3) {
+        width: 50% !important; /* Expande el nombre al ocultar la carpeta */
+    }
+}
+
+/* --- ESTILOS: PANTALLA FLOTANTE DE CARGA --- */
+.loading-overlay {
+    display: none; /* Se controla con JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
+    z-index: 9999; /* Por encima de todo */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    backdrop-filter: blur(5px); /* Efecto de desenfoque de fondo */
+    animation: fadeIn 0.2s ease-in;
+}
+
+.loading-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: var(--primario);
+    font-size: 1.5rem;
+    margin-top: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid var(--primario); /* Color primario de la marca */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 25 sept -- ANIMACIÓN "PARTIDO DE TENIS": sustituye a la rueda giratoria (.spinner) en el
+   overlay de carga (ver loading-overlay en index.html). Una única pelota (.pelota-tenis) viaja
+   de una raqueta a la otra y vuelve, y cada raqueta gira un poco justo cuando la "golpea" --
+   todo con CSS puro (keyframes), sin imágenes ni JS: los % de cada keyframe están sincronizados
+   entre .pelota-tenis y .raqueta-izq/.raqueta-der para que el golpe de raqueta coincida con el
+   instante en que la pelota llega a ese lado.
+   Reutiliza --primario (naranja de la marca) para la pelota y un verde de pista para las
+   raquetas/red, coherente con los colores de Roland Garros que ya usa el resto de la web.
+
+   27 sept -- v4 "PISTA COMPLETA": a petición del usuario, las raquetas se separan a cada lado
+   de la pantalla (el contenedor pasa de 180px fijos a casi el ancho completo del overlay,
+   min(94vw, 760px) -- las raquetas ya estaban pegadas a los bordes del contenedor con
+   left/right:-6px, así que con solo ensanchar el contenedor quedan en los extremos de la
+   pantalla sin tocar su geometría interna (tamaño/transform-origin/keyframes de giro, ya
+   afinados y que siguen funcionando igual). Se añade una red de tenis (.tenis-red) centrada
+   sobre una línea de suelo (.tenis-suelo), y la pelota ya NO hace un único arco liso de lado a
+   lado: ahora bota en el suelo antes de llegar a la raqueta contraria, con DOS parábolas por
+   trayecto (una alta que cruza por encima de la red, y otra más baja tras el bote, como un
+   golpe real que pierde altura al tocar el suelo) -- ver el desglose de puntos en el comentario
+   de @keyframes tenisPelota. Cada tramo ascendente/descendente lleva su propio
+   animation-timing-function (ease-out al alejarse de un punto de contacto = frena hacia el
+   pico; ease-in al acercarse a uno = acelera como por gravedad) para que el movimiento se lea
+   como una parábola real y no como un vaivén mecánico. El instante del bote añade además un
+   "aplastamiento" (scale) de la pelota y una sombra proyectada (.pelota-sombra) que crece/se
+   oscurece cuando la pelota está a ras de suelo y se encoge/aclara en lo alto de cada arco, para
+   reforzar la sensación de altura. El ciclo completo (ida y vuelta) se alarga de 1.8s a 3.2s --
+   con el recorrido más largo y el bote intermedio, 1.8s se veía demasiado atropellado. Los
+   keyframes de giro de las raquetas (tenisGolpeIzq/tenisGolpeDer) NO cambian: siguen golpeando
+   exactamente en 0%/100% (izquierda) y 50% (derecha), que es justo cuando la pelota llega a
+   cada lado en el nuevo recorrido -- solo se actualiza su duración a los mismos 3.2s. */
+.loading-tenis {
+    position: relative;
+    width: min(94vw, 760px);
+    height: 150px;
+    margin: 0 auto;
+}
+
+/* Línea de suelo/pista, apenas visible, para que el bote de la pelota tenga una referencia
+   visual clara de "hasta dónde baja". */
+.loading-tenis .tenis-suelo {
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    bottom: 20px;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.18) 10%, rgba(0, 0, 0, 0.18) 90%, transparent);
+}
+
+/* Red de tenis centrada entre las dos raquetas, apoyada en la línea de suelo: cinta blanca
+   arriba, postes en verde de marca y un cordaje en rombos dibujado con dos gradientes
+   diagonales repetidos (no hay imagen de red, es más simple y se ve nítido a cualquier tamaño). */
+.loading-tenis .tenis-red {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 40px;
+    background-color: rgba(20, 20, 20, 0.1);
+    background-image:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.65) 0 1px, transparent 1px 7px),
+        repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.65) 0 1px, transparent 1px 7px);
+    border-top: 3px solid #fff;
+    border-left: 2px solid var(--verde);
+    border-right: 2px solid var(--verde);
+}
+
+/* 25 sept -- v3: v2 (aro CSS ovalado + cordaje dibujado) todavía se leía poco a poco como una
+   raqueta real. El usuario pasó una silueta de raqueta de verdad (recortada de una foto), le
+   quitamos las letras "RG" que traía superpuestas y la recoloreamos al verde de la marca
+   (--verde); ahora se usa esa imagen (raqueta_tenis.png) como fondo en vez de dibujar el aro a
+   mano. Estructura en dos capas por raqueta: ".raqueta" solo posiciona la caja (izq/der),
+   ".raqueta-img" pinta la imagen y es quien anima el "golpe" -- así el volteo horizontal
+   (scaleX(-1), para que la raqueta izquierda mire hacia el centro igual que la derecha, ya que
+   la foto original solo mira hacia un lado) y la rotación del golpe conviven en el mismo
+   elemento sin pisarse (los keyframes de la izquierda llevan el scaleX(-1) incluido en cada
+   paso). transform-origin apunta aproximadamps al centro del aro dentro de la imagen (no al
+   centro de la caja, que incluye el mango) para que el golpe pivote como una muñeca real. */
+.loading-tenis .raqueta {
+    position: absolute;
+    top: 42.5px; /* antes era top:50%+margin-top:-17px sobre un contenedor de 84px; con el contenedor ahora a 150px se fija en px directo para que el CENTRO DEL ARO quede a la misma altura de golpeo que usa la pelota (60px, ver tenisPelota) */
+    width: 58px;
+    height: 53px;
+}
+
+.loading-tenis .raqueta-izq { left: -6px; }
+.loading-tenis .raqueta-der { right: -6px; }
+
+.loading-tenis .raqueta-img {
+    position: absolute;
+    inset: 0;
+    background-image: url('raqueta_tenis.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    transform-origin: 30% 33%;
+}
+
+.loading-tenis .raqueta-izq .raqueta-img {
+    animation: tenisGolpeIzq 3.2s ease-in-out infinite;
+}
+.loading-tenis .raqueta-der .raqueta-img {
+    animation: tenisGolpeDer 3.2s ease-in-out infinite;
+}
+
+.loading-tenis .pelota-tenis {
+    position: absolute;
+    top: 60px;
+    left: 22px;
+    width: 15px;
+    height: 15px;
+    margin-top: -7.5px;
+    background: var(--primario);
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 3px rgba(0, 0, 0, 0.3);
+    animation: tenisPelota 3.2s infinite;
+    z-index: 2;
+}
+
+/* Sombra proyectada de la pelota sobre el suelo: sigue la misma posición horizontal que la
+   pelota (los % coinciden con los puntos "principales" de tenisPelota, sin los micro-pasos del
+   aplastamiento) y usa opacidad/escala para sugerir la altura -- grande y oscura cuando la
+   pelota está a ras de suelo, pequeña y tenue en lo alto de cada arco. */
+.loading-tenis .pelota-sombra {
+    position: absolute;
+    bottom: 18px;
+    left: 22px;
+    width: 20px;
+    height: 6px;
+    margin-left: -10px;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 72%);
+    border-radius: 50%;
+    animation: tenisSombra 3.2s ease-in-out infinite;
+    z-index: 0;
+}
+
+/* La pelota ya no hace un único arco liso: cada trayecto (ida y vuelta) tiene DOS parábolas --
+   una alta que sale de la raqueta y cruza por encima de la red (pico en 14%/64%, muy por encima
+   de la red para que se vea claramente el salto), y tras tocar el suelo (bote en 27-29%/77-79%,
+   con un breve aplastamiento) una segunda parábola más baja (pico en 38%/88%, ya sin la red de
+   por medio) que la lleva hasta la raqueta contraria -- así la pelota SIEMPRE bota una vez antes
+   de llegar a cada raqueta, como se pidió. 0%/50%/100% son los instantes exactos en los que la
+   pelota toca cada raqueta (deben coincidir con el golpe de tenisGolpeIzq/tenisGolpeDer). Cada
+   keyframe fija su propio animation-timing-function: ease-out al iniciar un ascenso (frena hacia
+   el pico, como al soltar un golpe hacia arriba) y ease-in al iniciar un descenso (acelera como
+   por gravedad hasta el impacto) -- así el tramo entre dos keyframes se lee como una parábola de
+   verdad y no como un vaivén a velocidad constante. */
+@keyframes tenisPelota {
+    0%   { left: 22px;                 top: 60px;  transform: scale(1);            animation-timing-function: ease-out; }
+    14%  { left: 34%;                 top: 10px;  transform: scale(1);            animation-timing-function: ease-in; }
+    27%  { left: 60%;                 top: 118px; transform: scale(1);            animation-timing-function: ease-out; }
+    28%  { left: 60%;                 top: 121px; transform: scale(1.5, 0.55); }
+    29%  { left: 60%;                 top: 118px; transform: scale(1);            animation-timing-function: ease-in; }
+    38%  { left: 76%;                 top: 40px;  transform: scale(1);            animation-timing-function: ease-in; }
+    50%  { left: calc(100% - 37px);   top: 60px;  transform: scale(1);            animation-timing-function: ease-out; }
+    64%  { left: 66%;                 top: 10px;  transform: scale(1);            animation-timing-function: ease-in; }
+    77%  { left: 40%;                 top: 118px; transform: scale(1);            animation-timing-function: ease-out; }
+    78%  { left: 40%;                 top: 121px; transform: scale(1.5, 0.55); }
+    79%  { left: 40%;                 top: 118px; transform: scale(1);            animation-timing-function: ease-in; }
+    88%  { left: 24%;                 top: 40px;  transform: scale(1);            animation-timing-function: ease-in; }
+    100% { left: 22px;                top: 60px;  transform: scale(1);            animation-timing-function: ease-out; }
+}
+
+/* Misma línea de tiempo que tenisPelota pero solo con los puntos "principales" (sin el
+   aplastamiento del bote, no hace falta para una sombra): opacidad y escala más altas cuando la
+   pelota está a ras de suelo (bote, 28%/78%), más bajas en lo alto de cada arco (14%/64% el arco
+   alto sobre la red, 38%/88% el arco bajo tras el bote). */
+@keyframes tenisSombra {
+    0%   { left: 22px;               opacity: 0.55; transform: scale(0.7); }
+    14%  { left: 34%;                opacity: 0.15; transform: scale(0.35); }
+    28%  { left: 60%;                opacity: 0.65; transform: scale(1.1); }
+    38%  { left: 76%;                opacity: 0.3;  transform: scale(0.55); }
+    50%  { left: calc(100% - 37px);  opacity: 0.55; transform: scale(0.7); }
+    64%  { left: 66%;                opacity: 0.15; transform: scale(0.35); }
+    78%  { left: 40%;                opacity: 0.65; transform: scale(1.1); }
+    88%  { left: 24%;                opacity: 0.3;  transform: scale(0.55); }
+    100% { left: 22px;               opacity: 0.55; transform: scale(0.7); }
+}
+
+/* La raqueta izquierda golpea (gira hacia dentro) justo en el 0%/100% de tenisPelota -- cuando
+   la pelota está a punto de salir de su lado -- y se queda quieta mientras la pelota va y vuelve
+   por el lado contrario. La foto original solo mira hacia un lado, así que la izquierda lleva
+   scaleX(-1) en TODOS los pasos (para mirar hacia el centro, como su espejo) y el golpe es solo
+   el rotate() que se añade encima en cada paso. */
+@keyframes tenisGolpeIzq {
+    0%   { transform: scaleX(-1) rotate(0deg); }
+    4%   { transform: scaleX(-1) rotate(22deg); }
+    10%  { transform: scaleX(-1) rotate(0deg); }
+    90%  { transform: scaleX(-1) rotate(0deg); }
+    96%  { transform: scaleX(-1) rotate(22deg); }
+    100% { transform: scaleX(-1) rotate(0deg); }
+}
+
+/* La raqueta derecha golpea justo en el 50% de tenisPelota, cuando la pelota le llega -- esta
+   usa la foto tal cual (ya mira hacia el centro/izquierda de forma natural), sin scaleX. */
+@keyframes tenisGolpeDer {
+    0%   { transform: rotate(0deg); }
+    44%  { transform: rotate(0deg); }
+    50%  { transform: rotate(-22deg); }
+    56%  { transform: rotate(0deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
