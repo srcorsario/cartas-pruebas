@@ -16,7 +16,7 @@ window.RESTAURANTE = {
     id: 'clubhouse',
 
     datos: {
-        tipo: 'sheets',
+        tipo: 'json',
         csv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpVWFPsuWkDT5wtr5mM8H0JFC8d0ePBCKJxcXDyyfX7M5FOZ1UXUqRrPiOaLeq_tYt9n9-a1iabKPR/pub?output=csv',
         vivo: 'https://script.google.com/macros/s/AKfycbxzwOUB9Bb7HbngjGuvqhDPF0JCQsuOfwnqZNsUBzS6TDTrJjuC3ZTTe0N0sZElu1jXrg/exec'
     },

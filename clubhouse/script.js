@@ -7,11 +7,15 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.1.0';
+const APP_VERSION = 'v4.2.0';
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
 const LIVE_CSV_ENDPOINT = (R.datos && R.datos.vivo) || '';
+// v4.2: datos.tipo 'json' -> la carta sale de un archivo propio (datos.json, generado con
+// PASAR_A_JSON.bat) en vez de Google Sheets. 'sheets' (por defecto) = como siempre.
+const DATOS_TIPO = (R.datos && R.datos.tipo) || 'sheets';
+const DATOS_ARCHIVO = (R.datos && R.datos.archivo) || 'datos.json';
 const ESSENTIAL_LANGS = (R.idiomas && R.idiomas.esenciales) || ['ES', 'EN', 'DE', 'FR', 'IT'];
 const RTL_LANGS = (R.idiomas && R.idiomas.rtl) || ['AR'];
 
@@ -330,6 +334,29 @@ async function init() {
         // vez quitada una categoría no habría forma de "recuperarla" si luego resulta que sigue
         // activa de verdad).
         const categoriesListOriginal = categoriesList.slice();
+
+        // v4.2: carta desde datos.json (un solo fetch, todos los idiomas, ocultas incluidas).
+        // Si fallara y hay endpoint de Sheets configurado, sigue con el flujo de siempre.
+        if (DATOS_TIPO === 'json') {
+            try {
+                const { platos, ocultas } = await cargarDatosJson();
+                allData = platos;
+                idsGlobalesDesactivados = ocultas;
+                categoriesList = categoriesListOriginal.filter(c => !ocultas.has(c.id));
+                if (!categoriesList.some(c => c.id === currentCat)) {
+                    currentCat = categoriesList.length > 0 ? categoriesList[0].id : currentCat;
+                }
+                renderCategories();
+                renderMenu();
+                updateLanguageUI();
+                managePreload();
+                setupScrollListener();
+                return;
+            } catch (e) {
+                console.error('[datos.json] No se pudo cargar:', e.message);
+                if (!LIVE_CSV_ENDPOINT && !CSV_URL) return;
+            }
+        }
 
         // NUEVO: se pide en paralelo con la carga de platos (no depende de ella) para no
         // añadir latencia al primer render.
@@ -719,6 +746,39 @@ function parseCSV(text) {
         rows.push(item);
     }
     return rows;
+}
+
+// v4.2: lee datos.json y lo deja con la misma forma que parseCSV (nombre_xx / info_xx en
+// minúsculas, todos los idiomas presentes aunque vacíos -> isLangLoaded() siempre true).
+// El ?v= lo pone construir.ps1 (hash de datos.json): solo cambia cuando cambia el archivo.
+async function cargarDatosJson() {
+    const v = BUILD.vDatos || Date.now();
+    const response = await fetch(`${DATOS_ARCHIVO}?v=${v}`);
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const j = await response.json();
+    const lista = (v) => Array.isArray(v) ? v : (v ? String(v).split(',') : []);
+    const platos = (j.platos || []).filter(p => p && p.id !== undefined && p.id !== '').map(p => {
+        const it = {
+            id: String(p.id),
+            precio: String(p.precio == null || p.precio === '' ? '0' : p.precio).replace(',', '.'),
+            precioMedia: String(p.precioMedia == null ? '' : p.precioMedia).replace(',', '.'),
+            activa: String(p.activa == null ? '' : p.activa).toUpperCase(),
+            carpeta: p.carpeta || '',
+            archivo: p.archivo || '',
+            alergenos: lista(p.alergenos).map(x => String(x).trim()).filter(x => x),
+            opcionesInactivas: lista(p.opcionesInactivas).map(x => parseInt(x, 10)).filter(n => !isNaN(n)),
+            hash: ''
+        };
+        Object.keys(IDIOMAS).forEach(l => {
+            const k = l.toLowerCase();
+            const n = p.nombre && p.nombre[l];
+            const inf = p.info && p.info[l];
+            it[`nombre_${k}`] = n ? String(n) : '';
+            it[`info_${k}`] = !inf ? '' : (typeof inf === 'string' ? inf : JSON.stringify(inf));
+        });
+        return it;
+    });
+    return { platos, ocultas: new Set((j.ocultas || []).map(String)) };
 }
 
 // NUEVO: pide al endpoint en vivo solo las columnas de los idiomas indicados.
