@@ -10,6 +10,9 @@
 //                                  en el payload se conserva; los platos que no vengan se borran)
 //   POST ?accion=categorias     -> activa/desactiva pestaña o interruptor (fotos / info)
 //   POST ?accion=infoplato      -> Info de un plato (+ huella INFO_HASH_FICHA)
+// En el editor de la web (EDITOR_SITIO) también Menús Especiales (WEBAPP_URL_MENUS_ESPECIALES):
+//   <carpeta de datos.json>/menus-especiales.json = { menus: [...], platosManuales: [...] }
+//   Cada restaurante el suyo. La 1ª vez se copia lo que haya en la hoja de Menús Especiales.
 // Cada guardado sube en un solo commit datos.json + datos/base.json + datos/<idioma>.json
 // (lo que lee la web pública, por idiomas; solo los que cambian).
 // El resto de peticiones (Gemini, Menús Especiales...) pasan tal cual.
@@ -26,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.2.0';
+    window.APP_VERSIONS.almacenJson = '1.3.0';
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -65,6 +68,15 @@
             const a = document.getElementById('tab-btn-rg'), b = document.getElementById('tab-btn-usopen');
             if (a && b) { a.classList.remove('active'); b.classList.add('active'); }
         }
+        // Traductor Pro e importar CSV: solo este restaurante.
+        const ocultar = (id, subir) => {
+            let el = document.getElementById(id);
+            for (let i = 0; el && i < (subir || 0); i++) el = el.parentElement;
+            if (el) el.style.display = 'none';
+        };
+        const otro = SITIO.modo === 'restaurante002' ? { url: 'sheetsUrlRG', dest: 'modal-dest-rg' } : { url: 'sheetsUrlUSOpen', dest: 'modal-dest-usopen' };
+        ocultar(otro.url, 2);   // input -> fila -> bloque "WEB ..."
+        ocultar(otro.dest);
     }
 
     const fetchOriginal = window.fetch.bind(window);
@@ -485,6 +497,119 @@
         }
     }
 
+    // ---------- Menús Especiales (solo editor de la web) ----------
+    const urlMenus = () => (typeof window.WEBAPP_URL_MENUS_ESPECIALES === 'string') ? window.WEBAPP_URL_MENUS_ESPECIALES : '';
+    const cfgMenus = () => {
+        const c = CONFIG.modos[SITIO.modo];
+        return { repo: c.repo, ruta: c.ruta.replace(/[^/]*$/, '') + 'menus-especiales.json' };
+    };
+    const jsonResp = (o) => respuesta(JSON.stringify(o), 200, 'application/json; charset=utf-8');
+    let colaMenus = Promise.resolve();
+
+    async function leerMenus() {
+        const cfg = cfgMenus();
+        const r = await gh(cfg, { method: 'GET' });
+        if (r.ok) {
+            const j = await r.json();
+            const d = JSON.parse(b64aTexto(j.content || ''));
+            return { datos: { menus: d.menus || [], platosManuales: d.platosManuales || [] }, sha: j.sha };
+        }
+        if (r.status !== 404) throw new Error('GitHub HTTP ' + r.status + ' leyendo ' + cfg.ruta);
+        // 1ª vez: se parte de lo que haya en la hoja de Menús Especiales (solo lectura).
+        const datos = { menus: [], platosManuales: [] };
+        const u = urlMenus();
+        if (u) {
+            try {
+                const [m, p] = await Promise.all([
+                    fetchOriginal(u + '?accion=listarMenus&zx=' + Date.now(), { cache: 'no-store' }).then(x => x.json()),
+                    fetchOriginal(u + '?accion=listarPlatosManuales&zx=' + Date.now(), { cache: 'no-store' }).then(x => x.json())
+                ]);
+                if (m && Array.isArray(m.menus)) datos.menus = m.menus;
+                if (p && Array.isArray(p.platos)) datos.platosManuales = p.platos;
+                console.log('[almacen-json] menus-especiales.json nuevo: copiados de la hoja', datos.menus.length, 'menús y', datos.platosManuales.length, 'platos');
+            } catch (e) { console.warn('[almacen-json] No se pudo copiar la hoja de Menús Especiales:', e); }
+        }
+        return { datos, sha: null };
+    }
+
+    // op(datos) -> respuesta (objeto); se reintenta si otro dispositivo guardó a la vez.
+    function cambiarMenus(op, mensaje) {
+        const tarea = colaMenus.then(async () => {
+            for (let intento = 0; intento < 3; intento++) {
+                const { datos, sha } = await leerMenus();
+                const res = op(datos);
+                if (!res.ok) return res;
+                const texto = JSON.stringify({ formato: 1, restaurante: SITIO.restaurante, guardado: new Date().toISOString(), menus: datos.menus, platosManuales: datos.platosManuales }, null, 1) + '\n';
+                const cuerpo = { message: 'Menús Especiales: ' + mensaje, content: textoAB64(texto) };
+                if (sha) cuerpo.sha = sha;
+                const r = await gh(cfgMenus(), { method: 'PUT', body: JSON.stringify(cuerpo) });
+                if (r.ok) return res;
+                if (r.status !== 409 && r.status !== 422) throw new Error('GitHub HTTP ' + r.status + ' guardando menús');
+            }
+            throw new Error('No se pudo guardar (otro dispositivo guardando a la vez). Reintenta.');
+        });
+        colaMenus = tarea.catch(() => { });
+        return tarea;
+    }
+
+    const normalizarPlato = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+    async function manejarMenus(url, init) {
+        const accion = new URL(url, location.href).searchParams.get('accion') || '';
+        const metodo = String(init.method || 'GET').toUpperCase();
+        try {
+            if (metodo === 'GET') {
+                await colaMenus;
+                const { datos } = await leerMenus();
+                if (accion === 'listarPlatosManuales') return jsonResp({ ok: true, platos: datos.platosManuales });
+                const menus = datos.menus.slice().sort((a, b) => String(b.fechaModificacion || '').localeCompare(String(a.fechaModificacion || '')));
+                return jsonResp({ ok: true, menus });
+            }
+            const c = JSON.parse(typeof init.body === 'string' ? init.body : '{}');
+            const ahora = new Date().toISOString();
+            let res;
+            if (accion === 'eliminarMenu') {
+                const id = String(c.id || '').trim();
+                res = await cambiarMenus(d => {
+                    const i = d.menus.findIndex(m => String(m.id) === id);
+                    if (i < 0) return { ok: false, error: 'No se encontró ningún menú con ese id.' };
+                    d.menus.splice(i, 1); return { ok: true };
+                }, 'borrar menú');
+            } else if (accion === 'guardarPlatoManual') {
+                const es = String(c.es || '').trim(), en = String(c.en || '').trim(), tipo = c.tipo === 'postre' ? 'postre' : 'principal';
+                if (!es) return jsonResp({ ok: false, error: 'Falta el nombre del plato.' });
+                res = await cambiarMenus(d => {
+                    const p = d.platosManuales.find(x => normalizarPlato(x.es) === normalizarPlato(es));
+                    if (p) { p.en = en; p.tipo = tipo; return { ok: true, id: p.id, creado: false }; }
+                    const id = d.platosManuales.reduce((m, x) => Math.max(m, Number(x.id) || 0), 0) + 1;
+                    d.platosManuales.push({ id, es, en, tipo }); return { ok: true, id, creado: true };
+                }, 'plato ' + es);
+            } else if (accion === 'eliminarPlatoManual') {
+                const id = Number(c.id);
+                res = await cambiarMenus(d => {
+                    const i = d.platosManuales.findIndex(x => Number(x.id) === id);
+                    if (i < 0) return { ok: false, error: 'No se encontró ningún plato con ese id.' };
+                    d.platosManuales.splice(i, 1); return { ok: true };
+                }, 'borrar plato');
+            } else {
+                const nombre = String(c.nombre || '').trim();
+                if (!nombre) return jsonResp({ ok: false, error: 'Falta el nombre del menú.' });
+                const idE = String(c.id || '').trim();
+                res = await cambiarMenus(d => {
+                    const m = idE && d.menus.find(x => String(x.id) === idE);
+                    if (m) { m.nombre = nombre; m.config = c.config || {}; m.fechaModificacion = ahora; return { ok: true, id: idE, creado: false }; }
+                    const id = (crypto.randomUUID ? crypto.randomUUID() : 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2));
+                    d.menus.push({ id, nombre, config: c.config || {}, fechaCreacion: ahora, fechaModificacion: ahora });
+                    return { ok: true, id, creado: true };
+                }, 'guardar ' + nombre);
+            }
+            return jsonResp(res);
+        } catch (err) {
+            console.error('[almacen-json] menús', err);
+            return jsonResp({ ok: false, error: err.message });
+        }
+    }
+
     let activo = CONFIG.activo === true;
     if (CONFIG.activo === 'url') {
         try {
@@ -497,6 +622,7 @@
     if (activo) {
         window.fetch = function (input, init) {
             const url = typeof input === 'string' ? input : (input && input.url) || '';
+            if (SITIO && urlMenus() && baseUrl(url) === baseUrl(urlMenus())) return manejarMenus(url, init || {});
             const modo = modoDeUrl(url);
             if (!modo) return fetchOriginal(input, init);
             // Editor de la web: nunca toca el Sheets/Apps Script de otro restaurante.
