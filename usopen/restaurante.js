@@ -69,7 +69,7 @@ window.RESTAURANTE = {
     id: 'usopen',
 
     datos: {
-        tipo: 'sheets',
+        tipo: 'json',
         csv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOWewZgqWZEFYiIMh8DTUX5tr6EEXBwvUJGr7hrpkCG91UhE5xU8fDJ12qcRVrT69xfZ5NGGGyhNCE/pub?output=csv',
         vivo: 'https://script.google.com/macros/s/AKfycbweTq3o4NCOeBpZw-s65RgN9N311N5BLd1m9pA6_W9r6M_JdcxBsOrbyR8JLXAG9WbL/exec'
     },
