@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <script src="sitio-editor.js?v=1d1f8f1d"></script>
+    <script src="acceso.js?v=1d1f8f1d"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Editor Pro</title>
+    <link rel="icon" href="setting.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- CORREGIDO: incluye el peso 300 aquí (antes solo 400;600;700) para que
+         sugerencias-print.js no tenga que pedirlo otra vez con un @import duplicado -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        // VERSION DE DESPLIEGUE del codigo propio (HTML/CSS/JS). Subela (ej: 2026.09.18.1
+        // -> 2026.09.18.2) SOLO cuando subas cambios de codigo a GitHub, para que los
+        // navegadores descarguen la version nueva. Si no subes codigo nuevo, no la toques:
+        // asi los visitantes reaprovechan la cache del navegador en vez de descargarse
+        // todo el JS/CSS de golpe en cada visita.
+        // OJO: esto NO afecta a los datos del menu (platos/precios) — esos se piden
+        // siempre en fresco con cache:"no-store" en app.js, y eso no cambia.
+        window.__CACHE_BUST__ = '2026.11.02.2-1d1f8f1d';
+    </script>
+    <script>document.write('<link rel="stylesheet" href="styles.css?v=' + window.__CACHE_BUST__ + '">');</script>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header-admin">
+            <img id="header-logo-rg" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="header-logo header-logo-left" alt="Logo RG">
+            <div class="header-center-wrapper">
+                <h1 style="font-size: 1.9rem; font-weight: 800; color: var(--texto); letter-spacing: -0.02em; margin: 0 0 8px 0;">Web Editor Pro <span id="app-version" style="font-size: 0.85rem; color: var(--primario); font-weight: 700; margin-left: 8px; vertical-align: middle; display: inline-block;"></span></h1>
+                <div class="header-status-row" style="display: flex; align-items: center; gap: 10px; width: 100%; margin-bottom: 10px;">
+                    <div id="status-carga" class="status-ok" style="flex: 1;">⏳ Conectando...</div>
+                    <!-- NUEVO: activa/desactiva la precarga en segundo plano del OTRO restaurante
+                         (ver precargarEnSegundoPlano en app.js). La preferencia se guarda en
+                         localStorage de este navegador (clave "precargaSegundoPlanoDesactivada"),
+                         no en el servidor -- cada dispositivo recuerda la suya. -->
+                    <label id="precarga-toggle-wrapper" style="font-size: 0.7rem; display: flex; align-items: center; gap: 4px; white-space: nowrap; background: #f8f9fa; padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; color: #555; font-weight: 600;" title="Descarga en segundo plano los datos del otro restaurante nada más abrir la web, para que cambiar de pestaña entre RG y US Open sea instantáneo.">
+                        <input type="checkbox" id="chk-precarga-segundo-plano" style="margin:0; cursor:pointer;" checked>
+                        ⚡ Precargar
+                    </label>
+                    <div id="tabs-visibility-wrapper" style="position: relative;">
+                        <button id="btn-toggle-tabs-panel" type="button" style="font-size: 0.7rem; display: flex; align-items: center; gap: 4px; white-space: nowrap; background: #f8f9fa; padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; color: #555; font-weight: 600;">👁️ Pestañas</button>
+                        <div id="tabs-visibility-panel" style="display: none; position: absolute; top: calc(100% + 4px); right: 0; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); padding: 10px 12px; z-index: 50; min-width: 220px; text-align: left;"></div>
+                    </div>
+                </div>
+                <div id="optimistic-timer" style="display:none; font-size: 0.7rem; color: #c0392b; font-weight: bold; margin-top: 5px; background: #fce4e4; padding: 4px 8px; border-radius: 4px; align-items: center; gap: 5px;">
+                    🔒 Consistencia <span id="timer-mode" style="background:#c0392b; color:white; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem;">RG</span>: <span id="timer-seconds">180</span>s
+                    <button onclick="cancelarModoOptimista()" style="margin-left: 10px; background: transparent; border: 1px solid #c0392b; color: #c0392b; padding: 1px 5px; border-radius: 3px; cursor: pointer; font-size: 0.6rem; font-weight: bold;">✕ CANCELAR</button>
+                </div>
+            </div>
+            <img id="header-logo-usopen" src="data:image/gif;base64,R0lGODlhAQABAAD/ACWAAAAAAQABAAACADs=" class="header-logo header-logo-right" alt="Logo USOPEN">
+        </div>
+
+        <div class="tabs-container" id="tabs-container">
+            <button id="tab-btn-apikeys" class="tab-btn" onclick="switchTab('apikeys', this)">0. Gestión de API Keys Gemini</button>
+            <button id="tab-btn-rg" class="tab-btn active" onclick="switchTab('editor', this)">1. Editor Carta RG</button>
+            <button id="tab-btn-sug-rg" class="tab-btn" onclick="switchTab('sugerencias', this)">2. Sugerencias RG</button>
+            <!-- NUEVO (30 oct): hojas imprimibles de Postres (rango 16000-16299, no salen en la web pública) -->
+            <button id="tab-btn-pos-rg" class="tab-btn" onclick="switchTab('postres', this)">2.1. Postres RG</button>
+            <button id="tab-btn-pro" class="tab-btn" onclick="switchTab('pro', this)" style="margin-left: auto; margin-right: auto;">3. Traductor Pro</button>
+            <button id="tab-btn-qa" class="tab-btn" onclick="switchTab('qa', this)">3.1. Preguntas y respuestas</button>
+            <button id="tab-btn-usopen" class="tab-btn" onclick="switchTab('editor-usopen', this)">4. Editor Carta USOpen</button>
+            <button id="tab-btn-sug-usopen" class="tab-btn" onclick="switchTab('sugerencias-usopen', this)">5. Sugerencias USOpen</button>
+            <button id="tab-btn-pos-usopen" class="tab-btn" onclick="switchTab('postres-usopen', this)">5.1. Postres USOpen</button>
+            <!-- NUEVO: pestaña común a los dos restaurantes (no la oculta el sistema de
+                 Enable/Disable de RESTAURANTES_CONFIG ni depende de window.currentMode) — un
+                 menú especial puede mezclar platos de RG y de US Open en la misma plantilla. -->
+            <button id="tab-btn-menu-especial" class="tab-btn" onclick="switchTab('menu-especial', this)">6. Menú Especial</button>
+        </div>
+
+        <div id="tab-apikeys" class="tab-content" style="display: none;">
+            <div class="api-keys-manager" style="max-width: 500px; margin-top: 0;">
+                <label class="label-seccion">Gestión de API Keys Gemini</label>
+                <div class="api-keys-inputs">
+                    <textarea id="nuevaKey" rows="2" placeholder="Pega aquí una Gemini Key, o varias de golpe (una por línea, o separadas por comas) — Ctrl+Enter para añadir" class="input-estandar" onkeydown="if((event.key==='Enter')&&(event.ctrlKey||event.metaKey)){agregarKeyDesdeInput();}"></textarea>
+                    <button id="addKeyBtn" class="btn-add-key" onclick="agregarKeyDesdeInput()">Añadir Key(s)</button>
+                </div>
+                <div class="api-keys-list">
+                    <div id="contenedorSelectKeys" class="flex-1">
+                        <select id="selectKeys" class="select-keys"></select>
+                    </div>
+                    <button id="btnEliminarKeySeleccionada" class="btn-delete-key" title="Eliminar key" onclick="eliminarKeySeleccionada()">✕</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-editor" class="tab-content active">
+            <div id="ajustes-generales-bar" class="ajustes-generales-bar"></div>
+            <div id="editor-dinamico"></div>
+        </div>
+
+        <div id="tab-pro" class="tab-content pro-panel" style="display: none;">
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="card md:w-3/10 flex-none flex flex-col justify-between" style="width: 30%; min-width: 330px;">
+                    <div class="space-y-1.5">
+                        <h3 class="text-sm font-semibold uppercase tracking-wider mb-2">1. Orígenes de Datos</h3>
+                        <div class="grid grid-cols-1 gap-1 text-sm mb-2">
+                            <div class="flex gap-2 items-center"><label id="label-web-rg" class="text-xs whitespace-nowrap font-bold text-slate-400">WEB RG:</label></div>
+                            <div class="flex gap-1.5">
+                                <input type="text" id="sheetsUrlRG" placeholder="Cargando URL..." class="flex-1 text-xs py-1 px-2">
+                                <button id="loadSheetsBtnRG" class="btn btn-secondary text-xs py-1 px-2 whitespace-nowrap">Cargar web RG</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-1 text-sm mb-2">
+                            <div class="flex gap-2 items-center"><label id="label-web-usopen" class="text-xs whitespace-nowrap font-bold text-slate-400">WEB USOPEN:</label></div>
+                            <div class="flex gap-1.5">
+                                <input type="text" id="sheetsUrlUSOpen" placeholder="Cargando URL..." class="flex-1 text-xs py-1 px-2">
+                                <button id="loadSheetsBtnUSOpen" class="btn btn-secondary text-xs py-1 px-2 whitespace-nowrap">Cargar web USOPEN</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-1 text-sm">
+                            <div class="flex gap-2 items-center"><label class="text-xs whitespace-nowrap">CSV Local:</label><input type="file" id="archivoLocal" accept=".csv" class="text-xs flex-1 p-0.5"></div>
+                        </div>
+                    </div>
+                    <div class="border-t pt-1.5 space-y-1.5 mt-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-medium">Rango de Filas:</span>
+                            <div class="flex items-center gap: 2px">
+                                <label class="text-slate-400">Desde: <input type="number" id="rangoInicio" value="2" min="2" class="w-20 text-center text-xs py-0.5 px-1 ml-1"></label>
+                                <label class="text-slate-400">Hasta: <input type="number" id="rangoFin" value="9999" min="2" class="w-20 text-center text-xs py-0.5 px-1 ml-1" title="Se actualiza automáticamente a la última fila con datos al cargar."></label>
+                            </div>
+                        </div>
+                        <!-- Orden de los 3 pasos de generación/traducción por IA: 1) nombres a todos los idiomas, 2) Info ES/EN, 3) Info al resto de idiomas -->
+                        <button id="btnIniciarNombres" class="btn btn-success font-bold py-1 px-1 text-[11px] tracking-tight uppercase w-full">🌐 Traducir Platos en ES a Todos los Idiomas Faltantes (Solo en el Rango Asignado)</button>
+                        <button id="btnIniciar" class="btn btn-success font-bold py-1 px-1 text-[11px] tracking-tight uppercase w-full mt-1">Generar Info Platos ES/EN (Solo en el Rango Asignado)</button>
+                        <button id="btnIniciarInfoOtros" class="btn btn-success font-bold py-1 px-1 text-[11px] tracking-tight uppercase w-full mt-1">🌍 Generar Info Platos Otros Idiomas (Solo en el Rango Asignado)</button>
+                        <button id="btnRevisarConsistencia" class="btn btn-secondary font-bold py-1 px-1 text-[11px] tracking-tight uppercase w-full mt-1 border border-amber-400" title="Detecta platos cuyo nombre/ingredientes o alérgenos han cambiado desde que se generaron sus traducciones, y las regenera automáticamente en todos los idiomas.">🔍 Revisar y Corregir Consistencia (Nombre/Alérgenos)</button>
+                        <button id="btnAuditarAlergenos" class="btn btn-secondary font-bold py-1 px-1 text-[11px] tracking-tight uppercase w-full mt-1 border border-rose-400" title="Comprueba AHORA MISMO, plato a plato, si el texto de ES/EN dice realmente los alérgenos que hay en ALERGENOS_COD (no depende de si algo ha cambiado o no). Detecta desajustes ya existentes.">🩺 Auditar Alérgenos Ahora (ES/EN)</button>
+                        <button id="btnAuditarSeparadores" class="btn btn-secondary font-bold py-1 px-1 text-[11px] tracking-tight uppercase w-full mt-1 border border-sky-400" title="Comprueba AHORA MISMO, plato a plato, si las traducciones ya generadas de un nombre con &quot;//&quot; (segunda línea de ingredientes/opciones, o variedad de uva en vinos) mantienen ese separador. Detecta traducciones donde la IA lo sustituyó por un guion u otro signo, y las regenera solo en los idiomas afectados.">🔀 Auditar Separadores // Ahora</button>
+                        <div class="grid grid-cols-2 gap-1.5 text-xs mt-1">
+                            <button id="btnPausa" class="btn btn-secondary font-bold py-1 px-1 uppercase">Pausar</button>
+                            <button id="btnCancelar" class="btn btn-danger font-bold py-1 px-1 uppercase">Cancelar</button>
+                        </div>
+                        <button id="btnSyncSheets" class="btn btn-success font-bold py-2 px-1 text-[11px] tracking-tight uppercase w-full mt-1 border border-emerald-400">☁️ Sincronizar con Google Sheet</button>
+                        <button id="saveCsvBtn" class="btn btn-primary font-bold py-1 px-1 text-[11px] whitespace-nowrap uppercase w-full mt-1">Descargar CSV</button>
+                    </div>
+                </div>
+                <div class="card md:w-1/5 flex-none flex flex-col" style="width: 20%; min-width: 200px">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider mb-2">2. Idioma Vista</h3>
+                    <div id="radiosIdiomas" class="w-full overflow-y-auto pr-1 flex-1"></div>
+                </div>
+                <div class="card flex-1 md:w-1/2 c-consola flex flex-col" style="width: 50%;">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold uppercase tracking-wider">3. Monitor de Sistema</h3>
+                        <button id="btnCopiarConsola" class="btn btn-secondary text-[10px] py-0.5 px-2 whitespace-nowrap" title="Copia todo el texto de la consola al portapapeles">📋 Copiar consola</button>
+                    </div>
+                    <div id="consola"></div>
+                </div>
+            </div>
+            <div class="card overflow-x-auto">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Previsualización de Datos en Memoria</h3>
+                <div class="max-h-[580px] overflow-y-auto">
+                    <table class="w-full">
+                        <thead id="tableHeadRow" class="sticky top-0 z-10"></thead>
+                        <tbody id="tablaBody" class="text-sm text-selle-300">
+                            <tr><td colspan="4" class="text-center py-8 text-slate-500 italic">Ningún archivo cargado en el sistema.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-qa" class="tab-content pro-panel" style="display: none;">
+            <div class="card mb-4">
+                <h3 class="text-sm font-semibold uppercase tracking-wider mb-3">Edición de Preguntas y Respuestas (ES / EN)</h3>
+                <p class="text-xs text-slate-400 mb-3">Usa la misma lista cargada en la pestaña "3. Traductor Pro" (Google Sheet o CSV local). Los cambios se aplican en memoria al instante; para guardarlos de verdad, vuelve a esa pestaña y usa "Descargar CSV" o "☁️ Sincronizar con Google Sheet".</p>
+                <div class="flex flex-col md:flex-row gap-2 md:items-center">
+                    <input type="text" id="qa-filtro" placeholder="Buscar plato por nombre..." class="flex-1 text-xs py-1.5 px-2 input-estandar" style="margin-bottom:0;">
+                    <label class="text-xs flex items-center gap-1.5 whitespace-nowrap">
+                        <input type="checkbox" id="qa-solo-con-datos" checked> Solo platos con datos generados
+                    </label>
+                    <button id="qa-refrescar" class="btn btn-secondary text-xs py-1.5 px-3 whitespace-nowrap">🔄 Refrescar</button>
+                </div>
+            </div>
+            <div id="qa-lista"></div>
+        </div>
+
+        <div id="tab-sugerencias" class="tab-content" style="display: none;">
+            <div id="sugerencias-contenido"></div>
+        </div>
+
+        <div id="tab-sugerencias-usopen" class="tab-content" style="display: none;">
+            <div id="sugerencias-contenido-usopen"></div>
+        </div>
+
+        <!-- NUEVO (30 oct): hojas de Postres, las construye postres-print.js -->
+        <div id="tab-postres" class="tab-content" style="display: none;">
+            <div id="postres-contenido"></div>
+        </div>
+
+        <div id="tab-postres-usopen" class="tab-content" style="display: none;">
+            <div id="postres-contenido-usopen"></div>
+        </div>
+
+        <!-- NUEVO: pestaña "6. Menú Especial" — plantillas de menú de evento (boda/grupo), sin
+             precio, con platos de RG y/o US Open, guardadas en su propio backend (ver
+             menu-especial.js y config.js/WEBAPP_URL_MENUS_ESPECIALES). El contenido lo construye
+             menu-especial.js dentro de #menu-especial-contenido, igual que ya hace
+             sugerencias-print.js con #sugerencias-contenido. -->
+        <div id="tab-menu-especial" class="tab-content" style="display: none;">
+            <div id="menu-especial-contenido"></div>
+        </div>
+
+        <button class="btn-add-float" onclick="abrirSelector()">+</button>
+        <button class="btn-guardar-main" id="btn-guardar-dinamico" onclick="enviarAlExcel()">GUARDAR CAMBIOS EN WEB</button>
+
+        <div id="modal-selector" class="modal">
+            <div class="modal-content">
+                <h2 style="margin-top:0;">Añadir Nuevo Plato</h2>
+                <div id="lista-agrupada"></div>
+                <button class="btn-modal-cancelar" onclick="cerrarModal('modal-selector')" style="margin-top:20px;">Cancelar</button>
+            </div>
+        </div>
+
+        <div id="modal-seleccionar-destino" class="modal">
+            <div class="modal-content" style="max-width: 400px; text-align: center; padding: 30px;">
+                <h3 style="margin-top:0; margin-bottom: 10px;">¿Destino de la Importación?</h3>
+                <p style="color: #666; margin-bottom: 25px;">Selecciona a qué restaurante deseas subir los datos del archivo seleccionado:</p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <!-- MODIFICADO: Llamadas abstractas -->
+                    <button class="btn-modal-aceptar" id="modal-dest-rg" onclick="UI.confirmarImportacion('restaurante001')" style="background-color: #e67e22; width: 100%; padding: 15px; font-size: 1.1rem;">RG (Roland Garros)</button>
+                    <button class="btn-modal-aceptar" id="modal-dest-usopen" onclick="UI.confirmarImportacion('restaurante002')" style="background-color: #2ecc71; width: 100%; padding: 15px; font-size: 1.1rem;">US Open</button>
+                </div>
+                <button class="btn-modal-cancelar" onclick="UI.cancelarImportacion()" style="margin-top: 25px;">Cancelar</button>
+            </div>
+        </div>
+
+        <div id="modal-editor" class="modal">
+            <div class="modal-content modal-full-layout">
+                <div class="modal-col-izquierda">
+                    <div class="input-group">
+                        <label id="label-uvas" class="label-seccion">Nombres y Detalles del Plato</label>
+                        <input id="edit-es" class="input-estandar" placeholder="Nombre en Español">
+                        <input id="edit-es-uvas" class="input-estandar input-uvas" placeholder="Detalle extra (Español) — ej: con salsa de trufa">
+                    </div>
+                    <div class="input-group">
+                        <button id="btn-generar-en" class="btn-traducir-en" onclick="generarTraduccionEN()">🇬🇧 Generar opciones en Inglés con IA</button>
+                        <input id="edit-en" class="input-estandar" placeholder="Nombre en Inglés">
+                        <input id="edit-en-uvas" class="input-estandar input-uvas" placeholder="Detalle extra (Inglés)">
+                    </div>
+
+                    <!-- NUEVO: modo "Plato con ingredientes" — alternativa al campo de detalle
+                         simple de arriba, para platos con VARIAS opciones intercambiables
+                         activables por separado (p.ej. "Mix de Gyozas: Pato / Langostino /
+                         Pollo"). abrirEditor()/toggleModoIngredientes() en app.js muestran u
+                         ocultan esto según el tipo de plato y el estado de la casilla. -->
+                    <div class="input-group" id="contenedor-toggle-ingredientes" style="display:none;">
+                        <label class="checkbox-label-ingredientes">
+                            <input type="checkbox" id="chk-modo-ingredientes" onchange="toggleModoIngredientes()">
+                            🧾 Plato con varias opciones/ingredientes activables (ej: Mix de Gyozas)
+                        </label>
+                    </div>
+                    <div class="input-group" id="contenedor-opciones-plato" style="display:none;"></div>
+
+                    <button id="btn-autotraducir" class="btn-traductor-magico" onclick="ejecutarTraduccionAutomatica()" disabled>✨ Auto-Traducir resto de idiomas con Gemini</button>
+                    <div class="input-group">
+                        <label class="label-seccion">Resto de Idiomas</label>
+                        <div id="contenedor-resto-idiomas"></div>
+                    </div>
+                </div>
+                <div class="modal-col-derecha">
+                    <div class="input-group">
+                        <label class="label-seccion">Configuración</label>
+                        <div class="panel-control-precio">
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label style="font-size:0.7rem; font-weight:bold; color:#7f8c8d;">Precio (€)</label>
+                                <input id="edit-precio" type="number" step="0.01" class="input-estandar input-precio-super-mini input-precio-mini">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label style="font-size:0.7rem; font-weight:bold; color:#7f8c8d;">Nombre Imagen</label>
+                                <input id="edit-imagen" class="input-estandar input-imagen-flexible" placeholder="ej: paella01.webp">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label class="label-seccion">Alérgenos</label>
+                        <div id="alergenos-grid" class="alergenos-grid"></div>
+                    </div>
+                    <!-- NUEVO: consola de la generación automática de Info (ES/EN + resto de
+                         idiomas al crear/editar este plato — ver logInfoAutomatica()/
+                         renderConsolaInfoPlato() en app.js), justo debajo de Alérgenos, que es
+                         donde el usuario está mirando al pulsar "Aplicar Cambios". Muestra el
+                         historial de ESTE plato (se repinta al abrir el editor) y se actualiza en
+                         vivo mientras el modal siga abierto para él. Antes este rastro solo se
+                         veía en la consola de "Ajustes Expertos" (UI.log), invisible desde aquí. -->
+                    <div class="input-group">
+                        <label class="label-seccion">🤖 Consola de Info automática</label>
+                        <div id="consola-info-plato" class="consola-info-automatica"></div>
+                    </div>
+                    <div id="contenedor-croquetas"></div>
+                    <div class="modal-acciones-footer">
+                        <button class="btn-modal-aceptar" onclick="aplicarCambiosPlato()">✅ Aplicar Cambios</button>
+                        <button class="btn-modal-cancelar" onclick="cerrarModal('modal-editor')">Cancelar</button>
+                        <!-- NUEVO: solo visible para un plato ya existente (abrirEditor() la oculta al
+                             crear uno nuevo) — pide contraseña antes de borrar, ver modal-eliminar-plato -->
+                        <button id="btn-eliminar-plato" class="btn-modal-eliminar" onclick="abrirModalEliminarPlato()" style="display:none;">🗑️ Eliminar Plato</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO: confirmación con contraseña antes de eliminar un plato (ver
+             abrirModalEliminarPlato()/confirmarEliminarPlato() en app.js). La contraseña se
+             pide siempre, cada vez — no se recuerda de un borrado al siguiente. -->
+        <div id="modal-eliminar-plato" class="modal">
+            <div class="modal-content" style="max-width: 400px; text-align: center; padding: 30px;">
+                <h3 style="margin-top:0; margin-bottom: 10px; color: var(--rojo);">⚠️ Eliminar plato</h3>
+                <p style="color: #666; margin-bottom: 5px;">Vas a eliminar de forma permanente:</p>
+                <p id="texto-plato-a-eliminar" style="font-weight: 700; margin-bottom: 20px;"></p>
+                <p style="color: #666; font-size: 0.85rem; margin-bottom: 15px;">Introduce la contraseña para confirmar. Esta acción no se puede deshacer.</p>
+                <input type="password" id="password-eliminar-plato" class="input-estandar" placeholder="Contraseña" autocomplete="off" onkeydown="if(event.key==='Enter') confirmarEliminarPlato()">
+                <p id="error-password-eliminar" style="color: var(--rojo); font-size: 0.8rem; margin: 8px 0 0; display: none;">❌ Contraseña incorrecta.</p>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn-modal-eliminar" style="margin:0;" onclick="confirmarEliminarPlato()">🗑️ Eliminar definitivamente</button>
+                    <button class="btn-modal-cancelar" style="margin:0;" onclick="cerrarModalEliminarPlato()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO (18 sept, traído de la web de cartelitos -- ver mostrarCorreccionOrtografiaEN()/
+             responderCorreccionEN() en app.js): confirmación editable "¿Quisiste decir...?" que se
+             muestra ANTES del modal de opciones en Inglés de abajo, solo cuando prompts.js >
+             opcionesEN detecta una posible falta de ortografía en el nombre en español (nunca para
+             vinos). Aceptar corrige el campo 'edit-es'; Mantener lo deja como estaba -- en ambos
+             casos las 3 opciones de traducción, ya generadas, se muestran igual a continuación. -->
+        <div id="modal-correccion-en" class="modal">
+            <div class="modal-content" style="max-width: 440px; text-align: center; padding: 30px;">
+                <h3 style="margin-top:0; margin-bottom: 10px;">✏️ ¿Quisiste decir...?</h3>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.85rem;">La IA cree que el nombre en español puede tener una falta de ortografía. Revísalo o edítalo antes de traducir:</p>
+                <input type="text" id="correccion-en-input" class="input-estandar" style="margin-bottom: 20px;" onkeydown="if(event.key==='Enter') responderCorreccionEN(true)">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-modal-aceptar" style="margin:0;" onclick="responderCorreccionEN(true)">✅ Usar esta corrección</button>
+                    <button class="btn-modal-cancelar" style="margin:0;" onclick="responderCorreccionEN(false)">Mantener como estaba</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-traduccion-en" class="modal">
+            <div class="modal-content modal-box-en">
+                <h2 style="margin-top:0; margin-bottom: 10px;">Selecciona la mejor traducción al Inglés</h2>
+                <div id="opciones-en-container" class="opciones-en-scroll"></div>
+                <div class="footer-box-en">
+                    <textarea id="editar-opcion-en" class="input-estandar" rows="3" placeholder="Puedes editar la opción seleccionada aquí antes de confirmar..."></textarea>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="btn-modal-aceptar" onclick="confirmarTraduccionEN()" style="margin:0;">Confirmar Selección</button>
+                        <button class="btn-modal-cancelar" onclick="cerrarModalTraduccionEN()" style="margin:0;">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        // NUEVO: sello de caché compartido para todos los archivos propios del proyecto
+        // (no los de CDN externos, que no cambian). window.__CACHE_BUST__ se define una
+        // sola vez, arriba del todo en <head> — ver el comentario allí sobre cuándo
+        // subirlo. Antes aquí se usaba Date.now(), lo que obligaba a descargar todo el
+        // JS/CSS propio en CADA visita sin poder usar nunca la caché del navegador.
+        document.write('<scr' + 'ipt src="config.js?v=' + window.__CACHE_BUST__ + '"></scr' + 'ipt>');
+        // almacen-json.js: carta en datos.json (GitHub) en vez de Sheets — justo tras config.js.
+        document.write('<scr' + 'ipt src="almacen-json.js?v=' + window.__CACHE_BUST__ + '"></scr' + 'ipt>');
+        </script>
+        <script>
+        // MODIFICADO: Inyección dinámica desde config.js Abstract Keys
+        // CORREGIDO: antes se precargaba con CSV_URL_RESTAURANTE00X (la URL de "publicar en
+        // la web" de Google Sheets, cacheada varios minutos por Google). Ahora se usa el
+        // endpoint ?accion=csv de Código.gs, que lee la hoja en vivo con SpreadsheetApp — así
+        // "Sincronizar con Google Sheet" ya no puede pisar INFO_* real con datos desactualizados.
+        if (typeof getWebAppUrl === 'function') {
+            const urlRG = getWebAppUrl('restaurante001');
+            const urlUSOpen = getWebAppUrl('restaurante002');
+            if (urlRG) document.getElementById('sheetsUrlRG').value = urlRG + '?accion=csv';
+            if (urlUSOpen) document.getElementById('sheetsUrlUSOpen').value = urlUSOpen + '?accion=csv';
+        } else {
+            if (typeof CSV_URL_RESTAURANTE001 !== 'undefined') document.getElementById('sheetsUrlRG').value = CSV_URL_RESTAURANTE001;
+            if (typeof CSV_URL_RESTAURANTE002 !== 'undefined') document.getElementById('sheetsUrlUSOpen').value = CSV_URL_RESTAURANTE002;
+        }
+        
+        const logoRGEl = document.getElementById('header-logo-rg');
+        const logoUSOPENEl = document.getElementById('header-logo-usopen');
+        if (typeof LOGO_RESTAURANTE001 !== 'undefined' && logoRGEl) logoRGEl.src = LOGO_RESTAURANTE001;
+        if (typeof LOGO_RESTAURANTE002 !== 'undefined' && logoUSOPENEl) logoUSOPENEl.src = LOGO_RESTAURANTE002;
+
+        if (typeof getModoAlias === 'function') {
+            const tabRG = document.getElementById('tab-btn-rg');
+            if (tabRG) tabRG.innerText = `1. Editor Carta ${getModoAlias('restaurante001')}`;
+            const tabSugRG = document.getElementById('tab-btn-sug-rg');
+            if (tabSugRG) tabSugRG.innerText = `2. Sugerencias ${getModoAlias('restaurante001')}`;
+            const tabUSOPEN = document.getElementById('tab-btn-usopen');
+            if (tabUSOPEN) tabUSOPEN.innerText = `4. Editor Carta ${getModoAlias('restaurante002')}`;
+            const tabSugUSOPEN = document.getElementById('tab-btn-sug-usopen');
+            if (tabSugUSOPEN) tabSugUSOPEN.innerText = `5. Sugerencias ${getModoAlias('restaurante002')}`;
+            const tabPosRG = document.getElementById('tab-btn-pos-rg');
+            if (tabPosRG) tabPosRG.innerText = `2.1. Postres ${getModoAlias('restaurante001')}`;
+            const tabPosUSOPEN = document.getElementById('tab-btn-pos-usopen');
+            if (tabPosUSOPEN) tabPosUSOPEN.innerText = `5.1. Postres ${getModoAlias('restaurante002')}`;
+
+            const modalDestRG = document.getElementById('modal-dest-rg');
+            if (modalDestRG) modalDestRG.innerText = getModoAlias('restaurante001');
+            const modalDestUSOPEN = document.getElementById('modal-dest-usopen');
+            if (modalDestUSOPEN) modalDestUSOPEN.innerText = getModoAlias('restaurante002');
+
+            const labelWebRG = document.getElementById('label-web-rg');
+            if (labelWebRG) labelWebRG.innerText = `WEB ${getModoAlias('restaurante001')}:`;
+            const btnLoadRG = document.getElementById('loadSheetsBtnRG');
+            if (btnLoadRG) btnLoadRG.innerText = `Cargar web ${getModoAlias('restaurante001')}`;
+
+            const labelWebUSOPEN = document.getElementById('label-web-usopen');
+            if (labelWebUSOPEN) labelWebUSOPEN.innerText = `WEB ${getModoAlias('restaurante002')}:`;
+            const btnLoadUSOPEN = document.getElementById('loadSheetsBtnUSOpen');
+            if (btnLoadUSOPEN) btnLoadUSOPEN.innerText = `Cargar web ${getModoAlias('restaurante002')}`;
+
+            const btnSyncSheets = document.getElementById('btnSyncSheets');
+            if (btnSyncSheets) btnSyncSheets.innerText = `☁️ Sincronizar con Google Sheet ${getModoAlias('restaurante001')}`;
+        }
+
+        // NUEVO: Sistema de Enable/Disable de Restaurantes
+        if (typeof RESTAURANTES_CONFIG !== 'undefined') {
+            if (!RESTAURANTES_CONFIG.restaurante001.enabled) {
+                const t1 = document.getElementById('tab-btn-rg'); if(t1) t1.style.display = 'none';
+                const t2 = document.getElementById('tab-btn-sug-rg'); if(t2) t2.style.display = 'none';
+                const t2b = document.getElementById('tab-btn-pos-rg'); if(t2b) t2b.style.display = 'none';
+            }
+            if (!RESTAURANTES_CONFIG.restaurante002.enabled) {
+                const t3 = document.getElementById('tab-btn-usopen'); if(t3) t3.style.display = 'none';
+                const t4 = document.getElementById('tab-btn-sug-usopen'); if(t4) t4.style.display = 'none';
+                const t4b = document.getElementById('tab-btn-pos-usopen'); if(t4b) t4b.style.display = 'none';
+            }
+        }
+
+        // NUEVO: Panel de checks para mostrar/ocultar pestañas manualmente (persistente en
+        // localStorage). Independiente del Enable/Disable de restaurantes de arriba: una
+        // pestaña ya oculta por RESTAURANTES_CONFIG (restaurante desactivado) ni siquiera
+        // aparece en la lista de checks, porque no tiene sentido ofrecer mostrarla desde aquí.
+        const TABS_VISIBILITY_STORAGE_KEY = 'webEditorPro_tabsVisibility';
+
+        function leerPreferenciasVisibilidad() {
+            try {
+                return JSON.parse(localStorage.getItem(TABS_VISIBILITY_STORAGE_KEY)) || {};
+            } catch (e) { return {}; }
+        }
+
+        function guardarPreferenciasVisibilidad(prefs) {
+            try { localStorage.setItem(TABS_VISIBILITY_STORAGE_KEY, JSON.stringify(prefs)); } catch (e) {}
+        }
+
+        function initTabsVisibilityPanel() {
+            const panel = document.getElementById('tabs-visibility-panel');
+            const toggleBtn = document.getElementById('btn-toggle-tabs-panel');
+            if (!panel || !toggleBtn) return;
+
+            const todosLosBotones = Array.from(document.querySelectorAll('.tabs-container .tab-btn'));
+            // Solo entran en la lista de checks los botones que no estén ya ocultos por el
+            // sistema de Enable/Disable de restaurantes (display:none puesto arriba).
+            const botonesElegibles = todosLosBotones.filter(btn => btn.style.display !== 'none');
+
+            const prefs = leerPreferenciasVisibilidad();
+
+            // Construir el HTML del panel: primero el checkbox de DEBUG (movido aquí desde
+            // la cabecera para dejarla más limpia), luego un separador, luego un checkbox
+            // por cada pestaña elegible.
+            const debugRowHtml = `<label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:#555; padding:4px 0; cursor:pointer; white-space:nowrap;">
+                <input type="checkbox" id="toggle-debug-panel" style="cursor:pointer; margin:0;">
+                🐛 DEBUG
+            </label>
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 6px 0;">`;
+
+            panel.innerHTML = debugRowHtml + botonesElegibles.map(btn => {
+                const key = btn.id;
+                const visible = prefs[key] !== false; // por defecto, visible
+                const label = btn.innerText;
+                return `<label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:#555; padding:4px 0; cursor:pointer; white-space:nowrap;">
+                    <input type="checkbox" data-tab-key="${key}" ${visible ? 'checked' : ''} style="cursor:pointer; margin:0;">
+                    ${label}
+                </label>`;
+            }).join('');
+
+            // Aplicar el estado guardado a cada botón elegible
+            botonesElegibles.forEach(btn => {
+                const visible = prefs[btn.id] !== false;
+                if (!visible) btn.style.display = 'none';
+            });
+
+            // Si la pestaña actualmente activa ha quedado oculta, cambiar a la primera visible
+            const activo = document.querySelector('.tabs-container .tab-btn.active');
+            if (activo && activo.style.display === 'none') {
+                const primeraVisible = botonesElegibles.find(btn => btn.style.display !== 'none');
+                if (primeraVisible) primeraVisible.click();
+            }
+
+            panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+                chk.addEventListener('change', () => {
+                    const key = chk.getAttribute('data-tab-key');
+                    const btn = document.getElementById(key);
+                    if (!btn) return;
+                    const prefsActuales = leerPreferenciasVisibilidad();
+                    prefsActuales[key] = chk.checked;
+                    guardarPreferenciasVisibilidad(prefsActuales);
+                    btn.style.display = chk.checked ? '' : 'none';
+
+                    // Si se acaba de ocultar la pestaña activa, saltar a la primera visible
+                    if (!chk.checked && btn.classList.contains('active')) {
+                        const primeraVisible = botonesElegibles.find(b => b.style.display !== 'none');
+                        if (primeraVisible) primeraVisible.click();
+                    }
+                });
+            });
+
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            });
+            document.addEventListener('click', (e) => {
+                if (panel.style.display !== 'none' && !panel.contains(e.target) && e.target !== toggleBtn) {
+                    panel.style.display = 'none';
+                }
+            });
+        }
+        initTabsVisibilityPanel();
+    </script>
+    <script>
+        var __v = window.__CACHE_BUST__;
+        document.write('<scr' + 'ipt src="languages.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="data.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="state.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="utils.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="estructuras.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="prompts.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="app.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt type="module" src="ui.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="sugerencias-print.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="postres-print.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="menu-especial.js?v=' + __v + '"></scr' + 'ipt>');
+    </script>
+
+    <div id="loading-overlay" class="loading-overlay">
+        <!-- 25 sept: animación "partido de tenis" en vez de la rueda giratoria -- una sola
+             pelota (.pelota-tenis) que va de una raqueta a la otra y cada raqueta gira al
+             golpearla (ver @keyframes tenisPelota/tenisGolpeIzq/tenisGolpeDer en styles.css).
+             27 sept: raquetas separadas a cada lado de la pantalla (el contenedor .loading-tenis
+             ahora ocupa casi todo el ancho), red de tenis (.tenis-red) de separación sobre una
+             línea de suelo (.tenis-suelo), y sombra proyectada (.pelota-sombra) que refuerza la
+             sensación de altura -- la pelota ya bota en el suelo antes de llegar a cada raqueta
+             (ver el desglose completo en el comentario de @keyframes tenisPelota). -->
+        <div class="loading-tenis">
+            <div class="tenis-suelo"></div>
+            <div class="tenis-red"></div>
+            <div class="pelota-sombra"></div>
+            <div class="raqueta raqueta-izq"><div class="raqueta-img"></div></div>
+            <div class="pelota-tenis"></div>
+            <div class="raqueta raqueta-der"><div class="raqueta-img"></div></div>
+        </div>
+        <!-- NUEVO (18 sept): id añadido para poder cambiar el texto desde JS (ver
+             mostrarOverlayCarga()/ocultarOverlayCarga() en app.js) -- se reutiliza este mismo
+             overlay/animación para las llamadas de traducción con IA (que a veces tardan bastante,
+             sobre todo si Gemini responde 503 "modelo saturado" y hay que reintentar con varias
+             claves), no solo para "Cargando datos..." al cambiar de pestaña. -->
+        <div id="loading-text" class="loading-text">Cargando datos...</div>
+    </div>
+
+    <div id="debug-panel" style="display: none; position: fixed; bottom: 20px; left: 20px; background: #111827; color: #4ade80; padding: 12px; border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; z-index: 9998; max-width: 320px; border: 1px solid #334155; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); line-height: 1.4; cursor: grab;">
+        <div style="color: #f8fafc; margin-bottom: 8px; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 4px;">🐛 DEBUG MODE ACTIVO</div>
+        <div id="debug-versions" style="margin-bottom: 8px; color: #94a3b8;"></div>
+        <hr style="border-color: #334155; margin: 5px 0;">
+        <div id="debug-state"></div>
+    </div>
+
+    <script>
+        function actualizarTextoBotonGuardar() {
+            const btn = document.getElementById('btn-guardar-dinamico');
+            if (!btn) return;
+            const modo = window.currentMode || 'restaurante001';
+            btn.innerText = `GUARDAR CAMBIOS EN WEB ${getModoAlias(modo)}`;
+        }
+
+        async function switchTab(tabId, btnElement) {
+            const loader = document.getElementById('loading-overlay');
+            // CORREGIDO (19 sept): antes se mostraba este overlay aquí mismo para CUALQUIER
+            // pestaña, incluida "6. Menú Especial" -- eso anulaba la lógica de
+            // MenuEspecial.init() (ver más abajo) que evita mostrar overlay cuando los índices de
+            // platos/vinos YA están cargados y solo hace falta un GET ligero (listarMenus) para
+            // refrescar la lista de menús guardados. Como este "flex" de aquí se ponía SIEMPRE,
+            // el overlay "Cargando datos..." volvía a aparecer cada vez que se volvía a esa
+            // pestaña -- aunque solo tardase el tiempo de esa petición ligera (2-3s), daba la
+            // sensación de que recargaba todo de cero. Ahora Menú Especial gestiona su propio
+            // overlay (mostrarCargando() en menu-especial.js), que sí sabe si hace falta o no.
+            if (loader && tabId !== 'menu-especial') loader.style.display = 'flex';
+
+            try {
+                const esEditorActual = document.getElementById('tab-editor').style.display !== 'none' || document.getElementById('tab-editor').classList.contains('active');
+                
+                if (esEditorActual && window.hayCambiosSinGuardar) {
+                    const confirmarGuardar = confirm("⚠️ Tienes cambios sin guardar en esta pestaña. ¿Quieres guardarlos antes de cambiar?");
+                    if (confirmarGuardar) {
+                        await window.enviarAlExcel();
+                        return; 
+                    }
+                }
+
+                document.querySelectorAll('.tab-content').forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+                
+                let targetTabId = tabId;
+                if (tabId === 'editor-usopen') targetTabId = 'editor';
+                
+                const targetTab = document.getElementById('tab-' + targetTabId);
+                if (targetTab) { targetTab.classList.add('active'); targetTab.style.display = 'block'; }
+                if(btnElement) btnElement.classList.add('active');
+
+                const floatBtn = document.querySelector('.btn-add-float');
+                const saveBtn = document.getElementById('btn-guardar-dinamico');
+                
+                if (targetTabId === 'editor') {
+                    if(floatBtn) floatBtn.style.display = 'block';
+                    if(saveBtn) saveBtn.style.display = 'block';
+                } else {
+                    if(floatBtn) floatBtn.style.display = 'none';
+                    if(saveBtn) saveBtn.style.display = 'none';
+                }
+
+                // NUEVO: guardamos el modo que estaba cargado ANTES de este cambio de pestaña,
+                // para poder saber más abajo si de verdad hace falta recargar el menú.
+                const modoAnterior = window.currentMode;
+
+                // MODIFICADO: Mapeo estricto a Abstract Keys
+                // CORREGIDO: "6. Menú Especial" es una pestaña común, independiente del
+                // restaurante activo del Editor normal -- antes SÍ entraba en este mapeo (caía
+                // en el "else"), así que cada vez que se entraba a Menú Especial se forzaba
+                // window.currentMode a 'restaurante001' aunque se viniera de US Open. Eso
+                // disparaba el bloque de "necesitaRecargar" de abajo (currentMode distinto del
+                // anterior) y volvía a descargar/reprocesar el CSV entero de RG para el Editor
+                // de carta -- trabajo pesado y completamente ajeno a esta pestaña, que carga sus
+                // propios datos por separado (ver MenuEspecial.init() más abajo). Por eso tardaba
+                // mucho más que el resto de pestañas y parecía quedarse colgada en "Cargando
+                // datos...". Ahora Menú Especial no toca window.currentMode en absoluto.
+                if (tabId === 'menu-especial') {
+                    // no-op: se deja window.currentMode tal cual estaba
+                } else if (tabId === 'sugerencias-usopen' || tabId === 'editor-usopen' || tabId === 'postres-usopen') {
+                    window.currentMode = 'restaurante002';
+                } else {
+                    // Editor dentro de la web (cartas): el resto de pestañas trabajan con SU restaurante.
+                    window.currentMode = (window.EDITOR_SITIO && window.EDITOR_SITIO.modo) || 'restaurante001';
+                }
+
+                actualizarTextoBotonGuardar();
+
+                const timerDiv = document.getElementById('optimistic-timer');
+                if (timerDiv) {
+                    if (window.optimisticTimers && window.optimisticTimers[window.currentMode]) {
+                        timerDiv.style.display = 'flex';
+                        const timerMode = document.getElementById('timer-mode');
+                        if(timerMode && typeof getModoAlias === 'function') timerMode.innerText = getModoAlias(window.currentMode);
+                    } else {
+                        timerDiv.style.display = 'none';
+                    }
+                }
+
+                // CORREGIDO: antes se llamaba a cargar() en CADA cambio de pestaña, aunque el
+                // restaurante siguiera siendo el mismo (p.ej. Editor Carta RG -> Sugerencias RG
+                // -> Traductor Pro son las tres restaurante001) — eso descargaba el CSV del
+                // menú entero (~2,7 MB) y volvía a consultar el estado de categorías en Apps
+                // Script cada vez, aunque los datos ya estuvieran en memoria y no hubieran
+                // cambiado. Ahora solo se recarga si el modo (RG/USOpen) cambia de verdad, o si
+                // todavía no hay datos cargados (primera vez, o la carga anterior falló). Para
+                // forzar una recarga manual desde Google Sheets sigue estando el botón de
+                // "Cargar desde Google Sheets" / "Sincronizar", que no ha cambiado.
+                // CORREGIDO: se excluye 'menu-especial' de este bloque -- ver el comentario de
+                // arriba, junto al mapeo de currentMode. Esta recarga es solo para el Editor de
+                // carta normal (RG/US Open); Menú Especial nunca la necesita.
+                if (tabId !== 'menu-especial') {
+                    const necesitaRecargar = (window.currentMode !== modoAnterior) ||
+                        !Array.isArray(window.datosLocales) || window.datosLocales.length === 0;
+                    if (necesitaRecargar && typeof window.cargar === 'function') {
+                        try { await window.cargar(); } catch (e) { console.error("[Editor] Error cargando datos:", e); }
+                    }
+                }
+
+                // MODIFICADO: Llamadas abstractas a renderCarta
+                if (tabId === 'sugerencias') {
+                    if (typeof window.renderCarta === 'function') window.renderCarta('restaurante001');
+                } else if (tabId === 'sugerencias-usopen') {
+                    if (typeof window.renderCarta === 'function') window.renderCarta('restaurante002');
+                } else if (tabId === 'postres') {
+                    if (typeof window.renderHojaPostres === 'function') window.renderHojaPostres('restaurante001');
+                } else if (tabId === 'postres-usopen') {
+                    if (typeof window.renderHojaPostres === 'function') window.renderHojaPostres('restaurante002');
+                } else if (tabId === 'qa') {
+                    if (window.UI && typeof window.UI.renderQA === 'function') window.UI.renderQA();
+                } else if (tabId === 'menu-especial') {
+                    // NUEVO: pestaña común RG/US Open — no depende de window.currentMode ni del
+                    // "necesitaRecargar" de arriba (ese solo mira window.datosLocales, que es del
+                    // editor de carta). MenuEspecial.init() se encarga de cargar (una sola vez,
+                    // con su propia caché) tanto la carta de RG como la de US Open en paralelo.
+                    if (window.MenuEspecial && typeof window.MenuEspecial.init === 'function') {
+                        try { await window.MenuEspecial.init(); } catch (e) { console.error('[MenuEspecial] Error al iniciar:', e); }
+                    }
+                }
+                
+                actualizarTextoBotonGuardar();
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
+        }
+
+        if (!window.currentMode) window.currentMode = 'restaurante001';
+        actualizarTextoBotonGuardar();
+
+        // NUEVO: comprueba si el restaurante indicado tiene alguna de sus pestañas visible
+        // según la configuración del usuario en "👁️ Pestañas" (initTabsVisibilityPanel, más
+        // arriba). Se usa para no descargar/precargar en segundo plano un restaurante que el
+        // usuario ni siquiera tiene mostrado (p.ej. si solo dejó visibles las pestañas de
+        // USOpen, RG no debería descargarse para nada).
+        function modoTieneTabsVisibles(modo) {
+            const ids = (modo === 'restaurante002')
+                ? ['tab-btn-usopen', 'tab-btn-sug-usopen', 'tab-btn-pos-usopen']
+                : ['tab-btn-rg', 'tab-btn-sug-rg', 'tab-btn-pos-rg'];
+            return ids.some(id => {
+                const btn = document.getElementById(id);
+                return btn && btn.style.display !== 'none';
+            });
+        }
+
+        // NUEVO: carga automática de la pestaña activa al abrir la web. Antes, nada disparaba
+        // la primera carga de datos hasta que el usuario hacía clic en una pestaña — aunque
+        // "1. Editor Carta RG" ya apareciera marcada como activa, su contenido se quedaba
+        // vacío y SIN ningún indicador de carga hasta ese primer clic. En una pestaña nueva
+        // del navegador (que no tiene la caché en memoria de otra pestaña ya abierta) eso
+        // podía tardar varios segundos y dar la sensación de que la web se había quedado
+        // colgada. Ahora se simula el clic que haría el usuario, reutilizando switchTab() tal
+        // cual — con su mismo overlay "Cargando datos..." — para que quede claro que está
+        // trabajando.
+        //
+        // CORREGIDO: antes esto apuntaba siempre a "tab-btn-rg" a pelo, sin mirar si esa
+        // pestaña estaba oculta por "👁️ Pestañas" — así que aunque el usuario solo tuviera
+        // visibles las pestañas de USOpen, RG se descargaba igualmente (y de paso se
+        // deshacía el cambio de pestaña que ya hacía initTabsVisibilityPanel más arriba).
+        // Ahora se calcula la pestaña inicial real a partir de cuál haya quedado activa (o,
+        // si esa ha quedado oculta, la primera pestaña visible), para no tocar ningún
+        // restaurante que el usuario no tenga mostrado.
+        let tabBtnInicial = document.querySelector('.tabs-container .tab-btn.active');
+        if (!tabBtnInicial || tabBtnInicial.style.display === 'none') {
+            tabBtnInicial = Array.from(document.querySelectorAll('.tabs-container .tab-btn'))
+                .find(btn => btn.style.display !== 'none');
+        }
+        if (tabBtnInicial) {
+            const MAPA_ID_A_TABID = {
+                'tab-btn-apikeys': 'apikeys',
+                'tab-btn-rg': 'editor',
+                'tab-btn-sug-rg': 'sugerencias',
+                'tab-btn-pro': 'pro',
+                'tab-btn-qa': 'qa',
+                'tab-btn-usopen': 'editor-usopen',
+                'tab-btn-sug-usopen': 'sugerencias-usopen',
+                'tab-btn-pos-rg': 'postres',
+                'tab-btn-pos-usopen': 'postres-usopen'
+            };
+            const tabIdInicial = MAPA_ID_A_TABID[tabBtnInicial.id] || 'editor';
+            switchTab(tabIdInicial, tabBtnInicial).then(() => {
+                // NUEVO: una vez cargada la pestaña inicial, se precarga en segundo plano el
+                // OTRO restaurante (ver precargarEnSegundoPlano en app.js) para que si luego
+                // cambias de pestaña ya esté listo al instante. No bloquea ni retrasa nada de
+                // lo que se ve en pantalla mientras tanto. Se puede desactivar con el checkbox
+                // "⚡ Precargar" de la cabecera (ver initPrecargaToggle más abajo).
+                //
+                // CORREGIDO: solo se precarga si ese otro restaurante tiene alguna pestaña
+                // visible — si el usuario solo usa USOpen (o solo RG), no tiene sentido
+                // descargar en segundo plano el que ni siquiera va a ver.
+                const otroModo = (window.currentMode === 'restaurante002') ? 'restaurante001' : 'restaurante002';
+                if (modoTieneTabsVisibles(otroModo) && typeof window.precargarEnSegundoPlano === 'function') {
+                    window.precargarEnSegundoPlano(otroModo);
+                }
+
+                // NUEVO: además del otro restaurante del Editor normal (arriba), precarga en
+                // segundo plano las cartas que necesita "6. Menú Especial" -- mismo patrón,
+                // misma caché compartida (cargarYCachearModo), así que no duplica ninguna
+                // descarga. Así, si el usuario acaba entrando en esa pestaña, los datos ya
+                // estarán listos sin overlay de carga ni nueva petición de red. Respeta el
+                // mismo checkbox "⚡ Precargar" (comprobado dentro de
+                // MenuEspecial.precargarEnSegundoPlano) y solo se lanza si esa pestaña está
+                // visible.
+                const btnMenuEspecial = document.getElementById('tab-btn-menu-especial');
+                if (btnMenuEspecial && btnMenuEspecial.style.display !== 'none' && window.MenuEspecial && typeof window.MenuEspecial.precargarEnSegundoPlano === 'function') {
+                    window.MenuEspecial.precargarEnSegundoPlano();
+                }
+            });
+        }
+
+        // NUEVO: checkbox "⚡ Precargar" de la cabecera — activa/desactiva la precarga en
+        // segundo plano del otro restaurante. La preferencia se recuerda en este navegador
+        // (localStorage), no en el servidor: cada dispositivo guarda la suya.
+        (function initPrecargaToggle() {
+            const chk = document.getElementById('chk-precarga-segundo-plano');
+            if (!chk) return;
+            try {
+                chk.checked = localStorage.getItem('precargaSegundoPlanoDesactivada') !== '1';
+            } catch (e) { /* si localStorage no está disponible, se queda activado por defecto */ }
+            chk.addEventListener('change', () => {
+                try {
+                    if (chk.checked) {
+                        localStorage.removeItem('precargaSegundoPlanoDesactivada');
+                        // Si se acaba de reactivar y el otro restaurante aún no está en
+                        // caché, se lanza la precarga ya mismo en vez de esperar a la
+                        // próxima vez que se cargue la página entera. CORREGIDO: solo si ese
+                        // otro restaurante tiene alguna pestaña visible (ver
+                        // modoTieneTabsVisibles más arriba).
+                        const modoContrario = (window.currentMode === 'restaurante002') ? 'restaurante001' : 'restaurante002';
+                        if (modoTieneTabsVisibles(modoContrario) && typeof window.precargarEnSegundoPlano === 'function') {
+                            window.precargarEnSegundoPlano(modoContrario);
+                        }
+                        // NUEVO: igual que arriba, relanza también la precarga de "Menú
+                        // Especial" al reactivar el checkbox.
+                        const btnMenuEspecialReact = document.getElementById('tab-btn-menu-especial');
+                        if (btnMenuEspecialReact && btnMenuEspecialReact.style.display !== 'none' && window.MenuEspecial && typeof window.MenuEspecial.precargarEnSegundoPlano === 'function') {
+                            window.MenuEspecial.precargarEnSegundoPlano();
+                        }
+                    } else {
+                        localStorage.setItem('precargaSegundoPlanoDesactivada', '1');
+                    }
+                } catch (e) { /* si localStorage no está disponible, el checkbox sigue funcionando en esta sesión */ }
+            });
+        })();
+
+        // NUEVO: muestra la versión general de la app (window.APP_VERSIONS.app, la que se
+        // incrementa en app.js con cada cambio significativo) junto al título, como
+        // "v.X.xx", para saber de un vistazo si el navegador tiene cargada la última versión.
+        // Se hace aquí (no antes) porque app.js — quien fija APP_VERSIONS.app — se carga
+        // después del bloque de cabecera.
+        const appVersionEl = document.getElementById('app-version');
+        if (appVersionEl && window.APP_VERSIONS && window.APP_VERSIONS.app) {
+            appVersionEl.innerText = `v.${window.APP_VERSIONS.app}`;
+        }
+
+        function updateDebugPanel() {
+            const vDiv = document.getElementById('debug-versions');
+            const sDiv = document.getElementById('debug-state');
+            if (!vDiv || !sDiv) return;
+
+            let vHtml = '';
+            if (window.APP_VERSIONS) {
+                for (const [key, val] of Object.entries(window.APP_VERSIONS)) {
+                    vHtml += `<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${key}: ${val}">${key}: <span style="color: #fbbf24;">${val}</span></div>`;
+                }
+            }
+            vDiv.innerHTML = vHtml;
+
+            const modoActual = window.currentMode || 'restaurante001';
+            const aliasActual = (typeof getModoAlias === 'function') ? getModoAlias(modoActual) : modoActual;
+            
+            let sHtml = `<div>Modo Activo: <span style="color: #60a5fa; font-weight: bold;">${aliasActual}</span></div><hr style="border-color: #334155; margin: 4px 0;">`;
+            
+            // MODIFICADO: Debug con Abstract Keys
+            ['restaurante001', 'restaurante002'].forEach(modo => {
+                const aliasModo = (typeof getModoAlias === 'function') ? getModoAlias(modo) : modo;
+                const state = window.optimisticState ? window.optimisticState[modo] : { t: 0, s: [] };
+                const timeSinceSave = Date.now() - state.t;
+                const isZone = timeSinceSave < CONSISTENCY_WINDOW_MS; 
+                const isActiveMode = (modo === modoActual);
+                
+                sHtml += `<div style="margin-bottom: 4px; color: ${isActiveMode ? '#f8fafc' : '#64748b'}; font-weight: ${isActiveMode ? 'bold' : 'normal'}">--- ${aliasModo} ---</div>`;
+                sHtml += `<div>Hace: <span style="color: ${timeSinceSave < 10000 ? '#4ade80' : '#f87171'}">${Math.round(timeSinceSave/1000)}s</span></div>`;
+                sHtml += `<div style="color: ${isZone ? '#f87171' : '#4ade80'}; font-weight: bold;">Zona Peligro: ${isZone ? '⛔ ACTIVA' : '✅ INACTIVA'}</div>`;
+                sHtml += `<div>Snapshot: <span style="color: #c084fc;">${state.s ? state.s.length : 0} items</span></div>`;
+            });
+
+            sHtml += `<hr style="border-color: #334155; margin: 4px 0;">`;
+            sHtml += `<div>Mem Local: <span style="color: #38bdf8;">${window.datosLocales ? window.datosLocales.length : 0} items</span></div>`;
+            sDiv.innerHTML = sHtml;
+        }
+
+        (function() {
+            const panel = document.getElementById('debug-panel');
+            if (!panel) return;
+            let isDragging = false, startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
+            panel.addEventListener('mousedown', function(e) {
+                isDragging = true; const rect = panel.getBoundingClientRect(); startX = e.clientX; startY = e.clientY; initialLeft = rect.left; initialTop = rect.top; panel.style.left = initialLeft + 'px'; panel.style.top = initialTop + 'px'; panel.style.bottom = 'auto'; panel.style.right = 'auto'; panel.style.cursor = 'grabbing'; e.preventDefault();
+            });
+            document.addEventListener('mousemove', function(e) { if (!isDragging) return; panel.style.left = (initialLeft + (e.clientX - startX)) + 'px'; panel.style.top = (initialTop + (e.clientY - startY)) + 'px'; });
+            document.addEventListener('mouseup', function() { if (!isDragging) return; isDragging = false; panel.style.cursor = 'grab'; });
+        })();
+
+        (function() {
+            const checkbox = document.getElementById('toggle-debug-panel');
+            const panel = document.getElementById('debug-panel');
+            if (checkbox && panel) { checkbox.addEventListener('change', function() { panel.style.display = this.checked ? 'block' : 'none'; }); }
+        })();
+
+        setInterval(updateDebugPanel, 1000);
+        updateDebugPanel();
+    </script>
+</body>
+</html>

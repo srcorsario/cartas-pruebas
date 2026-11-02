@@ -1,0 +1,1 @@
+window.EDITOR_SITIO = {"restaurante":"usopen","titulo":"US Open Menu","modo":"restaurante002","repo":"srcorsario/cartas-pruebas","ruta":"usopen/datos.json","entorno":"pruebas","claveToken":"editor.usopen.pruebas.token"};

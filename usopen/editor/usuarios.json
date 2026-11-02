@@ -1,0 +1,17 @@
+{
+    "formato":  1,
+    "iteraciones":  310000,
+    "secreto":  {
+                    "iv":  "Ee7LdDKE8fgRSTAExx5gYw==",
+                    "datos":  "wcx2tENcijI6f8NShNt+wDdzsdR1ZqhKK/WwUQMbWYOW0mTPRP188G4RxDgYvax9tNak1B5xxvtuxYwEJ67sVwvYrVQpdOdtMxuiJU0j6s6JyCODAiG9DqY7hAfXgQ4LjTy8Ek4IKrQskn+oy35zccueciGA4+QY929AWIvGwwlOp1MH+O2LCVo7T7qMwL+AUYKTYVAO7kwdAuomeGb8GO5sAtyl6rvYfSfp2YiaLNzpWSj3+UaO/KvWThuDlrBxqlZDZSARKixzO6K1yG/O7v4OhP6oiBAvCxyaQQnbCBAbLxtgYzlAH11CQ26zw/BfFWmM1ZGU7jesSrAEu0XzATEaIdxoXYGDakTPFOI5IbXJb0A7JrtLd+xzPRL+OKPwMreJizjPEJpeWpGpShqxHhSz+nz4+BaJA2/0oJ5LAlYIGA9qAkszNC5BFL3T6Gqui8eaw5S40qhfGiEPDBevP3xcWjWq47ai5vb0rYoX0OaZYBBFTPJjLMjl3Jh4kb64leRBTXCUPZtQt0PuY5tbJmzgpp1WAJc43YnX9PMjwVKyVCZ2bi2xnu0vGgITtQlHOlBSAevLquHl4lri4cF5jHo2JXfqNEXfIWOQ3eBoNOd+lY8YpXIvmxFj+PZhxvWBapSemO9J8opNbzVkHpt/PbYjKWHXXR6lemAHiTwfYajoYtA67kZcmhuSvx5li3RHvUKxLAS7RI+TMgEiqwhKu1HqxymlMeGrelA24d5vv4vf6uSXzBEvLDBGbSP1ewUA5vOtdz9xIcHr/N0hMhwfj1I6mnO2DMCYZcvb934GBRj/RWh14DmQBGWorjLHBXXx1lnMjrmlI1nzpjzkHYRScm7Q/FjDFPh+WmqvxRwjMTzmbSC2woKMm1Vns0d9Cs4a1/THsrb6XOAykrU0JPytau/Fo/IImx8aSg/QtNh6CVtVrgHjsmbf5hdV8g2AHbGL",
+                    "mac":  "15iFSc/bEAFZybNAr+WZeHiSGwq9iG7OBFGIuOX+XCk="
+                },
+    "usuarios":  {
+                     "usopenadmin":  {
+                                         "sal":  "1pcD2+NV74LqmqLfBmmtaQ==",
+                                         "iv":  "DlsU9ZsCVJxOtYo9EGwNHg==",
+                                         "datos":  "7GFzjVwGJsSyaafw582R7P5gWgtMG1d6vV/V3S6rWGmQxthxLzKEK8jXpL65bry1URx/JFjH9IupfKkqgj35HPdH6ekDYeBKrtNeC8vs/y0=",
+                                         "mac":  "BJyKxQ8OIfhmKk/QRCgG9krGzfvBgusCZqCecx/2Hqw="
+                                     }
+                 }
+}
