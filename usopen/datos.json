@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T09:00:25.557Z",
+  "guardado": "2026-11-03T09:45:50.163Z",
   "ocultas": ["pizzas"],
   "platos": [
     {
@@ -5686,6 +5686,40 @@
             "HASH_FICHA": "52848320",
             "HASH_NOMBRE": "6bb06c6b"
         }
+    },
+    {
+        "id": "12110", "activa": "si", "precio": "1.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "calamar_a_la_andaluza01.webp",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Calamar a la Andaluza",
+            "EN": "Calamar a la Andaluza, lightly floured and deep-fried squid",
+            "DE": "Calamar a la Andaluza, leicht melierter und frittierter Tintenfisch",
+            "FR": "Calamar a la Andaluza, encornet légèrement enfariné et frit",
+            "IT": "Calamar a la Andaluza, calamaro leggermente infarinato e fritto",
+            "RU": "Calamar a la Andaluza, кальмар, слегка обвалянный в муке и обжаренный во фритюре",
+            "NL": "Calamar a la Andaluza, licht bebloemde en gefrituurde inktvis",
+            "PL": "Calamar a la Andaluza, lekko oprószone mąką i smażone w głębokim tłuszczu kalmary",
+            "SV": "Calamar a la Andaluza, lätt mjölad och friterad bläckfisk",
+            "NO": "Calamar a la Andaluza, lett melet og frityrstekt blekksprut",
+            "DA": "Calamar a la Andaluza, let melet og friturestegt blæksprutte",
+            "FI": "Calamar a la Andaluza, kevyesti jauhotettu ja uppopaistettu mustekala",
+            "PT": "Calamar a la Andaluza, lula levemente enfarinhada e frita",
+            "RO": "Calamar a la Andaluza, calamar ușor trecut prin făină și prăjit în baie de ulei",
+            "HU": "Calamar a la Andaluza, enyhén lisztezett és bő olajban sült tintahal",
+            "CS": "Calamar a la Andaluza, lehce obalený v mouce a smažený kalamár",
+            "EL": "Calamar a la Andaluza, ελαφρώς αλευρωμένο και τηγανητό καλαμάρι",
+            "TR": "Calamar a la Andaluza, hafifçe unlanmış ve derin yağda kızartılmış kalamar",
+            "AR": "Calamar a la Andaluza، حبار مغطى بطبقة خفيفة من الطحين ومقلي عميقاً",
+            "ZH": "Calamar a la Andaluza，裹薄面粉炸鱿鱼",
+            "JA": "Calamar a la Andaluza、軽く粉をまぶして揚げたイカ",
+            "CA": "Calamar a l'Andalusa, calamar lleugerament enfarinat i fregit",
+            "EU": "Calamar a la Andaluza, irineztatutako txipiroi frijitu arina",
+            "GL": "Calamar á andaluza, calamar lixeiramente fariñado e frixido",
+            "VA": "Calamar a l'Andalusa, calamar lleugerament enfarinat i fregit",
+            "KO": "Calamar a la Andaluza, 얇게 밀가루를 묻혀 바삭하게 튀긴 오징어"
+        },
+        "info": {}
     },
     {
         "id": "12201", "activa": "no", "precio": "16.50", "precioMedia": "",
