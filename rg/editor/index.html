@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow">
-    <script src="sitio-editor.js?v=b4a482d6"></script>
-    <script src="categorias.js?v=b4a482d6"></script>
-    <script src="acceso.js?v=b4a482d6"></script>
-    <script src="subir-foto.js?v=b4a482d6"></script>
-    <script src="editor-web.js?v=b4a482d6"></script>
-    <script src="mapa-ids.js?v=b4a482d6"></script>
+    <script src="sitio-editor.js?v=fc7cb408"></script>
+    <script src="categorias.js?v=fc7cb408"></script>
+    <script src="acceso.js?v=fc7cb408"></script>
+    <script src="subir-foto.js?v=fc7cb408"></script>
+    <script src="editor-web.js?v=fc7cb408"></script>
+    <script src="mapa-ids.js?v=fc7cb408"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Editor Pro</title>
     <link rel="icon" href="setting.png" type="image/png">
@@ -25,7 +25,7 @@
         // todo el JS/CSS de golpe en cada visita.
         // OJO: esto NO afecta a los datos del menu (platos/precios) — esos se piden
         // siempre en fresco con cache:"no-store" en app.js, y eso no cambia.
-        window.__CACHE_BUST__ = '2026.11.03.1-b4a482d6';
+        window.__CACHE_BUST__ = '2026.11.03.3-fc7cb408';
     </script>
     <script>document.write('<link rel="stylesheet" href="styles.css?v=' + window.__CACHE_BUST__ + '">');</script>
 </head>
@@ -60,20 +60,20 @@
         </div>
 
         <div class="tabs-container" id="tabs-container">
+            <!-- 3 nov: mismo orden en todos los editores: 0 API · 1 Editor · 2 Sugerencias · 2.1 Postres ·
+                 3 Traductor · 3.1 Preguntas · 4 Menú Especial. Cada web enseña solo su restaurante. -->
             <button id="tab-btn-apikeys" class="tab-btn" onclick="switchTab('apikeys', this)">0. Gestión de API Keys Gemini</button>
             <button id="tab-btn-rg" class="tab-btn active" onclick="switchTab('editor', this)">1. Editor Carta RG</button>
+            <button id="tab-btn-usopen" class="tab-btn" onclick="switchTab('editor-usopen', this)">1. Editor Carta USOpen</button>
             <button id="tab-btn-sug-rg" class="tab-btn" onclick="switchTab('sugerencias', this)">2. Sugerencias RG</button>
-            <!-- NUEVO (30 oct): hojas imprimibles de Postres (rango 16000-16299, no salen en la web pública) -->
+            <button id="tab-btn-sug-usopen" class="tab-btn" onclick="switchTab('sugerencias-usopen', this)">2. Sugerencias USOpen</button>
+            <!-- Hojas imprimibles de Postres (rango 16000-16299, no salen en la web pública) -->
             <button id="tab-btn-pos-rg" class="tab-btn" onclick="switchTab('postres', this)">2.1. Postres RG</button>
-            <button id="tab-btn-pro" class="tab-btn" onclick="switchTab('pro', this)" style="margin-left: auto; margin-right: auto;">3. Traductor Pro</button>
+            <button id="tab-btn-pos-usopen" class="tab-btn" onclick="switchTab('postres-usopen', this)">2.1. Postres USOpen</button>
+            <button id="tab-btn-pro" class="tab-btn" onclick="switchTab('pro', this)">3. Traductor Pro</button>
             <button id="tab-btn-qa" class="tab-btn" onclick="switchTab('qa', this)">3.1. Preguntas y respuestas</button>
-            <button id="tab-btn-usopen" class="tab-btn" onclick="switchTab('editor-usopen', this)">4. Editor Carta USOpen</button>
-            <button id="tab-btn-sug-usopen" class="tab-btn" onclick="switchTab('sugerencias-usopen', this)">5. Sugerencias USOpen</button>
-            <button id="tab-btn-pos-usopen" class="tab-btn" onclick="switchTab('postres-usopen', this)">5.1. Postres USOpen</button>
-            <!-- NUEVO: pestaña común a los dos restaurantes (no la oculta el sistema de
-                 Enable/Disable de RESTAURANTES_CONFIG ni depende de window.currentMode) — un
-                 menú especial puede mezclar platos de RG y de US Open en la misma plantilla. -->
-            <button id="tab-btn-menu-especial" class="tab-btn" onclick="switchTab('menu-especial', this)">6. Menú Especial</button>
+            <!-- Pestaña común a los dos restaurantes (no la oculta el Enable/Disable de RESTAURANTES_CONFIG). -->
+            <button id="tab-btn-menu-especial" class="tab-btn" onclick="switchTab('menu-especial', this)">4. Menú Especial</button>
         </div>
 
         <div id="tab-apikeys" class="tab-content" style="display: none;">
@@ -400,13 +400,13 @@
             const tabSugRG = document.getElementById('tab-btn-sug-rg');
             if (tabSugRG) tabSugRG.innerText = `2. Sugerencias ${getModoAlias('restaurante001')}`;
             const tabUSOPEN = document.getElementById('tab-btn-usopen');
-            if (tabUSOPEN) tabUSOPEN.innerText = `4. Editor Carta ${getModoAlias('restaurante002')}`;
+            if (tabUSOPEN) tabUSOPEN.innerText = `1. Editor Carta ${getModoAlias('restaurante002')}`;
             const tabSugUSOPEN = document.getElementById('tab-btn-sug-usopen');
-            if (tabSugUSOPEN) tabSugUSOPEN.innerText = `5. Sugerencias ${getModoAlias('restaurante002')}`;
+            if (tabSugUSOPEN) tabSugUSOPEN.innerText = `2. Sugerencias ${getModoAlias('restaurante002')}`;
             const tabPosRG = document.getElementById('tab-btn-pos-rg');
             if (tabPosRG) tabPosRG.innerText = `2.1. Postres ${getModoAlias('restaurante001')}`;
             const tabPosUSOPEN = document.getElementById('tab-btn-pos-usopen');
-            if (tabPosUSOPEN) tabPosUSOPEN.innerText = `5.1. Postres ${getModoAlias('restaurante002')}`;
+            if (tabPosUSOPEN) tabPosUSOPEN.innerText = `2.1. Postres ${getModoAlias('restaurante002')}`;
 
             const modalDestRG = document.getElementById('modal-dest-rg');
             if (modalDestRG) modalDestRG.innerText = getModoAlias('restaurante001');
