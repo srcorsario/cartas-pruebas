@@ -16,7 +16,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.mapaIds = '1.0.0'; // 3 nov: Fase 2 del organizador — mapa de solo lectura
+    window.APP_VERSIONS.mapaIds = '1.0.1'; // 3 nov: ocupa todo el ancho y letra más grande. 1.0.0: Fase 2 del organizador — mapa de solo lectura
 
     var $ = function (id) { return document.getElementById(id); };
     var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -92,7 +92,7 @@
     // ---------- dibujo ----------
     // Barra de un rango: una celda por ID (canvas). Fondo de subcategorías alterno.
     function dibujarBarra(cv, d, h, a, subs, zonas) {
-        var cap = h - d + 1, w = cv.clientWidth || 600, hgt = 22, dpr = window.devicePixelRatio || 1;
+        var cap = h - d + 1, w = cv.clientWidth || 600, hgt = 34, dpr = window.devicePixelRatio || 1;
         cv.width = w * dpr; cv.height = hgt * dpr;
         var g = cv.getContext('2d'); g.scale(dpr, dpr);
         var px = w / cap, x = function (i) { return (i - d) * px; };
@@ -123,12 +123,12 @@
 
     function barraPct(oc, cap) {
         var pc = cap ? Math.round(oc * 100 / cap) : 0, col = pc >= 90 ? '#e74c3c' : pc >= 70 ? '#f39c12' : '#27ae60';
-        return '<span style="display:inline-block; width:60px; height:8px; background:#eef2f7; border-radius:4px; vertical-align:middle; overflow:hidden;"><span style="display:block; height:100%; width:' + Math.min(pc, 100) + '%; background:' + col + ';"></span></span> <small style="color:#64748b;">' + pc + '%</small>';
+        return '<span style="display:inline-block; width:90px; height:10px; background:#eef2f7; border-radius:4px; vertical-align:middle; overflow:hidden;"><span style="display:block; height:100%; width:' + Math.min(pc, 100) + '%; background:' + col + ';"></span></span> <small style="color:#64748b;">' + pc + '%</small>';
     }
     function etiquetaTipo(c) {
         var t = { sugerencias: 'Sugerencias', vino: 'Vino' + (c.vino ? ' (' + c.vino + ')' : ''), bebida: 'Bebida', alergenos: 'Alérgenos', 'hoja-postres': 'Hoja postres',
             croquetas: 'Croquetas', 'croquetas-veg': 'Croquetas veg.', copas: 'Copas', postres: 'Postres', helados: 'Helados', bebidas: 'Bebidas' }[c.tipo];
-        return t ? ' <span style="font-size:.7rem; background:#eef2ff; color:#4338ca; border-radius:10px; padding:1px 7px;">' + t + '</span>' : '';
+        return t ? ' <span style="font-size:.78em; background:#eef2ff; color:#4338ca; border-radius:10px; padding:1px 7px;">' + t + '</span>' : '';
     }
     function numeros(c) {
         return '<span style="color:#334155;">' + c.c.ocupados + ' / ' + c.cap + '</span> · <span style="color:#27ae60;">' + c.c.activos + ' activos</span>' +
@@ -141,36 +141,36 @@
         var av = a.avisos.length ? a.avisos.map(function (x) {
             return '<li style="margin:3px 0; color:' + (x.t === 'mal' ? '#b91c1c' : '#92400e') + ';">' + (x.t === 'mal' ? '⛔ ' : '⚠️ ') + esc(x.txt) + '</li>';
         }).join('') : '<li style="color:#15803d;">✔ Sin problemas: ningún plato fuera de su categoría y ningún rango se pisa.</li>';
-        var huecos = a.huecos.length ? a.huecos.map(function (h) { return '<span style="display:inline-block; margin:2px 4px 2px 0; padding:2px 8px; border:1px dashed #94a3b8; border-radius:6px; font-size:.78rem;">' + h[0] + '–' + h[1] + ' <small style="color:#64748b;">(' + (h[1] - h[0] + 1) + ')</small></span>'; }).join('') : '<small style="color:#64748b;">ninguno</small>';
+        var huecos = a.huecos.length ? a.huecos.map(function (h) { return '<span style="display:inline-block; margin:2px 4px 2px 0; padding:2px 8px; border:1px dashed #94a3b8; border-radius:6px; font-size:.78em;">' + h[0] + '–' + h[1] + ' <small style="color:#64748b;">(' + (h[1] - h[0] + 1) + ')</small></span>'; }).join('') : '<small style="color:#64748b;">ninguno</small>';
         var filas = a.cats.filter(function (c) {
             if (!f) return true;
             return (c.nombre + ' ' + c.subs.map(function (s) { return s.nombre; }).join(' ') + ' ' + c.desde + ' ' + c.hasta).toLowerCase().indexOf(f) >= 0;
         }).map(function (c) {
             var subs = c.subs.map(function (s) {
-                return '<div style="display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; font-size:.78rem; padding:2px 0 2px 14px; border-left:2px solid #e2e8f0;">' +
-                    '<span style="min-width:150px;"><b>' + esc(s.nombre) + '</b>' + etiquetaTipo(s) + '</span>' +
+                return '<div style="display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; font-size:.92em; padding:3px 0 3px 14px; border-left:2px solid #e2e8f0;">' +
+                    '<span style="min-width:220px;"><b>' + esc(s.nombre) + '</b>' + etiquetaTipo(s) + '</span>' +
                     '<span style="font-family:monospace; color:#475569;">' + s.desde + '–' + s.hasta + '</span>' + numeros(s) + '</div>';
             }).join('');
-            if (c.libreSub) subs += '<div style="font-size:.75rem; color:#92400e; padding:2px 0 2px 14px; border-left:2px solid #fde68a;">▨ Sin subcategoría: ' +
+            if (c.libreSub) subs += '<div style="font-size:.88em; color:#92400e; padding:2px 0 2px 14px; border-left:2px solid #fde68a;">▨ Sin subcategoría: ' +
                 c.zonasSinSub.map(function (z) { return z[0] + '–' + z[1]; }).join(', ') + ' (' + c.libreSub + ' ID)' + (c.sinSub.length ? ' — con ' + c.sinSub.length + ' plato(s) dentro' : '') + '</div>';
             return '<div class="mi-cat" style="border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; margin-bottom:8px;">' +
                 '<div style="display:flex; flex-wrap:wrap; gap:4px 12px; align-items:baseline; margin-bottom:5px;">' +
-                '<b style="font-size:.95rem;">' + esc(c.nombre) + '</b>' + etiquetaTipo(c) +
+                '<b style="font-size:1.1em;">' + esc(c.nombre) + '</b>' + etiquetaTipo(c) +
                 '<span style="font-family:monospace; color:#475569;">' + c.desde + '–' + c.hasta + '</span>' +
                 (c.pestana == null ? '<small style="color:#94a3b8;">sin pestaña en la web</small>' : '') +
                 (c.sinPlatos ? '<small style="color:#94a3b8;">(sin platos)</small>' : '') +
-                '<span style="font-size:.8rem;">' + numeros(c) + '</span></div>' +
-                '<canvas data-cat="' + c.n + '" style="display:block; width:100%; height:22px; cursor:crosshair;"></canvas>' +
+                '<span style="font-size:.95em;">' + numeros(c) + '</span></div>' +
+                '<canvas data-cat="' + c.n + '" style="display:block; width:100%; height:34px; cursor:crosshair;"></canvas>' +
                 (subs ? '<div style="margin-top:6px;">' + subs + '</div>' : '') + '</div>';
         }).join('');
-        return '<div style="display:flex; flex-wrap:wrap; gap:6px 16px; font-size:.8rem; color:#475569; margin-bottom:10px;">' +
+        return '<div style="display:flex; flex-wrap:wrap; gap:6px 16px; font-size:.9em; color:#475569; margin-bottom:10px;">' +
             '<span><b>' + a.total + '</b> platos · <b>' + a.cats.length + '</b> categorías · ' + a.tot.oc + ' de ' + a.tot.cap + ' ID usados</span>' +
             '<span><i style="display:inline-block;width:10px;height:10px;background:' + COL.activo + ';"></i> activo</span>' +
             '<span><i style="display:inline-block;width:10px;height:10px;background:' + COL.inactivo + ';"></i> inactivo</span>' +
             '<span><i style="display:inline-block;width:10px;height:10px;border:1px solid #cbd5e1;"></i> libre</span>' +
             '<span><i style="display:inline-block;width:10px;height:10px;background:#fff7d6;border:1px solid ' + COL.sinSub + ';"></i> sin subcategoría</span>' +
             '<span>| línea gris = empieza subcategoría</span></div>' +
-            '<details open style="margin-bottom:10px;"><summary style="cursor:pointer; font-weight:600;">Avisos (' + a.avisos.length + ')</summary><ul style="margin:6px 0 0; padding-left:18px; font-size:.82rem;">' + av + '</ul></details>' +
+            '<details open style="margin-bottom:10px;"><summary style="cursor:pointer; font-weight:600;">Avisos (' + a.avisos.length + ')</summary><ul style="margin:6px 0 0; padding-left:18px; font-size:.82em;">' + av + '</ul></details>' +
             '<details style="margin-bottom:12px;"><summary style="cursor:pointer; font-weight:600;">Huecos sin categoría entre categorías (' + a.huecos.length + ')</summary><div style="margin-top:6px;">' + huecos + '</div></details>' +
             (filas || '<p style="color:#64748b;">Ninguna categoría coincide.</p>');
     }
@@ -178,7 +178,7 @@
     // ---------- ventana ----------
     var tip = null;
     function tooltip(txt, ev) {
-        if (!tip) { tip = document.createElement('div'); tip.style.cssText = 'position:fixed; z-index:10002; background:#0f172a; color:#fff; font-size:.75rem; padding:4px 8px; border-radius:5px; pointer-events:none; max-width:320px;'; document.body.appendChild(tip); }
+        if (!tip) { tip = document.createElement('div'); tip.style.cssText = 'position:fixed; z-index:10002; background:#0f172a; color:#fff; font-size:14px; padding:4px 8px; border-radius:5px; pointer-events:none; max-width:320px;'; document.body.appendChild(tip); }
         if (!txt) { tip.style.display = 'none'; return; }
         tip.innerHTML = txt; tip.style.display = 'block';
         tip.style.left = Math.min(ev.clientX + 12, window.innerWidth - 330) + 'px'; tip.style.top = (ev.clientY + 14) + 'px';
@@ -190,11 +190,11 @@
         var viejo = $('ew-mapa'); if (viejo) viejo.remove();
         var fondo = document.createElement('div');
         fondo.id = 'ew-mapa';
-        fondo.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:10000; display:flex; align-items:center; justify-content:center; padding:12px;';
-        fondo.innerHTML = '<div style="background:#fff; border-radius:12px; width:100%; max-width:980px; max-height:94vh; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,.25);">' +
+        fondo.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:10000; display:flex; align-items:center; justify-content:center; padding:1vh 1vw;';
+        fondo.innerHTML = '<div style="background:#fff; border-radius:12px; width:98vw; max-width:none; height:96vh; max-height:96vh; font-size:16px; line-height:1.4; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,.25);">' +
             '<div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:14px 18px 10px; border-bottom:1px solid #eef2f7;">' +
-            '<h3 style="margin:0; font-size:1.1rem; flex:1 1 auto;">🗺️ Mapa de categorías y rangos de ID <small style="font-weight:400; color:#94a3b8;">(solo consulta)</small></h3>' +
-            '<input id="ew-mapa-filtro" type="search" placeholder="Buscar categoría o número…" style="padding:5px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:.85rem; width:220px; max-width:100%;">' +
+            '<h3 style="margin:0; font-size:1.3em; flex:1 1 auto;">🗺️ Mapa de categorías y rangos de ID <small style="font-weight:400; color:#94a3b8;">(solo consulta)</small></h3>' +
+            '<input id="ew-mapa-filtro" type="search" placeholder="Buscar categoría o número…" style="padding:5px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:.85em; width:300px; max-width:100%;">' +
             '<button type="button" id="ew-mapa-cerrar" style="padding:6px 12px; border-radius:6px; border:1px solid #cbd5e1; background:#f1f5f9; cursor:pointer;">Cerrar</button></div>' +
             '<div id="ew-mapa-cuerpo" style="overflow:auto; padding:12px 18px 16px;"></div></div>';
         document.body.appendChild(fondo);
