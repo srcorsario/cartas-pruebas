@@ -20,6 +20,9 @@
  * que ahora también atraparía la Hoja de Postres (16000-16299) y la trataría como vino.
  */
 function esIdVino(id) {
+    // 3 nov: categorías con "tipo":"vino" de datos.json (categorias.js); si no hay, el rango fijo.
+    const r = window.Categorias ? window.Categorias.esVino(id) : null;
+    if (r !== null) return r;
     const n = parseInt(id, 10);
     return n >= 13000 && n < 15000;
 }

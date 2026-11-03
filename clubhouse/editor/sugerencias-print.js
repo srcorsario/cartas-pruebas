@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v2.9.6-Abstract-Keys',
+            versionStr: 'v2.9.7-Abstract-Keys',
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -27,7 +27,7 @@
             ]
         },
         restaurante002: {
-            versionStr: 'v2.9.6-Abstract-Keys',
+            versionStr: 'v2.9.7-Abstract-Keys',
             versionKey: 'sugerencias_restaurante002',
             containerId: 'sugerencias-contenido-usopen',
             logoSrc: LOGO_RESTAURANTE002,
@@ -768,13 +768,17 @@
         let intentos = 0; const MAX_INTENTOS = 10;
         function intentarRenderizado() {
             let fuente = window.datosLocales || [];
-            const tieneDatosEnRango = fuente.some(p => p && p.activa && parseInt(p.id, 10) >= 12000 && parseInt(p.id, 10) <= 12999);
+            const tieneDatosEnRango = fuente.some(p => p && p.activa && enSugerencias(p.id));
             if (tieneDatosEnRango) procesarYRender(fuente, contenedor, config, modo);
             else if (intentos < MAX_INTENTOS) { intentos++; setTimeout(intentarRenderizado, 500); }
             else contenedor.innerHTML = `<div class="p-4 text-center text-slate-500 italic">Esperando origen de datos...</div>`;
         }
         intentarRenderizado();
     };
+
+    // 3 nov: rango de Sugerencias desde datos.json (categorias.js); si no hay, el fijo.
+    const rangoSug = () => (window.Categorias && window.Categorias.rangoSugerencias()) || [12000, 12999];
+    const enSugerencias = (id) => { const n = parseInt(id, 10), r = rangoSug(); return n >= r[0] && n <= r[1]; };
 
     function aplicarParcheOptimista(fuente, modo) {
         const state = window.optimisticState ? window.optimisticState[modo] : { t: 0, s: [] };
@@ -792,7 +796,7 @@
         // NUEVO: los platos que la persona haya quitado a mano de ESTA hoja (ver
         // window.quitarPlatoSugerencia) se excluyen aquí — es independiente de "activa" (el plato
         // sigue en el resto de la carta con normalidad, solo se omite en esta hoja de Sugerencias).
-        const todosLosPlatos = fuente.filter(p => p && p.activa && parseInt(p.id, 10) >= 12000 && parseInt(p.id, 10) <= 12999);
+        const todosLosPlatos = fuente.filter(p => p && p.activa && enSugerencias(p.id));
         const platos = todosLosPlatos.filter(p => !excluidos.has(parseInt(p.id, 10)));
         let entrantes = [], principales = [], postres = [], vinos = [];
         platos.forEach(p => { const id = parseInt(p.id, 10); if (id === 12990) vinos.push(p); else if (id >= 12100 && id <= 12399) entrantes.push(p); else if (id >= 12400 && id <= 12899) principales.push(p); else if (id >= 12900 && id <= 12999) postres.push(p); else entrantes.push(p); });

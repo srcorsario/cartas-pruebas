@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '2.22.0'; // NUEVO (3 nov, 5): antes de traducir del español (Generar opciones en inglés) pide revisar los alérgenos (la Info se genera con ellos). 2.21.0: NUEVO (3 nov, 4): la Info ES/EN se adelanta EN SEGUNDO PLANO en cuanto se elige el inglés (y al pulsar traducir al resto), en paralelo con la traducción; al pulsar "Generar Info y Aplicar" se reutiliza si el nombre/alérgenos no han cambiado (o se espera a que termine). 2.20.0: NUEVO (3 nov, 3): traducciones con el mismo aviso que la Info (tenis + contador + nota según nº de idiomas) y botón Cancelar en ambos; si Gemini está saturado (503/429) se reintenta solo (varias rondas con espera) en vez de dar error; casillas en la lista para eliminar varios platos a la vez. 2.19.0: NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
+window.APP_VERSIONS.app = '2.23.0'; // 3 nov (6): croquetas e imagen inicial del plato según la estructura de datos.json (categorias.js). 2.22.0: // NUEVO (3 nov, 5): antes de traducir del español (Generar opciones en inglés) pide revisar los alérgenos (la Info se genera con ellos). 2.21.0: NUEVO (3 nov, 4): la Info ES/EN se adelanta EN SEGUNDO PLANO en cuanto se elige el inglés (y al pulsar traducir al resto), en paralelo con la traducción; al pulsar "Generar Info y Aplicar" se reutiliza si el nombre/alérgenos no han cambiado (o se espera a que termine). 2.20.0: NUEVO (3 nov, 3): traducciones con el mismo aviso que la Info (tenis + contador + nota según nº de idiomas) y botón Cancelar en ambos; si Gemini está saturado (503/429) se reintenta solo (varias rondas con espera) en vez de dar error; casillas en la lista para eliminar varios platos a la vez. 2.19.0: NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
 
 console.group("%c[Editor] Inicializando sistema de control...", "color: orange; font-weight: bold;");
 
@@ -889,8 +889,24 @@ function moverPlato(id, direccion) {
 // el chequeo de currentMode en los 4 sitios que lo necesitan (abrirEditor,
 // actualizarNombreCroquetas, prepararNuevoPlato).
 function esRangoCroquetasRG(id) {
+    // 3 nov: subcategorías "croquetas"/"croquetas-veg" de datos.json (categorias.js); si no hay, lo de siempre.
+    const r = window.Categorias ? window.Categorias.esCroqueta(id) : null;
+    if (r !== null) return r;
     const modo = window.currentMode || 'restaurante001';
     return modo === 'restaurante001' && id >= 12100 && id <= 12299;
+}
+function esCroquetaVegId(id) {
+    const r = window.Categorias ? window.Categorias.esCroquetaVeg(id) : null;
+    if (r !== null) return r;
+    return esRangoCroquetasRG(id) && id >= 12200;
+}
+// Foto que se pone sola al crear un plato en esa subcategoría ("imagen" en datos.json).
+function imagenInicialDeId(baseId) {
+    const r = window.Categorias ? window.Categorias.imagenInicial(baseId) : null;
+    if (r !== null) return r;
+    if (esRangoCroquetasRG(baseId) && baseId >= 12200) return "croquetasvegetarianas01.webp";
+    if (esRangoCroquetasRG(baseId) && baseId <= 12199) return "croquetas01.webp";
+    return '';
 }
 
 function abrirEditor(id, esNuevo = false) {
@@ -901,7 +917,7 @@ function abrirEditor(id, esNuevo = false) {
     platoEditandoId = id;
     const esVino = esIdVino(id); // MODIFICADO (30 oct)
     const esCroqueta = esRangoCroquetasRG(id);
-    const esCroquetaVeg = esCroqueta && id >= 12200;
+    const esCroquetaVeg = esCroqueta && esCroquetaVegId(id);
     
     // MODIFICADO: el campo de "detalle" (antes solo visible para vinos, la variedad de uva)
     // ahora se muestra también en platos normales — es la "segunda línea" de siempre, pero
@@ -1149,7 +1165,7 @@ function renderIngredientesPlato() {
 function actualizarNombreCroquetas() {
     // CORREGIDO: mismo problema que en abrirEditor() — sin el chequeo de currentMode dentro de
     // esRangoCroquetasRG(), esto se disparaba también para IDs de Entrantes/Ensaladas en US Open.
-    const esCroquetaVeg = esRangoCroquetasRG(platoEditandoId) && platoEditandoId >= 12200;
+    const esCroquetaVeg = esRangoCroquetasRG(platoEditandoId) && esCroquetaVegId(platoEditandoId);
     const seleccionadas = Array.from(document.querySelectorAll('.croqueta-btn.selected')).map(el => el.innerText.trim()); 
     
     if (seleccionadas.length === 0) { 
@@ -2059,8 +2075,8 @@ function prepararNuevoPlato(baseId, folder) {
     // CORREGIDO: mismo problema que en abrirEditor() — antes precargaba la imagen de croquetas
     // para cualquier ID 12100-12299 sin importar el restaurante, así que un plato nuevo en
     // Entrantes/Ensaladas de US Open salía con la foto de croquetas puesta por defecto.
-    if (esRangoCroquetasRG(baseId) && baseId >= 12200) datosTempNuevo.imagen = "croquetasvegetarianas01.webp";
-    else if (esRangoCroquetasRG(baseId) && baseId <= 12199) datosTempNuevo.imagen = "croquetas01.webp";
+    const imagenInicial = imagenInicialDeId(baseId); // 3 nov: sale de datos.json ("imagen" de la subcategoría)
+    if (imagenInicial) datosTempNuevo.imagen = imagenInicial;
     
     if (window.IDIOMAS_ORDEN) { 
         window.IDIOMAS_ORDEN.forEach(l => { datosTempNuevo[l] = ""; }); 

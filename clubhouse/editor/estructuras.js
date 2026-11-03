@@ -1,6 +1,6 @@
 // --- estructuras.js ---
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.estructuras = '4.0.0-clubhouse'; // REESCRITO para Club House: rangos de ID reales de esta carta (ver conversación con el usuario), ya no son los de RG
+window.APP_VERSIONS.estructuras = '4.1.0-clubhouse'; // 3 nov: dentro de la web la estructura sale de datos.json ("estructura", ver categorias.js); estas constantes quedan solo de reserva y como origen de la semilla. Anterior '4.0.0-clubhouse': // REESCRITO para Club House: rangos de ID reales de esta carta (ver conversación con el usuario), ya no son los de RG
 
 // =================================================================================
 // CARTA 01 - CLUB HOUSE (restaurante001)
@@ -202,6 +202,9 @@ window.ESTRUCTURA_RESTAURANTE001 = ESTRUCTURA_RESTAURANTE001;
 window.ESTRUCTURA_RESTAURANTE002 = ESTRUCTURA_RESTAURANTE002;
 
 function getEstructuraActual() {
+    // NUEVO (3 nov): la de datos.json si la hay (editor dentro de la web).
+    const deDatos = window.Categorias && window.Categorias.estructuraEditor();
+    if (deDatos) return deDatos;
     const modo = window.currentMode || 'restaurante001';
     return (modo === 'restaurante002') ? window.ESTRUCTURA_RESTAURANTE002 : window.ESTRUCTURA_RESTAURANTE001;
 }
