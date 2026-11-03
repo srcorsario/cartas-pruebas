@@ -1,4 +1,4 @@
-{"ocultas":["pizzas","sugerencias"],"platos":[
+{"ocultas":["pizzas"],"platos":[
 {"id":"1","activa":"no","precio":"0.00","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"fc021d8e98ee"},
 {"id":"2","activa":"no","precio":"0.00","precioMedia":"","carpeta":"ensaladas","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"777a1818f9b1"},
 {"id":"3","activa":"no","precio":"0.00","precioMedia":"","carpeta":"","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"39739e12e01b"},
@@ -103,7 +103,7 @@
 {"id":"12107","activa":"no","precio":"13.50","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["GLUTEN","CRUSTACEO","HUEVO","SOJA","APIO","SESAMO"],"opcionesInactivas":[],"h":"fb864f7367f9"},
 {"id":"12108","activa":"no","precio":"4.00","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["GLUTEN","LACTOSA","HUEVO","FRUTOSCASCARA","MOSTAZA","SESAMO","SOJA","VEGANO"],"opcionesInactivas":[],"h":"637a70e378b1"},
 {"id":"12109","activa":"no","precio":"3.00","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["HUEVO","SOJA","SESAMO","MOSTAZA"],"opcionesInactivas":[],"h":"cf5622af273d"},
-{"id":"12110","activa":"si","precio":"1.00","precioMedia":"","carpeta":"entrantes","archivo":"tortilla01.webp","alergenos":["GLUTEN","HUEVO"],"opcionesInactivas":[],"h":"70d663d9b603"},
+{"id":"12110","activa":"si","precio":"1.00","precioMedia":"","carpeta":"entrantes","archivo":"tortilla01.webp","alergenos":["GLUTEN","HUEVO"],"opcionesInactivas":[],"h":"07d59c878c40"},
 {"id":"12201","activa":"no","precio":"16.50","precioMedia":"","carpeta":"ensaladas","archivo":"","alergenos":["GLUTEN","LACTOSA","CRUSTACEO","FRUTOSCASCARA"],"opcionesInactivas":[],"h":"135af7ae9297"},
 {"id":"12202","activa":"no","precio":"15.00","precioMedia":"","carpeta":"ensaladas","archivo":"","alergenos":["PESCADO","SULFITOS","FRUTOSCASCARA","CRUSTACEO"],"opcionesInactivas":[],"h":"d6adf25d1275"},
 {"id":"12203","activa":"no","precio":"16.50","precioMedia":"","carpeta":"ensaladas","archivo":"","alergenos":["SULFITOS","MOSTAZA","LACTOSA","FRUTOSCASCARA","PESCADO","CRUSTACEO","SOJA","SESAMO","APIO"],"opcionesInactivas":[],"h":"e7899ec8ca2e"},

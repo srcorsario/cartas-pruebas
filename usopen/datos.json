@@ -2,8 +2,8 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T08:39:55.734Z",
-  "ocultas": ["pizzas", "sugerencias"],
+  "guardado": "2026-11-03T08:40:36.305Z",
+  "ocultas": ["pizzas"],
   "platos": [
     {
         "id": "1", "activa": "no", "precio": "0.00", "precioMedia": "",
@@ -5719,7 +5719,11 @@
             "VA": "Truita espanyola",
             "KO": "스패니시 오믈렛"
         },
-        "info": {}
+        "info": {
+            "ES": "{\"desc\":\"Preparación culinaria a base de huevo batido cuajado en sartén.\",\"q1\":\"¿En qué consiste el método de elaboración de una tortilla?\",\"r1\":\"Consiste en batir huevos y cocinarlos a fuego controlado en sartén hasta lograr que la mezcla adquiera consistencia.\",\"q2\":\"¿Cuál es el ingrediente base de este plato?\",\"r2\":\"El ingrediente principal de esta elaboración es el huevo.\",\"q3\":\"¿Qué alérgenos debo considerar en este plato?\",\"r3\":\"Este plato contiene gluten y huevo.\"}",
+            "EN": "{\"desc\":\"A culinary preparation made from beaten egg set in a pan.\",\"q1\":\"What does the preparation method for an omelette involve?\",\"r1\":\"It involves beating eggs and cooking them over controlled heat in a pan until the mixture sets.\",\"q2\":\"What is the base ingredient of this dish?\",\"r2\":\"The primary ingredient in this preparation is egg.\",\"q3\":\"What allergens should I be aware of in this dish?\",\"r3\":\"This dish contains gluten and egg.\"}",
+            "HASH_FICHA": "b33c2b62"
+        }
     },
     {
         "id": "12201", "activa": "no", "precio": "16.50", "precioMedia": "",
