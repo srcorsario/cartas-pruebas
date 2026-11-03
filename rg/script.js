@@ -7,7 +7,7 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.2.0';
+const APP_VERSION = 'v4.3.0'; // 3 nov: idiomas de la web elegibles desde el editor (base.json "idiomas")
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
@@ -330,9 +330,11 @@ async function init() {
     try {
         injectVisualIndicatorStyles();
         populateLanguageSelect();
+        if (DATOS_TIPO === 'json') aplicarIdiomasWeb(idiomasWebGuardados());
 
         const userLang = (navigator.language || navigator.userLanguage).split('-')[0].toUpperCase();
         currentLang = IDIOMAS[userLang] ? userLang : 'EN';
+        comprobarIdiomasWeb();
 
         // Copia SIN filtrar de categoriesList — se usa como base cada vez que se aplica un
         // estado de pestañas desactivadas, para poder tanto ocultar como volver a mostrar una
@@ -611,6 +613,38 @@ function setupScrollListener() {
 
     selector.addEventListener('scroll', hideHint);
     selector.addEventListener('touchstart', hideHint);
+}
+
+// v4.3: la web solo ofrece los idiomas elegidos en el editor (🌐 Idiomas -> base.json "idiomas";
+// vacío = todos). ES y EN siempre. Se recuerda en este navegador para aplicarlo ya al abrir.
+const IDIOMAS_TODOS_WEB = Object.assign({}, IDIOMAS);
+const ESENCIALES_TODOS_WEB = ESSENTIAL_LANGS.slice();
+const IDIOMAS_WEB_KEY = CACHE_PREFIX + '-idiomas-v1';
+function aplicarIdiomasWeb(lista) {
+    const ok = (Array.isArray(lista) && lista.length) ? new Set(lista.map(x => String(x).toUpperCase()).concat(['ES', 'EN'])) : null;
+    Object.keys(IDIOMAS).forEach(k => delete IDIOMAS[k]);
+    Object.keys(IDIOMAS_TODOS_WEB).forEach(k => { if (!ok || ok.has(k)) IDIOMAS[k] = IDIOMAS_TODOS_WEB[k]; });
+    ESSENTIAL_LANGS.length = 0;
+    ESENCIALES_TODOS_WEB.forEach(k => { if (IDIOMAS[k]) ESSENTIAL_LANGS.push(k); });
+    document.querySelectorAll('#language-selector button').forEach(b => {
+        b.style.display = IDIOMAS[b.id.replace('btn-', '')] ? '' : 'none';
+    });
+    populateLanguageSelect();
+    const sel = document.getElementById('more-langs');
+    if (sel) sel.style.display = sel.options.length > 1 ? '' : 'none';
+}
+function idiomasWebGuardados() {
+    try { return JSON.parse(localStorage.getItem(IDIOMAS_WEB_KEY) || 'null'); } catch (e) { return null; }
+}
+function comprobarIdiomasWeb() {
+    if (DATOS_TIPO !== 'json') return;
+    jsonBase().then(b => {
+        const lista = Array.isArray(b.idiomas) ? b.idiomas : [];
+        try { localStorage.setItem(IDIOMAS_WEB_KEY, JSON.stringify(lista)); } catch (e) { }
+        aplicarIdiomasWeb(lista);
+        if (!IDIOMAS[currentLang]) changeLanguage('EN');
+        else updateLanguageUI();
+    }).catch(() => { });
 }
 
 function populateLanguageSelect() {

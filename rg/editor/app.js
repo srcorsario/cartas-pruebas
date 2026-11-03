@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '2.18.0'; // NUEVO (3 nov): mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
+window.APP_VERSIONS.app = '2.19.0'; // NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
 
 console.group("%c[Editor] Inicializando sistema de control...", "color: orange; font-weight: bold;");
 
@@ -52,8 +52,8 @@ function mostrarOverlayCarga(texto) {
     if (!overlay) return;
     const textoEl = document.getElementById('loading-text');
     if (textoEl) textoEl.textContent = texto;
-    const btnFondo = document.getElementById('loading-btn-fondo');
-    if (btnFondo) btnFondo.style.display = 'none';
+    const sub = document.getElementById('loading-subtext');
+    if (sub) sub.style.display = 'none';
     overlay.style.display = 'flex';
 }
 
@@ -62,39 +62,46 @@ function ocultarOverlayCarga() {
     if (overlay) overlay.style.display = 'none';
     const textoEl = document.getElementById('loading-text');
     if (textoEl) textoEl.textContent = 'Cargando datos...';
-    const btnFondo = document.getElementById('loading-btn-fondo');
-    if (btnFondo) btnFondo.style.display = 'none';
+    const sub = document.getElementById('loading-subtext');
+    if (sub) sub.style.display = 'none';
+    clearInterval(window.__overlayInfoReloj);
     window.__overlayInfoPlato = null;
 }
 
-// NUEVO (3 nov): mientras se genera la Info del plato que está ABIERTO en el editor, se enseña la
-// misma animación de tenis a pantalla completa (así no parece que se haya colgado), con un botón
-// "Seguir en segundo plano" para quitarla y seguir trabajando (la generación continúa igual, con
-// el aviso "🤖 generando info…" en la lista). Si el editor de ese plato ya está cerrado, nada.
-function mostrarOverlayInfoPlato(p, texto) {
+// NUEVO (3 nov): mientras se genera la Info del plato que está ABIERTO en el editor, la misma
+// animación de tenis a pantalla completa, como UN solo proceso (aunque por dentro primero va
+// ES/EN y luego el resto de idiomas) y con un contador de tiempo. Se quita al terminar.
+function mostrarOverlayInfoPlato(p) {
     if (!p || typeof platoEditandoId === 'undefined' || platoEditandoId !== p.id) return;
     const modal = document.getElementById('modal-editor');
     if (!modal || modal.style.display === 'none') return;
-    if (window.__overlayInfoDescartado === p.id) return;
-    mostrarOverlayCarga(texto);
+    mostrarOverlayCarga('Generando la Info del plato...');
     window.__overlayInfoPlato = p.id;
-    let btn = document.getElementById('loading-btn-fondo');
     const overlay = document.getElementById('loading-overlay');
-    if (!btn && overlay) {
-        btn = document.createElement('button');
-        btn.id = 'loading-btn-fondo';
-        btn.type = 'button';
-        btn.textContent = 'Seguir en segundo plano';
-        btn.style.cssText = 'margin-top:18px; padding:8px 16px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:0.85rem; cursor:pointer;';
-        btn.onclick = () => { window.__overlayInfoDescartado = window.__overlayInfoPlato; ocultarOverlayCarga(); };
-        overlay.appendChild(btn);
+    let sub = document.getElementById('loading-subtext');
+    if (!sub && overlay) {
+        sub = document.createElement('div');
+        sub.id = 'loading-subtext';
+        sub.style.cssText = 'margin-top:10px; color:#64748b; font-size:0.95rem; text-align:center; font-variant-numeric:tabular-nums;';
+        overlay.appendChild(sub);
     }
-    if (btn) btn.style.display = '';
+    const inicio = Date.now();
+    const pintar = () => {
+        const seg = Math.floor((Date.now() - inicio) / 1000);
+        if (sub) sub.innerHTML = `⏱️ <b>${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}</b> &nbsp;·&nbsp; Puede tardar 2 minutos o más, no cierres la página.`;
+    };
+    clearInterval(window.__overlayInfoReloj);
+    pintar();
+    if (sub) sub.style.display = '';
+    window.__overlayInfoReloj = setInterval(pintar, 1000);
 }
 
 function ocultarOverlayInfoPlato(p) {
-    if (p && window.__overlayInfoPlato === p.id) ocultarOverlayCarga();
-    if (p && window.__overlayInfoDescartado === p.id) window.__overlayInfoDescartado = null;
+    if (!p || window.__overlayInfoPlato !== p.id) return;
+    clearInterval(window.__overlayInfoReloj);
+    const sub = document.getElementById('loading-subtext');
+    if (sub) sub.style.display = 'none';
+    ocultarOverlayCarga();
 }
 // NUEVO: estado del modo "Plato con ingredientes" (checkbox #chk-modo-ingredientes) — ver
 // abrirEditor(), toggleModoIngredientes() y aplicarCambiosPlato(). modoIngredientesActivo
@@ -914,6 +921,13 @@ function abrirEditor(id, esNuevo = false) {
     // Un plato recién creado (esNuevo) no tiene historial todavía: queda vacío (ver placeholder
     // por CSS en .consola-info-automatica:empty).
     renderConsolaInfoPlato(id);
+
+    // NUEVO (3 nov): el botón dice lo que hace — si el plato lleva Info, "Generar Info y Aplicar".
+    const btnAplicar = document.querySelector('#modal-editor .btn-modal-aceptar');
+    if (btnAplicar) {
+        const sinInfo = id < 13 || CARPETAS_SIN_IA_INFO.includes(String(p.carpeta || '').trim().toLowerCase());
+        btnAplicar.textContent = sinInfo ? '✅ Aplicar Cambios' : '✅ Generar Info y Aplicar Cambios';
+    }
 
     // La rueda de solo activar/desactivar de antes se sustituyó por la lista editable de
     // ingredientes — ver aplicarVisibilidadModoIngredientes()/renderIngredientesPlato() más
@@ -1752,7 +1766,7 @@ async function generarInfoAutomaticaPlato(p) {
 
         marcarPlatoGenerandoInfo(p.id, true);
         logInfoAutomatica(`Generando ficha ES/EN de "${nombreEs}" (ID ${p.id})...`, p.id);
-        mostrarOverlayInfoPlato(p, `Generando la Info (1/2: ES/EN)...`);
+        mostrarOverlayInfoPlato(p);
 
         // --- Paso A: INFO_ES + INFO_EN (mismo prompt que "Generar Info Platos ES/EN", 1 plato) ---
         const promptPiloto = esVino ? window.PROMPTS.vino(nombreEs) : window.PROMPTS.piloto(nombreEs, tieneAlergenos, alergenosValor);
@@ -1773,7 +1787,6 @@ async function generarInfoAutomaticaPlato(p) {
 
         await guardarInfoPlatoEnBackend(p.id, { es: resultadoEsEn.es, en: resultadoEsEn.en }, nuevoHashFicha);
         logInfoAutomatica(`Ficha ES/EN guardada para "${nombreEs}" (ID ${p.id}). Traduciendo al resto de idiomas...`, p.id);
-        if (window.__overlayInfoPlato === p.id) mostrarOverlayInfoPlato(p, `Traduciendo la Info (2/2: resto de idiomas)...`);
 
         // --- Paso B: encadenado, resto de idiomas (mismo prompt que "Generar Info Platos Otros
         // Idiomas", 1 plato) — traduce fielmente la ficha ES/EN recién generada, no redacta contenido nuevo.

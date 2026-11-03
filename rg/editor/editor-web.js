@@ -9,13 +9,16 @@
 //   3) Tras cada guardado en GitHub, recuadro abajo a la derecha con cada plato cambiado:
 //      ⏳ hasta que la web publicada (../datos/base.json) ya lo tiene, luego ✔. Consulta cada
 //      10 s durante 5 min como máximo (~5 KB por consulta); si no aparece, avisa.
+//   4) 🌐 Idiomas (cabecera, junto a Pestañas): qué idiomas tiene la web. El editor solo
+//      enseña, traduce y genera Info en esos; la web pública solo ofrece esos. ES y EN siempre.
+//      Se guarda en datos.json ("idiomas") y base.json. Vacío = los 26.
 // =========================================================================================
 (function () {
     'use strict';
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.editorWeb = '1.2.0';
+    window.APP_VERSIONS.editorWeb = '1.3.0';
 
     var $ = function (id) { return document.getElementById(id); };
     var log = function (t) { try { if (window.UI && window.UI.log) window.UI.log(t); } catch (e) { } console.log(t); };
@@ -223,7 +226,7 @@
     function leerBase(texto) {
         var d = typeof texto === 'string' ? JSON.parse(texto) : texto, m = {};
         (d.platos || []).forEach(function (p) { m[String(p.id)] = p.h; });
-        return { platos: m, ocultas: (d.ocultas || []).map(String).sort().join(',') };
+        return { platos: m, ocultas: (d.ocultas || []).map(String).sort().join(',') + '|' + (d.idiomas || []).map(String).join(',') };
     }
     async function baseWeb() {
         var r = await fetch(URL_BASE_WEB + '?zx=' + Date.now(), { cache: 'no-store' });
@@ -311,8 +314,88 @@
         temporizador = setTimeout(comprobar, CADA);
     });
 
+    // ---------- 4) 🌐 Idiomas ----------
+    var ESENCIALES = ['ES', 'EN', 'DE', 'FR', 'IT'];
+    function todosLosIdiomas() {
+        return (window.IDIOMAS_ORDEN_TODOS || window.IDIOMAS_ORDEN || []).map(function (l) { return l.toUpperCase(); });
+    }
+    function idiomasElegidos() {
+        var e = window.IDIOMAS_WEB_ELEGIDOS;
+        return (e && e.length) ? e.slice() : todosLosIdiomas();
+    }
+    function nombreIdioma(c) { return (window.IDIOMAS_CONFIG && window.IDIOMAS_CONFIG[c]) || c; }
+    function pintarBotonIdiomas() {
+        var b = $('ew-btn-idiomas');
+        if (b) b.textContent = '🌐 Idiomas (' + idiomasElegidos().length + ')';
+    }
+    function crearBotonIdiomas() {
+        if ($('ew-btn-idiomas')) return;
+        var ref = $('tabs-visibility-wrapper');
+        if (!ref) return;
+        var b = document.createElement('button');
+        b.id = 'ew-btn-idiomas'; b.type = 'button';
+        b.title = 'Idiomas de la web: el editor solo enseña, traduce y genera Info en estos, y la web pública solo ofrece estos.';
+        b.style.cssText = 'font-size:0.7rem; display:flex; align-items:center; gap:4px; white-space:nowrap; background:#f8f9fa; padding:4px 8px; border-radius:4px; border:1px solid #ddd; cursor:pointer;';
+        b.onclick = abrirIdiomas;
+        ref.parentNode.insertBefore(b, ref.nextSibling);
+        pintarBotonIdiomas();
+    }
+    function abrirIdiomas() {
+        var todos = todosLosIdiomas(), elegidos = idiomasElegidos();
+        var fondo = document.createElement('div');
+        fondo.id = 'ew-idiomas';
+        fondo.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:10000; display:flex; align-items:center; justify-content:center; padding:16px;';
+        var casillas = todos.map(function (c) {
+            var fijo = c === 'ES' || c === 'EN';
+            return '<label style="display:flex; align-items:center; gap:6px; padding:5px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.85rem; cursor:' + (fijo ? 'default' : 'pointer') + ';">' +
+                '<input type="checkbox" value="' + c + '"' + (elegidos.indexOf(c) >= 0 || fijo ? ' checked' : '') + (fijo ? ' disabled' : '') + '> ' +
+                nombreIdioma(c) + (fijo ? ' <small style="color:#94a3b8;">(siempre)</small>' : '') + '</label>';
+        }).join('');
+        fondo.innerHTML = '<div style="background:#fff; border-radius:12px; max-width:640px; width:100%; max-height:90vh; overflow:auto; padding:20px; box-shadow:0 20px 40px rgba(0,0,0,.25);">' +
+            '<h3 style="margin:0 0 6px; font-size:1.1rem;">🌐 Idiomas de la web</h3>' +
+            '<p style="margin:0 0 12px; color:#64748b; font-size:0.85rem;">Solo se enseñan, se traducen y se genera la Info en los idiomas marcados, y la web pública solo ofrece esos. ' +
+            'Con menos idiomas las traducciones y la Info van más rápido. Los textos de los idiomas que quites no se borran.</p>' +
+            '<div style="display:flex; gap:6px; margin-bottom:10px;">' +
+            '<button type="button" data-sel="todos" style="font-size:0.8rem; padding:4px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; cursor:pointer;">Todos</button>' +
+            '<button type="button" data-sel="esenciales" style="font-size:0.8rem; padding:4px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; cursor:pointer;">Solo ES EN DE FR IT</button>' +
+            '<button type="button" data-sel="minimo" style="font-size:0.8rem; padding:4px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; cursor:pointer;">Solo ES EN</button></div>' +
+            '<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:6px;">' + casillas + '</div>' +
+            '<div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">' +
+            '<button type="button" id="ew-idiomas-cancelar" style="padding:8px 14px; border-radius:6px; border:1px solid #cbd5e1; background:#f1f5f9; cursor:pointer;">Cancelar</button>' +
+            '<button type="button" id="ew-idiomas-guardar" style="padding:8px 14px; border-radius:6px; border:0; background:#27ae60; color:#fff; font-weight:600; cursor:pointer;">Guardar en la web</button></div></div>';
+        document.body.appendChild(fondo);
+        var cajas = function () { return Array.prototype.slice.call(fondo.querySelectorAll('input[type=checkbox]')); };
+        fondo.querySelectorAll('[data-sel]').forEach(function (btn) {
+            btn.onclick = function () {
+                var t = btn.getAttribute('data-sel');
+                cajas().forEach(function (c) { if (!c.disabled) c.checked = t === 'todos' || (t === 'esenciales' && ESENCIALES.indexOf(c.value) >= 0); });
+            };
+        });
+        $('ew-idiomas-cancelar').onclick = function () { fondo.remove(); };
+        $('ew-idiomas-guardar').onclick = async function () {
+            if (window.hayCambiosSinGuardar) { alert('Antes pulsa "GUARDAR CAMBIOS EN WEB": hay cambios sin guardar y la página se recargará al cambiar los idiomas.'); return; }
+            var lista = cajas().filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+            var btn = $('ew-idiomas-guardar');
+            btn.disabled = true; btn.textContent = '⏳ Guardando...';
+            try {
+                var url = typeof window.getWebAppUrl === 'function' ? window.getWebAppUrl(S.modo) : '';
+                var r = await fetch(url + '?accion=idiomas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idiomas: lista }) });
+                var t = await r.text();
+                if (!r.ok || /^Error/.test(t)) throw new Error(t);
+                location.reload();
+            } catch (err) {
+                alert('No se pudieron guardar los idiomas: ' + (err.message || err));
+                btn.disabled = false; btn.textContent = 'Guardar en la web';
+            }
+        };
+    }
+
     window.addEventListener('load', function () {
         enganchar();
+        setTimeout(crearBotonIdiomas, 400);
+    });
+    window.addEventListener('idiomas-editor', pintarBotonIdiomas);
+    window.addEventListener('load', function () {
         // La UI (módulos) se inicializa ~150 ms después de DOMContentLoaded.
         setTimeout(adaptarTraductor, 400);
         setTimeout(adaptarTraductor, 2000);

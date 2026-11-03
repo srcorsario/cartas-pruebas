@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.7.0'; // 3 nov: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.8.0'; // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -216,6 +216,7 @@
             '  "generado": ' + J(d.generado || '') + ',\n' +
             '  "guardado": ' + J(new Date().toISOString()) + ',\n' +
             '  "ocultas": ' + J(d.ocultas || []).replace(/","/g, '", "') + ',\n' +
+            '  "idiomas": ' + J(d.idiomas || []).replace(/","/g, '", "') + ',\n' +
             '  "platos": [\n' + platos.join(',\n') + '\n  ]\n}\n';
     }
 
@@ -271,7 +272,10 @@
                 ',"carpeta":' + J(S(p.carpeta)) + ',"archivo":' + J(S(p.archivo)) + ',"alergenos":[' + al.map(x => J(x)).join(',') +
                 '],"opcionesInactivas":[' + op.join(',') + '],"h":' + J(h) + '}');
         }
-        const res = { 'datos/base.json': '{"ocultas":[' + (datos.ocultas || []).map(x => J(S(x))).join(',') + '],"platos":[\n' + filas.join(',\n') + '\n]}\n' };
+        // "idiomas" solo si se ha elegido alguno (vacío = los 26, como siempre). Mismo formato que construir.ps1.
+        const idi = (datos.idiomas || []).map(x => J(S(x).toUpperCase()));
+        const res = { 'datos/base.json': '{"ocultas":[' + (datos.ocultas || []).map(x => J(S(x))).join(',') + ']' +
+            (idi.length ? ',"idiomas":[' + idi.join(',') + ']' : '') + ',"platos":[\n' + filas.join(',\n') + '\n]}\n' };
         IDIOMAS_WEB.forEach(l => { res['datos/' + l.toLowerCase() + '.json'] = '{\n' + porIdioma[l].join(',\n') + '\n}\n'; });
         return res;
     }
@@ -437,6 +441,30 @@
         };
     }
 
+    // Idiomas de la web: lista de códigos (ES, EN, ...). ES y EN siempre. Vacío = todos.
+    function opIdiomas(cuerpo) {
+        return (datos) => {
+            const l = (cuerpo && Array.isArray(cuerpo.idiomas) ? cuerpo.idiomas : []).map(x => String(x).toUpperCase()).filter(x => IDIOMAS_WEB.includes(x));
+            const todos = IDIOMAS_WEB.every(x => l.includes(x) || x === 'ES' || x === 'EN');
+            datos.idiomas = (!l.length || todos) ? [] : IDIOMAS_WEB.filter(x => x === 'ES' || x === 'EN' || l.includes(x));
+        };
+    }
+
+    // Editor: solo trabaja (muestra, traduce, genera Info) con los idiomas elegidos. Cambia
+    // window.IDIOMAS_ORDEN EN SU SITIO (la usan app.js y Ajustes Expertos). Los idiomas quitados
+    // no se borran de datos.json: al guardar, almacen-json conserva lo que ya hubiera.
+    function aplicarIdiomasEditor(lista) {
+        const orden = window.IDIOMAS_ORDEN;
+        if (!Array.isArray(orden)) return;
+        if (!window.IDIOMAS_ORDEN_TODOS) window.IDIOMAS_ORDEN_TODOS = orden.slice();
+        const set = (lista && lista.length) ? new Set(lista.map(x => String(x).toLowerCase()).concat(['es', 'en'])) : null;
+        const nuevo = window.IDIOMAS_ORDEN_TODOS.filter(l => !set || set.has(l));
+        orden.length = 0;
+        nuevo.forEach(l => orden.push(l));
+        window.IDIOMAS_WEB_ELEGIDOS = set ? nuevo.map(l => l.toUpperCase()) : [];
+        try { window.dispatchEvent(new CustomEvent('idiomas-editor')); } catch (x) { }
+    }
+
     function opCategoria(cuerpo) {
         return (datos) => {
             const id = String(cuerpo.id || '').trim();
@@ -493,6 +521,7 @@
         try {
             if (metodo === 'GET') {
                 const d = await vista(modo, true);
+                aplicarIdiomasEditor(d.idiomas);
                 if (accion === 'categorias') {
                     return respuesta(['ID,Activa'].concat((d.ocultas || []).map(id => escaparCsv(id) + ',NO')).join('\r\n'), 200, 'text/csv; charset=utf-8');
                 }
@@ -502,6 +531,10 @@
             if (accion === 'categorias') {
                 await encolar(modo, opCategoria(cuerpo), 'pestaña ' + cuerpo.id + (cuerpo.activa ? ' activa' : ' oculta'), 300);
                 return respuesta('OK: pestaña ' + cuerpo.id);
+            }
+            if (accion === 'idiomas') {
+                await encolar(modo, opIdiomas(cuerpo), 'idiomas de la web', 300);
+                return respuesta('OK: idiomas');
             }
             if (accion === 'infoplato') {
                 // No se espera al commit: los lotes de Info mandan muchas seguidas y se agrupan.
