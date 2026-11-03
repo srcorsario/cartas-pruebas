@@ -357,6 +357,45 @@ body {
 
 .plato-meta-footer { display: flex; align-items: center; gap: 8px; flex-shrink: 0; min-width: 210px; justify-content: flex-end; }
 
+/* NUEVO: aviso discreto mientras se genera/guarda automáticamente la Info de un plato en
+   segundo plano (ver generarInfoAutomaticaPlato() en app.js). Puramente informativo, no
+   bloquea ninguna interacción con el plato. */
+.badge-generando-info {
+    display: inline-block; font-size: 0.68rem; color: #8e44ad; background: #f4ecf7;
+    border: 1px solid #d7bde2; border-radius: 4px; padding: 1px 6px; margin-top: 3px;
+    animation: badge-generando-pulso 1.4s ease-in-out infinite;
+}
+@keyframes badge-generando-pulso { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+/* NUEVO: aviso cuando la Info ES/EN se generó bien pero falló la traducción automática al
+   resto de idiomas (ver generarInfoOtrosIdiomasPlato() en app.js) — con botón para reintentar
+   SOLO ese paso sin tener que ir a "Ajustes Expertos" ni regenerar ES/EN de nuevo. */
+.badge-info-otros-fallido {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.68rem; color: #a04000;
+    background: #fdf2e0; border: 1px solid #f0c98a; border-radius: 4px; padding: 1px 6px; margin-top: 3px;
+}
+.btn-reintentar-info-otros {
+    font-size: 0.66rem; color: #a04000; background: #fff; border: 1px solid #f0c98a;
+    border-radius: 3px; padding: 0 5px; cursor: pointer; line-height: 1.6;
+}
+.btn-reintentar-info-otros:hover { background: #f0c98a; }
+
+/* NUEVO: consola visible de la generación automática de Info, debajo de la lista de categorías
+   en la pestaña normal del Editor (ver #consola-info-automatica en index.html y
+   logInfoAutomatica() en app.js). Antes este rastro solo se veía en la consola de "Ajustes
+   Expertos", invisible mientras se trabaja aquí. */
+.consola-info-automatica {
+    background: #1c1c1e; color: #d0d0d0; font-family: 'Courier New', monospace; font-size: 0.72rem;
+    border-radius: 6px; padding: 8px 10px; max-height: 160px; overflow-y: auto;
+    min-height: 34px; line-height: 1.5;
+}
+.consola-info-automatica:empty::before {
+    content: "Aquí aparecerá el resultado (éxito o error) de la generación automática de Info al crear/editar un plato.";
+    color: #888; font-style: italic;
+}
+.consola-info-automatica-linea { white-space: pre-wrap; word-break: break-word; }
+.consola-info-automatica-linea.es-error { color: #ff8a80; }
+
 .btn-config { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 8px; cursor: pointer; }
 .btn-orden { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; cursor: pointer; font-size: 0.85rem; }
 .btn-nav { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; cursor: pointer; font-size: 0.85rem; }

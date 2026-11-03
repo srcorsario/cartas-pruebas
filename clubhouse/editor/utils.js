@@ -15,6 +15,24 @@
  * @param {String} texto
  * @returns {Object} { nombre: String, uvas: String, opciones: String[] }
  */
+/**
+ * NUEVO (30 oct): ¿es este ID un vino de la carta (13000-14999)? Antes se usaba "id >= 13000",
+ * que ahora también atraparía la Hoja de Postres (16000-16299) y la trataría como vino.
+ */
+function esIdVino(id) {
+    const n = parseInt(id, 10);
+    return n >= 13000 && n < 15000;
+}
+
+/**
+ * NUEVO (3 nov): primera letra del nombre en mayúscula ("ensalada verde" -> "Ensalada verde").
+ * Salta signos iniciales (¿ ¡ " ' ( ...) y no toca el resto del texto.
+ */
+function mayusculaInicial(texto) {
+    const s = String(texto == null ? '' : texto);
+    return s.replace(/\p{L}/u, c => c.toLocaleUpperCase('es-ES'));
+}
+
 function desglosarNombre(texto) {
     if (!texto) return { nombre: "", uvas: "", opciones: [] };
     const partes = texto.split('//');
@@ -187,15 +205,16 @@ function extraerJSON(texto) {
 }
 
 // =================================================================================
-// Traído de Web Editor Pro v3 -- fetchConTimeout: wrapper de fetch() con límite de tiempo
-// (AbortController). DIAGNÓSTICO (HAR real analizado en el proyecto principal): la carga
-// inicial de la web tardaba más de 1 minuto y medio en total porque varias peticiones a Apps
-// Script (?accion=csv/categorias) se quedaban colgadas entre 2 y 35 SEGUNDOS cada una antes de
-// responder (a veces con un 404 al final, en vez de los datos) -- Apps Script, en el plan
-// gratuito, sirve estas peticiones con mucha cola/latencia cuando varias llegan seguidas o el
-// proyecto llevaba un rato sin usarse ("cold start"). Sin límite de tiempo, el navegador espera
-// lo que Apps Script tarde, por lento que sea, antes de poder caer al respaldo (CSV publicado) o
-// reintentar -- por eso una sola petición podía comerse 30+ segundos de la carga.
+// 25 sept -- fetchConTimeout: wrapper de fetch() con límite de tiempo (AbortController).
+// DIAGNÓSTICO (HAR "pedido_v1.har" que envió el usuario): la carga inicial de la web tardaba
+// más de 1 minuto y medio en total porque varias peticiones a Apps Script (RG/US Open ?accion=
+// csv/categorias, Menús Especiales ?accion=listarMenus/listarPlatosManuales) se quedaban
+// colgadas entre 2 y 35 SEGUNDOS cada una antes de responder (a veces con un 404 al final, en
+// vez de los datos) -- Apps Script, en el plan gratuito, sirve estas peticiones con mucha cola/
+// latencia quando varias llegan seguidas o el proyecto llevaba un rato sin usarse ("cold
+// start"). Sin límite de tiempo, el navegador espera lo que Apps Script tarde, por lento que
+// sea, antes de poder caer al respaldo (CSV publicado) o reintentar -- por eso una sola
+// petición podía comerse 30+ segundos de la carga.
 // Uso: fetchConTimeout(url, opciones, milisegundos) -- misma firma que fetch(), con un 3er
 // parámetro opcional (por defecto 9000ms). Si no responde a tiempo, aborta esa petición
 // concreta y lanza un error (mensaje "Tiempo de espera agotado...") en vez de dejarla colgada,

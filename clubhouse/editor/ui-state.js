@@ -9,7 +9,8 @@
 export const stateContainer = {
     headers: [],
     csvData: [],
-    currentProMode: 'restaurante001'
+    // Editor dentro de la web (cartas): el Traductor Pro trabaja con SU restaurante.
+    currentProMode: (window.EDITOR_SITIO && window.EDITOR_SITIO.modo) || 'restaurante001'
 };
 
 // Estado del proceso de lotes (generación de info / traducción de nombres),

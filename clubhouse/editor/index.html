@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow">
-    <script src="sitio-editor.js?v=023e9315"></script>
-    <script src="acceso.js?v=023e9315"></script>
-    <script src="subir-foto.js?v=023e9315"></script>
-    <script src="editor-web.js?v=023e9315"></script>
+    <script src="sitio-editor.js?v=d7a66ccb"></script>
+    <script src="acceso.js?v=d7a66ccb"></script>
+    <script src="subir-foto.js?v=d7a66ccb"></script>
+    <script src="editor-web.js?v=d7a66ccb"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Editor Pro - Club House</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -24,7 +24,7 @@
         // todo el JS/CSS de golpe en cada visita.
         // OJO: esto NO afecta a los datos del menu (platos/precios) — esos se piden
         // siempre en fresco con cache:"no-store" en app.js, y eso no cambia.
-        window.__CACHE_BUST__ = '2026.09.28.1-023e9315';
+        window.__CACHE_BUST__ = '2026.11.03.1-d7a66ccb';
     </script>
     <script>document.write('<link rel="stylesheet" href="styles.css?v=' + window.__CACHE_BUST__ + '">');</script>
 </head>
@@ -241,6 +241,13 @@
                         <label class="label-seccion">Alérgenos</label>
                         <div id="alergenos-grid" class="alergenos-grid"></div>
                     </div>
+                    <!-- NUEVO: consola de la generación automática de Info (ES/EN + resto de
+                         idiomas al crear/editar este plato — ver logInfoAutomatica()/
+                         renderConsolaInfoPlato() en app.js), justo debajo de Alérgenos. -->
+                    <div class="input-group">
+                        <label class="label-seccion">🤖 Consola de Info automática</label>
+                        <div id="consola-info-plato" class="consola-info-automatica"></div>
+                    </div>
                     <div id="contenedor-croquetas"></div>
                     <div class="modal-acciones-footer">
                         <button class="btn-modal-aceptar" onclick="aplicarCambiosPlato()">✅ Aplicar Cambios</button>
@@ -311,6 +318,8 @@
         // subirlo. Antes aquí se usaba Date.now(), lo que obligaba a descargar todo el
         // JS/CSS propio en CADA visita sin poder usar nunca la caché del navegador.
         document.write('<scr' + 'ipt src="config.js?v=' + window.__CACHE_BUST__ + '"></scr' + 'ipt>');
+        // almacen-json.js: carta en datos.json (GitHub) en vez de Sheets — justo tras config.js.
+        document.write('<scr' + 'ipt src="almacen-json.js?v=' + window.__CACHE_BUST__ + '"></scr' + 'ipt>');
         </script>
         <script>
         // MODIFICADO: Inyección dinámica desde config.js Abstract Keys
@@ -537,7 +546,8 @@
                 if (tabId === 'sugerencias-usopen' || tabId === 'editor-usopen') {
                     window.currentMode = 'restaurante002';
                 } else {
-                    window.currentMode = 'restaurante001';
+                    // Editor dentro de la web (cartas): el resto de pestañas trabajan con SU restaurante.
+                    window.currentMode = (window.EDITOR_SITIO && window.EDITOR_SITIO.modo) || 'restaurante001';
                 }
 
                 actualizarTextoBotonGuardar();

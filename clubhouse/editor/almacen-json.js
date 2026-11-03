@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.6.0';
+    window.APP_VERSIONS.almacenJson = '1.7.0'; // 3 nov: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -46,7 +46,10 @@
         // true   = siempre (cuando las webs reales pasen a JSON) · false = nunca
         activo: 'url',
         modos: {
-            restaurante001: { repo: 'srcorsario/cartas-pruebas', ruta: 'clubhouse/datos.json', restaurante: 'clubhouse', columnasBase: BASE_RG.concat(['Precio_Media']) }
+            // 3 nov: todas las cartas con Precio_Media (1/2 ración), igual que Club House. El repo/ruta
+            // real lo pone EDITOR_SITIO (sitio.json); este archivo es el mismo en todos los editores.
+            restaurante001: { repo: 'srcorsario/cartas-pruebas', ruta: 'rg/datos.json', restaurante: 'rg', columnasBase: BASE_RG.concat(['Precio_Media']) },
+            restaurante002: { repo: 'srcorsario/cartas-pruebas', ruta: 'usopen/datos.json', restaurante: 'usopen', columnasBase: BASE_RG.concat(['Precio_Media']) }
         }
     }/*CONFIG_FIN*/;
     // -----------------------------------

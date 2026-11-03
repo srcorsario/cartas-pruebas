@@ -75,6 +75,20 @@ ${esVino ? `Este elemento es un VINO: los nombres de vino son marcas/nombres pro
     Estructura exacta: {"correccion":{"hayError":false,"texto":"..."},"directa": "...", "gastronomica": "...", "corta": "..."}`,
 
     // ---------------------------------------------------------
+    // NUEVO (19 sept, para menu-especial.js > agregarPlatoManual/guardarEdicionPlato): versión
+    // "solo ortografía" de opcionesEN() de arriba, para cuando NO hace falta traducir (no se ha
+    // pedido traducción, o el inglés ya está puesto) pero SÍ conviene avisar de una posible falta
+    // en el nombre en español antes de añadirlo al menú -- sin gastar la llamada más cara de pedir
+    // además 3 alternativas de traducción que no se van a usar. Misma lógica de revisión que la
+    // mitad de arriba de opcionesEN (conservadora, entiende nombres "como suenan").
+    // ---------------------------------------------------------
+    revisionOrtografica: (textoCompletoEs) => `Actúa como un corrector ortográfico de nombres de platos de restaurante. Te paso un elemento en español tal como lo ha escrito el encargado: "${textoCompletoEs}".
+
+Revisa si el NOMBRE PRINCIPAL del plato (la parte antes del primer "//", si lo hay) tiene una falta de ortografía clara o está mal escrito (letras cambiadas, falta alguna letra, etc.) -- no hace falta traducir nada. Ten en cuenta también ingredientes, salsas o platos extranjeros conocidos internacionalmente (japoneses, italianos, franceses, etc.): a veces se escriben "como suenan" en español, con un resultado que se parece poco por escrito al nombre real pero suena parecido al leerlo en voz alta (por ejemplo, "waquinicu" por "yakiniku"); si reconoces el nombre real por cómo suena, aunque se escriba muy distinto, trátalo igualmente como una falta a corregir. Sé conservador: si es un nombre de plato poco habitual, casero, o una forma de escribirlo válida aunque no sea la más común, y no reconoces ningún nombre real (ni por ortografía ni por sonido) al que se pueda estar refiriendo, NO lo marques como error. Si SÍ hay una falta clara, escribe en "texto" el texto COMPLETO corregido, respetando cualquier parte tras "//" tal cual (solo corriges el nombre principal, nunca inventas ni tocas el resto) y pon "hayError":true. Si no hay ninguna falta, "texto" debe ser EXACTAMENTE igual al original y "hayError":false.
+    ${REGLA_COMILLAS_JSON}
+    Responde EXCLUSIVAMENTE con un objeto JSON válido, sin texto adicional ni bloques de código. Estructura exacta: {"hayError":false,"texto":"..."}`,
+
+    // ---------------------------------------------------------
     // Usado en app.js > ejecutarTraduccionAutomatica()
     // Traduce el nombre del plato/vino (ES + EN de referencia) al resto de idiomas.
     // ---------------------------------------------------------

@@ -1,34 +1,11 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '2.12.0'; // NUEVO: más mejoras traídas de Web Editor Pro v3 -- confirmación editable "¿Quisiste decir...?" (mostrarCorreccionOrtografiaEN/responderCorreccionEN) antes de traducir al inglés cuando prompts.js detecta una posible falta de ortografía en el nombre en español (nunca en vinos), y abrirModalTraduccionEN ahora recorre las claves de traducción en orden fijo (ya no con Object.entries) para que el nuevo campo "correccion" del JSON no se pinte como una opción más. Sigue sin incluir "Menú Especial" ni "Info automática" (no aplican a este proyecto/no se ha pedido su migración).
+window.APP_VERSIONS.app = '2.18.0'; // NUEVO (3 nov): mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
 
 console.group("%c[Editor] Inicializando sistema de control...", "color: orange; font-weight: bold;");
 
 window.hayCambiosSinGuardar = false;
-
-// NUEVO: overlay de carga reutilizable a pantalla completa (#loading-overlay en index.html).
-// Antes solo se mostraba, sin poder cambiar su texto, al cambiar de pestaña ("Cargando
-// datos..."). Ahora generarTraduccionEN() y ejecutarTraduccionAutomatica() también lo
-// reutilizan con su propio texto mientras esperan la respuesta de Gemini -- una llamada puede
-// tardar bastante (reintentos ante un 503 "modelo saturado"), y antes el único aviso era el
-// texto del propio botón, poco visible. ocultarOverlayCarga() restaura el texto por defecto
-// "Cargando datos..." al ocultarlo, para no dejarlo puesto la próxima vez que switchTab()
-// (index.html) reutilice este mismo overlay al cambiar de pestaña.
-function mostrarOverlayCarga(texto) {
-    const overlay = document.getElementById('loading-overlay');
-    if (!overlay) return;
-    const textoEl = document.getElementById('loading-text');
-    if (textoEl) textoEl.textContent = texto;
-    overlay.style.display = 'flex';
-}
-
-function ocultarOverlayCarga() {
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) overlay.style.display = 'none';
-    const textoEl = document.getElementById('loading-text');
-    if (textoEl) textoEl.textContent = 'Cargando datos...';
-}
 
 // NUEVO: estado en memoria de qué pestañas (categorías de nivel superior) están desactivadas
 // en la web pública, por restaurante. Se guarda como Set de pestanaId (ver estructuras.js).
@@ -58,10 +35,67 @@ let platoEditandoId = null;
 let esNuevoPlato = false;
 let datosTempNuevo = null;
 let opcionesENActuales = [];
-// Traído de Web Editor Pro v3: resuelve la promesa de mostrarCorreccionOrtografiaEN() cuando el
-// usuario responde al modal "¿Quisiste decir...?" (aceptar con el texto corregido, o null si lo
-// rechaza).
+// NUEVO (18 sept): resuelve la promesa de mostrarCorreccionOrtografiaEN() cuando el usuario
+// responde al modal "¿Quisiste decir...?" (aceptar con el texto corregido, o null si lo rechaza).
 let resolverCorreccionEN = null;
+
+// NUEVO (18 sept): overlay de carga reutilizable para las llamadas de traducción con IA que
+// pueden tardar bastante (visto en la práctica: Gemini responde 503 "modelo saturado" y hay que
+// reintentar con varias claves antes de conseguir respuesta, hasta 30-45s en total). Reutiliza el
+// mismo overlay/rueda giratoria que ya se usaba solo para "Cargando datos..." al cambiar de
+// pestaña (#loading-overlay en index.html), con el texto que le pases, para dejar claro que sigue
+// trabajando y no que el editor se ha colgado. ocultarOverlayCarga() restaura el texto por
+// defecto "Cargando datos..." al ocultarlo, para no dejarlo puesto la próxima vez que switchTab()
+// (index.html) reutilice este mismo overlay al cambiar de pestaña.
+function mostrarOverlayCarga(texto) {
+    const overlay = document.getElementById('loading-overlay');
+    if (!overlay) return;
+    const textoEl = document.getElementById('loading-text');
+    if (textoEl) textoEl.textContent = texto;
+    const btnFondo = document.getElementById('loading-btn-fondo');
+    if (btnFondo) btnFondo.style.display = 'none';
+    overlay.style.display = 'flex';
+}
+
+function ocultarOverlayCarga() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.style.display = 'none';
+    const textoEl = document.getElementById('loading-text');
+    if (textoEl) textoEl.textContent = 'Cargando datos...';
+    const btnFondo = document.getElementById('loading-btn-fondo');
+    if (btnFondo) btnFondo.style.display = 'none';
+    window.__overlayInfoPlato = null;
+}
+
+// NUEVO (3 nov): mientras se genera la Info del plato que está ABIERTO en el editor, se enseña la
+// misma animación de tenis a pantalla completa (así no parece que se haya colgado), con un botón
+// "Seguir en segundo plano" para quitarla y seguir trabajando (la generación continúa igual, con
+// el aviso "🤖 generando info…" en la lista). Si el editor de ese plato ya está cerrado, nada.
+function mostrarOverlayInfoPlato(p, texto) {
+    if (!p || typeof platoEditandoId === 'undefined' || platoEditandoId !== p.id) return;
+    const modal = document.getElementById('modal-editor');
+    if (!modal || modal.style.display === 'none') return;
+    if (window.__overlayInfoDescartado === p.id) return;
+    mostrarOverlayCarga(texto);
+    window.__overlayInfoPlato = p.id;
+    let btn = document.getElementById('loading-btn-fondo');
+    const overlay = document.getElementById('loading-overlay');
+    if (!btn && overlay) {
+        btn = document.createElement('button');
+        btn.id = 'loading-btn-fondo';
+        btn.type = 'button';
+        btn.textContent = 'Seguir en segundo plano';
+        btn.style.cssText = 'margin-top:18px; padding:8px 16px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:0.85rem; cursor:pointer;';
+        btn.onclick = () => { window.__overlayInfoDescartado = window.__overlayInfoPlato; ocultarOverlayCarga(); };
+        overlay.appendChild(btn);
+    }
+    if (btn) btn.style.display = '';
+}
+
+function ocultarOverlayInfoPlato(p) {
+    if (p && window.__overlayInfoPlato === p.id) ocultarOverlayCarga();
+    if (p && window.__overlayInfoDescartado === p.id) window.__overlayInfoDescartado = null;
+}
 // NUEVO: estado del modo "Plato con ingredientes" (checkbox #chk-modo-ingredientes) — ver
 // abrirEditor(), toggleModoIngredientes() y aplicarCambiosPlato(). modoIngredientesActivo
 // indica si el plato que se está editando ahora mismo usa la lista editable de
@@ -70,6 +104,23 @@ let resolverCorreccionEN = null;
 // orden/posición que espera Opciones_Inactivas (compartida por todos los idiomas).
 let modoIngredientesActivo = false;
 let ingredientesPlatoActual = [];
+
+// NUEVO: generación automática de "Info" (descripción + preguntas/respuestas) al crear/editar
+// un plato — ver aplicarCambiosPlato(), generarInfoAutomaticaPlato() y enviarAlExcel() más
+// abajo. platosPendientesInfoAlGuardar guarda los IDs de platos NUEVOS cuya Info todavía no se
+// puede generar (su fila no existe aún en la hoja) hasta que se pulse "GUARDAR CAMBIOS EN WEB".
+// window.platosGenerandoInfo es el Set de IDs con una generación en curso AHORA MISMO, usado
+// solo para pintar el aviso "🤖 generando…" en renderPlatoItemHtml().
+let platosPendientesInfoAlGuardar = [];
+window.platosGenerandoInfo = window.platosGenerandoInfo || new Set();
+
+// NUEVO: IDs de platos a los que se les generó bien la Info ES/EN pero falló la traducción
+// automática al resto de idiomas (Paso B, ver generarInfoOtrosIdiomasPlato() más abajo). El
+// aviso de ese fallo antes solo se veía con UI.log(), que escribe en la consola de "Ajustes
+// Expertos" — invisible mientras se está en la pestaña normal del Editor, que es donde
+// realmente se crea/edita el plato. Este Set se usa para pintar un aviso "⚠️ faltan otros
+// idiomas" con botón de reintento directamente en la ficha del plato (renderPlatoItemHtml).
+window.platosInfoOtrosIdiomasFallidos = window.platosInfoOtrosIdiomasFallidos || new Set();
 
 // CORREGIDO: esta constante faltaba por completo (no estaba definida en ningún
 // archivo), lo que hacía que abrirEditor() lanzara "ALERGENOS_LISTA is not
@@ -128,7 +179,11 @@ async function cargarEstadoCategorias(modo) {
     try {
         const url = (typeof window.getWebAppUrl === 'function') ? window.getWebAppUrl(modo) : '';
         if (!url) return;
-        const resp = await fetch(url + '?accion=categorias&zx=' + Date.now(), { cache: "no-store" });
+        // 25 sept: mismo límite de tiempo que fetchYParsearDatos (ver fetchConTimeout en
+        // utils.js) -- esta petición no tiene CSV publicado de respaldo, pero al menos no deja
+        // la carga colgada: si no responde a tiempo, se deja el Set tal cual (catch de abajo).
+        const fetcher = (typeof window.fetchConTimeout === 'function') ? window.fetchConTimeout : fetch;
+        const resp = await fetcher(url + '?accion=categorias&zx=' + Date.now(), { cache: "no-store" }, 8000);
         const text = await resp.text();
         const filas = text.split(/\r?\n/).filter(f => f.trim() !== "");
         const deshabilitadas = new Set();
@@ -146,24 +201,69 @@ async function cargarEstadoCategorias(modo) {
 }
 
 // NUEVO: descarga y parsea el CSV de platos de un restaurante concreto, sin tocar
-// datosLocales/window.currentMode ni renderizar nada — separado de cargar() para que la
-// caché en memoria (ver cargarYCachearModo) pueda reutilizar este mismo bloque sin
-// duplicarlo. Devuelve null (en vez de lanzar) si el modo no tiene URL de CSV configurada,
-// igual que hacía antes cargar() en ese caso.
+// datosLocales/window.currentMode ni renderizar nada — separado de cargar() para poder
+// reutilizarlo también desde la precarga en segundo plano (ver precargarEnSegundoPlano),
+// que trae los datos de un modo que NO es el que se está viendo en pantalla en ese momento.
+// Devuelve null (en vez de lanzar) si el modo no tiene URL de CSV configurada, igual que
+// hacía antes cargar() en ese caso.
 async function fetchYParsearDatos(modo) {
-    const url = (typeof window.getCsvUrl === 'function') ? window.getCsvUrl(modo) : '';
-    if (!url) return null;
+    // CAMBIADO (22 sept): antes se leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la
+    // web" que Google cachea varios minutos. Eso hacía que, justo después de guardar algo
+    // (precio, Info automática...), recargar el editor pudiera devolver datos desactualizados
+    // durante ese rato: p.ej. la fila seguía sin INFO_HASH_FICHA en la copia cacheada aunque ya
+    // estuviera bien guardada en la hoja real, así que cualquier "Aplicar Cambios" volvía a
+    // disparar una regeneración completa con IA solo por leer una foto vieja de la hoja (ver
+    // generarInfoAutomaticaPlato()). Ahora se usa PRIMERO el endpoint EN VIVO de Código.gs
+    // (?accion=csv sin idiomas -- sirve TODAS las columnas, mismo comportamiento que ya usaba
+    // "Sincronizar" en la documentación de servirCsvEnVivo), que lee la hoja directamente con
+    // SpreadsheetApp sin caché de Google de por medio. Si esa petición fallara (arranque en
+    // frío de Apps Script, problema de red puntual...), se cae de vuelta al CSV publicado de
+    // siempre para no dejar el editor sin datos.
+    const urlBase = (typeof window.getWebAppUrl === 'function') ? window.getWebAppUrl(modo) : '';
+    const urlCacheada = (typeof window.getCsvUrl === 'function') ? window.getCsvUrl(modo) : '';
+    if (!urlBase && !urlCacheada) return null;
 
     // OJO: no añadir cabeceras manuales aquí (Cache-Control/Pragma): fuerzan un preflight
     // CORS (OPTIONS) que el CSV publicado de Google Sheets/Apps Script no responde bien,
     // y el navegador bloquea la petición real. "no-store" ya evita la caché del navegador.
-    const resp = await fetch(url + '&zx=' + Date.now(), {
-        cache: "no-store"
-    });
+    let resp;
+    if (urlBase) {
+        try {
+            // 25 sept: con límite de tiempo (ver fetchConTimeout en utils.js) -- el endpoint en
+            // vivo de Apps Script puede quedarse colgado 15-35s antes de responder (o de
+            // fallar); con este límite, si no contesta en 8s se cae al CSV publicado en vez de
+            // esperar lo que Apps Script tarde.
+            const fetcher = (typeof window.fetchConTimeout === 'function') ? window.fetchConTimeout : fetch;
+            resp = await fetcher(`${urlBase}?accion=csv&zx=${Date.now()}`, { cache: "no-store" }, 8000);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        } catch (err) {
+            console.warn(`[Editor] Endpoint en vivo de CSV falló para ${modo}, usando el CSV publicado como respaldo:`, err.message);
+            resp = null;
+        }
+    }
+    if (!resp) {
+        if (!urlCacheada) return null;
+        resp = await fetch(urlCacheada + '&zx=' + Date.now(), { cache: "no-store" });
+    }
     const text = await resp.text();
 
     const filas = text.split(/\r?\n/).filter(f => f.trim() !== "");
     const datos = [];
+
+    // NUEVO: a diferencia de las columnas NOMBRE_* (posición fija, ver IDIOMAS_CSV_INDICES
+    // en languages.js), las columnas INFO_* son dinámicas — Código.gs solo las crea a
+    // medida que hacen falta, así que su posición varía. Se localizan por NOMBRE leyendo la
+    // fila de cabeceras (fila 0), igual que ya hace el "Ajustes Expertos" (stateContainer)
+    // con su propio CSV. Solo se usan para decidir si ya hay Info generada (y su huella de
+    // cambio) antes de disparar la generación automática — ver aplicarCambiosPlato().
+    const cabecerasCsv = filas.length > 0 ? filas[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(h => superLimpiar(h)) : [];
+    const idxInfoPorIdioma = {};
+    if (window.IDIOMAS_ORDEN) {
+        window.IDIOMAS_ORDEN.forEach(lang => {
+            idxInfoPorIdioma[lang] = cabecerasCsv.findIndex(h => h && h.toUpperCase() === ('INFO_' + lang.toUpperCase()));
+        });
+    }
+    const idxInfoHashFicha = cabecerasCsv.findIndex(h => h && h.toUpperCase() === 'INFO_HASH_FICHA');
 
     filas.forEach((f, i) => {
         if (i === 0) return;
@@ -180,7 +280,17 @@ async function fetchYParsearDatos(modo) {
                 alergenos: superLimpiar(c[6]),
                 // NUEVO: posiciones desactivadas de "Opciones del plato" (ver languages.js).
                 opcionesInactivas: superLimpiar(c[window.IDX_OPCIONES_INACTIVAS] || ""),
-                // NUEVO (8 septiembre): precio opcional de "1/2 ración" (ver languages.js > IDX_PRECIO_MEDIA).
+                // NUEVO: Info (descripción + preguntas/respuestas) ya generada, por idioma —
+                // JSON en bruto tal cual viene de la hoja (se parsea solo cuando hace falta).
+                info: {},
+                infoHashFicha: (idxInfoHashFicha !== -1 && c[idxInfoHashFicha] !== undefined) ? superLimpiar(c[idxInfoHashFicha]) : "",
+                // NUEVO: viene del CSV de la hoja, así que su fila YA existe de verdad en
+                // Google Sheets — ver filaExisteEnHoja en prepararNuevoPlato()/enviarAlExcel()/
+                // aplicarCambiosPlato(), que usan este flag (no "esNuevoPlato") para decidir si
+                // es seguro llamar ya al endpoint de Info automática o hay que esperar a que
+                // "GUARDAR CAMBIOS EN WEB" cree la fila primero.
+                filaExisteEnHoja: true,
+                // Precio opcional de "1/2 ración" (ver languages.js > IDX_PRECIO_MEDIA).
                 precioMedia: superLimpiar(c[window.IDX_PRECIO_MEDIA] || "")
             };
 
@@ -190,6 +300,8 @@ async function fetchYParsearDatos(modo) {
                     if (index !== undefined && c[index] !== undefined) {
                         item[lang] = superLimpiar(c[index]);
                     }
+                    const idxInfo = idxInfoPorIdioma[lang];
+                    item.info[lang] = (idxInfo !== undefined && idxInfo !== -1 && c[idxInfo] !== undefined) ? superLimpiar(c[idxInfo]) : "";
                 });
             }
             datos.push(item);
@@ -199,13 +311,16 @@ async function fetchYParsearDatos(modo) {
     return datos;
 }
 
-// NUEVO: caché en memoria por restaurante + de-duplicación de cargas en marcha. Antes, cada
-// cambio de pestaña (aunque fuera dentro del mismo restaurante, p.ej. de "1. Editor Carta RG"
-// a "2. Sugerencias RG") volvía a descargar el CSV entero y a pedir el estado de categorías,
-// aunque ya se hubieran cargado hace un instante. Ahora, si este modo ya está en caché se
-// devuelve directamente, y si ya hay una descarga en marcha para ese modo (venga de donde
-// venga la llamada) se espera esa misma en vez de lanzar una segunda en paralelo. Devuelve el
-// array de platos, o null si el modo no tiene URL de CSV configurada.
+// CORREGIDO: fallo detectado por HAR — al abrir la web, la carga automática de RG (nueva) y
+// un clic real del usuario en "1. Editor Carta RG" (por costumbre, mientras la automática
+// todavía estaba en marcha) acababan lanzando DOS descargas del CSV de RG en paralelo, porque
+// cargar() solo comprobaba la precarga en segundo plano de OTRO restaurante, pero no se
+// protegía a sí mismo si se le llamaba dos veces seguidas para el MISMO restaurante antes de
+// terminar. Ahora TODA petición de datos de un restaurante (la del usuario mirando la pantalla
+// Y la precarga en segundo plano del otro) pasa por este único punto, que primero devuelve la
+// caché si ya existe y si no comprueba si YA hay una carga en marcha para ese modo — sea cual
+// sea su origen — y se limita a esperar esa misma, en vez de arrancar una segunda en paralelo.
+// Devuelve el array de platos, o null si el modo no tiene URL de CSV configurada.
 async function cargarYCachearModo(modo) {
     window.__datosLocalesCache = window.__datosLocalesCache || {};
     window.__prefetchEnCurso = window.__prefetchEnCurso || {};
@@ -220,8 +335,8 @@ async function cargarYCachearModo(modo) {
 
         console.log(`[Editor] Cargando datos para ${modo} (${getModoAlias(modo)})... (Zona de peligro: ${isConsistencyZone})`);
 
-        // NUEVO: el fetch + parseo del CSV vive en fetchYParsearDatos (ver esa función).
-        // Devuelve null si el modo no tiene URL configurada.
+        // NUEVO: el fetch + parseo del CSV vive en fetchYParsearDatos (ver esa función para el
+        // detalle de columnas INFO_*, etc). Devuelve null si el modo no tiene URL configurada.
         const datos = await fetchYParsearDatos(modo);
         if (datos === null) return null;
 
@@ -245,10 +360,15 @@ async function cargarYCachearModo(modo) {
         console.log(`[Editor] ${datos.length} platos cargados (${modo}).`);
         window.__datosLocalesCache[modo] = datos;
 
-        // NUEVO: el estado de pestañas activas/inactivas se pide en paralelo, SIN esperarlo
-        // (ver cargarEstadoCategoriasEnSegundoPlano) — el menú ya puede pintarse con lo que
-        // trae el CSV aunque Apps Script tarde en responder (arranque en frío), y en cuanto
-        // llegue se corrige solo el estado de los interruptores, sin bloquear nada más.
+        // MODIFICADO (2026.09.18): antes se esperaba aquí (`await`) a que Apps Script
+        // respondiera el estado de pestañas activas/inactivas antes de dar los platos por
+        // listos — y esa llamada puede tardar varios segundos (arranque en frío de Apps
+        // Script), dejando el overlay "Cargando datos..." puesto de más sin motivo, aunque el
+        // menú (con todo su contenido) ya estuviera listo desde el CSV. Ahora esa comprobación
+        // se lanza en paralelo SIN esperarla — el menú se pinta ya con el último estado de
+        // interruptores conocido (o todos activados, si es la primera vez que se carga este
+        // restaurante en esta pestaña del navegador) — y, en cuanto responda, se corrige solo
+        // ese detalle (ver cargarEstadoCategoriasEnSegundoPlano). No bloquea nada más.
         cargarEstadoCategoriasEnSegundoPlano(modo);
 
         return datos;
@@ -262,17 +382,43 @@ async function cargarYCachearModo(modo) {
     }
 }
 
-// NUEVO: pide el estado real de pestañas/categorías activas-inactivas sin bloquear la
-// aparición del menú (ver el comentario en cargarYCachearModo). Cuando responde, si el
-// usuario sigue viendo ese mismo restaurante en este momento, se repinta el menú
+// NUEVO (2026.09.18): pide el estado real de pestañas/categorías activas-inactivas sin
+// bloquear la aparición del menú (ver el comentario en cargarYCachearModo). Cuando responde,
+// si el usuario sigue viendo ese mismo restaurante en este momento, se repinta el menú
 // (renderizar) para que los interruptores de cada categoría reflejen ya el estado real
-// guardado en Apps Script — el resto del menú no cambia con ese repintado.
+// guardado en Apps Script — el resto del menú (platos, contenido, estructura) no cambia con
+// este repintado, así que no hay ningún parpadeo salvo, como mucho, en esos interruptores.
 async function cargarEstadoCategoriasEnSegundoPlano(modo) {
     await cargarEstadoCategorias(modo);
     if (window.currentMode === modo && typeof renderizar === 'function') {
         renderizar();
     }
 }
+
+// NUEVO: precarga en segundo plano los datos de OTRO restaurante (el que no se está viendo
+// en este momento), para que al cambiar de pestaña ya estén listos en window.__datosLocalesCache
+// y cargar() los sirva al instante. Se puede desactivar desde el checkbox "⚡ Precargar" de la
+// cabecera — la preferencia se recuerda en este navegador (localStorage), no en el servidor.
+async function precargarEnSegundoPlano(modo) {
+    window.__datosLocalesCache = window.__datosLocalesCache || {};
+    if (window.__datosLocalesCache[modo]) return;
+    if (typeof isRestauranteA === 'function' && !isRestauranteA(modo)) return;
+    try {
+        if (localStorage.getItem('precargaSegundoPlanoDesactivada') === '1') return;
+    } catch (e) { /* si localStorage no está disponible, seguimos con la precarga activada */ }
+
+    try {
+        const datos = await cargarYCachearModo(modo);
+        if (datos !== null) {
+            console.log(`[Editor] Precarga en segundo plano completada: ${datos.length} platos (${modo}).`);
+        }
+    } catch (e) {
+        // Una precarga fallida no es un error visible para el usuario: si de verdad entra
+        // en esa pestaña, cargar() simplemente hará la carga normal en ese momento.
+        console.warn(`[Editor] Precarga en segundo plano de ${modo} falló (sin problema):`, e.message);
+    }
+}
+window.precargarEnSegundoPlano = precargarEnSegundoPlano;
 
 async function cargar(retryCount = 0, forzarRecarga = false) {
     const modo = window.currentMode || 'restaurante001';
@@ -291,13 +437,15 @@ async function cargar(retryCount = 0, forzarRecarga = false) {
     }
 
     // NUEVO: caché en memoria por restaurante (y de-duplicación de cargas en marcha — ver
-    // cargarYCachearModo). Si este modo ya se cargó una vez en esta sesión del navegador, se
-    // reutilizan esos datos directamente — son los mismos objetos que editan las funciones de
-    // guardado (push/splice sobre datosLocales), así que la caché ya refleja cualquier cambio
-    // hecho desde este editor. Lo único que NO recoge es un cambio hecho DIRECTAMENTE en la
-    // hoja de Google Sheets (por otra persona u otro dispositivo) mientras este restaurante ya
-    // estaba en caché aquí — para eso hay que recargar la página entera (F5), o pasar
-    // forzarRecarga=true para vaciar la caché de este modo antes de pedir los datos de nuevo.
+    // cargarYCachearModo). Antes, cada vez que se cruzaba de RG a US Open (o al revés) se
+    // volvía a pedir el CSV entero (~2,7 MB) y el estado de categorías a Google Sheets/Apps
+    // Script, aunque ya se hubiera cargado ese mismo restaurante hace un momento. Ahora, si
+    // este modo ya se cargó una vez en esta sesión del navegador, se reutilizan esos datos
+    // directamente — son los mismos objetos que editan las funciones de guardado (push/splice
+    // sobre datosLocales), así que la caché ya refleja cualquier cambio hecho desde este editor.
+    // Lo único que NO recoge es un cambio hecho DIRECTAMENTE en la hoja de Google Sheets (por
+    // otra persona u otro dispositivo) mientras este restaurante ya estaba en caché aquí — para
+    // eso hay que recargar la página entera (F5).
     window.__datosLocalesCache = window.__datosLocalesCache || {};
     if (forzarRecarga) delete window.__datosLocalesCache[modo];
 
@@ -386,11 +534,23 @@ function renderPlatoItemHtml(p) {
     // había tras los separadores "//" — la uva/detalle en vinos (id >= 13000), o las opciones
     // (segunda línea de ingredientes/sabores intercambiables) en platos — que antes solo era
     // visible abriendo el editor de cada elemento.
-    const esVino = (p.id >= 13000);
+    const esVino = esIdVino(p.id); // MODIFICADO (30 oct): excluye la Hoja Postres 16xxx
     const desglosado = desglosarNombre(p.es);
     const nombreLimpio = desglosado.nombre;
     const detalle = esVino ? desglosado.uvas : desglosado.opciones.join(' // ');
     const htmlDetalle = detalle ? `<span class="plato-detalle">${detalle}</span>` : "";
+
+    // NUEVO: aviso discreto mientras la Info (descripción + preguntas/respuestas) de este plato
+    // se está generando/guardando automáticamente en segundo plano — ver
+    // generarInfoAutomaticaPlato() (app.js). No bloquea nada, es solo visual.
+    const generandoInfo = window.platosGenerandoInfo && window.platosGenerandoInfo.has(p.id);
+    const htmlGenerandoInfo = generandoInfo ? `<span class="badge-generando-info" title="Generando la Info (descripción + preguntas/respuestas) con IA en segundo plano...">🤖 generando info…</span>` : "";
+
+    // NUEVO: si la Info ES/EN se generó bien pero falló la traducción automática al resto de
+    // idiomas (ver generarInfoOtrosIdiomasPlato()), se avisa aquí mismo con un botón para
+    // reintentar SOLO ese paso (no hace falta regenerar ES/EN de nuevo ni tocar nada más).
+    const infoOtrosFallido = !generandoInfo && window.platosInfoOtrosIdiomasFallidos && window.platosInfoOtrosIdiomasFallidos.has(p.id);
+    const htmlInfoOtrosFallido = infoOtrosFallido ? `<span class="badge-info-otros-fallido" title="La Info se generó en ES/EN, pero falló la traducción automática al resto de idiomas. Pulsa para reintentar solo ese paso.">⚠️ faltan otros idiomas <button type="button" class="btn-reintentar-info-otros" onclick="event.stopPropagation(); reintentarInfoOtrosIdiomasPlato(${p.id});">🔄 reintentar</button></span>` : "";
 
     return `<div class="plato-item">
         <div class="plato-orden-btns">
@@ -400,6 +560,8 @@ function renderPlatoItemHtml(p) {
         <div class="plato-info">
             <span class="plato-nombre">${nombreLimpio}</span>
             ${htmlDetalle}
+            ${htmlGenerandoInfo}
+            ${htmlInfoOtrosFallido}
             <div style="font-size: 0.7rem; color: #7f8c8d; margin-top: 4px; display: flex; gap: 10px; align-items: center;">${htmlCarpetaPC} ${htmlImagenPC}</div>
         </div>
         <div class="plato-meta-footer">
@@ -657,7 +819,7 @@ function abrirEditor(id, esNuevo = false) {
 
     esNuevoPlato = esNuevo;
     platoEditandoId = id;
-    const esVino = (id >= 13000);
+    const esVino = esIdVino(id); // MODIFICADO (30 oct)
     const esCroqueta = esRangoCroquetasRG(id);
     const esCroquetaVeg = esCroqueta && id >= 12200;
     
@@ -718,10 +880,10 @@ function abrirEditor(id, esNuevo = false) {
     const editPrecio = document.getElementById('edit-precio');
     if (editPrecio) editPrecio.value = p.precio;
 
-    // NUEVO (8 septiembre): precio opcional de "1/2 ración" — vacío si el plato no la tiene.
+    // Precio opcional de "1/2 ración" — vacío si el plato no la tiene.
     const editPrecioMedia = document.getElementById('edit-precio-media');
     if (editPrecioMedia) editPrecioMedia.value = p.precioMedia || '';
-
+    
     const editImagen = document.getElementById('edit-imagen');
     if (editImagen) editImagen.value = p.imagen;
     
@@ -745,6 +907,13 @@ function abrirEditor(id, esNuevo = false) {
         }
         alergenosGrid.innerHTML = alergenosHtml;
     }
+
+    // NUEVO: repinta la consola de Info automática (ver logInfoAutomatica() más abajo) con el
+    // historial de ESTE plato — así, si la generación se disparó/siguió en segundo plano tras
+    // cerrar el editor la última vez, al reabrirlo se ve igualmente qué pasó (éxito o error).
+    // Un plato recién creado (esNuevo) no tiene historial todavía: queda vacío (ver placeholder
+    // por CSS en .consola-info-automatica:empty).
+    renderConsolaInfoPlato(id);
 
     // La rueda de solo activar/desactivar de antes se sustituyó por la lista editable de
     // ingredientes — ver aplicarVisibilidadModoIngredientes()/renderIngredientesPlato() más
@@ -931,7 +1100,7 @@ function comprobarRequisitosTraduccion() {
 // tenía ui-batch-nombres.js, esto usa reconstruirNombreConOpciones() (utils.js) en vez de
 // reconstruir el texto a mano.
 function construirTextoCompletoParaTraducir(l) {
-    const esVino = (platoEditandoId >= 13000);
+    const esVino = esIdVino(platoEditandoId); // MODIFICADO (30 oct)
     const nom = (document.getElementById(`edit-${l}`)?.value || "").trim();
 
     if (esVino) {
@@ -955,7 +1124,7 @@ function construirTextoCompletoParaTraducir(l) {
 
 async function generarTraduccionEN() {
     const nombreEs = document.getElementById('edit-es').value.trim();
-    const esVino = (platoEditandoId >= 13000);
+    const esVino = esIdVino(platoEditandoId); // MODIFICADO (30 oct)
 
     if (!nombreEs) { alert("❌ Debes introducir primero el nombre en Español."); return; }
 
@@ -967,19 +1136,20 @@ async function generarTraduccionEN() {
     const originalText = btn.innerText;
     btn.innerText = "🇬🇧 Generando opciones...";
     btn.disabled = true;
-    // NUEVO: rueda de carga a pantalla completa mientras se espera a Gemini -- este paso puede
-    // tardar bastante si hay que reintentar con varias claves (ver mostrarOverlayCarga arriba).
+    // NUEVO (18 sept): rueda de carga a pantalla completa mientras se espera a Gemini -- este
+    // paso puede tardar bastante si hay que reintentar con varias claves (ver mostrarOverlayCarga
+    // más arriba), y sin esto el único aviso era el texto del propio botón, poco visible.
     mostrarOverlayCarga("🇬🇧 Generando opciones de traducción...");
 
     const textoCompletoEs = construirTextoCompletoParaTraducir('es').replace(/"/g, "'");
     // Prompt centralizado en prompts.js (window.PROMPTS.opcionesEN)
     const instruccion = window.PROMPTS.opcionesEN(textoCompletoEs, esVino);
-    
-    let exito = false; 
-    let intentos = 0; 
-    let ultimoError = ""; 
+
+    let exito = false;
+    let intentos = 0;
+    let ultimoError = "";
     let opciones = {};
-    
+
     while (!exito && intentos < keys.length) {
         try {
             const apiKey = keys[intentos];
@@ -1008,21 +1178,21 @@ async function generarTraduccionEN() {
                     throw new Error("El JSON no contiene las claves esperadas."); 
                 } 
             } 
-        } catch(err) { 
-            ultimoError = err.message; 
-            intentos++; 
-        } 
+        } catch(err) {
+            ultimoError = err.message;
+            intentos++;
+        }
     }
 
     ocultarOverlayCarga();
 
     if (exito) {
-        // Traído de Web Editor Pro v3: si el prompt detectó una posible falta de ortografía en
-        // el nombre en español (ver "correccion" en prompts.js > opcionesEN), se ofrece antes
-        // una confirmación editable "¿Quisiste decir...?" -- nunca se aplica a vinos (nombres
-        // propios/marca). Si el usuario acepta, se corrige el campo 'edit-es' antes de mostrar
-        // las opciones de traducción (que ya son válidas de todos modos, generadas entendiendo
-        // el plato pese a la posible falta).
+        // NUEVO (18 sept): si el prompt detectó una posible falta de ortografía en el nombre en
+        // español (ver "correccion" en prompts.js > opcionesEN), se ofrece antes una confirmación
+        // editable "¿Quisiste decir...?" -- igual que ya hacía la web de cartelitos. Nunca se
+        // aplica a vinos (nombres propios/marca). Si el usuario acepta, se corrige el campo
+        // 'edit-es' antes de mostrar las opciones de traducción (que ya son válidas de todos
+        // modos, generadas entendiendo el plato pese a la posible falta).
         if (!esVino && opciones.correccion && opciones.correccion.hayError && opciones.correccion.texto) {
             const corregido = await mostrarCorreccionOrtografiaEN(opciones.correccion.texto, (document.getElementById('edit-es') || {}).value);
             if (corregido) {
@@ -1039,10 +1209,10 @@ async function generarTraduccionEN() {
     btn.disabled = false;
 }
 
-// Traído de Web Editor Pro v3: confirmación "¿Quisiste decir...?" para la falta de ortografía
-// que puede detectar prompts.js > opcionesEN en el nombre en español. Es una promesa que se
-// resuelve con el texto corregido (editable antes de aceptar) si el usuario acepta, o null si
-// prefiere dejarlo como estaba.
+// NUEVO (18 sept): confirmación "¿Quisiste decir...?" para la falta de ortografía que puede
+// detectar prompts.js > opcionesEN en el nombre en español. Es una promesa que se resuelve con el
+// texto corregido (editable antes de aceptar) si el usuario acepta, o null si prefiere dejarlo
+// como estaba -- mismo patrón que ya usa la web de cartelitos (WB-main/js/app.js).
 // MODIFICADO (3 nov): también enseña el texto original y el sugerido, con las palabras que
 // cambian resaltadas (rojo = lo que estaba mal, verde = la corrección).
 function resaltarDiferenciasOrtografia(a, b) {
@@ -1064,6 +1234,7 @@ function resaltarDiferenciasOrtografia(a, b) {
 }
 
 function mostrarCorreccionOrtografiaEN(textoCorregido, textoOriginal) {
+    textoCorregido = mayusculaInicial(String(textoCorregido || '').trim()); // NUEVO (3 nov)
     return new Promise(resolve => {
         const modal = document.getElementById('modal-correccion-en');
         const input = document.getElementById('correccion-en-input');
@@ -1108,11 +1279,11 @@ function abrirModalTraduccionEN(opciones) {
 
     let html = "";
     const mapaOpciones = { directa: "Directa / Literal", gastronomica: "Gastronómica / Elegante", corta: "Corta / Menú" };
-    // Traído de Web Editor Pro v3: se recorren solo las claves de traducción, EN ESTE ORDEN
-    // fijo, en vez de Object.entries(opciones) -- desde que el JSON también trae "correccion"
-    // (objeto, no texto; ver prompts.js > opcionesEN), iterar todas las claves del objeto lo
-    // pintaba como una opción más ("[object Object]"). Así además el orden de los botones queda
-    // siempre igual, sin depender del orden en que Gemini haya escrito las claves del JSON.
+    // NUEVO (18 sept): se recorren solo las claves de traducción, EN ESTE ORDEN fijo, en vez de
+    // Object.entries(opciones) -- desde que el JSON también trae "correccion" (objeto, no texto;
+    // ver prompts.js > opcionesEN), iterar todas las claves del objeto lo pintaba como una opción
+    // más ("[object Object]"). Así además el orden de los botones queda siempre igual, sin
+    // depender del orden en que Gemini haya escrito las claves del JSON.
     let index = 0;
     for (const key of ['directa', 'gastronomica', 'corta']) {
         const value = opciones[key];
@@ -1137,7 +1308,7 @@ function confirmarTraduccionEN() {
     const textoFinal = document.getElementById('editar-opcion-en').value.trim(); 
     if (!textoFinal) { alert("❌ Selecciona una opción o escribe la traducción antes de confirmar."); return; } 
     const desglosado = desglosarNombre(textoFinal); 
-    const esVino = (platoEditandoId >= 13000); 
+    const esVino = esIdVino(platoEditandoId); // MODIFICADO (30 oct) 
     const editEn = document.getElementById('edit-en'); 
     if (editEn) editEn.value = esVino ? formatWineName(desglosado.nombre) : desglosado.nombre; 
     
@@ -1158,19 +1329,19 @@ async function ejecutarTraduccionAutomatica() {
     const btn = document.getElementById('btn-autotraducir'); 
     if (!btn) return; 
     
-    const originalText = btn.innerText; 
-    btn.innerText = "✨ Traduciendo con Gemini 2.5..."; 
-    btn.disabled = true; 
-    
-    const esVino = (platoEditandoId >= 13000);
+    const originalText = btn.innerText;
+    btn.innerText = "✨ Traduciendo con Gemini 2.5...";
+    btn.disabled = true;
+
+    const esVino = esIdVino(platoEditandoId); // MODIFICADO (30 oct)
 
     let keys = [];
     if (typeof getKeys === 'function') keys = getKeys();
     if (keys.length === 0) { alert("❌ No hay API Keys de Gemini configuradas."); btn.innerText = originalText; btn.disabled = false; return; }
 
-    // NUEVO: misma rueda de carga a pantalla completa que en generarTraduccionEN() -- esta
-    // llamada traduce a todos los demás idiomas de golpe y puede tardar bastante, sobre todo
-    // si hay que reintentar con varias claves por un 503 "modelo saturado" de Gemini.
+    // NUEVO (18 sept): misma rueda de carga a pantalla completa que en generarTraduccionEN() --
+    // esta llamada traduce a ~24 idiomas de golpe y puede tardar bastante, sobre todo si hay que
+    // reintentar con varias claves por un 503 "modelo saturado" de Gemini.
     mostrarOverlayCarga("✨ Traduciendo al resto de idiomas...");
 
     const textoCompletoEs = construirTextoCompletoParaTraducir('es').replace(/"/g, "'");
@@ -1262,7 +1433,7 @@ function aplicarCambiosPlato() {
     
     if (esNuevoPlato) datosLocales.push(p);
     
-    const esVino = (platoEditandoId >= 13000);
+    const esVino = esIdVino(platoEditandoId); // MODIFICADO (30 oct)
 
     // NUEVO: nº de opciones que tenía ES ANTES de este guardado — para saber, una vez
     // reconstruido, si el modo ingredientes ha añadido o quitado alguna (ver más abajo).
@@ -1272,6 +1443,7 @@ function aplicarCambiosPlato() {
         window.IDIOMAS_ORDEN.forEach(l => {
             let nom = superLimpiar(document.getElementById(`edit-${l}`)?.value || "");
             if (esVino) nom = formatWineName(nom);
+            else nom = mayusculaInicial(nom); // NUEVO (3 nov): "ensalada verde" -> "Ensalada verde"
 
             if (esVino) {
                 // Vinos: sin cambios — un único detalle/uva editable por su propio campo.
@@ -1327,8 +1499,8 @@ function aplicarCambiosPlato() {
     p.precio = parseFloat(preVal).toFixed(2);
     if(isNaN(p.precio)) p.precio = "0.00";
 
-    // NUEVO (8 septiembre): precio opcional de "1/2 ración" — campo vacío = el plato no tiene
-    // media ración (a diferencia de Precio, aquí "" es un valor válido y distinto de "0.00").
+    // Precio opcional de "1/2 ración" — campo vacío = el plato no tiene media ración (a
+    // diferencia de Precio, aquí "" es un valor válido y distinto de "0.00").
     let preValMedia = (document.getElementById('edit-precio-media') || {}).value || "";
     preValMedia = preValMedia.trim();
     p.precioMedia = preValMedia !== "" && !isNaN(parseFloat(preValMedia)) ? parseFloat(preValMedia).toFixed(2) : "";
@@ -1355,11 +1527,366 @@ function aplicarCambiosPlato() {
     }
 
     window.hayCambiosSinGuardar = true;
-    cerrarModal('modal-editor');
+
+    // NUEVO: dispara la generación automática de la Info (descripción + preguntas/respuestas)
+    // en ES/EN y, encadenado, en el resto de idiomas — en segundo plano, sin bloquear el editor
+    // ni pedir nada más al usuario (ver generarInfoAutomaticaPlato() más abajo). CORREGIDO: la
+    // decisión de encolar YA NO se basa en "esNuevoPlato" (que solo es true la PRIMERA vez que
+    // se aplica un plato recién creado) sino en p.filaExisteEnHoja -- si el usuario reabre con la
+    // rueda ⚙️ ese mismo plato nuevo y vuelve a pulsar "Aplicar Cambios" SIN haber pulsado antes
+    // el botón grande "GUARDAR CAMBIOS EN WEB", esNuevoPlato ya es false (abrirEditor() sin
+    // esNuevo=true) pero la fila SIGUE sin existir en la hoja -- disparar ya mismo el endpoint
+    // seguro "?accion=infoplato" en ese caso fallaba en SILENCIO (Código.gs no encuentra la fila
+    // y devuelve un error, pero el fetch usa "no-cors" y el editor no puede leer esa respuesta,
+    // así que la consola mostraba "generado con éxito" aunque no se hubiera guardado nada de
+    // verdad). p.filaExisteEnHoja se pone a false al crear el plato (prepararNuevoPlato()) y solo
+    // pasa a true tras un "GUARDAR CAMBIOS EN WEB" con éxito (ver enviarAlExcel()), así que sigue
+    // encolando correctamente aunque se reabra y reaplique el mismo plato varias veces antes de
+    // guardar. Si la fila ya existe, se dispara ya mismo contra ese mismo endpoint, que solo toca
+    // la fila de ESTE plato — nunca reenvía ni toca el resto de la carta, así que no hay riesgo de
+    // pisar la Info ya generada de otros platos aunque la caché de "publicar en la web" esté
+    // desactualizada en este momento.
+    // MODIFICADO (3 nov): con la carta en datos.json (editor de la web) la Info se genera ya mismo:
+    // si el plato aún no está guardado, almacen-json la guarda aparte y la añade al guardarlo.
+    if (p.filaExisteEnHoja !== true && !(window.AlmacenJSON && window.AlmacenJSON.activo)) {
+        if (!platosPendientesInfoAlGuardar.includes(p.id)) platosPendientesInfoAlGuardar.push(p.id);
+        logInfoAutomatica(`"${p['es'] || ('ID ' + p.id)}" es un plato nuevo: su fila todavía no existe en la hoja, así que la Info se generará automáticamente en cuanto pulses "GUARDAR CAMBIOS EN WEB" (unos segundos después de guardar).`, p.id);
+        cerrarModalPlatoTrasInfoSiSigueAbierto(p);
+    } else {
+        dispararGeneracionInfoAutomatica(p);
+        // NUEVO: ya NO se cierra el modal al instante en este caso (fila ya existente) — se deja
+        // abierto para que el usuario pueda ver en vivo, en la consola de debajo de "Alérgenos",
+        // si la generación automática de Info tiene éxito o falla (antes se cerraba enseguida y
+        // ese aviso solo aparecía en la consola de "Ajustes Expertos", invisible desde aquí). Los
+        // cambios ya están aplicados en memoria a esta altura, así que cerrar con "Cancelar" en
+        // cualquier momento no deshace nada; la generación sigue en segundo plano igualmente
+        // aunque se cierre antes de que termine (y su resultado queda guardado para la próxima
+        // vez que se reabra el editor de este plato, ver abrirEditor() > renderConsolaInfoPlato()).
+        // El propio generarInfoAutomaticaPlato() cierra el modal solo al terminar (ver
+        // cerrarModalPlatoTrasInfoSiSigueAbierto()).
+    }
+
     renderizar();
 }
 
-function generarMenuAgrupado() { 
+// =========================================================================================
+// NUEVO: GENERACIÓN AUTOMÁTICA DE INFO (descripción + preguntas/respuestas) AL CREAR/EDITAR UN
+// PLATO. Reutiliza los mismos prompts que ya usaba "Ajustes Expertos" (window.PROMPTS.piloto /
+// vino / infoOtrosIdiomasLote — ver prompts.js), pero para UN SOLO plato/vino a la vez, y
+// guarda el resultado con el endpoint seguro "?accion=infoplato" (Código.gs), que actualiza
+// SOLO la fila de ese plato sin tocar ni reenviar el resto de la carta.
+// =========================================================================================
+
+// Idéntico patrón de reintento-por-key que ya usaban generarTraduccionEN()/
+// ejecutarTraduccionAutomatica(), extraído aquí para reutilizarlo. Devuelve el JSON ya
+// parseado, o null si ninguna key tuvo éxito (nunca lanza excepción: este flujo es 100% en
+// segundo plano y no debe interrumpir al usuario con ningún alert()).
+async function llamarGeminiConReintentos(instruccion, keys) {
+    let intentos = 0;
+    while (intentos < keys.length) {
+        try {
+            const apiKey = keys[intentos];
+            const response = await fetch(`${GEMINI_ENDPOINT_URL}?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: instruccion }] }], generationConfig: { maxOutputTokens: window.GEMINI_MAX_OUTPUT_TOKENS || 65536, thinkingConfig: { thinkingLevel: window.GEMINI_THINKING_LEVEL || "medium" } } })
+            });
+            const data = await response.json();
+            if (!response.ok || data.error) {
+                if (data.error?.code === 429 || response.status === 429) await new Promise(r => setTimeout(r, 3000));
+                intentos++;
+                continue;
+            }
+            const txt = (typeof extraerTextoCompletoRespuesta === 'function') ? extraerTextoCompletoRespuesta(data.candidates?.[0]) : data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (txt) return extraerJSON(txt);
+            intentos++;
+        } catch (err) {
+            intentos++;
+        }
+    }
+    return null;
+}
+
+// Envía al backend (Código.gs, acción "infoplato") la Info ya generada de UN plato concreto,
+// para uno o varios idiomas a la vez. "no-cors" (igual que el resto de guardados del editor)
+// significa que no se puede leer la respuesta real — se asume éxito de forma optimista, igual
+// que ya hace enviarAlExcel()/toggleCategoriaPestana().
+// NUEVO: parámetro opcional hashFicha — la huella (NOMBRE_ES+ALERGENOS_COD) usada para generar
+// esta ficha, para que Código.gs la guarde en INFO_HASH_FICHA (ver generarInfoAutomaticaPlato()
+// más abajo). Antes esta huella solo quedaba en memoria del navegador (p.infoHashFicha) y nunca
+// se guardaba de verdad en la hoja, así que tras recargar la página se perdía siempre y
+// CUALQUIER edición de un plato ya con ficha (aunque solo cambiara el precio, que ni forma
+// parte de la huella) disparaba una regeneración completa con IA solo por no encontrar huella
+// con la que comparar. infoPorIdioma puede ir vacío ({}) cuando lo único que hay que guardar es
+// la huella (caso "bautizo", ver más abajo).
+async function guardarInfoPlatoEnBackend(id, infoPorIdioma, hashFicha) {
+    try {
+        const url = getWebAppUrlSafe();
+        if (!url) return;
+        const body = { id: id, info: infoPorIdioma || {} };
+        if (hashFicha) body.hashFicha = hashFicha;
+        await fetch(url + '?accion=infoplato', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+    } catch (err) {
+        console.warn('[Editor] Error al guardar Info automática en el backend:', err);
+    }
+}
+
+// Añade/quita el ID del Set de "generando ahora mismo" y repinta para que
+// renderPlatoItemHtml() muestre/oculte el aviso "🤖 generando info…".
+function marcarPlatoGenerandoInfo(id, activo) {
+    if (activo) window.platosGenerandoInfo.add(id); else window.platosGenerandoInfo.delete(id);
+    renderizar();
+}
+
+// Punto de entrada "fire-and-forget" llamado desde aplicarCambiosPlato()/enviarAlExcel(): no se
+// espera (await) su resultado a propósito, para no bloquear el editor ni el guardado normal.
+function dispararGeneracionInfoAutomatica(p) {
+    generarInfoAutomaticaPlato(p);
+}
+
+// Carpetas de bebidas simples que "Ajustes Expertos" también omite de la generación de Info
+// (café, refrescos, cerveza) — mismo criterio aquí para no generar fichas de sabor a un café.
+const CARPETAS_SIN_IA_INFO = ['cafe', 'refrescos', 'cerveza'];
+
+// NUEVO: historial de mensajes de la generación automática de Info, por ID de plato (ver
+// logInfoAutomatica()/renderConsolaInfoPlato() más abajo). Se guarda SIEMPRE (haya o no un
+// modal abierto en ese momento) para poder pintarlo en cuanto el usuario abra/reabra el editor
+// de ESE plato concreto — ver abrirEditor(), que llama a renderConsolaInfoPlato(id).
+window.logsInfoPorPlato = window.logsInfoPorPlato || {};
+
+// NUEVO: consola visible DENTRO del propio modal de crear/editar plato, justo debajo de
+// "Alérgenos" (ver #consola-info-plato en index.html, dentro de .modal-col-derecha). Antes todo
+// el rastro de la generación automática de Info solo se veía con UI.log(), que escribe en la
+// consola de "Ajustes Expertos" — invisible mientras se está creando/editando un plato, que es
+// justo cuando el usuario quiere ver si está funcionando. Cada línea se guarda en
+// window.logsInfoPorPlato[idPlato] (para poder repintarla si se reabre el editor de ese plato
+// más tarde, ya que la generación sigue en marcha en segundo plano aunque se cierre el modal) y,
+// si el modal está abierto AHORA MISMO para ese mismo plato (platoEditandoId === idPlato), se
+// añade también en vivo a la consola visible.
+function logInfoAutomatica(mensaje, idPlato, esError = false) {
+    console.log(`[Info automática] ${mensaje}`);
+    if (typeof UI !== 'undefined' && typeof UI.log === 'function') UI.log(`[Info automática] ${mensaje}`);
+
+    const hora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const historial = window.logsInfoPorPlato[idPlato] = window.logsInfoPorPlato[idPlato] || [];
+    historial.push({ hora, mensaje, esError });
+    while (historial.length > 20) historial.shift(); // no crecer indefinidamente por plato
+
+    if (typeof platoEditandoId !== 'undefined' && platoEditandoId === idPlato) {
+        renderConsolaInfoPlato(idPlato);
+    }
+}
+
+// Repinta la consola del modal (#consola-info-plato) con el historial guardado de ESE plato —
+// se llama al abrir/reabrir el editor de un plato (abrirEditor()) y, en vivo, desde
+// logInfoAutomatica() mientras el modal de ese mismo plato sigue abierto.
+function renderConsolaInfoPlato(idPlato) {
+    const consola = document.getElementById('consola-info-plato');
+    if (!consola) return;
+    const historial = window.logsInfoPorPlato[idPlato] || [];
+    consola.innerHTML = "";
+    historial.forEach(linea => {
+        const div = document.createElement('div');
+        div.className = 'consola-info-automatica-linea' + (linea.esError ? ' es-error' : '');
+        div.textContent = `[${linea.hora}] ${linea.mensaje}`;
+        consola.appendChild(div);
+    });
+    consola.scrollTop = consola.scrollHeight;
+}
+
+async function generarInfoAutomaticaPlato(p) {
+    try {
+        if (!p || isNaN(p.id) || p.id < 13) return; // ids 1-12 son cabeceras de categoría heredadas, sin info real
+        const carpetaValor = (p.carpeta || "").trim().toLowerCase();
+        if (CARPETAS_SIN_IA_INFO.includes(carpetaValor)) return;
+
+        const esVino = esIdVino(p.id); // MODIFICADO (30 oct): excluye la Hoja Postres 16xxx
+        const nombreEs = p['es'] || "";
+        if (!nombreEs) return;
+
+        const alergenosValor = p.alergenos || "";
+        const tieneAlergenos = !!(alergenosValor && alergenosValor.toUpperCase() !== 'NINGUNO' && alergenosValor !== '0');
+        const nuevoHashFicha = (typeof calcularHashContenido === 'function') ? calcularHashContenido(`${nombreEs}|${alergenosValor}`) : "";
+
+        p.info = p.info || {};
+        const infoCompleta = !!(p.info.es && p.info.en);
+
+        if (infoCompleta && p.infoHashFicha && p.infoHashFicha === nuevoHashFicha) {
+            logInfoAutomatica(`"${nombreEs}" (ID ${p.id}) ya tenía su ficha generada y ni el nombre ni los alérgenos han cambiado: no se regenera.`, p.id);
+            return;
+        }
+
+        // NUEVO (fix "se queda regenerando al tocar el precio"): la ficha ya existe pero nunca
+        // se llegó a guardar su huella en la hoja (platos con Info generada antes de que
+        // existiera este control, o cuyo guardado de huella se perdió por lo que sea — ver
+        // guardarInfoPlatoEnBackend()/Código.gs). Antes esto se trataba igual que "la ficha está
+        // desactualizada" y disparaba una regeneración completa con IA en CUALQUIER "Aplicar
+        // Cambios" del plato (precio incluido, que ni siquiera forma parte de esta huella).
+        // Igual que ya hace "Revisar y Corregir Consistencia" (ui-batch-revision.js) con las
+        // filas "nunca revisadas": se asume que la ficha actual sigue siendo válida y solo se
+        // "bautiza" (se calcula y se guarda la huella ahora), sin tocar el contenido ni llamar a
+        // Gemini. Si el nombre/alérgenos SÍ han cambiado de verdad, esto no aplica (infoCompleta
+        // sería true pero también lo sería más abajo con hash distinto solo si ya había huella
+        // guardada — aquí, sin huella guardada, no hay forma de saber si cambiaron, así que se
+        // prioriza no gastar IA de más; "Revisar y Corregir Consistencia" sigue disponible para
+        // una auditoría explícita si se sospecha de un desajuste real).
+        if (infoCompleta && !p.infoHashFicha) {
+            p.infoHashFicha = nuevoHashFicha;
+            window.hayCambiosSinGuardar = true;
+            logInfoAutomatica(`"${nombreEs}" (ID ${p.id}) ya tenía su ficha generada pero le faltaba la huella de control: guardada ahora sin regenerar nada.`, p.id);
+            guardarInfoPlatoEnBackend(p.id, {}, nuevoHashFicha);
+            return;
+        }
+
+        let keys = [];
+        if (typeof getKeys === 'function') keys = getKeys();
+        if (keys.length === 0) {
+            logInfoAutomatica(`No hay ninguna API Key de Gemini configurada — no se puede generar la Info de "${p['es'] || ('ID ' + p.id)}" automáticamente. Añade al menos una en "Ajustes Expertos".`, p.id, true);
+            return;
+        }
+
+        marcarPlatoGenerandoInfo(p.id, true);
+        logInfoAutomatica(`Generando ficha ES/EN de "${nombreEs}" (ID ${p.id})...`, p.id);
+        mostrarOverlayInfoPlato(p, `Generando la Info (1/2: ES/EN)...`);
+
+        // --- Paso A: INFO_ES + INFO_EN (mismo prompt que "Generar Info Platos ES/EN", 1 plato) ---
+        const promptPiloto = esVino ? window.PROMPTS.vino(nombreEs) : window.PROMPTS.piloto(nombreEs, tieneAlergenos, alergenosValor);
+        const resultadoEsEn = await llamarGeminiConReintentos(promptPiloto, keys);
+        if (!resultadoEsEn || !resultadoEsEn.es || !resultadoEsEn.en) {
+            logInfoAutomatica(`No se pudo generar la ficha ES/EN de "${nombreEs}" (ID ${p.id}) — puede que ninguna API Key haya respondido bien (cuota agotada, key inválida...). Puedes generarla luego a mano desde "Ajustes Expertos".`, p.id, true);
+            return;
+        }
+
+        // NUEVO: a propósito NO se toca el nombre en inglés (parsed.nombre_en) desde aquí — el
+        // editor ya tiene su propio flujo manual para elegir el nombre EN ("🇬🇧 Generar EN",
+        // con 3 estilos a elegir), y pisarlo en silencio desde este proceso de fondo iría en
+        // contra de esa elección del usuario.
+        p.info.es = JSON.stringify(resultadoEsEn.es);
+        p.info.en = JSON.stringify(resultadoEsEn.en);
+        p.infoHashFicha = nuevoHashFicha;
+        window.hayCambiosSinGuardar = true;
+
+        await guardarInfoPlatoEnBackend(p.id, { es: resultadoEsEn.es, en: resultadoEsEn.en }, nuevoHashFicha);
+        logInfoAutomatica(`Ficha ES/EN guardada para "${nombreEs}" (ID ${p.id}). Traduciendo al resto de idiomas...`, p.id);
+        if (window.__overlayInfoPlato === p.id) mostrarOverlayInfoPlato(p, `Traduciendo la Info (2/2: resto de idiomas)...`);
+
+        // --- Paso B: encadenado, resto de idiomas (mismo prompt que "Generar Info Platos Otros
+        // Idiomas", 1 plato) — traduce fielmente la ficha ES/EN recién generada, no redacta contenido nuevo.
+        const otrosOk = await generarInfoOtrosIdiomasPlato(p, keys, resultadoEsEn.es, resultadoEsEn.en);
+
+        logInfoAutomatica(otrosOk
+            ? `Ficha generada y guardada en TODOS los idiomas para "${nombreEs}" (ID ${p.id}).`
+            : `ES/EN guardados para "${nombreEs}" (ID ${p.id}), pero falló la traducción al resto de idiomas. Aviso "⚠️ faltan otros idiomas" en su ficha del Editor.`,
+            p.id, !otrosOk);
+    } catch (err) {
+        console.warn('[Editor] Error en generación automática de Info:', err);
+        if (p) logInfoAutomatica(`Error inesperado generando la Info de "${p['es'] || ('ID ' + p.id)}": ${err && err.message ? err.message : err}`, p.id, true);
+    } finally {
+        marcarPlatoGenerandoInfo(p.id, false);
+        ocultarOverlayInfoPlato(p);
+        cerrarModalPlatoTrasInfoSiSigueAbierto(p);
+    }
+}
+
+// NUEVO: si el usuario dejó el editor de ESTE plato abierto viendo la consola (ver
+// aplicarCambiosPlato(), que ya no lo cierra al instante en un plato existente), se cierra solo
+// un par de segundos después de terminar la generación automática de Info -- da tiempo de sobra
+// a leer el último mensaje sin obligar a pulsar "Cancelar" a mano cada vez. Si el usuario ya lo
+// cerró él mismo, o mientras tanto abrió el editor de OTRO plato, no hace nada.
+function cerrarModalPlatoTrasInfoSiSigueAbierto(p) {
+    if (!p || typeof platoEditandoId === 'undefined' || platoEditandoId !== p.id) return;
+    const modal = document.getElementById('modal-editor');
+    if (!modal || modal.style.display === 'none') return;
+    setTimeout(() => {
+        if (platoEditandoId === p.id) cerrarModal('modal-editor');
+    }, 1800);
+}
+
+// NUEVO: Paso B extraído a su propia función para poder reutilizarlo tanto encadenado desde
+// generarInfoAutomaticaPlato() (recién generado ES/EN) como desde un reintento manual posterior
+// (reintentarInfoOtrosIdiomasPlato(), botón "🔄 reintentar" del aviso "⚠️ faltan otros idiomas").
+// infoEsObj/infoEnObj deben ser objetos ya parseados (no JSON.stringify-ados). Reintenta hasta
+// MAX_INTENTOS_OTROS veces (fallos puntuales: 429, JSON truncado por el propio modelo, etc.)
+// antes de darse por vencido; si al final falla, marca el plato en
+// window.platosInfoOtrosIdiomasFallidos para que quede visible en su ficha. Devuelve true/false.
+async function generarInfoOtrosIdiomasPlato(p, keys, infoEsObj, infoEnObj) {
+    const esVino = esIdVino(p.id); // MODIFICADO (30 oct): excluye la Hoja Postres 16xxx
+    const idiomasObjetivo = (window.IDIOMAS_ORDEN || []).filter(l => l !== 'es' && l !== 'en');
+    if (idiomasObjetivo.length === 0) { window.platosInfoOtrosIdiomasFallidos.delete(p.id); return true; }
+
+    const MAX_INTENTOS_OTROS = 2;
+    let traducciones = null;
+    for (let intento = 0; intento < MAX_INTENTOS_OTROS && !traducciones; intento++) {
+        const promptOtros = window.PROMPTS.infoOtrosIdiomasLote(
+            [{ esVino: esVino, infoEs: infoEsObj, infoEn: infoEnObj }],
+            idiomasObjetivo.map(l => l.toUpperCase())
+        );
+        const resultadoOtros = await llamarGeminiConReintentos(promptOtros, keys);
+        traducciones = resultadoOtros ? (resultadoOtros['0'] || resultadoOtros[0]) : null;
+    }
+
+    if (!traducciones) {
+        window.platosInfoOtrosIdiomasFallidos.add(p.id);
+        logInfoAutomatica(`Falló la traducción de Info al resto de idiomas del plato "${p['es'] || ''}" (ID ${p.id}) tras ${MAX_INTENTOS_OTROS} intento(s).`, p.id, true);
+        return false;
+    }
+
+    p.info = p.info || {};
+    const paraGuardar = {};
+    idiomasObjetivo.forEach(l => {
+        const valor = traducciones[l.toUpperCase()] || traducciones[l];
+        if (valor) { p.info[l] = JSON.stringify(valor); paraGuardar[l] = valor; }
+    });
+    if (Object.keys(paraGuardar).length > 0) {
+        window.hayCambiosSinGuardar = true;
+        await guardarInfoPlatoEnBackend(p.id, paraGuardar);
+    }
+    window.platosInfoOtrosIdiomasFallidos.delete(p.id);
+    return true;
+}
+
+// NUEVO: entrada manual del botón "🔄 reintentar" del aviso "⚠️ faltan otros idiomas" —
+// reintenta SOLO el Paso B (resto de idiomas) a partir de la ficha ES/EN ya guardada, sin
+// gastar otra llamada a Gemini para regenerarla ni tocar el resto de la carta.
+async function reintentarInfoOtrosIdiomasPlato(id) {
+    const p = datosLocales.find(x => x.id === id);
+    if (!p) return;
+
+    let keys = [];
+    if (typeof getKeys === 'function') keys = getKeys();
+    if (keys.length === 0) { alert('Añade al menos una API Key de Gemini en "Ajustes Expertos" antes de reintentar.'); return; }
+
+    if (!p.info || !p.info.es || !p.info.en) {
+        alert('Este plato todavía no tiene guardada su ficha ES/EN; no se puede traducir al resto de idiomas todavía.');
+        return;
+    }
+    let infoEsObj, infoEnObj;
+    try {
+        infoEsObj = JSON.parse(p.info.es);
+        infoEnObj = JSON.parse(p.info.en);
+    } catch (err) {
+        alert('La ficha ES/EN guardada de este plato no es un JSON válido; regenérala primero desde "Ajustes Expertos".');
+        return;
+    }
+
+    marcarPlatoGenerandoInfo(id, true);
+    logInfoAutomatica(`Reintentando la traducción al resto de idiomas de "${p['es'] || ''}" (ID ${id})...`, id);
+    try {
+        const ok = await generarInfoOtrosIdiomasPlato(p, keys, infoEsObj, infoEnObj);
+        if (ok) logInfoAutomatica(`Reintento correcto: "${p['es'] || ''}" (ID ${id}) ya tiene la Info en todos los idiomas.`, id);
+        if (!ok) alert('Ha vuelto a fallar la traducción al resto de idiomas. Puedes reintentarlo de nuevo, o completarla desde "Ajustes Expertos" (Paso 3).');
+    } finally {
+        marcarPlatoGenerandoInfo(id, false);
+    }
+}
+window.reintentarInfoOtrosIdiomasPlato = reintentarInfoOtrosIdiomasPlato;
+
+function generarMenuAgrupado() {
     const estructuraActual = getEstructuraActual(); 
     if (!estructuraActual) return;
     
@@ -1403,12 +1930,17 @@ function prepararNuevoPlato(baseId, folder) {
     datosTempNuevo = {
         id: nuevoId,
         precio: "0.00",
-        precioMedia: "",
         activa: true,
         carpeta: folder,
         imagen: "",
         alergenos: "",
-        opcionesInactivas: ""
+        precioMedia: "",
+        opcionesInactivas: "",
+        // NUEVO: su fila NO existe todavía en Google Sheets (solo se crea al pulsar "GUARDAR
+        // CAMBIOS EN WEB") — ver filaExisteEnHoja en cargar()/enviarAlExcel()/
+        // aplicarCambiosPlato(). Sigue en false aunque se reabra este mismo plato con la rueda
+        // ⚙️ y se pulse "Aplicar Cambios" varias veces ANTES de guardar de verdad.
+        filaExisteEnHoja: false
     };
     
     // CORREGIDO: mismo problema que en abrirEditor() — antes precargaba la imagen de croquetas
@@ -1465,12 +1997,34 @@ async function enviarAlExcel() {
         }
         
         alert(`✅ Petición enviada para ${getModoAlias(modo)}. Memoria local bloqueada por 3 min.`);
-        
+
+        // NUEVO: este guardado general acaba de crear/actualizar la fila de TODOS los platos de
+        // datosLocales en la hoja (incluidos los nuevos) — a partir de ahora es seguro llamar al
+        // endpoint de Info automática para cualquiera de ellos. Ver filaExisteEnHoja en cargar()/
+        // prepararNuevoPlato()/aplicarCambiosPlato().
+        datosLocales.forEach(p => { p.filaExisteEnHoja = true; });
+
         window.hayCambiosSinGuardar = false;
         btn.innerText = textoOriginal;
         btn.disabled = false;
         iniciarContadorOptimista(modo);
-    } catch (e) { 
+
+        // NUEVO: platos NUEVOS cuya Info automática quedó en cola (ver aplicarCambiosPlato())
+        // porque su fila todavía no existía en la hoja — ahora que este guardado ya la ha
+        // creado, se procesan. Margen de unos segundos para darle tiempo a Apps Script a
+        // terminar de escribir antes de que el endpoint seguro "?accion=infoplato" intente
+        // localizar la fila por ID.
+        if (platosPendientesInfoAlGuardar.length > 0) {
+            const idsAProcesar = platosPendientesInfoAlGuardar.slice();
+            platosPendientesInfoAlGuardar = [];
+            setTimeout(() => {
+                idsAProcesar.forEach(idPlato => {
+                    const plato = datosLocales.find(x => x.id === idPlato);
+                    if (plato) dispararGeneracionInfoAutomatica(plato);
+                });
+            }, 4000);
+        }
+    } catch (e) {
         alert("Error al intentar impactar los datos.");
         console.error("[Editor] Error de red: ", e);
         btn.disabled = false; 
@@ -1597,5 +2151,13 @@ function agregarKeyDesdeInput() {
     }
 }
 
-// Auto-invocación inicial
-cargar();
+// ELIMINADO (2026.09.18): esta "Auto-invocación inicial" (`cargar();` a pelo) se ejecutaba
+// SIEMPRE al cargar app.js, ANTES de que index.html llegase a fijar window.currentMode —
+// así que por dentro caía siempre en su valor por defecto 'restaurante001' (RG) y disparaba
+// una carga de RG *aunque el usuario tuviera oculta esa pestaña* en "👁️ Pestañas", sin pasar
+// por switchTab() (por eso tampoco mostraba el overlay "Cargando datos..." — de ahí la
+// sensación de que la web se quedaba colgada antes de que existiera ese overlay). La carga
+// inicial de verdad la dispara ahora index.html, que sí respeta qué pestaña/restaurante está
+// realmente visible antes de llamar a cargar() — ver el bloque "NUEVO: carga automática..."
+// cerca del final de index.html. Dejar esta línea aquí solo provocaba una descarga duplicada
+// e innecesaria del restaurante equivocado.
