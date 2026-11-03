@@ -316,7 +316,10 @@
                         case 'pri': lista.splice(i, 1); lista.unshift(x); break;
                         case 'off': activas.splice(i, 1); desact.push(x); break;
                         case 'on': desact.splice(i, 1); activas.push(x); break;
-                        case 'del': if (!confirm('¿Eliminar esta foto del todo?')) return; lista.splice(i, 1); break;
+                        case 'del':
+                            (window.confirmarEditor ? window.confirmarEditor('¿Eliminar esta foto del todo?') : Promise.resolve(confirm('¿Eliminar esta foto del todo?')))
+                                .then(function (ok) { if (ok) { lista.splice(i, 1); pintar(); } });
+                            return;
                         case 'rec':
                             recortar(x.fuente || x.blob, 'foto 0' + (i + 1)).then(function (r) {
                                 if (!r) return;

@@ -31,8 +31,8 @@
         salir: function () {
             var p = window.AlmacenJSON && window.AlmacenJSON.pendientes ? window.AlmacenJSON.pendientes() : {};
             var n = Object.keys(p).reduce(function (a, k) { return a + (p[k] || 0); }, 0);
-            if (n && !window.confirm('Hay ' + n + ' cambio(s) guardándose todavía. ¿Salir igualmente?')) return;
-            aLogin('');
+            if (!n) { aLogin(''); return; }
+            window.confirmarEditor('Hay ' + n + ' cambio(s) guardándose todavía. ¿Salir igualmente?').then(function (ok) { if (ok) aLogin(''); });
         },
         caducado: function (motivo) { aLogin(motivo || 'La sesión ha caducado. Vuelve a entrar.'); }
     };
@@ -65,4 +65,51 @@
         b.querySelector('button').addEventListener('click', window.AccesoEditor.salir);
         document.body.appendChild(b);
     });
+
+    // ---------- Avisos propios (3 nov) ----------
+    // Los alert()/confirm() del navegador enseñan "srcorsario.github.io dice" en la cabecera. En el
+    // editor se cambian por un cuadro propio, solo con el texto. alert() ya no bloquea (los avisos
+    // se encolan); confirmarEditor(texto) devuelve una promesa true/false.
+    var cola = [], abierto = false;
+    function estilos() {
+        if (document.getElementById('aviso-ed-css')) return;
+        var st = document.createElement('style');
+        st.id = 'aviso-ed-css';
+        st.textContent = '#aviso-ed{position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;}' +
+            '#aviso-ed .caja{background:#fff;border-radius:14px;max-width:440px;width:100%;padding:22px 22px 18px;box-shadow:0 20px 50px rgba(0,0,0,.3);font-family:Montserrat,system-ui,sans-serif;}' +
+            '#aviso-ed .txt{white-space:pre-line;color:#1e293b;font-size:.95rem;line-height:1.5;max-height:60vh;overflow:auto;}' +
+            '#aviso-ed .bts{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}' +
+            '#aviso-ed button{border-radius:8px;padding:8px 18px;font-weight:600;font-size:.9rem;cursor:pointer;border:1px solid #cbd5e1;background:#f1f5f9;color:#334155;}' +
+            '#aviso-ed button.ok{background:#27ae60;border-color:#27ae60;color:#fff;}';
+        document.head.appendChild(st);
+    }
+    function siguiente() {
+        if (abierto || !cola.length || !document.body) return;
+        var a = cola.shift();
+        abierto = true;
+        estilos();
+        var f = document.createElement('div');
+        f.id = 'aviso-ed';
+        f.innerHTML = '<div class="caja" role="dialog" aria-modal="true"><div class="txt"></div><div class="bts">' +
+            (a.confirmar ? '<button type="button" class="no">Cancelar</button>' : '') + '<button type="button" class="ok">Aceptar</button></div></div>';
+        f.querySelector('.txt').textContent = String(a.texto == null ? '' : a.texto);
+        var cerrar = function (v) { document.removeEventListener('keydown', tecla, true); f.remove(); abierto = false; a.fin(v); setTimeout(siguiente, 0); };
+        var tecla = function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); cerrar(true); }
+            else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cerrar(!a.confirmar); }
+        };
+        f.querySelector('.ok').onclick = function () { cerrar(true); };
+        var no = f.querySelector('.no'); if (no) no.onclick = function () { cerrar(false); };
+        document.addEventListener('keydown', tecla, true);
+        document.body.appendChild(f);
+        f.querySelector('.ok').focus();
+    }
+    function encolar(texto, confirmar) {
+        return new Promise(function (fin) {
+            cola.push({ texto: texto, confirmar: confirmar, fin: fin });
+            if (document.body) siguiente(); else document.addEventListener('DOMContentLoaded', siguiente);
+        });
+    }
+    window.alert = function (texto) { encolar(texto, false); };
+    window.confirmarEditor = function (texto) { return encolar(texto, true); };
 })();
