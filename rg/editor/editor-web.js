@@ -18,7 +18,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.editorWeb = '1.3.0';
+    window.APP_VERSIONS.editorWeb = '1.4.0'; // 3 nov: eliminar varios platos a la vez
 
     var $ = function (id) { return document.getElementById(id); };
     var log = function (t) { try { if (window.UI && window.UI.log) window.UI.log(t); } catch (e) { } console.log(t); };
@@ -150,13 +150,16 @@
         (error || input).insertAdjacentElement('afterend', lab);
     }
 
-    function abrirModalEliminarPlato() {
+    // ids = varios platos (barra "Eliminar seleccionados"); sin ids = el plato abierto.
+    function idsAEliminar() { return window.__idsAEliminar || [platoEditandoId]; }   // eslint-disable-line no-undef
+    function platoDe(id) { return datosLocales.find(function (x) { return x.id === id; }); }   // eslint-disable-line no-undef
+    function abrirModalEliminarPlato(ids) {
         adaptarModalEliminar();
-        var p = datosLocales.find(function (x) { return x.id === platoEditandoId; });   // eslint-disable-line no-undef
-        __abrirOriginal();
+        __abrirOriginal(ids);
+        var conFotos = idsAEliminar().some(function (id) { return tieneFotos(platoDe(id)); });
         var fila = $('ew-fila-fotos'), chk = $('ew-borrar-fotos');
         if (chk) chk.checked = false;
-        if (fila) fila.style.display = tieneFotos(p) ? 'block' : 'none';
+        if (fila) fila.style.display = conFotos ? 'block' : 'none';
     }
     var __abrirOriginal = function () { };
 
@@ -168,15 +171,23 @@
             return;
         }
         /* global datosLocales, platoEditandoId, renderizar */
-        var idx = datosLocales.findIndex(function (x) { return x.id === platoEditandoId; });
-        if (idx === -1) { window.cerrarModalEliminarPlato(); return; }
-        var p = datosLocales[idx], chk = $('ew-borrar-fotos'), conFotos = tieneFotos(p), borrar = !!(chk && chk.checked);
-        if (conFotos) fotosPendientes.push({ id: p.id, carpeta: p.carpeta, imagen: p.imagen, borrar: borrar });
-        datosLocales.splice(idx, 1);
+        var chk = $('ew-borrar-fotos'), borrar = !!(chk && chk.checked), n = 0, conFotos = false;
+        idsAEliminar().forEach(function (id) {
+            var idx = datosLocales.findIndex(function (x) { return x.id === id; });
+            if (window.platosSeleccionados) window.platosSeleccionados.delete(id);
+            if (idx === -1) return;
+            var p = datosLocales[idx];
+            if (tieneFotos(p)) { conFotos = true; fotosPendientes.push({ id: p.id, carpeta: p.carpeta, imagen: p.imagen, borrar: borrar }); }
+            datosLocales.splice(idx, 1);
+            n++;
+        });
+        window.__idsAEliminar = null;
+        if (!n) { window.cerrarModalEliminarPlato(); return; }
         window.hayCambiosSinGuardar = true;
         window.cerrarModalEliminarPlato();
         renderizar();
-        alert('🗑️ Plato eliminado. Pulsa "GUARDAR CAMBIOS EN WEB" para que se borre también en la web.' +
+        if (typeof window.pintarBarraSeleccion === 'function') window.pintarBarraSeleccion();
+        alert('🗑️ ' + (n === 1 ? 'Plato eliminado' : n + ' platos eliminados') + '. Pulsa "GUARDAR CAMBIOS EN WEB" para que se borre también en la web.' +
             (conFotos ? '\nAl guardar, sus fotos se ' + (borrar ? 'borrarán.' : 'moverán a desactivadas/.') : ''));
     }
 
