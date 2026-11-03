@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T10:11:36.625Z",
+  "guardado": "2026-11-03T10:12:14.001Z",
   "ocultas": ["pizzas"],
   "platos": [
     {
@@ -6158,7 +6158,11 @@
             "VA": "Amanida verda",
             "KO": "그린 샐러드"
         },
-        "info": {}
+        "info": {
+            "ES": "{\"desc\":\"Preparación a base de una selección de vegetales y hortalizas verdes.\",\"q1\":\"¿En qué consiste una ensalada verde?\",\"r1\":\"Es una mezcla culinaria elaborada principalmente con vegetales y hortalizas de color verde.\",\"q2\":\"¿Qué tipo de ingredientes incluye este plato?\",\"r2\":\"Incluye exclusivamente vegetales y hortalizas de tonalidad verde.\"}",
+            "EN": "{\"desc\":\"Preparation based on a selection of green vegetables and greens.\",\"q1\":\"What is a green salad?\",\"r1\":\"It is a culinary dish prepared primarily with green-colored vegetables and greens.\",\"q2\":\"What type of ingredients does this dish include?\",\"r2\":\"It includes exclusively green-toned vegetables and greens.\"}",
+            "HASH_FICHA": "e899d7dc"
+        }
     },
     {
         "id": "12301", "activa": "no", "precio": "18.00", "precioMedia": "",

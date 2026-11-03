@@ -110,7 +110,7 @@
 {"id":"12204","activa":"no","precio":"16.50","precioMedia":"","carpeta":"ensaladas","archivo":"","alergenos":["GLUTEN","LACTOSA","HUEVO","FRUTOSCASCARA","SULFITOS","APIO","MOSTAZA","SOJA","SESAMO"],"opcionesInactivas":[],"h":"066d9ca81728"},
 {"id":"12205","activa":"no","precio":"15.00","precioMedia":"","carpeta":"ensaladas","archivo":"","alergenos":["LACTOSA","FRUTOSCASCARA","VEGETARIANO"],"opcionesInactivas":[],"h":"14fa10fcaf0d"},
 {"id":"12206","activa":"si","precio":"1.00","precioMedia":"","carpeta":"ensaladas","archivo":"ensalada_de_canonigos_y_tomate01.webp","alergenos":[],"opcionesInactivas":[],"h":"c6f5102b964a"},
-{"id":"12207","activa":"si","precio":"1.00","precioMedia":"","carpeta":"ensaladas","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"c885c56cd4f8"},
+{"id":"12207","activa":"si","precio":"1.00","precioMedia":"","carpeta":"ensaladas","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"d73706aa1c5c"},
 {"id":"12301","activa":"no","precio":"18.00","precioMedia":"","carpeta":"pokes","archivo":"","alergenos":["PESCADO","SOJA","FRUTOSCASCARA","SULFITOS","MOSTAZA","SESAMO"],"opcionesInactivas":[],"h":"b58d72ca8781"},
 {"id":"12302","activa":"no","precio":"16.00","precioMedia":"","carpeta":"pokes","archivo":"","alergenos":["SOJA","FRUTOSCASCARA","SULFITOS","MOSTAZA","SESAMO"],"opcionesInactivas":[],"h":"3e3b18690dc2"},
 {"id":"12303","activa":"no","precio":"17.00","precioMedia":"","carpeta":"pokes","archivo":"","alergenos":["PESCADO","SOJA","FRUTOSCASCARA","SULFITOS","MOSTAZA","SESAMO"],"opcionesInactivas":[],"h":"cdd8e41c87aa"},
