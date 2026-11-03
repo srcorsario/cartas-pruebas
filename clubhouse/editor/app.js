@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '2.20.0'; // NUEVO (3 nov, 3): traducciones con el mismo aviso que la Info (tenis + contador + nota según nº de idiomas) y botón Cancelar en ambos; si Gemini está saturado (503/429) se reintenta solo (varias rondas con espera) en vez de dar error; casillas en la lista para eliminar varios platos a la vez. 2.19.0: NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
+window.APP_VERSIONS.app = '2.21.0'; // NUEVO (3 nov, 4): la Info ES/EN se adelanta EN SEGUNDO PLANO en cuanto se elige el inglés (y al pulsar traducir al resto), en paralelo con la traducción; al pulsar "Generar Info y Aplicar" se reutiliza si el nombre/alérgenos no han cambiado (o se espera a que termine). 2.20.0: NUEVO (3 nov, 3): traducciones con el mismo aviso que la Info (tenis + contador + nota según nº de idiomas) y botón Cancelar en ambos; si Gemini está saturado (503/429) se reintenta solo (varias rondas con espera) en vez de dar error; casillas en la lista para eliminar varios platos a la vez. 2.19.0: NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
 
 console.group("%c[Editor] Inicializando sistema de control...", "color: orange; font-weight: bold;");
 
@@ -1377,6 +1377,7 @@ function confirmarTraduccionEN() {
     } 
     cerrarModalTraduccionEN(); 
     comprobarRequisitosTraduccion(); 
+    adelantarInfoEsEn(); // NUEVO (3 nov): la Info ES/EN empieza ya, en paralelo
 } 
 
 function cerrarModalTraduccionEN() { 
@@ -1397,6 +1398,8 @@ async function ejecutarTraduccionAutomatica() {
     let keys = [];
     if (typeof getKeys === 'function') keys = getKeys();
     if (keys.length === 0) { alert("❌ No hay API Keys de Gemini configuradas."); btn.innerText = originalText; btn.disabled = false; return; }
+
+    adelantarInfoEsEn(); // NUEVO (3 nov): si no estaba ya en marcha, la Info ES/EN va en paralelo
 
     // NUEVO (18 sept): misma rueda de carga a pantalla completa que en generarTraduccionEN() --
     // esta llamada traduce a ~24 idiomas de golpe y puede tardar bastante, sobre todo si hay que
@@ -1705,6 +1708,76 @@ function renderConsolaInfoPlato(idPlato) {
     consola.scrollTop = consola.scrollHeight;
 }
 
+// =========================================================================================
+// NUEVO (3 nov): INFO ES/EN ADELANTADA. La Info solo depende del nombre en español y de los
+// alérgenos, así que en cuanto se elige el inglés (o se pulsa traducir al resto de idiomas) se
+// lanza ya en segundo plano, en paralelo con la traducción. Al pulsar "Generar Info y Aplicar"
+// se reutiliza si la huella (nombre ES + alérgenos) coincide; si sigue en marcha, se espera.
+// Si no coincide (se cambió el nombre o los alérgenos), se descarta y se genera como siempre.
+// =========================================================================================
+window.__infoAdelantada = null; // { id, hash, ctrl, promesa, resultado }
+
+// Mismo nombre ES y alérgenos que guardará aplicarCambiosPlato() con lo que hay ahora en el editor.
+function fichaPrevistaEditor() {
+    const id = platoEditandoId;
+    const esVino = esIdVino(id);
+    let nom = superLimpiar(document.getElementById('edit-es')?.value || "");
+    if (esVino) nom = formatWineName(nom); else nom = mayusculaInicial(nom);
+    let nombreEs = nom;
+    const inputUva = document.getElementById('edit-es-uvas');
+    if (!esVino && modoIngredientesActivo) {
+        const filas = ingredientesPlatoActual.filter(ing => superLimpiar(ing.es || "") !== "" || superLimpiar(ing.en || "") !== "");
+        const ops = filas.map(ing => superLimpiar(ing.es || ""));
+        if (ops.length) nombreEs = `${nom} //${ops.join('// , //')}//`;
+    } else {
+        const det = (inputUva && inputUva.style.display !== "none") ? superLimpiar(inputUva.value) : "";
+        if (det) nombreEs = `${nom} // ${det}`;
+    }
+    const alergenos = Array.from(document.querySelectorAll('.alergeno-btn.selected')).map(el => el.dataset.code || "").filter(c => c).join(', ');
+    return { id, esVino, nombreEs, alergenos, hash: calcularHashContenido(`${nombreEs}|${alergenos}`) };
+}
+
+function adelantarInfoEsEn() {
+    try {
+        const id = platoEditandoId;
+        if (typeof id !== 'number' || isNaN(id) || id < 13) return;
+        const p = esNuevoPlato ? datosTempNuevo : datosLocales.find(x => x.id === id);
+        if (!p || CARPETAS_SIN_IA_INFO.includes(String(p.carpeta || '').trim().toLowerCase())) return;
+        const f = fichaPrevistaEditor();
+        if (!f.nombreEs) return;
+        if (p.info && p.info.es && p.info.en && p.infoHashFicha === f.hash) return; // ya la tiene
+        const prev = window.__infoAdelantada;
+        if (prev && prev.id === id && prev.hash === f.hash) return;                   // ya en marcha
+        if (prev && prev.ctrl) { try { prev.ctrl.abort(); } catch (e) { } }
+        const keys = (typeof getKeys === 'function') ? getKeys() : [];
+        if (!keys.length) return;
+        const ctrl = new AbortController();
+        const tareaFondo = { cancelado: false, signal: ctrl.signal, estado() { } };
+        const tieneAl = !!(f.alergenos && f.alergenos.toUpperCase() !== 'NINGUNO' && f.alergenos !== '0');
+        const prompt = f.esVino ? window.PROMPTS.vino(f.nombreEs) : window.PROMPTS.piloto(f.nombreEs, tieneAl, f.alergenos);
+        const reg = { id, hash: f.hash, ctrl, resultado: undefined };
+        reg.promesa = pedirGeminiJSON(prompt, keys, tareaFondo, r => !!(r && r.es && r.en))
+            .then(r => { reg.resultado = r; logInfoAutomatica(`Info ES/EN de "${f.nombreEs}" preparada en segundo plano.`, id); return r; })
+            .catch(() => { reg.resultado = null; return null; });
+        window.__infoAdelantada = reg;
+        logInfoAutomatica(`Preparando la Info ES/EN de "${f.nombreEs}" en segundo plano...`, id);
+    } catch (e) { console.warn('[Info adelantada]', e); }
+}
+
+// Si hay Info adelantada para este plato y esta huella, la devuelve (esperando si hace falta;
+// se corta si se pulsa Cancelar). null = no sirve, hay que generarla.
+async function tomarInfoAdelantada(id, hash, tarea) {
+    const reg = window.__infoAdelantada;
+    if (!reg || reg.id !== id) return null;
+    if (reg.hash !== hash) { try { reg.ctrl.abort(); } catch (e) { } window.__infoAdelantada = null; return null; }
+    let r = reg.resultado;
+    if (r === undefined) {
+        r = await (tarea ? Promise.race([reg.promesa, new Promise((_, no) => tarea.signal.addEventListener('abort', () => no(errorCancelado()), { once: true }))]) : reg.promesa);
+    }
+    if (window.__infoAdelantada === reg) window.__infoAdelantada = null;
+    return r || null;
+}
+
 async function generarInfoAutomaticaPlato(p) {
     let tarea = null, cancelada = false;
     try {
@@ -1763,7 +1836,8 @@ async function generarInfoAutomaticaPlato(p) {
 
         // --- Paso A: INFO_ES + INFO_EN (mismo prompt que "Generar Info Platos ES/EN", 1 plato) ---
         const promptPiloto = esVino ? window.PROMPTS.vino(nombreEs) : window.PROMPTS.piloto(nombreEs, tieneAlergenos, alergenosValor);
-        const resultadoEsEn = await llamarGeminiConReintentos(promptPiloto, keys, tarea, r => !!(r && r.es && r.en));
+        const resultadoEsEn = (await tomarInfoAdelantada(p.id, nuevoHashFicha, tarea)) ||
+            await llamarGeminiConReintentos(promptPiloto, keys, tarea, r => !!(r && r.es && r.en));
         if (!resultadoEsEn || !resultadoEsEn.es || !resultadoEsEn.en) {
             logInfoAutomatica(`No se pudo generar la ficha ES/EN de "${nombreEs}" (ID ${p.id}) — puede que ninguna API Key haya respondido bien (cuota agotada, key inválida...). Puedes generarla luego a mano desde "Ajustes Expertos".`, p.id, true);
             return;
