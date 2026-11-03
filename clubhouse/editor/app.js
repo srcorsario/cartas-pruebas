@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '2.19.0'; // NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
+window.APP_VERSIONS.app = '2.20.0'; // NUEVO (3 nov, 3): traducciones con el mismo aviso que la Info (tenis + contador + nota según nº de idiomas) y botón Cancelar en ambos; si Gemini está saturado (503/429) se reintenta solo (varias rondas con espera) en vez de dar error; casillas en la lista para eliminar varios platos a la vez. 2.19.0: NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
 
 console.group("%c[Editor] Inicializando sistema de control...", "color: orange; font-weight: bold;");
 
@@ -52,8 +52,7 @@ function mostrarOverlayCarga(texto) {
     if (!overlay) return;
     const textoEl = document.getElementById('loading-text');
     if (textoEl) textoEl.textContent = texto;
-    const sub = document.getElementById('loading-subtext');
-    if (sub) sub.style.display = 'none';
+    ['loading-subtext', 'loading-estado', 'loading-btn-cancelar'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
     overlay.style.display = 'flex';
 }
 
@@ -62,46 +61,118 @@ function ocultarOverlayCarga() {
     if (overlay) overlay.style.display = 'none';
     const textoEl = document.getElementById('loading-text');
     if (textoEl) textoEl.textContent = 'Cargando datos...';
-    const sub = document.getElementById('loading-subtext');
-    if (sub) sub.style.display = 'none';
-    clearInterval(window.__overlayInfoReloj);
-    window.__overlayInfoPlato = null;
+    ['loading-subtext', 'loading-estado', 'loading-btn-cancelar'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 }
 
-// NUEVO (3 nov): mientras se genera la Info del plato que está ABIERTO en el editor, la misma
-// animación de tenis a pantalla completa, como UN solo proceso (aunque por dentro primero va
-// ES/EN y luego el resto de idiomas) y con un contador de tiempo. Se quita al terminar.
-function mostrarOverlayInfoPlato(p) {
-    if (!p || typeof platoEditandoId === 'undefined' || platoEditandoId !== p.id) return;
-    const modal = document.getElementById('modal-editor');
-    if (!modal || modal.style.display === 'none') return;
-    mostrarOverlayCarga('Generando la Info del plato...');
-    window.__overlayInfoPlato = p.id;
+// NUEVO (3 nov): aviso a pantalla completa para las tareas con IA que tardan (Info del plato,
+// traducción al resto de idiomas, opciones en inglés): animación de tenis, contador de tiempo,
+// una nota (p. ej. "depende de los idiomas"), una línea de estado para los reintentos y un botón
+// Cancelar que corta la petición en curso (AbortController). Solo una tarea a la vez.
+function iniciarTareaIA(titulo, nota) {
+    if (window.__tareaIA) window.__tareaIA.fin();
+    mostrarOverlayCarga(titulo);
     const overlay = document.getElementById('loading-overlay');
-    let sub = document.getElementById('loading-subtext');
-    if (!sub && overlay) {
-        sub = document.createElement('div');
-        sub.id = 'loading-subtext';
-        sub.style.cssText = 'margin-top:10px; color:#64748b; font-size:0.95rem; text-align:center; font-variant-numeric:tabular-nums;';
-        overlay.appendChild(sub);
-    }
+    const crear = (id, css, tag) => {
+        let el = document.getElementById(id);
+        if (!el && overlay) { el = document.createElement(tag || 'div'); el.id = id; el.style.cssText = css; overlay.appendChild(el); }
+        if (el) el.style.display = '';
+        return el;
+    };
+    const sub = crear('loading-subtext', 'margin-top:10px; color:#64748b; font-size:0.95rem; text-align:center; max-width:90vw; font-variant-numeric:tabular-nums;');
+    const estado = crear('loading-estado', 'margin-top:6px; color:#b45309; font-size:0.85rem; text-align:center; min-height:1.2em;');
+    const btn = crear('loading-btn-cancelar', 'margin-top:18px; padding:8px 22px; border-radius:6px; border:1px solid #fca5a5; background:#fff; color:#b91c1c; font-size:0.9rem; font-weight:600; cursor:pointer;', 'button');
+    if (estado) estado.textContent = '';
+    const tarea = {
+        controller: new AbortController(),
+        cancelado: false,
+        terminada: false,
+        get signal() { return this.controller.signal; },
+        estado(t) { if (!this.terminada && estado) estado.textContent = t || ''; },
+        cancelar() { if (this.terminada) return; this.cancelado = true; try { this.controller.abort(); } catch (e) { } this.fin(); },
+        fin() {
+            if (this.terminada) return;
+            this.terminada = true;
+            clearInterval(this.reloj);
+            if (window.__tareaIA === this) { window.__tareaIA = null; ocultarOverlayCarga(); }
+        }
+    };
+    if (btn) { btn.type = 'button'; btn.textContent = '✖ Cancelar'; btn.onclick = () => tarea.cancelar(); }
     const inicio = Date.now();
     const pintar = () => {
         const seg = Math.floor((Date.now() - inicio) / 1000);
-        if (sub) sub.innerHTML = `⏱️ <b>${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}</b> &nbsp;·&nbsp; Puede tardar 2 minutos o más, no cierres la página.`;
+        if (sub) sub.innerHTML = `⏱️ <b>${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}</b>` + (nota ? ` &nbsp;·&nbsp; ${nota}` : '');
     };
-    clearInterval(window.__overlayInfoReloj);
     pintar();
-    if (sub) sub.style.display = '';
-    window.__overlayInfoReloj = setInterval(pintar, 1000);
+    tarea.reloj = setInterval(pintar, 1000);
+    window.__tareaIA = tarea;
+    return tarea;
 }
 
-function ocultarOverlayInfoPlato(p) {
-    if (!p || window.__overlayInfoPlato !== p.id) return;
-    clearInterval(window.__overlayInfoReloj);
-    const sub = document.getElementById('loading-subtext');
-    if (sub) sub.style.display = 'none';
-    ocultarOverlayCarga();
+// Error que se lanza al pulsar Cancelar (para distinguirlo de un fallo de Gemini).
+function errorCancelado() { const e = new Error('Cancelado por el usuario'); e.cancelado = true; return e; }
+
+// Espera que se corta si se cancela la tarea.
+function esperarTarea(ms, tarea) {
+    return new Promise((resolver, rechazar) => {
+        const t = setTimeout(resolver, ms);
+        if (tarea) tarea.signal.addEventListener('abort', () => { clearTimeout(t); rechazar(errorCancelado()); }, { once: true });
+    });
+}
+
+// NUEVO (3 nov): llamada a Gemini que devuelve el JSON ya parseado. Prueba todas las claves y, si
+// todas fallan (lo normal es el 503 "This model is currently experiencing high demand" o un 429),
+// espera y vuelve a intentarlo, hasta MAX_RONDAS rondas, avisando en el overlay. validar(obj)
+// opcional: si devuelve false la respuesta no vale y se pasa a la siguiente clave. Lanza el
+// último error si no lo consigue, o errorCancelado() si se pulsa Cancelar.
+const GEMINI_MAX_RONDAS = 4;
+async function pedirGeminiJSON(instruccion, keys, tarea, validar) {
+    let ultimoError = 'sin respuesta';
+    for (let ronda = 0; ronda < GEMINI_MAX_RONDAS; ronda++) {
+        for (let i = 0; i < keys.length; i++) {
+            if (tarea && tarea.cancelado) throw errorCancelado();
+            try {
+                if (typeof UI !== 'undefined' && typeof UI.log === 'function') UI.log(`[Info] Usando Key ${i + 1}/${keys.length} (ronda ${ronda + 1})...`);
+                const response = await fetch(`${GEMINI_ENDPOINT_URL}?key=${keys[i]}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: instruccion }] }], generationConfig: { maxOutputTokens: window.GEMINI_MAX_OUTPUT_TOKENS || 65536, thinkingConfig: { thinkingLevel: window.GEMINI_THINKING_LEVEL || "medium" } } }),
+                    signal: tarea ? tarea.signal : undefined
+                });
+                const data = await response.json();
+                if (!response.ok || data.error) {
+                    ultimoError = data.error?.message || ('Error HTTP ' + response.status);
+                    if (data.error?.code === 429 || response.status === 429) await esperarTarea(3000, tarea);
+                    continue;
+                }
+                const txt = (typeof extraerTextoCompletoRespuesta === 'function') ? extraerTextoCompletoRespuesta(data.candidates?.[0]) : data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!txt) { ultimoError = 'Gemini devolvió una respuesta vacía.'; continue; }
+                const obj = extraerJSON(txt);
+                if (validar && !validar(obj)) { ultimoError = 'La respuesta de Gemini no traía lo esperado.'; continue; }
+                if (tarea) tarea.estado('');
+                return obj;
+            } catch (err) {
+                if ((tarea && tarea.cancelado) || err.cancelado || err.name === 'AbortError') throw errorCancelado();
+                ultimoError = err.message;
+            }
+        }
+        if (ronda < GEMINI_MAX_RONDAS - 1) {
+            const espera = 5 * (ronda + 1);
+            if (tarea) tarea.estado(`Gemini está saturado o ha fallado. Reintento ${ronda + 2} de ${GEMINI_MAX_RONDAS} en ${espera} s...`);
+            await esperarTarea(espera * 1000, tarea);
+            if (tarea) tarea.estado(`Reintento ${ronda + 2} de ${GEMINI_MAX_RONDAS}...`);
+        }
+    }
+    throw new Error(ultimoError);
+}
+
+// Info del plato ABIERTO: tarea con aviso (si el editor de ese plato está abierto; si no, null).
+function mostrarOverlayInfoPlato(p) {
+    if (!p || typeof platoEditandoId === 'undefined' || platoEditandoId !== p.id) return null;
+    const modal = document.getElementById('modal-editor');
+    if (!modal || modal.style.display === 'none') return null;
+    const n = (window.IDIOMAS_ORDEN || []).length;
+    return iniciarTareaIA('Generando la Info del plato...',
+        `${n} idiomas en la carta: puede tardar 2 minutos o más (con menos idiomas, más rápido). No cierres la página.`);
 }
 // NUEVO: estado del modo "Plato con ingredientes" (checkbox #chk-modo-ingredientes) — ver
 // abrirEditor(), toggleModoIngredientes() y aplicarCambiosPlato(). modoIngredientesActivo
@@ -559,7 +630,9 @@ function renderPlatoItemHtml(p) {
     const infoOtrosFallido = !generandoInfo && window.platosInfoOtrosIdiomasFallidos && window.platosInfoOtrosIdiomasFallidos.has(p.id);
     const htmlInfoOtrosFallido = infoOtrosFallido ? `<span class="badge-info-otros-fallido" title="La Info se generó en ES/EN, pero falló la traducción automática al resto de idiomas. Pulsa para reintentar solo ese paso.">⚠️ faltan otros idiomas <button type="button" class="btn-reintentar-info-otros" onclick="event.stopPropagation(); reintentarInfoOtrosIdiomasPlato(${p.id});">🔄 reintentar</button></span>` : "";
 
-    return `<div class="plato-item">
+    const seleccionado = window.platosSeleccionados && window.platosSeleccionados.has(p.id);
+    return `<div class="plato-item${seleccionado ? ' plato-seleccionado' : ''}">
+        <input type="checkbox" class="chk-sel-plato" title="Marcar para eliminar varios platos a la vez" ${seleccionado ? 'checked' : ''} onchange="toggleSeleccionPlato(${p.id}, this.checked)">
         <div class="plato-orden-btns">
             <button class="btn-orden" onclick="moverPlato(${p.id}, 'subir')">▲</button>
             <button class="btn-orden" onclick="moverPlato(${p.id}, 'bajar')">▼</button>
@@ -1153,52 +1226,24 @@ async function generarTraduccionEN() {
     // NUEVO (18 sept): rueda de carga a pantalla completa mientras se espera a Gemini -- este
     // paso puede tardar bastante si hay que reintentar con varias claves (ver mostrarOverlayCarga
     // más arriba), y sin esto el único aviso era el texto del propio botón, poco visible.
-    mostrarOverlayCarga("🇬🇧 Generando opciones de traducción...");
+    const tarea = iniciarTareaIA("🇬🇧 Generando opciones de traducción...", "Suele tardar unos segundos; si Gemini está saturado, se reintenta solo.");
 
     const textoCompletoEs = construirTextoCompletoParaTraducir('es').replace(/"/g, "'");
     // Prompt centralizado en prompts.js (window.PROMPTS.opcionesEN)
     const instruccion = window.PROMPTS.opcionesEN(textoCompletoEs, esVino);
 
     let exito = false;
-    let intentos = 0;
     let ultimoError = "";
     let opciones = {};
-
-    while (!exito && intentos < keys.length) {
-        try {
-            const apiKey = keys[intentos];
-            if (typeof UI !== 'undefined' && typeof UI.log === 'function') UI.log(`[Info] Usando Key ${intentos + 1}/${keys.length}...`);
-            const response = await fetch(`${GEMINI_ENDPOINT_URL}?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: instruccion }] }], generationConfig: { maxOutputTokens: window.GEMINI_MAX_OUTPUT_TOKENS || 65536, thinkingConfig: { thinkingLevel: window.GEMINI_THINKING_LEVEL || "medium" } } })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || data.error) {
-                ultimoError = data.error?.message || "Error HTTP " + response.status;
-                if (data.error?.code === 429 || response.status === 429) await new Promise(r => setTimeout(r, 3000));
-                intentos++;
-                continue;
-            }
-
-            const txt = (typeof extraerTextoCompletoRespuesta === 'function') ? extraerTextoCompletoRespuesta(data.candidates?.[0]) : data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (txt) {
-                opciones = extraerJSON(txt);
-                if (opciones.directa || opciones.gastronomica || opciones.corta) { 
-                    exito = true; 
-                } else { 
-                    throw new Error("El JSON no contiene las claves esperadas."); 
-                } 
-            } 
-        } catch(err) {
-            ultimoError = err.message;
-            intentos++;
-        }
+    try {
+        opciones = await pedirGeminiJSON(instruccion, keys, tarea, o => !!(o && (o.directa || o.gastronomica || o.corta)));
+        exito = true;
+    } catch (err) {
+        ultimoError = err.message;
+        if (err.cancelado) { tarea.fin(); btn.innerText = originalText; btn.disabled = false; return; }
     }
 
-    ocultarOverlayCarga();
+    tarea.fin();
 
     if (exito) {
         // NUEVO (18 sept): si el prompt detectó una posible falta de ortografía en el nombre en
@@ -1356,82 +1401,48 @@ async function ejecutarTraduccionAutomatica() {
     // NUEVO (18 sept): misma rueda de carga a pantalla completa que en generarTraduccionEN() --
     // esta llamada traduce a ~24 idiomas de golpe y puede tardar bastante, sobre todo si hay que
     // reintentar con varias claves por un 503 "modelo saturado" de Gemini.
-    mostrarOverlayCarga("✨ Traduciendo al resto de idiomas...");
-
     const textoCompletoEs = construirTextoCompletoParaTraducir('es').replace(/"/g, "'");
     const textoCompletoEn = construirTextoCompletoParaTraducir('en').replace(/"/g, "'");
     const idiomasObjetivo = window.IDIOMAS_ORDEN ? window.IDIOMAS_ORDEN.filter(l => l !== 'es' && l !== 'en').map(l => l.toUpperCase()) : [];
+    if (idiomasObjetivo.length === 0) { alert('La carta solo tiene español e inglés (🌐 Idiomas): no hay más idiomas que traducir.'); btn.innerText = originalText; btn.disabled = false; return; }
+
+    const tarea = iniciarTareaIA(`✨ Traduciendo a ${idiomasObjetivo.length} idiomas...`,
+        `Tarda más o menos según los idiomas de la carta (${idiomasObjetivo.length + 2}); con todos puede pasar de 1 minuto.`);
     
     // Prompt centralizado en prompts.js (window.PROMPTS.autoTraduccionResto)
     const instruccion = window.PROMPTS.autoTraduccionResto(textoCompletoEs, textoCompletoEn, esVino, idiomasObjetivo);
     
-    let exito = false; 
-    let intentos = 0; 
-    let ultimoError = ""; 
-    
-    while (!exito && intentos < keys.length) {
-        try {
-            const apiKey = keys[intentos];
-            if (typeof UI !== 'undefined' && typeof UI.log === 'function') UI.log(`[Info] Usando Key ${intentos + 1}/${keys.length}...`);
-            const response = await fetch(`${GEMINI_ENDPOINT_URL}?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: instruccion }] }], generationConfig: { maxOutputTokens: window.GEMINI_MAX_OUTPUT_TOKENS || 65536, thinkingConfig: { thinkingLevel: window.GEMINI_THINKING_LEVEL || "medium" } } })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || data.error) { 
-                ultimoError = data.error?.message || "Error HTTP " + response.status; 
-                if (data.error?.code === 429 || response.status === 429) await new Promise(r => setTimeout(r, 3000));
-                intentos++; 
-                continue; 
-            } 
-            
-            const txt = (typeof extraerTextoCompletoRespuesta === 'function') ? extraerTextoCompletoRespuesta(data.candidates?.[0]) : data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (txt) {
-                const traducciones = extraerJSON(txt);
-                // CORREGIDO: Gemini a veces devuelve las claves de idioma en minúscula
-                // pese a pedirse en MAYÚSCULAS (o viceversa). Antes esto hacía que
-                // traducciones[l] fallara en silencio (ningún campo se rellenaba pero
-                // exito se marcaba true igualmente, sin avisar al usuario). Ahora se
-                // busca la clave sin distinguir mayúsculas/minúsculas.
-                const clavesRespuesta = Object.keys(traducciones);
-                let rellenados = 0;
-                idiomasObjetivo.forEach(l => {
-                    const claveReal = clavesRespuesta.find(k => k.toUpperCase() === l.toUpperCase());
-                    const valor = claveReal ? traducciones[claveReal] : undefined;
-                    if (valor) {
-                        rellenados++;
-                        const desglosado = desglosarNombre(valor);
-                        const finalName = esVino ? formatWineName(desglosado.nombre) : desglosado.nombre;
-                        const inputField = document.getElementById(`edit-${l.toLowerCase()}`);
-                        if (inputField) inputField.value = finalName;
-
-                        const inputUva = document.getElementById(`edit-${l.toLowerCase()}-uvas`);
-                        if (inputUva && inputUva.style.display !== "none") {
-                            inputUva.value = desglosado.uvas;
-                        }
-                    }
-                });
-                // NUEVO: si la IA respondió pero ninguna traducción coincidió con los
-                // idiomas pedidos, no lo tratamos como éxito: reintenta con la
-                // siguiente key y, si se agotan, se avisa con el alert de abajo en
-                // vez de cerrar el modal como si todo hubiera ido bien.
-                if (rellenados > 0) {
-                    exito = true;
-                } else {
-                    ultimoError = "La respuesta de Gemini no contenía ninguna de las claves de idioma esperadas (" + idiomasObjetivo.join(', ') + ").";
-                    intentos++;
-                }
+    let exito = false;
+    let ultimoError = "";
+    // Rellena los campos con la respuesta; devuelve cuántos idiomas ha podido poner. Si no pone
+    // ninguno, la respuesta no vale (claves de idioma inesperadas) y se prueba otra vez.
+    const rellenar = (traducciones) => {
+        const clavesRespuesta = Object.keys(traducciones || {});
+        let rellenados = 0;
+        idiomasObjetivo.forEach(l => {
+            const claveReal = clavesRespuesta.find(k => k.toUpperCase() === l.toUpperCase());
+            const valor = claveReal ? traducciones[claveReal] : undefined;
+            if (valor) {
+                rellenados++;
+                const desglosado = desglosarNombre(valor);
+                const finalName = esVino ? formatWineName(desglosado.nombre) : desglosado.nombre;
+                const inputField = document.getElementById(`edit-${l.toLowerCase()}`);
+                if (inputField) inputField.value = finalName;
+                const inputUva = document.getElementById(`edit-${l.toLowerCase()}-uvas`);
+                if (inputUva && inputUva.style.display !== "none") inputUva.value = desglosado.uvas;
             }
-        } catch(err) {
-            ultimoError = err.message;
-            intentos++;
-        }
+        });
+        return rellenados;
+    };
+    try {
+        await pedirGeminiJSON(instruccion, keys, tarea, t => rellenar(t) > 0);
+        exito = true;
+    } catch (err) {
+        ultimoError = err.message;
+        if (err.cancelado) { tarea.fin(); btn.innerText = originalText; btn.disabled = false; return; }
     }
 
-    ocultarOverlayCarga();
+    tarea.fin();
 
     if (!exito) {
         alert("❌ Error al traducir con Gemini.\nDetalles del error: " + ultimoError);
@@ -1595,30 +1606,11 @@ function aplicarCambiosPlato() {
 // ejecutarTraduccionAutomatica(), extraído aquí para reutilizarlo. Devuelve el JSON ya
 // parseado, o null si ninguna key tuvo éxito (nunca lanza excepción: este flujo es 100% en
 // segundo plano y no debe interrumpir al usuario con ningún alert()).
-async function llamarGeminiConReintentos(instruccion, keys) {
-    let intentos = 0;
-    while (intentos < keys.length) {
-        try {
-            const apiKey = keys[intentos];
-            const response = await fetch(`${GEMINI_ENDPOINT_URL}?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: instruccion }] }], generationConfig: { maxOutputTokens: window.GEMINI_MAX_OUTPUT_TOKENS || 65536, thinkingConfig: { thinkingLevel: window.GEMINI_THINKING_LEVEL || "medium" } } })
-            });
-            const data = await response.json();
-            if (!response.ok || data.error) {
-                if (data.error?.code === 429 || response.status === 429) await new Promise(r => setTimeout(r, 3000));
-                intentos++;
-                continue;
-            }
-            const txt = (typeof extraerTextoCompletoRespuesta === 'function') ? extraerTextoCompletoRespuesta(data.candidates?.[0]) : data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (txt) return extraerJSON(txt);
-            intentos++;
-        } catch (err) {
-            intentos++;
-        }
-    }
-    return null;
+async function llamarGeminiConReintentos(instruccion, keys, tarea, validar) {
+    // 3 nov: usa pedirGeminiJSON (reintentos por rondas si Gemini está saturado). Devuelve null
+    // si no lo consigue; si se pulsa Cancelar, lanza errorCancelado().
+    try { return await pedirGeminiJSON(instruccion, keys, tarea, validar); }
+    catch (err) { if (err.cancelado) throw err; console.warn('[Info automática]', err.message); return null; }
 }
 
 // Envía al backend (Código.gs, acción "infoplato") la Info ya generada de UN plato concreto,
@@ -1714,6 +1706,7 @@ function renderConsolaInfoPlato(idPlato) {
 }
 
 async function generarInfoAutomaticaPlato(p) {
+    let tarea = null, cancelada = false;
     try {
         if (!p || isNaN(p.id) || p.id < 13) return; // ids 1-12 son cabeceras de categoría heredadas, sin info real
         const carpetaValor = (p.carpeta || "").trim().toLowerCase();
@@ -1766,11 +1759,11 @@ async function generarInfoAutomaticaPlato(p) {
 
         marcarPlatoGenerandoInfo(p.id, true);
         logInfoAutomatica(`Generando ficha ES/EN de "${nombreEs}" (ID ${p.id})...`, p.id);
-        mostrarOverlayInfoPlato(p);
+        tarea = mostrarOverlayInfoPlato(p);
 
         // --- Paso A: INFO_ES + INFO_EN (mismo prompt que "Generar Info Platos ES/EN", 1 plato) ---
         const promptPiloto = esVino ? window.PROMPTS.vino(nombreEs) : window.PROMPTS.piloto(nombreEs, tieneAlergenos, alergenosValor);
-        const resultadoEsEn = await llamarGeminiConReintentos(promptPiloto, keys);
+        const resultadoEsEn = await llamarGeminiConReintentos(promptPiloto, keys, tarea, r => !!(r && r.es && r.en));
         if (!resultadoEsEn || !resultadoEsEn.es || !resultadoEsEn.en) {
             logInfoAutomatica(`No se pudo generar la ficha ES/EN de "${nombreEs}" (ID ${p.id}) — puede que ninguna API Key haya respondido bien (cuota agotada, key inválida...). Puedes generarla luego a mano desde "Ajustes Expertos".`, p.id, true);
             return;
@@ -1790,19 +1783,26 @@ async function generarInfoAutomaticaPlato(p) {
 
         // --- Paso B: encadenado, resto de idiomas (mismo prompt que "Generar Info Platos Otros
         // Idiomas", 1 plato) — traduce fielmente la ficha ES/EN recién generada, no redacta contenido nuevo.
-        const otrosOk = await generarInfoOtrosIdiomasPlato(p, keys, resultadoEsEn.es, resultadoEsEn.en);
+        const otrosOk = await generarInfoOtrosIdiomasPlato(p, keys, resultadoEsEn.es, resultadoEsEn.en, tarea);
 
         logInfoAutomatica(otrosOk
             ? `Ficha generada y guardada en TODOS los idiomas para "${nombreEs}" (ID ${p.id}).`
             : `ES/EN guardados para "${nombreEs}" (ID ${p.id}), pero falló la traducción al resto de idiomas. Aviso "⚠️ faltan otros idiomas" en su ficha del Editor.`,
             p.id, !otrosOk);
     } catch (err) {
+        if (err && err.cancelado) {
+            cancelada = true;
+            const faltan = p && p.info && p.info.es && p.info.en && p.infoHashFicha;
+            if (faltan && (window.IDIOMAS_ORDEN || []).length > 2) window.platosInfoOtrosIdiomasFallidos.add(p.id);
+            if (p) logInfoAutomatica(`Cancelado. ${faltan ? 'ES/EN ya estaban guardados; faltan los otros idiomas (botón "🔄 reintentar" en la lista).' : 'No se ha generado la Info; se generará la próxima vez que pulses "Generar Info y Aplicar Cambios".'} Los demás cambios del plato SÍ están aplicados.`, p.id, true);
+            return;
+        }
         console.warn('[Editor] Error en generación automática de Info:', err);
         if (p) logInfoAutomatica(`Error inesperado generando la Info de "${p['es'] || ('ID ' + p.id)}": ${err && err.message ? err.message : err}`, p.id, true);
     } finally {
         marcarPlatoGenerandoInfo(p.id, false);
-        ocultarOverlayInfoPlato(p);
-        cerrarModalPlatoTrasInfoSiSigueAbierto(p);
+        if (tarea) tarea.fin();
+        if (!cancelada) cerrarModalPlatoTrasInfoSiSigueAbierto(p);
     }
 }
 
@@ -1827,19 +1827,19 @@ function cerrarModalPlatoTrasInfoSiSigueAbierto(p) {
 // MAX_INTENTOS_OTROS veces (fallos puntuales: 429, JSON truncado por el propio modelo, etc.)
 // antes de darse por vencido; si al final falla, marca el plato en
 // window.platosInfoOtrosIdiomasFallidos para que quede visible en su ficha. Devuelve true/false.
-async function generarInfoOtrosIdiomasPlato(p, keys, infoEsObj, infoEnObj) {
+async function generarInfoOtrosIdiomasPlato(p, keys, infoEsObj, infoEnObj, tarea) {
     const esVino = esIdVino(p.id); // MODIFICADO (30 oct): excluye la Hoja Postres 16xxx
     const idiomasObjetivo = (window.IDIOMAS_ORDEN || []).filter(l => l !== 'es' && l !== 'en');
     if (idiomasObjetivo.length === 0) { window.platosInfoOtrosIdiomasFallidos.delete(p.id); return true; }
 
-    const MAX_INTENTOS_OTROS = 2;
+    const MAX_INTENTOS_OTROS = 1; // 3 nov: los reintentos ya los hace pedirGeminiJSON (por rondas)
     let traducciones = null;
     for (let intento = 0; intento < MAX_INTENTOS_OTROS && !traducciones; intento++) {
         const promptOtros = window.PROMPTS.infoOtrosIdiomasLote(
             [{ esVino: esVino, infoEs: infoEsObj, infoEn: infoEnObj }],
             idiomasObjetivo.map(l => l.toUpperCase())
         );
-        const resultadoOtros = await llamarGeminiConReintentos(promptOtros, keys);
+        const resultadoOtros = await llamarGeminiConReintentos(promptOtros, keys, tarea, r => !!(r && (r['0'] || r[0])));
         traducciones = resultadoOtros ? (resultadoOtros['0'] || resultadoOtros[0]) : null;
     }
 
@@ -1889,11 +1889,18 @@ async function reintentarInfoOtrosIdiomasPlato(id) {
 
     marcarPlatoGenerandoInfo(id, true);
     logInfoAutomatica(`Reintentando la traducción al resto de idiomas de "${p['es'] || ''}" (ID ${id})...`, id);
+    const n = (window.IDIOMAS_ORDEN || []).length - 2;
+    const tarea = iniciarTareaIA(`Traduciendo la Info a ${n} idiomas...`, `Tarda más o menos según los idiomas de la carta (${n + 2}). No cierres la página.`);
     try {
-        const ok = await generarInfoOtrosIdiomasPlato(p, keys, infoEsObj, infoEnObj);
+        const ok = await generarInfoOtrosIdiomasPlato(p, keys, infoEsObj, infoEnObj, tarea);
+        tarea.fin();
         if (ok) logInfoAutomatica(`Reintento correcto: "${p['es'] || ''}" (ID ${id}) ya tiene la Info en todos los idiomas.`, id);
         if (!ok) alert('Ha vuelto a fallar la traducción al resto de idiomas. Puedes reintentarlo de nuevo, o completarla desde "Ajustes Expertos" (Paso 3).');
+    } catch (err) {
+        if (!err.cancelado) throw err;
+        logInfoAutomatica(`Cancelado el reintento de "${p['es'] || ''}" (ID ${id}).`, id, true);
     } finally {
+        tarea.fin();
         marcarPlatoGenerandoInfo(id, false);
     }
 }
@@ -2066,15 +2073,24 @@ function cerrarModal(id) {
 // NUEVO: paso 1 de "Eliminar Plato" — cierra el editor y abre la modal de confirmación con
 // contraseña (ver PASSWORD_ELIMINAR_PLATO en config.js), mostrando el nombre del plato para
 // que quede claro cuál se va a borrar antes de escribir la contraseña.
-function abrirModalEliminarPlato() {
-    const p = datosLocales.find(x => x.id === platoEditandoId);
-    if (!p) return;
+// MODIFICADO (3 nov): admite varios platos (ids) — desde la barra "Eliminar seleccionados".
+// Sin ids = el plato abierto en el editor, como siempre.
+function abrirModalEliminarPlato(ids) {
+    ids = (Array.isArray(ids) && ids.length) ? ids : [platoEditandoId];
+    const platos = ids.map(id => datosLocales.find(x => x.id === id)).filter(Boolean);
+    if (!platos.length) return;
+    window.__idsAEliminar = platos.map(p => p.id);
 
     cerrarModal('modal-editor');
 
-    const nombreLimpio = desglosarNombre(p.es || "").nombre || `ID ${p.id}`;
+    const nombre = p => `"${desglosarNombre(p.es || "").nombre || ('ID ' + p.id)}" (ID ${p.id})`;
     const textoPlato = document.getElementById('texto-plato-a-eliminar');
-    if (textoPlato) textoPlato.innerText = `"${nombreLimpio}" (ID ${p.id})`;
+    if (textoPlato) {
+        textoPlato.style.whiteSpace = 'pre-line';
+        textoPlato.style.maxHeight = '40vh';
+        textoPlato.style.overflowY = 'auto';
+        textoPlato.innerText = platos.length === 1 ? nombre(platos[0]) : `${platos.length} platos:\n` + platos.map(nombre).join('\n');
+    }
 
     const inputPassword = document.getElementById('password-eliminar-plato');
     if (inputPassword) inputPassword.value = "";
@@ -2109,17 +2125,59 @@ function confirmarEliminarPlato() {
         return;
     }
 
-    const idx = datosLocales.findIndex(x => x.id === platoEditandoId);
-    if (idx === -1) { cerrarModalEliminarPlato(); return; }
-
-    datosLocales.splice(idx, 1);
+    const ids = window.__idsAEliminar || [platoEditandoId];
+    let n = 0;
+    ids.forEach(id => {
+        const idx = datosLocales.findIndex(x => x.id === id);
+        if (idx !== -1) { datosLocales.splice(idx, 1); n++; }
+        if (window.platosSeleccionados) window.platosSeleccionados.delete(id);
+    });
+    window.__idsAEliminar = null;
+    if (!n) { cerrarModalEliminarPlato(); return; }
     window.hayCambiosSinGuardar = true;
 
     cerrarModalEliminarPlato();
     renderizar();
-    alert('🗑️ Plato eliminado. Pulsa "GUARDAR CAMBIOS EN WEB" para que el borrado se aplique también en la web.');
+    pintarBarraSeleccion();
+    alert(`🗑️ ${n === 1 ? 'Plato eliminado' : n + ' platos eliminados'}. Pulsa "GUARDAR CAMBIOS EN WEB" para que el borrado se aplique también en la web.`);
 }
 window.confirmarEliminarPlato = confirmarEliminarPlato;
+
+// NUEVO (3 nov): eliminar varios platos a la vez — casilla en cada plato de la lista y barra
+// abajo a la izquierda con "Eliminar seleccionados (N)". Mismo modal y misma confirmación.
+window.platosSeleccionados = window.platosSeleccionados || new Set();
+function toggleSeleccionPlato(id, marcado) {
+    if (marcado) window.platosSeleccionados.add(id); else window.platosSeleccionados.delete(id);
+    document.querySelectorAll('.chk-sel-plato').forEach(chk => {
+        const fila = chk.closest('.plato-item');
+        if (fila) fila.classList.toggle('plato-seleccionado', chk.checked);
+    });
+    pintarBarraSeleccion();
+}
+function pintarBarraSeleccion() {
+    const sel = window.platosSeleccionados;
+    Array.from(sel).forEach(id => { if (!datosLocales.some(x => x.id === id)) sel.delete(id); });
+    let barra = document.getElementById('barra-seleccion-platos');
+    if (!sel.size) { if (barra) barra.style.display = 'none'; return; }
+    if (!barra) {
+        barra = document.createElement('div');
+        barra.id = 'barra-seleccion-platos';
+        barra.className = 'barra-seleccion-platos';
+        document.body.appendChild(barra);
+    }
+    barra.innerHTML = `<button type="button" class="btn-sel-eliminar" onclick="abrirModalEliminarPlato(Array.from(window.platosSeleccionados))">🗑️ Eliminar seleccionados (${sel.size})</button>` +
+        `<button type="button" class="btn-sel-quitar" onclick="quitarSeleccionPlatos()">✖ Quitar selección</button>`;
+    barra.style.display = 'flex';
+}
+function quitarSeleccionPlatos() {
+    window.platosSeleccionados.clear();
+    document.querySelectorAll('.chk-sel-plato').forEach(chk => { chk.checked = false; });
+    document.querySelectorAll('.plato-seleccionado').forEach(el => el.classList.remove('plato-seleccionado'));
+    pintarBarraSeleccion();
+}
+window.toggleSeleccionPlato = toggleSeleccionPlato;
+window.pintarBarraSeleccion = pintarBarraSeleccion;
+window.quitarSeleccionPlatos = quitarSeleccionPlatos;
 
 function eliminarKeySeleccionada() {
     const selectEl = document.getElementById('selectKeys');
