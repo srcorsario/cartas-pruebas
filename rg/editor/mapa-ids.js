@@ -16,7 +16,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.mapaIds = '1.0.1'; // 3 nov: ocupa todo el ancho y letra más grande. 1.0.0: Fase 2 del organizador — mapa de solo lectura
+    window.APP_VERSIONS.mapaIds = '1.1.0'; // 3 nov: botón ➕ Nueva categoría (organizador.js). 1.0.1: 3 nov: ocupa todo el ancho y letra más grande. 1.0.0: Fase 2 del organizador — mapa de solo lectura
 
     var $ = function (id) { return document.getElementById(id); };
     var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -193,7 +193,8 @@
         fondo.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:10000; display:flex; align-items:center; justify-content:center; padding:1vh 1vw;';
         fondo.innerHTML = '<div style="background:#fff; border-radius:12px; width:98vw; max-width:none; height:96vh; max-height:96vh; font-size:16px; line-height:1.4; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,.25);">' +
             '<div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:14px 18px 10px; border-bottom:1px solid #eef2f7;">' +
-            '<h3 style="margin:0; font-size:1.3em; flex:1 1 auto;">🗺️ Mapa de categorías y rangos de ID <small style="font-weight:400; color:#94a3b8;">(solo consulta)</small></h3>' +
+            '<h3 style="margin:0; font-size:1.3em; flex:1 1 auto;">🗺️ Mapa de categorías y rangos de ID</h3>' +
+            (window.Organizador ? '<button type="button" id="ew-mapa-nueva" style="padding:6px 12px; border-radius:6px; border:1px solid #15803d; background:#16a34a; color:#fff; font-weight:600; cursor:pointer;">➕ Nueva categoría</button>' : '') +
             '<input id="ew-mapa-filtro" type="search" placeholder="Buscar categoría o número…" style="padding:5px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:.85em; width:300px; max-width:100%;">' +
             '<button type="button" id="ew-mapa-cerrar" style="padding:6px 12px; border-radius:6px; border:1px solid #cbd5e1; background:#f1f5f9; cursor:pointer;">Cerrar</button></div>' +
             '<div id="ew-mapa-cuerpo" style="overflow:auto; padding:12px 18px 16px;"></div></div>';
@@ -227,6 +228,7 @@
         var alCambiar = function () { if (document.body.contains(fondo)) pintar(); };
         var alTecla = function (ev) { if (ev.key === 'Escape') cerrar(); };
         $('ew-mapa-cerrar').onclick = cerrar;
+        if ($('ew-mapa-nueva')) $('ew-mapa-nueva').onclick = function () { window.Organizador.nuevaCategoria(); };
         fondo.addEventListener('click', function (ev) { if (ev.target === fondo) cerrar(); });
         window.addEventListener('resize', alCambiar);
         document.addEventListener('keydown', alTecla);
