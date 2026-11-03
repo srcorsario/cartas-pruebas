@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.5.0';
+    window.APP_VERSIONS.almacenJson = '1.6.0';
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -427,7 +427,9 @@
                     if (!hay && previo) { v = valorDePlato(previo, k); hay = v !== undefined && v !== null; }
                     fila[K] = hay ? (typeof v === 'object' ? JSON.stringify(v) : v) : '';
                 });
-                return platoDeFila(fila, previo);
+                const nuevo = platoDeFila(fila, previo);
+                if (!previo && infoSinPlato[idNum(nuevo.id)]) ponerInfo(nuevo, infoSinPlato[idNum(nuevo.id)]);
+                return nuevo;
             });
         };
     }
@@ -442,16 +444,28 @@
         };
     }
 
+    // Info de un plato nuevo que todavía no se ha guardado: se guarda aquí y se añade al plato
+    // cuando llega en el siguiente "Guardar cambios en web" (opGuardarTodo).
+    const infoSinPlato = {};
+    function ponerInfo(p, cuerpo) {
+        p.info = p.info || {};
+        Object.keys(cuerpo.info || {}).forEach(l => {
+            const v = cuerpo.info[l];
+            p.info[l.toUpperCase()] = typeof v === 'string' ? v : JSON.stringify(v);
+        });
+        if (cuerpo.hashFicha !== undefined && cuerpo.hashFicha !== null && String(cuerpo.hashFicha)) p.info.HASH_FICHA = String(cuerpo.hashFicha);
+    }
     function opInfoPlato(cuerpo) {
         return (datos) => {
             const p = (datos.platos || []).find(x => idNum(x.id) === idNum(cuerpo.id));
-            if (!p) { console.warn('[almacen-json] infoplato: no existe el plato', cuerpo.id); return; }
-            p.info = p.info || {};
-            Object.keys(cuerpo.info || {}).forEach(l => {
-                const v = cuerpo.info[l];
-                p.info[l.toUpperCase()] = typeof v === 'string' ? v : JSON.stringify(v);
-            });
-            if (cuerpo.hashFicha !== undefined && cuerpo.hashFicha !== null && String(cuerpo.hashFicha)) p.info.HASH_FICHA = String(cuerpo.hashFicha);
+            if (!p) {
+                const k = idNum(cuerpo.id);
+                const prev = infoSinPlato[k] || { info: {} };
+                infoSinPlato[k] = { info: Object.assign({}, prev.info, cuerpo.info || {}), hashFicha: cuerpo.hashFicha != null && String(cuerpo.hashFicha) ? cuerpo.hashFicha : prev.hashFicha };
+                console.log('[almacen-json] infoplato: plato', cuerpo.id, 'aún sin guardar; la Info se añadirá al guardarlo.');
+                return;
+            }
+            ponerInfo(p, cuerpo);
         };
     }
 

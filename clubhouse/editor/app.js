@@ -1024,7 +1024,7 @@ async function generarTraduccionEN() {
         // las opciones de traducción (que ya son válidas de todos modos, generadas entendiendo
         // el plato pese a la posible falta).
         if (!esVino && opciones.correccion && opciones.correccion.hayError && opciones.correccion.texto) {
-            const corregido = await mostrarCorreccionOrtografiaEN(opciones.correccion.texto);
+            const corregido = await mostrarCorreccionOrtografiaEN(opciones.correccion.texto, (document.getElementById('edit-es') || {}).value);
             if (corregido) {
                 const editEs = document.getElementById('edit-es');
                 if (editEs) editEs.value = corregido;
@@ -1043,11 +1043,45 @@ async function generarTraduccionEN() {
 // que puede detectar prompts.js > opcionesEN en el nombre en español. Es una promesa que se
 // resuelve con el texto corregido (editable antes de aceptar) si el usuario acepta, o null si
 // prefiere dejarlo como estaba.
-function mostrarCorreccionOrtografiaEN(textoCorregido) {
+// MODIFICADO (3 nov): también enseña el texto original y el sugerido, con las palabras que
+// cambian resaltadas (rojo = lo que estaba mal, verde = la corrección).
+function resaltarDiferenciasOrtografia(a, b) {
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const A = String(a).split(/(\s+)/), B = String(b).split(/(\s+)/);
+    const n = A.length, m = B.length, L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    let i = 0, j = 0, outA = '', outB = '';
+    const malo = t => /\S/.test(t) ? `<span style="background:#fee2e2;color:#b42318;text-decoration:underline wavy #b42318;">${esc(t)}</span>` : esc(t);
+    const bueno = t => /\S/.test(t) ? `<span style="background:#dcfce7;color:#15803d;font-weight:600;">${esc(t)}</span>` : esc(t);
+    while (i < n && j < m) {
+        if (A[i] === B[j]) { outA += esc(A[i]); outB += esc(B[j]); i++; j++; }
+        else if (L[i + 1][j] >= L[i][j + 1]) outA += malo(A[i++]);
+        else outB += bueno(B[j++]);
+    }
+    while (i < n) outA += malo(A[i++]);
+    while (j < m) outB += bueno(B[j++]);
+    return [outA, outB];
+}
+
+function mostrarCorreccionOrtografiaEN(textoCorregido, textoOriginal) {
     return new Promise(resolve => {
         const modal = document.getElementById('modal-correccion-en');
         const input = document.getElementById('correccion-en-input');
         if (!modal || !input) { resolve(null); return; }
+        let caja = document.getElementById('correccion-en-comparar');
+        if (!caja) {
+            caja = document.createElement('div');
+            caja.id = 'correccion-en-comparar';
+            caja.style.cssText = 'text-align:left; font-size:0.9rem; line-height:1.7; margin:0 0 12px; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;';
+            input.parentNode.insertBefore(caja, input);
+        }
+        const original = String(textoOriginal || '').trim();
+        if (original && original !== String(textoCorregido).trim()) {
+            const [a, b] = resaltarDiferenciasOrtografia(original, textoCorregido);
+            caja.innerHTML = `<div><span style="color:#64748b;">Texto original:</span> ${a}</div><div><span style="color:#64748b;">Texto sugerido:</span> ${b}</div>` +
+                `<div style="color:#94a3b8; font-size:0.8rem; margin-top:4px;">Puedes editar la sugerencia aquí debajo antes de usarla.</div>`;
+            caja.style.display = '';
+        } else caja.style.display = 'none';
         input.value = textoCorregido;
         modal.style.display = 'block';
         resolverCorreccionEN = resolve;
