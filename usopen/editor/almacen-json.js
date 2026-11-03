@@ -507,6 +507,19 @@
     const jsonResp = (o) => respuesta(JSON.stringify(o), 200, 'application/json; charset=utf-8');
     let colaMenus = Promise.resolve();
 
+    // La hoja de Menús Especiales es común a RG y US Open: al copiarla la 1ª vez solo se queda
+    // con los menús que usan platos de ESTE restaurante (o solo platos escritos a mano).
+    function esDeEsteRestaurante(menu) {
+        const modos = new Set();
+        (function buscar(o) {
+            if (!o || typeof o !== 'object') return;
+            if (Array.isArray(o)) { o.forEach(buscar); return; }
+            if (typeof o.modo === 'string' && /^restaurante\d+$/.test(o.modo)) modos.add(o.modo);
+            Object.keys(o).forEach(k => buscar(o[k]));
+        })(menu && menu.config);
+        return modos.size === 0 || modos.has(SITIO.modo);
+    }
+
     async function leerMenus() {
         const cfg = cfgMenus();
         const r = await gh(cfg, { method: 'GET' });
@@ -525,9 +538,9 @@
                     fetchOriginal(u + '?accion=listarMenus&zx=' + Date.now(), { cache: 'no-store' }).then(x => x.json()),
                     fetchOriginal(u + '?accion=listarPlatosManuales&zx=' + Date.now(), { cache: 'no-store' }).then(x => x.json())
                 ]);
-                if (m && Array.isArray(m.menus)) datos.menus = m.menus;
+                if (m && Array.isArray(m.menus)) datos.menus = m.menus.filter(esDeEsteRestaurante);
                 if (p && Array.isArray(p.platos)) datos.platosManuales = p.platos;
-                console.log('[almacen-json] menus-especiales.json nuevo: copiados de la hoja', datos.menus.length, 'menús y', datos.platosManuales.length, 'platos');
+                console.log('[almacen-json] menus-especiales.json nuevo: copiados de la hoja', datos.menus.length, 'menús de este restaurante (de', (m && m.menus ? m.menus.length : 0), ') y', datos.platosManuales.length, 'platos');
             } catch (e) { console.warn('[almacen-json] No se pudo copiar la hoja de Menús Especiales:', e); }
         }
         return { datos, sha: null };
