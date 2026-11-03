@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.3.0';
+    window.APP_VERSIONS.almacenJson = '1.4.0';
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -653,6 +653,18 @@
         activo: activo,
         cambiarToken: () => { borrarToken(); return !!pedirToken(); },
         pendientes: () => Object.fromEntries(Object.entries(estados).map(([m, e]) => [m, e.sinConfirmar.length])),
-        _serializar: serializar, _csvDe: csvDe
+        _serializar: serializar, _csvDe: csvDe,
+        // Traductor Pro (editor-web.js): archivo datos.json -> CSV, y memoria -> datos.json (sin guardar).
+        csvDeJson: (texto) => {
+            const d = JSON.parse(texto);
+            if (!d || !Array.isArray(d.platos)) throw new Error('no tiene la lista "platos"');
+            return csvDe(d, CONFIG.modos[SITIO ? SITIO.modo : (window.currentMode || MODOS_TODOS[0])]);
+        },
+        datosJsonDe: async (payload, modo) => {
+            modo = modo || (SITIO ? SITIO.modo : window.currentMode);
+            const v = clonar(await vista(modo));
+            opGuardarTodo(payload, CONFIG.modos[modo])(v);
+            return serializar(v);
+        }
     };
 })();
