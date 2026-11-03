@@ -147,7 +147,7 @@
 {"id":"12906","activa":"no","precio":"7.00","precioMedia":"","carpeta":"postres","archivo":"","alergenos":["GLUTEN","HUEVO","LACTOSA","FRUTOSCASCARA","CACAHUETE","SESAMO","VEGETARIANO"],"opcionesInactivas":[],"h":"6726ced93e7f"},
 {"id":"12907","activa":"no","precio":"7.00","precioMedia":"","carpeta":"postres","archivo":"","alergenos":["GLUTEN","HUEVO","LACTOSA","FRUTOSCASCARA","MOLUSCO","CACAHUETE","SESAMO","VEGETARIANO"],"opcionesInactivas":[],"h":"c95e896bccf3"},
 {"id":"12908","activa":"no","precio":"6.00","precioMedia":"","carpeta":"postres","archivo":"","alergenos":["GLUTEN","HUEVO","CACAHUETE","LACTOSA","FRUTOSCASCARA","VEGETARIANO"],"opcionesInactivas":[],"h":"9528f5e87ef9"},
-{"id":"12991","activa":"no","precio":"56.00","precioMedia":"","carpeta":"vinos","archivo":"el_tenista_01.webp","alergenos":[],"opcionesInactivas":[],"h":"fae14fd1f1a8"},
+{"id":"12991","activa":"si","precio":"56.00","precioMedia":"","carpeta":"vinos","archivo":"el_tenista_01.webp","alergenos":[],"opcionesInactivas":[],"h":"c859dcf15177"},
 {"id":"13100","activa":"si","precio":"23.00","precioMedia":"","carpeta":"vinos","archivo":"projecte-terra_01.webp","alergenos":[],"opcionesInactivas":[],"h":"5ae85aa0da9a"},
 {"id":"13101","activa":"si","precio":"33.00","precioMedia":"","carpeta":"vinos","archivo":"4-kilos-llampuga_01.webp","alergenos":[],"opcionesInactivas":[],"h":"7d796d41eb5b"},
 {"id":"13102","activa":"si","precio":"45.00","precioMedia":"","carpeta":"vinos","archivo":"miguel_gelabert_blanco_01.webp","alergenos":[],"opcionesInactivas":[],"h":"587a152cfd1a"},

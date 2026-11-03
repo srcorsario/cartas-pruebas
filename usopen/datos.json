@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T08:45:16.553Z",
+  "guardado": "2026-11-03T08:45:51.195Z",
   "ocultas": ["pizzas"],
   "platos": [
     {
@@ -8406,7 +8406,7 @@
         }
     },
     {
-        "id": "12991", "activa": "no", "precio": "56.00", "precioMedia": "",
+        "id": "12991", "activa": "si", "precio": "56.00", "precioMedia": "",
         "carpeta": "vinos", "archivo": "el_tenista_01.webp",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
