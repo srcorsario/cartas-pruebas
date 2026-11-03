@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.10.0'; // 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.11.0'; // 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -380,7 +380,9 @@
 
     async function vista(modo, fresca) {
         const e = est(modo);
-        if (!e.vista || (fresca && e.sinConfirmar.length === 0)) await refrescar(modo);
+        // Justo después de guardar se usa lo que tenemos (GitHub puede tardar unos segundos en
+        // devolver la versión nueva y el editor recargaría platos viejos).
+        if (!e.vista || (fresca && e.sinConfirmar.length === 0 && !(e.tEscrito && Date.now() - e.tEscrito < 20000))) await refrescar(modo);
         return e.vista;
     }
 
@@ -411,6 +413,7 @@
                     // Confirmados los del lote; los que llegaran después siguen pendientes.
                     e.sinConfirmar = e.sinConfirmar.filter(c => lote.indexOf(c) === -1);
                     e.base = datos;
+                    e.tEscrito = Date.now();
                     break;
                 } catch (err) {
                     if (!err.conflicto || intento >= 3) throw err;
@@ -491,21 +494,45 @@
     // tras un conflicto ya no cabe (otro dispositivo cogió ese rango), se descarta con aviso en consola.
     function opEstructura(cuerpo) {
         let primera = true;
-        return (datos) => {
+        const hecho = (datos) => {
             const ini = primera; primera = false;
             try {
                 const r = window.Organizador.aplicar(estructuraDe(datos), cuerpo, (datos.platos || []).map(p => idNum(p.id)));
                 datos.estructura = r.estructura;
-                if (r.ocultar && r.ocultar.length) {
-                    const s = new Set((datos.ocultas || []).map(String));
-                    r.ocultar.forEach(x => s.add(String(x)));
-                    datos.ocultas = Array.from(s);
+                const s = new Set((datos.ocultas || []).map(String));
+                (r.ocultar || []).forEach(x => s.add(String(x)));
+                (r.quitarOcultas || []).forEach(x => s.delete(String(x)));
+                datos.ocultas = Array.from(s);
+                // Unir: los platos cambian de ID (Fotos/Info/traducciones van con el plato).
+                if (r.renumerar && Object.keys(r.renumerar).length) {
+                    (datos.platos || []).forEach(p => { const n = r.renumerar[idNum(p.id)]; if (n != null) p.id = String(n); });
+                    datos.platos.sort((a, b) => idNum(a.id) - idNum(b.id));
                 }
+                hecho.ultimo = r;
             } catch (err) {
                 if (ini) throw err;
                 console.warn('[almacen-json] cambio de estructura descartado:', err.message);
+                hecho.ultimo = null;
             }
         };
+        return hecho;
+    }
+
+    // Tras "Unir": los Menús Especiales de esta web que usaban esos platos apuntan a los ID nuevos.
+    async function renumerarMenus(modo, mapa) {
+        if (!SITIO || !urlMenus() || SITIO.modo !== modo) return 0;
+        let n = 0;
+        await cambiarMenus(d => {
+            n = 0;
+            (function buscar(o) {
+                if (!o || typeof o !== 'object') return;
+                if (Array.isArray(o)) { o.forEach(buscar); return; }
+                if (o.modo === modo && o.id != null && mapa[idNum(o.id)] != null) { o.id = typeof o.id === 'number' ? mapa[idNum(o.id)] : String(mapa[idNum(o.id)]); n++; }
+                Object.keys(o).forEach(k => buscar(o[k]));
+            })(d.menus);
+            return n ? { ok: true } : { ok: false };
+        }, 'ID de platos renumerados (organizador)');
+        return n;
     }
 
     function opCategoria(cuerpo) {
@@ -582,8 +609,14 @@
             }
             if (accion === 'estructura') {
                 if (!window.Organizador) return respuesta('Error: falta organizador.js en el editor (CONSTRUIR).');
-                await encolar(modo, opEstructura(cuerpo), 'estructura: ' + ((cuerpo && cuerpo.categoria && cuerpo.categoria.nombre) || 'cambio'), 300);
+                const op = opEstructura(cuerpo);
+                await encolar(modo, op, 'estructura: ' + ((cuerpo && (cuerpo.mensaje || (cuerpo.categoria && cuerpo.categoria.nombre) || (cuerpo.sub && cuerpo.sub.nombre))) || 'cambio'), 300);
                 if (window.Categorias) window.Categorias.cargar(estructuraDe(est(modo).vista));
+                const ren = op.ultimo && op.ultimo.renumerar;
+                if (ren && Object.keys(ren).length) {
+                    try { const n = await renumerarMenus(modo, ren); if (n) console.log('[almacen-json] Menús Especiales: ' + n + ' plato(s) con ID nuevo.'); }
+                    catch (err) { console.warn('[almacen-json] No se pudieron actualizar los Menús Especiales:', err); alert('⚠️ Los platos se han movido, pero no se pudieron actualizar los Menús Especiales (' + err.message + '). Revisa los menús que usaran esos platos.'); }
+                }
                 return respuesta('OK: estructura');
             }
             if (accion === 'infoplato') {

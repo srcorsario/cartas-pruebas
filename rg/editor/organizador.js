@@ -1,5 +1,6 @@
 // =========================================================================================
-// organizador.js — ORGANIZADOR, FASE 3 (paso 1): crear una categoría desde el editor.
+// organizador.js — ORGANIZADOR, FASE 3: crear, renombrar, ampliar/reducir, unir, borrar y ordenar
+// categorías y subcategorías desde el editor.
 // Común a todos los editores (lo copia e inserta construir.ps1).
 //
 // Botón "➕ Nueva categoría" en el 🗺️ Mapa de ID. Pide nombre, tipo, carpeta de fotos, rango
@@ -15,7 +16,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.organizador = '1.1.0'; // 3 nov: crear subcategoría (también en Sugerencias; sección propia en la web y en la hoja). 1.0.0: Fase 3 — crear categoría
+    window.APP_VERSIONS.organizador = '1.2.0'; // 3 nov: paso 3 — ✏️ renombrar (y en la web), visible, ampliar/reducir rango (quitando tramo vacío a la vecina), unir (renumera platos), borrar vacía; ↕️ ordenar. 1.1.0: 3 nov: crear subcategoría (también en Sugerencias; sección propia en la web y en la hoja). 1.0.0: Fase 3 — crear categoría
 
     var IDIOMAS = ['ES', 'EN', 'DE', 'FR', 'IT', 'RU', 'NL', 'PL', 'SV', 'NO', 'DA', 'FI', 'PT', 'RO', 'HU', 'CS', 'EL', 'TR', 'AR', 'ZH', 'JA', 'KO', 'CA', 'EU', 'GL', 'VA'];
     var MIN_ID = 1000, MAX_ID = 99999;
@@ -99,6 +100,7 @@
         var est = clonar(estOriginal);
         est.pestanas = est.pestanas || [];
         if (cambio && cambio.tipo === 'crearSubcategoria') return aplicarSub(est, cambio, ids);
+        if (cambio && ['renombrar', 'rango', 'unir', 'borrar', 'ordenar'].indexOf(cambio.tipo) >= 0) return aplicarPaso3(est, cambio, ids);
         if (!cambio || cambio.tipo !== 'crearCategoria') throw new Error('Cambio de estructura desconocido.');
         var c = cambio.categoria || {}, d = parseInt(c.desde, 10), h = parseInt(c.hasta, 10);
         var nombre = String(c.nombre || '').trim();
@@ -290,6 +292,227 @@
             if (!p.grupos.length) delete p.grupos;
         }
         return { estructura: est, ocultar: [] };
+    }
+
+    // ---------- Fase 3, paso 3: renombrar, ampliar/reducir rango, unir, borrar, ordenar ----------
+    var ESPECIAL = { sugerencias: 'Sugerencias', alergenos: 'Alérgenos', 'hoja-postres': 'Hoja de Postres' };
+    var especialDe = function (c) { return c && (ESPECIAL[c.tipo] || (c.hojaPostres ? 'Hoja de Postres' : '')); };
+    var esUnico = function (rs, d, h) { return (rs || []).length === 1 && rs[0][0] === d && rs[0][1] === h; };
+
+    // obj = { cat: desde de la categoría, sub: desde de la subcategoría o null }
+    function buscar(est, obj) {
+        var cat = (est.categorias || []).find(function (c) { return c.desde === parseInt(obj && obj.cat, 10); });
+        if (!cat) throw new Error('No existe la categoría ' + (obj && obj.cat) + ' (¿la ha cambiado otro dispositivo? Cierra y vuelve a abrir el Mapa).');
+        var sub = null;
+        if (obj.sub != null && obj.sub !== '') {
+            sub = (cat.sub || []).find(function (s) { return s.desde === parseInt(obj.sub, 10); });
+            if (!sub) throw new Error('No existe la subcategoría ' + obj.sub + ' en "' + cat.nombre + '".');
+        }
+        return { cat: cat, sub: sub, d: sub ? sub.desde : cat.desde, h: sub ? sub.hasta : cat.hasta, nombre: sub ? sub.nombre : cat.nombre };
+    }
+
+    // Une rangos que se tocan o se pisan.
+    function unirRangos(rs) {
+        var o = (rs || []).map(function (x) { return [x[0], x[1]]; }).sort(function (a, b) { return a[0] - b[0]; }), res = [];
+        o.forEach(function (x) { var u = res[res.length - 1]; if (u && x[0] <= u[1] + 1) u[1] = Math.max(u[1], x[1]); else res.push(x); });
+        return res;
+    }
+    // fn(dueño) para la pestaña y cada grupo / anexo (todos tienen .rangos).
+    function cadaLista(p, fn) { fn(p); (p.grupos || []).forEach(fn); (p.anexos || []).forEach(fn); }
+    function limpiarPestana(p) {
+        if (p.grupos) { p.grupos = p.grupos.filter(function (g) { return (g.rangos || []).length; }); if (!p.grupos.length) delete p.grupos; }
+        if (p.anexos) { p.anexos = p.anexos.filter(function (g) { return (g.rangos || []).length; }); if (!p.anexos.length) delete p.anexos; }
+    }
+    function reemplazarExacto(est, od, oh, nd, nh) {
+        (est.pestanas || []).forEach(function (p) {
+            cadaLista(p, function (x) { if (x.rangos) x.rangos = x.rangos.map(function (r) { return r[0] === od && r[1] === oh ? [nd, nh] : r; }); });
+        });
+    }
+    function quitarExacto(est, d, h) {
+        (est.pestanas || []).forEach(function (p) {
+            cadaLista(p, function (x) { if (x.rangos) x.rangos = x.rangos.filter(function (r) { return !(r[0] === d && r[1] === h); }); });
+            limpiarPestana(p);
+        });
+    }
+
+    // Dónde tiene nombre propio en la web: su pestaña, o una sección (grupo) con su mismo rango.
+    function destinoWeb(est, cat, sub) {
+        var p = pestanaDe(est, cat), g;
+        if (!sub) {
+            if (p && !p.especial) return { tipo: 'pestana', p: p, x: p };
+            var r = null;
+            (est.pestanas || []).some(function (q) {
+                return (q.grupos || []).concat(q.anexos || []).some(function (x) { if (esUnico(x.rangos, cat.desde, cat.hasta)) { r = { tipo: 'grupo', p: q, x: x }; return true; } return false; });
+            });
+            return r;
+        }
+        g = p && (p.grupos || []).find(function (x) { return esUnico(x.rangos, sub.desde, sub.hasta); });
+        return g ? { tipo: 'grupo', p: p, x: g } : null;
+    }
+    function textoWeb(w) {
+        if (!w) return '';
+        var np = (w.p.nombre && w.p.nombre.ES) || w.p.id;
+        return w.tipo === 'pestana' ? 'pestaña "' + np + '"' : 'sección "' + ((w.x.nombre && w.x.nombre.ES) || '') + '" de la pestaña "' + np + '"';
+    }
+
+    // Problemas de cambiar el rango de una categoría / subcategoría a [nd, nh].
+    // Devuelve { errores: [...], vecinas: [{ obj, cat, sub, desde, hasta }] } — vecinas = las que
+    // pierden un tramo vacío de su borde (solo se aplica con recortarVecina).
+    function conflictosRango(est, objetivo, nd, nh, ids, recortarVecina) {
+        var o = buscar(est, objetivo), err = [], vec = [];
+        ids = ids || [];
+        if (!(nd >= MIN_ID) || !(nh >= nd) || nh > MAX_ID) return { errores: ['Rango no válido (de ' + MIN_ID + ' a ' + MAX_ID + ', "desde" ≤ "hasta").'], vecinas: [] };
+        if (o.sub && (nd < o.cat.desde || nh > o.cat.hasta)) return { errores: ['Tiene que quedar dentro de "' + o.cat.nombre + '" (' + o.cat.desde + '–' + o.cat.hasta + '): amplía antes la categoría.'], vecinas: [] };
+        var fuera = ids.filter(function (i) { return i >= o.d && i <= o.h && (i < nd || i > nh); });
+        if (o.sub) fuera = fuera.filter(function (i) { return i >= o.cat.desde && i <= o.cat.hasta; });
+        if (fuera.length) err.push('Dejaría fuera ' + fuera.length + ' plato(s) (' + fuera.slice(0, 6).join(', ') + (fuera.length > 6 ? '…' : '') + '): muévelos antes ("Unir") o elige un rango que los incluya.');
+        if (!o.sub) (o.cat.sub || []).forEach(function (s) {
+            if (s.desde < nd || s.hasta > nh) err.push('La subcategoría "' + s.nombre + '" (' + s.desde + '–' + s.hasta + ') quedaría fuera: redúcela o bórrala antes.');
+        });
+        var anadidos = recortar([[nd, nh]], o.d, o.h);
+        var hermanos = o.sub ? (o.cat.sub || []).filter(function (s) { return s !== o.sub; }) : est.categorias.filter(function (c) { return c !== o.cat; });
+        hermanos.forEach(function (x) {
+            if (!toca(anadidos, x.desde, x.hasta)) return;
+            var qd = Math.max(nd, x.desde), qh = Math.min(nh, x.hasta);
+            var resto = recortar([[x.desde, x.hasta]], qd, qh);
+            var platos = ids.filter(function (i) { return i >= qd && i <= qh; });
+            var subs = (x.sub || []).filter(function (s) { return s.desde <= qh && qd <= s.hasta; });
+            var txt = 'Pisa ' + (o.sub ? 'la subcategoría' : 'la categoría') + ' "' + x.nombre + '" (' + x.desde + '–' + x.hasta + ')';
+            if (platos.length) err.push(txt + ': tiene ' + platos.length + ' plato(s) en ' + qd + '–' + qh + '.');
+            else if (subs.length) err.push(txt + ': su subcategoría "' + subs[0].nombre + '" está en ' + qd + '–' + qh + '.');
+            else if (resto.length !== 1) err.push(txt + ': quedaría vacía o partida en dos.');
+            else if (!o.sub && especialDe(x)) err.push(txt + ' (es especial: ' + especialDe(x) + ').');
+            else {
+                vec.push({ obj: x, cat: o.sub ? o.cat : x, sub: o.sub ? x : null, desde: resto[0][0], hasta: resto[0][1], qd: qd, qh: qh });
+                if (!recortarVecina) err.push(txt + ': se le puede quitar ese tramo vacío (' + qd + '–' + qh + ') marcando la casilla.');
+            }
+        });
+        if (o.sub && o.sub.tipo !== 'vino') {
+            var zv = zonaVinoSug(est, o.cat);
+            if (anadidos.some(function (a) { return toca(zv, a[0], a[1]); })) err.push('Pisa los vinos de la hoja de Sugerencias (' + zv.map(function (r) { return r[0] + '–' + r[1]; }).join(', ') + ').');
+        }
+        // Pestañas de la web de otras categorías.
+        var propias = [pestanaDe(est, o.cat)];
+        var w = destinoWeb(est, o.cat, null); if (w) propias.push(w.p);
+        vec.forEach(function (v) { if (!v.sub) { propias.push(pestanaDe(est, v.cat)); var w2 = destinoWeb(est, v.cat, null); if (w2) propias.push(w2.p); } });
+        (est.pestanas || []).forEach(function (p) {
+            if (p.especial || propias.indexOf(p) >= 0) return;
+            var rs = []; cadaLista(p, function (x) { rs = rs.concat(x.rangos || []); });
+            var t = anadidos.filter(function (a) { return toca(rs, a[0], a[1]); });
+            if (t.length) err.push('Pisa la pestaña "' + ((p.nombre && p.nombre.ES) || p.id) + '" de la web.');
+        });
+        return { errores: err, vecinas: vec };
+    }
+
+    // Ajusta la web tras pasar (cat | sub) de [od, oh] a [nd, nh].
+    function ajustarWeb(est, cat, sub, od, oh, nd, nh) {
+        var quitados = recortar([[od, oh]], nd, nh), anadidos = recortar([[nd, nh]], od, oh);
+        reemplazarExacto(est, od, oh, nd, nh);
+        var p = pestanaDe(est, cat);
+        if (!p || p.especial) return;
+        if (!sub) {
+            quitados.forEach(function (q) { cadaLista(p, function (x) { if (x.rangos) x.rangos = recortar(x.rangos, q[0], q[1]); }); });
+            anadidos.forEach(function (a) {
+                if (!cubre(p.rangos, a[0], a[1])) p.rangos = unirRangos((p.rangos || []).concat([a]));
+                if (p.grupos && p.grupos.length && !p.grupos.some(function (g) { return toca(g.rangos, a[0], a[1]); })) {
+                    var borde = a[1] < od ? od : oh;
+                    var g = p.grupos.find(function (x) { return x.tipo !== 'vino' && toca(x.rangos, borde, borde); });
+                    if (g) g.rangos = unirRangos(g.rangos.concat([a]));
+                }
+            });
+        } else {
+            var g = (p.grupos || []).find(function (x) { return esUnico(x.rangos, nd, nh); });
+            if (g) anadidos.forEach(function (a) { p.grupos.forEach(function (x) { if (x !== g) x.rangos = recortar(x.rangos, a[0], a[1]); }); });
+            anadidos.forEach(function (a) { if (!cubre(p.rangos, a[0], a[1])) p.rangos = unirRangos((p.rangos || []).concat([a])); });
+        }
+        limpiarPestana(p);
+    }
+
+    // Quita (cat | sub) de la estructura. Devuelve los id de pestaña que desaparecen.
+    function quitar(est, o) {
+        if (!o.sub) {
+            est.categorias.splice(est.categorias.indexOf(o.cat), 1);
+            var p = pestanaDe(est, o.cat), fuera = [];
+            if (p && !p.especial && !est.categorias.some(function (c) { return String(c.pestana) === String(p.id); })) {
+                est.pestanas.splice(est.pestanas.indexOf(p), 1); fuera.push(String(p.id));
+            }
+            quitarExacto(est, o.d, o.h);
+            return fuera;
+        }
+        o.cat.sub = o.cat.sub.filter(function (s) { return s !== o.sub; });
+        var q = pestanaDe(est, o.cat);
+        if (q && q.grupos) { q.grupos = q.grupos.filter(function (g) { return !esUnico(g.rangos, o.d, o.h); }); limpiarPestana(q); }
+        if (!o.cat.sub.length) { delete o.cat.sub; if (!o.cat.carpeta) o.cat.carpeta = o.sub.carpeta || slug(o.cat.nombre); }
+        return [];
+    }
+
+    // Destino de "Unir": ID libres del destino, empezando detrás de su último plato.
+    function huecosDestino(dst, ids) {
+        var ocup = {}, ult = dst.d - 1, l = [];
+        (ids || []).forEach(function (i) { ocup[i] = 1; if (i >= dst.d && i <= dst.h) ult = Math.max(ult, i); });
+        for (var i = dst.d; i <= dst.h; i++) if (!ocup[i]) l.push(i);
+        return l.filter(function (i) { return i > ult; }).concat(l.filter(function (i) { return i < ult; }));
+    }
+
+    function aplicarPaso3(est, cambio, ids) {
+        ids = ids || [];
+        var o, r = { estructura: est, ocultar: [], quitarOcultas: [], renumerar: null };
+        if (cambio.tipo === 'ordenar') {
+            var pos = function (lista, k) { var i = (lista || []).map(String).indexOf(String(k)); return i < 0 ? 1e9 : i; };
+            if (cambio.categorias) est.categorias = est.categorias.map(function (c, i) { return [c, i]; })
+                .sort(function (a, b) { return (pos(cambio.categorias, a[0].desde) - pos(cambio.categorias, b[0].desde)) || (a[1] - b[1]); }).map(function (x) { return x[0]; });
+            if (cambio.pestanas) est.pestanas = est.pestanas.map(function (p, i) { return [p, i]; })
+                .sort(function (a, b) { return (pos(cambio.pestanas, a[0].id) - pos(cambio.pestanas, b[0].id)) || (a[1] - b[1]); }).map(function (x) { return x[0]; });
+            return r;
+        }
+        o = buscar(est, cambio.objetivo || cambio.origen);
+        if (cambio.tipo === 'renombrar') {
+            var nombre = String(cambio.nombre || '').trim();
+            if (!nombre) throw new Error('Falta el nombre.');
+            var hermanos = o.sub ? o.cat.sub.filter(function (s) { return s !== o.sub; }) : est.categorias.filter(function (c) { return c !== o.cat; });
+            if (hermanos.some(function (x) { return String(x.nombre).trim().toLowerCase() === nombre.toLowerCase(); })) throw new Error('Ya hay ' + (o.sub ? 'una subcategoría' : 'una categoría') + ' "' + nombre + '".');
+            (o.sub || o.cat).nombre = nombre;
+            if (cambio.nombresWeb) {
+                var w = destinoWeb(est, o.cat, o.sub);
+                if (!w) throw new Error('"' + o.nombre + '" no tiene nombre propio en la web.');
+                w.x.nombre = Object.assign({}, w.x.nombre || {}, nombresDe({ nombres: cambio.nombresWeb }, nombre));
+            }
+            return r;
+        }
+        if (cambio.tipo === 'rango') {
+            var nd = parseInt(cambio.desde, 10), nh = parseInt(cambio.hasta, 10);
+            if (nd === o.d && nh === o.h) throw new Error('El rango no ha cambiado.');
+            var c = conflictosRango(est, cambio.objetivo, nd, nh, ids, !!cambio.recortarVecina);
+            if (c.errores.length) throw new Error(c.errores.join(' '));
+            (o.sub || o.cat).desde = nd; (o.sub || o.cat).hasta = nh;
+            c.vecinas.forEach(function (v) {
+                var vd = v.obj.desde, vh = v.obj.hasta;
+                v.obj.desde = v.desde; v.obj.hasta = v.hasta;
+                ajustarWeb(est, v.cat, v.sub, vd, vh, v.desde, v.hasta);
+            });
+            ajustarWeb(est, o.cat, o.sub, o.d, o.h, nd, nh);
+            return r;
+        }
+        if (cambio.tipo === 'borrar' || cambio.tipo === 'unir') {
+            if (!o.sub && especialDe(o.cat)) throw new Error('"' + o.cat.nombre + '" es especial (' + especialDe(o.cat) + '): no se puede ' + (cambio.tipo === 'unir' ? 'unir' : 'borrar') + '.');
+            var dentro = ids.filter(function (i) { return i >= o.d && i <= o.h; }).sort(function (a, b) { return a - b; });
+            if (cambio.tipo === 'borrar') {
+                if (dentro.length) throw new Error('"' + o.nombre + '" tiene ' + dentro.length + ' plato(s) (activos o no): muévelos antes con "Unir" o bórralos en el editor.');
+                r.quitarOcultas = quitar(est, o);
+                return r;
+            }
+            var dst = buscar(est, cambio.destino);
+            if (dst.cat === o.cat && (!o.sub || !dst.sub || dst.sub === o.sub)) throw new Error('Elige otro destino.');
+            if (dst.cat.sub && dst.cat.sub.length && !dst.sub) throw new Error('"' + dst.cat.nombre + '" tiene subcategorías: elige en cuál van los platos.');
+            if (!dentro.length) throw new Error('"' + o.nombre + '" no tiene platos: usa "Borrar".');
+            var libresD = huecosDestino(dst, ids);
+            if (libresD.length < dentro.length) throw new Error('No caben: son ' + dentro.length + ' plato(s) y "' + dst.nombre + '" solo tiene ' + libresD.length + ' ID libres. Amplía antes su rango.');
+            r.renumerar = {};
+            dentro.forEach(function (id, k) { r.renumerar[id] = libresD[k]; });
+            r.quitarOcultas = quitar(est, o);
+            return r;
+        }
+        throw new Error('Cambio de estructura desconocido.');
     }
 
     // Guarda un cambio (POST ?accion=estructura). Devuelve true si se guardó.
@@ -627,6 +850,222 @@
         }
     }
 
+    // ---------- interfaz del paso 3 ----------
+    function hayPendiente() {
+        if (window.hayCambiosSinGuardar) return true;
+        try { var p = window.AlmacenJSON && window.AlmacenJSON.pendientes(); return !!p && Object.keys(p).some(function (k) { return p[k] > 0; }); } catch (e) { return false; }
+    }
+    function ventana(titulo, ancho) {
+        var viejo = $('ew-org'); if (viejo) viejo.remove();
+        var fondo = document.createElement('div');
+        fondo.id = 'ew-org';
+        fondo.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:10001; display:flex; align-items:center; justify-content:center; padding:2vh 2vw;';
+        fondo.innerHTML = '<div style="background:#fff; border-radius:12px; width:' + (ancho || 760) + 'px; max-width:96vw; max-height:94vh; overflow:auto; font-size:16px; line-height:1.4; box-shadow:0 20px 40px rgba(0,0,0,.3);">' +
+            '<div style="padding:14px 18px 10px; border-bottom:1px solid #eef2f7; display:flex; align-items:center; gap:8px;"><h3 style="margin:0; flex:1;">' + titulo + '</h3>' +
+            '<button type="button" data-b="x" style="' + ESTILO_BTN + '">Cerrar</button></div><div data-b="cuerpo" style="padding:14px 18px;"></div></div>';
+        document.body.appendChild(fondo);
+        var tecla = function (ev) { if (ev.key === 'Escape') cerrar(); };
+        var cerrar = function () { fondo.remove(); document.removeEventListener('keydown', tecla); };
+        document.addEventListener('keydown', tecla);
+        fondo.querySelector('[data-b="x"]').onclick = cerrar;
+        return { fondo: fondo, cuerpo: fondo.querySelector('[data-b="cuerpo"]'), cerrar: cerrar };
+    }
+    async function trasGuardar(v, texto, recargarPlatos) {
+        v.cerrar();
+        if (recargarPlatos && typeof cargar === 'function') { try { await cargar(0, true); } catch (e) { } } // eslint-disable-line no-undef
+        await refrescarEditor();
+        if (window.MapaIds && $('ew-mapa')) window.MapaIds.abrir();
+        if (texto) alert(texto);
+    }
+    var CAJA = 'border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; margin:0 0 12px;';
+
+    // ✏️ Gestionar una categoría (subDesde = null) o una subcategoría.
+    function gestionar(catDesde, subDesde) {
+        var est = window.Categorias && window.Categorias.estructura();
+        if (!est) { alert('Este editor aún no tiene la estructura de la carta. Pulsa CONSTRUIR y vuelve a abrir el editor.'); return; }
+        var ids = idsPlatos(), objetivo = { cat: catDesde, sub: subDesde == null ? null : subDesde }, o;
+        try { o = buscar(est, objetivo); } catch (err) { alert(err.message); return; }
+        var dentro = ids.filter(function (i) { return i >= o.d && i <= o.h; }).sort(function (a, b) { return a - b; });
+        var esp = !o.sub && especialDe(o.cat);
+        var w = destinoWeb(est, o.cat, o.sub);
+        var pes = !o.sub ? pestanaDe(est, o.cat) : null;
+        var v = ventana('✏️ ' + esc(o.sub ? o.cat.nombre + ' › ' + o.sub.nombre : o.cat.nombre) + ' <small style="font-weight:400; color:#64748b;">' + o.d + '–' + o.h + '</small>');
+        // Destinos de "Unir": categorías sin sub y cada subcategoría.
+        var destinos = [];
+        est.categorias.forEach(function (c) {
+            if (c.sinPlatos || c.tipo === 'alergenos') return;
+            if (c.sub && c.sub.length) c.sub.forEach(function (s) { if (s !== o.sub) destinos.push({ v: c.desde + ':' + s.desde, t: c.nombre + ' › ' + s.nombre + ' (' + s.desde + '–' + s.hasta + ')', cat: c.desde, sub: s.desde }); });
+            else if (c !== o.cat) destinos.push({ v: c.desde + ':', t: c.nombre + ' (' + c.desde + '–' + c.hasta + ')', cat: c.desde, sub: null });
+        });
+        if (!o.sub) destinos = destinos.filter(function (d) { return d.cat !== o.cat.desde; });
+        var deshab = (typeof categoriasDeshabilitadas !== 'undefined' && categoriasDeshabilitadas[modo()]) || null; // eslint-disable-line no-undef
+        var visible = pes && deshab ? !deshab.has(String(pes.id)) : true;
+
+        v.cuerpo.innerHTML =
+            '<div style="font-size:.9em; color:#475569; margin:0 0 12px;">' + dentro.length + ' plato(s)' + (dentro.length ? ' (de ' + dentro[0] + ' a ' + dentro[dentro.length - 1] + ')' : '') +
+            (w ? ' · en la web: ' + esc(textoWeb(w)) : ' · sin nombre propio en la web') + (esp ? ' · <b>especial: ' + esc(esp) + '</b>' : '') + '</div>' +
+            // Nombre
+            '<fieldset style="' + CAJA + '"><legend><b>Nombre</b></legend><div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">' +
+            '<input id="ew-g-nombre" value="' + esc(o.nombre) + '" style="' + ESTILO_IN + ' flex:1 1 260px;">' +
+            '<button type="button" id="ew-g-renombrar" style="' + ESTILO_OK + '">Renombrar</button></div>' +
+            (w ? '<label style="display:block; margin-top:6px; font-size:.92em;"><input type="checkbox" id="ew-g-web"> Cambiar también el nombre en la web (' + esc(textoWeb(w)) + ', con IA a los 26 idiomas)</label>' : '') + '</fieldset>' +
+            // Visible
+            (pes && !pes.especial ? '<fieldset style="' + CAJA + '"><legend><b>En la web</b></legend><label><input type="checkbox" id="ew-g-visible"' + (visible ? ' checked' : '') + '> Pestaña "' + esc((pes.nombre && pes.nombre.ES) || pes.id) + '" visible en la web</label> <small style="color:#64748b;">(igual que su interruptor en el editor)</small></fieldset>' : '') +
+            // Rango
+            '<fieldset style="' + CAJA + '"><legend><b>Rango de ID</b> (ampliar / reducir)</legend><div style="display:flex; flex-wrap:wrap; gap:10px; align-items:end;">' +
+            '<label>Desde<br><input id="ew-g-desde" type="number" value="' + o.d + '" style="' + ESTILO_IN + ' width:110px;"></label>' +
+            '<label>Hasta<br><input id="ew-g-hasta" type="number" value="' + o.h + '" style="' + ESTILO_IN + ' width:110px;"></label>' +
+            '<button type="button" id="ew-g-rango" style="' + ESTILO_OK + '">Guardar rango</button></div>' +
+            '<label id="ew-g-vecina-l" style="display:none; margin-top:6px; font-size:.92em;"><input type="checkbox" id="ew-g-vecina"> <span id="ew-g-vecina-t"></span></label>' +
+            '<div id="ew-g-rango-estado" style="margin-top:6px; font-size:.9em;"></div></fieldset>' +
+            // Unir
+            (!esp ? '<fieldset style="' + CAJA + '"><legend><b>Unir</b> (mover sus platos a otra y borrar esta)</legend>' +
+                (dentro.length ? '<div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">Mover los ' + dentro.length + ' plato(s) a <select id="ew-g-destino" style="' + ESTILO_IN + ' max-width:100%;"><option value="">— elige destino —</option>' +
+                    destinos.map(function (d) { return '<option value="' + d.v + '">' + esc(d.t) + '</option>'; }).join('') + '</select>' +
+                    '<button type="button" id="ew-g-unir" style="' + ESTILO_BTN + ' border-color:#b45309; color:#92400e;">Unir</button></div>' +
+                    '<div id="ew-g-unir-estado" style="margin-top:6px; font-size:.9em;"></div>' +
+                    '<small style="color:#64748b;">Los platos cambian de ID (en orden, detrás del último del destino). Fotos, Info y traducciones se quedan; los Menús Especiales se actualizan.</small>'
+                    : '<small style="color:#64748b;">No tiene platos: usa "Borrar".</small>') + '</fieldset>' : '') +
+            // Borrar
+            (!esp ? '<fieldset style="' + CAJA + '"><legend><b>Borrar</b></legend>' + (dentro.length
+                ? '<small style="color:#64748b;">Solo se puede borrar vacía: tiene ' + dentro.length + ' plato(s) (activos o no). Muévelos con "Unir" o bórralos en el editor.</small>'
+                : '<button type="button" id="ew-g-borrar" style="' + ESTILO_BTN + ' border-color:#b91c1c; color:#b91c1c;">🗑️ Borrar ' + (o.sub ? 'subcategoría' : 'categoría') + '</button>' +
+                    (!o.sub && pes && !pes.especial ? ' <small style="color:#64748b;">(también su pestaña de la web)</small>' : '')) + '</fieldset>' : '<small style="color:#64748b;">Categoría especial: se puede renombrar y cambiar su rango, pero no unir ni borrar.</small>');
+
+        // --- renombrar ---
+        $('ew-g-renombrar').onclick = async function () {
+            var b = this, nombre = $('ew-g-nombre').value.trim(), web = $('ew-g-web') && $('ew-g-web').checked;
+            if (!nombre) { alert('Escribe el nombre.'); return; }
+            var cambio = { tipo: 'renombrar', objetivo: objetivo, nombre: nombre, mensaje: 'renombrar ' + o.nombre + ' → ' + nombre };
+            if (nombre === o.nombre && !web) { alert('El nombre no ha cambiado.'); return; }
+            try { aplicar(est, cambio, ids); } catch (err) { alert(err.message); return; }
+            var fin = async function () {
+                if (!(await guardarCambio(cambio))) return false;
+                await trasGuardar(v, '✔ "' + o.nombre + '" ahora se llama "' + nombre + '".' + (web ? '\nNombre de la web cambiado.' : ''));
+                return true;
+            };
+            if (!web) { b.disabled = true; if (!(await fin())) b.disabled = false; return; }
+            v.fondo.style.display = 'none';
+            var trad = await traducir(nombre);
+            v.fondo.style.display = 'flex';
+            var caja = v.cuerpo;
+            var antes = Array.prototype.slice.call(caja.childNodes);
+            var p2 = document.createElement('div'); antes.forEach(function (n) { n.style && (n.style.display = 'none'); });
+            caja.appendChild(p2);
+            revisarNombres(p2, 'Nombre en la web de <b>' + esc(nombre) + '</b> (' + esc(textoWeb(w)) + ')', trad || Object.assign({}, w.x.nombre || {}, { ES: nombre }), !trad,
+                function () { p2.remove(); antes.forEach(function (n) { n.style && (n.style.display = ''); }); },
+                function (n) { n.ES = n.ES || nombre; cambio.nombresWeb = n; return fin(); });
+        };
+        // --- visible ---
+        if ($('ew-g-visible')) $('ew-g-visible').onchange = async function () {
+            if (typeof window.toggleCategoriaPestana !== 'function') { alert('Usa el interruptor de la pestaña en el editor.'); return; }
+            await window.toggleCategoriaPestana(String(pes.id), this.checked, this);
+            try { if (typeof renderizar === 'function') renderizar(); } catch (e) { } // eslint-disable-line no-undef
+        };
+        // --- rango ---
+        function comprobarRango() {
+            var d = parseInt($('ew-g-desde').value, 10), h = parseInt($('ew-g-hasta').value, 10), rec = $('ew-g-vecina').checked;
+            var c;
+            try { c = conflictosRango(est, objetivo, d, h, ids, rec); } catch (err) { c = { errores: [err.message], vecinas: [] }; }
+            $('ew-g-vecina-l').style.display = c.vecinas.length ? 'block' : 'none';
+            $('ew-g-vecina-t').textContent = c.vecinas.map(function (x) { return 'Quitar ' + x.qd + '–' + x.qh + ' (vacío) a "' + x.obj.nombre + '": quedaría ' + x.desde + '–' + x.hasta; }).join(' · ');
+            var igual = d === o.d && h === o.h;
+            $('ew-g-rango-estado').innerHTML = igual ? '<span style="color:#64748b;">Rango actual (' + (o.h - o.d + 1) + ' ID).</span>' : c.errores.length
+                ? '<span style="color:#b91c1c;">⛔ ' + esc(c.errores.join(' ')) + '</span>'
+                : '<span style="color:#15803d;">✔ Vale: ' + d + '–' + h + ' (' + (h - d + 1) + ' ID, ' + (h - d + 1 - dentro.length) + ' libres).</span>';
+            return !igual && !c.errores.length;
+        }
+        $('ew-g-desde').oninput = comprobarRango; $('ew-g-hasta').oninput = comprobarRango; $('ew-g-vecina').onchange = comprobarRango;
+        comprobarRango();
+        $('ew-g-rango').onclick = async function () {
+            if (!comprobarRango()) { alert('Ese rango no vale (mira el aviso en rojo).'); return; }
+            var d = parseInt($('ew-g-desde').value, 10), h = parseInt($('ew-g-hasta').value, 10);
+            var cambio = { tipo: 'rango', objetivo: objetivo, desde: d, hasta: h, recortarVecina: $('ew-g-vecina').checked, mensaje: 'rango ' + o.nombre + ' ' + d + '-' + h };
+            try { aplicar(est, cambio, ids); } catch (err) { alert(err.message); return; }
+            this.disabled = true;
+            if (!(await guardarCambio(cambio))) { this.disabled = false; return; }
+            await trasGuardar(v, '✔ "' + o.nombre + '": ' + o.d + '–' + o.h + ' → ' + d + '–' + h + '.');
+        };
+        // --- unir ---
+        function destinoElegido() {
+            var x = $('ew-g-destino') && $('ew-g-destino').value; if (!x) return null;
+            var t = x.split(':'); return { cat: parseInt(t[0], 10), sub: t[1] === '' ? null : parseInt(t[1], 10) };
+        }
+        function comprobarUnir() {
+            var dst = destinoElegido(); if (!dst) { $('ew-g-unir-estado').innerHTML = ''; return false; }
+            try {
+                var dd = buscar(est, dst), l = huecosDestino(dd, ids);
+                $('ew-g-unir-estado').innerHTML = l.length >= dentro.length
+                    ? '<span style="color:#15803d;">✔ Caben: irán de ' + Math.min.apply(null, l.slice(0, dentro.length)) + ' a ' + Math.max.apply(null, l.slice(0, dentro.length)) + ' (' + l.length + ' libres en el destino).</span>'
+                    : '<span style="color:#b91c1c;">⛔ No caben: ' + dentro.length + ' plato(s) y solo hay ' + l.length + ' ID libres. Amplía antes el rango del destino.</span>';
+                return l.length >= dentro.length;
+            } catch (err) { $('ew-g-unir-estado').innerHTML = '<span style="color:#b91c1c;">⛔ ' + esc(err.message) + '</span>'; return false; }
+        }
+        if ($('ew-g-destino')) { $('ew-g-destino').onchange = comprobarUnir; comprobarUnir(); }
+        if ($('ew-g-unir')) $('ew-g-unir').onclick = async function () {
+            if (hayPendiente()) { alert('Antes guarda los cambios del editor ("Guardar cambios en web") y espera a que termine: al unir, los platos cambian de ID.'); return; }
+            if (!comprobarUnir()) { if (!destinoElegido()) alert('Elige a dónde van los platos.'); return; }
+            var dst = destinoElegido(), dd = buscar(est, dst);
+            var cambio = { tipo: 'unir', origen: objetivo, destino: dst, mensaje: 'unir ' + o.nombre + ' → ' + dd.nombre };
+            try { aplicar(est, cambio, ids); } catch (err) { alert(err.message); return; }
+            var ok = typeof window.confirmarEditor === 'function'
+                ? await window.confirmarEditor('¿Mover los ' + dentro.length + ' plato(s) de "' + o.nombre + '" a "' + dd.nombre + '" y borrar "' + o.nombre + '"' + (!o.sub && pes && !pes.especial ? ' (y su pestaña de la web)' : '') + '?', { si: 'Sí, unir', no: 'Cancelar' })
+                : confirm('¿Unir "' + o.nombre + '" con "' + dd.nombre + '"?');
+            if (!ok) return;
+            this.disabled = true; this.textContent = '⏳ Uniendo…';
+            if (!(await guardarCambio(cambio))) { this.disabled = false; this.textContent = 'Unir'; return; }
+            await trasGuardar(v, '✔ ' + dentro.length + ' plato(s) movidos a "' + dd.nombre + '" y "' + o.nombre + '" borrada.', true);
+        };
+        // --- borrar ---
+        if ($('ew-g-borrar')) $('ew-g-borrar').onclick = async function () {
+            var b = this;
+            if (b.dataset.seguro !== '1') { b.dataset.seguro = '1'; b.textContent = '¿Seguro? Pulsa otra vez'; return; }
+            var cambio = { tipo: 'borrar', objetivo: objetivo, mensaje: 'borrar ' + o.nombre };
+            try { aplicar(est, cambio, ids); } catch (err) { alert(err.message); return; }
+            b.disabled = true;
+            if (!(await guardarCambio(cambio))) { b.disabled = false; return; }
+            await trasGuardar(v, '✔ "' + o.nombre + '" borrada.');
+        };
+    }
+
+    // ↕️ Orden del acordeón del editor y de las pestañas de la web.
+    function ordenar() {
+        var est = window.Categorias && window.Categorias.estructura();
+        if (!est) { alert('Este editor aún no tiene la estructura de la carta. Pulsa CONSTRUIR y vuelve a abrir el editor.'); return; }
+        var cats = est.categorias.map(function (c) { return { k: c.desde, t: c.nombre + ' (' + c.desde + '–' + c.hasta + ')' }; });
+        var pes = (est.pestanas || []).map(function (p) { return { k: p.id, t: (p.especial === 'alergenos' ? 'Alérgenos' : ((p.nombre && p.nombre.ES) || p.id)) }; });
+        var v = ventana('↕️ Ordenar', 900);
+        function lista(arr, id) {
+            return '<ol id="' + id + '" style="margin:0; padding-left:26px;">' + arr.map(function (x, i) {
+                return '<li style="margin:2px 0;"><span style="display:inline-flex; gap:6px; align-items:center;">' +
+                    '<button type="button" data-m="-1" data-i="' + i + '" style="' + ESTILO_BTN + ' padding:1px 7px;"' + (i ? '' : ' disabled') + '>↑</button>' +
+                    '<button type="button" data-m="1" data-i="' + i + '" style="' + ESTILO_BTN + ' padding:1px 7px;"' + (i < arr.length - 1 ? '' : ' disabled') + '>↓</button>' + esc(x.t) + '</span></li>';
+            }).join('') + '</ol>';
+        }
+        function pintar() {
+            v.cuerpo.innerHTML = '<div style="display:flex; flex-wrap:wrap; gap:18px;">' +
+                '<div style="flex:1 1 360px;"><h4 style="margin:0 0 6px;">Acordeón del editor</h4>' + lista(cats, 'ew-o-cats') + '</div>' +
+                '<div style="flex:1 1 300px;"><h4 style="margin:0 0 6px;">Pestañas de la web</h4>' + lista(pes, 'ew-o-pes') + '</div></div>' +
+                '<p style="font-size:.85em; color:#64748b;">Las subcategorías van siempre por número de ID.</p>' +
+                '<div style="display:flex; gap:8px; justify-content:flex-end;"><button type="button" id="ew-o-guardar" style="' + ESTILO_OK + '">Guardar orden</button></div>';
+            [['ew-o-cats', cats], ['ew-o-pes', pes]].forEach(function (z) {
+                Array.prototype.forEach.call($(z[0]).querySelectorAll('button[data-m]'), function (b) {
+                    b.onclick = function () {
+                        var i = +b.getAttribute('data-i'), j = i + (+b.getAttribute('data-m')), a = z[1], t = a[i];
+                        a[i] = a[j]; a[j] = t; pintar();
+                    };
+                });
+            });
+            $('ew-o-guardar').onclick = async function () {
+                var cambio = { tipo: 'ordenar', categorias: cats.map(function (x) { return x.k; }), pestanas: pes.map(function (x) { return x.k; }), mensaje: 'ordenar' };
+                this.disabled = true;
+                if (!(await guardarCambio(cambio))) { this.disabled = false; return; }
+                await trasGuardar(v, '✔ Orden guardado.');
+            };
+        }
+        pintar();
+    }
+
     // Repinta el acordeón, el menú de "nuevo plato" y los interruptores de pestaña.
     async function refrescarEditor() {
         try { if (typeof cargarEstadoCategorias === 'function') await cargarEstadoCategorias(modo()); } catch (e) { } // eslint-disable-line no-undef
@@ -656,6 +1095,8 @@
     window.Organizador = {
         ocupados: ocupados, conflictos: conflictos, libres: libres, proponer: proponer, aplicar: aplicar, slug: slug,
         conflictosSub: conflictosSub, libresSub: libresSub, proponerSub: proponerSub,
-        nuevaCategoria: nuevaCategoria, nuevaSubcategoria: nuevaSubcategoria
+        nuevaCategoria: nuevaCategoria, nuevaSubcategoria: nuevaSubcategoria,
+        conflictosRango: conflictosRango, destinoWeb: destinoWeb, huecosDestino: huecosDestino,
+        gestionar: gestionar, ordenar: ordenar
     };
 })();
