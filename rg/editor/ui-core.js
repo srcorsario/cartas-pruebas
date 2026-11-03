@@ -215,6 +215,7 @@ export const UICore = {
 
         const idxId = findExactIdx('ID');
         const idxPrecio = findExactIdx('PRECIO');
+        const idxPrecioMedia = findExactIdx('PRECIO_MEDIA');
         const idxActiva = findExactIdx('ACTIVA');
         const idxCarpeta = findExactIdx('CARPETA');
         const idxImagen = findExactIdx('ARCHIVO_FOTO');
@@ -244,6 +245,7 @@ export const UICore = {
             let obj = {
                 id: parseInt(row[idxId]),
                 precio: idxPrecio !== -1 ? (row[idxPrecio] || "0.00") : "0.00",
+                precio_media: idxPrecioMedia !== -1 ? (row[idxPrecioMedia] || "") : "",
                 activa: valActiva,
                 carpeta: idxCarpeta !== -1 ? (row[idxCarpeta] || "") : "",
                 archivo_foto: idxImagen !== -1 ? (row[idxImagen] || "") : "",

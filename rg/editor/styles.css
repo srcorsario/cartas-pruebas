@@ -503,7 +503,7 @@ input:checked + .slider-switch:before { transform: translateX(18px); }
 .btn-add-ingrediente:hover { background: #e0f2e5; }
 .ingredientes-vacio { font-size: 0.8rem; color: #888; font-style: italic; margin: 4px 0 10px; }
 
-.panel-control-precio { display: flex; gap: 12px; width: 100%; align-items: flex-start; margin-bottom: 15px; }
+.panel-control-precio { display: flex; flex-wrap: wrap; gap: 12px; width: 100%; align-items: flex-start; margin-bottom: 15px; }
 .input-precio-super-mini { flex: 0 0 90px !important; }
 .input-precio-mini { text-align: center; font-weight: bold; padding: 8px; }
 .input-imagen-flexible { flex: 1; }

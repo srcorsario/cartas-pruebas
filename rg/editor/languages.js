@@ -34,3 +34,10 @@ var IDIOMAS_CSV_INDICES = {
 // del CSV y por abrirEditor()/aplicarCambiosPlato() para pintar y guardar la rueda de
 // "Opciones del plato".
 var IDX_OPCIONES_INACTIVAS = 32;
+
+// NUEVO (8 septiembre): posición fija (índice 0-based en el CSV) de la columna "Precio_Media"
+// — columna 34 en Código.gs, la última de las fijas (justo después de Opciones_Inactivas).
+// Precio opcional de "1/2 ración" por plato (vacío = ese plato no tiene media ración). Usada
+// por cargar() (app.js) para leerla del CSV y por abrirEditor()/aplicarCambiosPlato() para
+// pintar y guardar el campo "Precio 1/2 ración" del editor.
+var IDX_PRECIO_MEDIA = 33;
