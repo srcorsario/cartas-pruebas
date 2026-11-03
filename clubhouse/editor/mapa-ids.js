@@ -16,7 +16,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.mapaIds = '1.2.0'; // 3 nov: botón ➕ Nueva subcategoría (general y en cada categoría). 1.1.0: 3 nov: botón ➕ Nueva categoría (organizador.js). 1.0.1: 3 nov: ocupa todo el ancho y letra más grande. 1.0.0: Fase 2 del organizador — mapa de solo lectura
+    window.APP_VERSIONS.mapaIds = '1.3.0'; // 3 nov: botones ✏️ (gestionar categoría / subcategoría) y ↕️ Ordenar. 1.2.0: 3 nov: botón ➕ Nueva subcategoría (general y en cada categoría). 1.1.0: 3 nov: botón ➕ Nueva categoría (organizador.js). 1.0.1: 3 nov: ocupa todo el ancho y letra más grande. 1.0.0: Fase 2 del organizador — mapa de solo lectura
 
     var $ = function (id) { return document.getElementById(id); };
     var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -149,7 +149,8 @@
             var subs = c.subs.map(function (s) {
                 return '<div style="display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; font-size:.92em; padding:3px 0 3px 14px; border-left:2px solid #e2e8f0;">' +
                     '<span style="min-width:220px;"><b>' + esc(s.nombre) + '</b>' + etiquetaTipo(s) + '</span>' +
-                    '<span style="font-family:monospace; color:#475569;">' + s.desde + '–' + s.hasta + '</span>' + numeros(s) + '</div>';
+                    '<span style="font-family:monospace; color:#475569;">' + s.desde + '–' + s.hasta + '</span>' + numeros(s) +
+                    (window.Organizador && window.Organizador.gestionar ? '<button type="button" data-gest="' + c.desde + ':' + s.desde + '" title="Renombrar, ampliar/reducir rango, unir o borrar esta subcategoría" style="margin-left:auto; font-size:.8em; padding:2px 8px; border-radius:5px; border:1px solid #cbd5e1; background:#f8fafc; cursor:pointer;">✏️</button>' : '') + '</div>';
             }).join('');
             if (c.libreSub) subs += '<div style="font-size:.88em; color:#92400e; padding:2px 0 2px 14px; border-left:2px solid #fde68a;">▨ Sin subcategoría: ' +
                 c.zonasSinSub.map(function (z) { return z[0] + '–' + z[1]; }).join(', ') + ' (' + c.libreSub + ' ID)' + (c.sinSub.length ? ' — con ' + c.sinSub.length + ' plato(s) dentro' : '') + '</div>';
@@ -160,7 +161,8 @@
                 (c.pestana == null ? '<small style="color:#94a3b8;">sin pestaña en la web</small>' : '') +
                 (c.sinPlatos ? '<small style="color:#94a3b8;">(sin platos)</small>' : '') +
                 '<span style="font-size:.95em;">' + numeros(c) + '</span>' +
-                (window.Organizador && !c.sinPlatos && c.tipo !== 'alergenos' ? '<button type="button" data-nuevasub="' + c.desde + '" title="Crear una subcategoría dentro de esta" style="margin-left:auto; font-size:.8em; padding:2px 8px; border-radius:5px; border:1px solid #cbd5e1; background:#f8fafc; cursor:pointer;">➕ sub</button>' : '') + '</div>' +
+                (window.Organizador && !c.sinPlatos && c.tipo !== 'alergenos' ? '<button type="button" data-nuevasub="' + c.desde + '" title="Crear una subcategoría dentro de esta" style="margin-left:auto; font-size:.8em; padding:2px 8px; border-radius:5px; border:1px solid #cbd5e1; background:#f8fafc; cursor:pointer;">➕ sub</button>' : '') +
+                (window.Organizador && window.Organizador.gestionar && !c.sinPlatos ? '<button type="button" data-gest="' + c.desde + ':" title="Renombrar, visible en la web, ampliar/reducir rango, unir o borrar esta categoría" style="' + (c.tipo === 'alergenos' ? 'margin-left:auto; ' : '') + 'font-size:.8em; padding:2px 8px; border-radius:5px; border:1px solid #cbd5e1; background:#f8fafc; cursor:pointer;">✏️ Gestionar</button>' : '') + '</div>' +
                 '<canvas data-cat="' + c.n + '" style="display:block; width:100%; height:34px; cursor:crosshair;"></canvas>' +
                 (subs ? '<div style="margin-top:6px;">' + subs + '</div>' : '') + '</div>';
         }).join('');
@@ -196,6 +198,7 @@
             '<div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:14px 18px 10px; border-bottom:1px solid #eef2f7;">' +
             '<h3 style="margin:0; font-size:1.3em; flex:1 1 auto;">🗺️ Mapa de categorías y rangos de ID</h3>' +
             (window.Organizador ? '<button type="button" id="ew-mapa-nueva" style="padding:6px 12px; border-radius:6px; border:1px solid #15803d; background:#16a34a; color:#fff; font-weight:600; cursor:pointer;">➕ Nueva categoría</button><button type="button" id="ew-mapa-nuevasub" style="padding:6px 12px; border-radius:6px; border:1px solid #15803d; background:#fff; color:#15803d; font-weight:600; cursor:pointer;">➕ Nueva subcategoría</button>' : '') +
+            (window.Organizador && window.Organizador.ordenar ? '<button type="button" id="ew-mapa-ordenar" style="padding:6px 12px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; font-weight:600; cursor:pointer;">↕️ Ordenar</button>' : '') +
             '<input id="ew-mapa-filtro" type="search" placeholder="Buscar categoría o número…" style="padding:5px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:.85em; width:300px; max-width:100%;">' +
             '<button type="button" id="ew-mapa-cerrar" style="padding:6px 12px; border-radius:6px; border:1px solid #cbd5e1; background:#f1f5f9; cursor:pointer;">Cerrar</button></div>' +
             '<div id="ew-mapa-cuerpo" style="overflow:auto; padding:12px 18px 16px;"></div></div>';
@@ -231,7 +234,13 @@
         $('ew-mapa-cerrar').onclick = cerrar;
         if ($('ew-mapa-nueva')) $('ew-mapa-nueva').onclick = function () { window.Organizador.nuevaCategoria(); };
         if ($('ew-mapa-nuevasub')) $('ew-mapa-nuevasub').onclick = function () { window.Organizador.nuevaSubcategoria(); };
-        cuerpo.addEventListener('click', function (ev) { var b = ev.target.closest && ev.target.closest('[data-nuevasub]'); if (b) window.Organizador.nuevaSubcategoria(+b.getAttribute('data-nuevasub')); });
+        if ($('ew-mapa-ordenar')) $('ew-mapa-ordenar').onclick = function () { window.Organizador.ordenar(); };
+        cuerpo.addEventListener('click', function (ev) {
+            var b = ev.target.closest && ev.target.closest('[data-nuevasub]');
+            if (b) window.Organizador.nuevaSubcategoria(+b.getAttribute('data-nuevasub'));
+            var g = ev.target.closest && ev.target.closest('[data-gest]');
+            if (g) { var t = g.getAttribute('data-gest').split(':'); window.Organizador.gestionar(+t[0], t[1] === '' ? null : +t[1]); }
+        });
         fondo.addEventListener('click', function (ev) { if (ev.target === fondo) cerrar(); });
         window.addEventListener('resize', alCambiar);
         document.addEventListener('keydown', alTecla);
