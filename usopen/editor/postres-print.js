@@ -12,11 +12,11 @@
     'use strict';
 
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.postres_print = '1.8.4'; // marco con más aire lateral. 1.8.3: sabor con descripción: ES+descripción en 1ª línea, inglés debajo. 1.8.2: descripción //..// también en sabores de helado. 1.8.1: pantalla = impresión (neutraliza styles.css), hoja centrada con márgenes "Ninguno". 1.8.0: puntitos a todo el ancho en helados, tarro centrado con los sabores, sin "Todos / All", logo mayor. 1.7.0: inglés en 1 línea + alérgenos comunes de helados una sola vez. 1.6.1: // botella+copa agrupadas y solapadas. 1.6.0: // varias imágenes por bebida (botella + copa). 1.5.0: // bebidas en una sola línea. 1.4.0: // puntitos desde el nombre ES. 1.3.3: // marco separado de los bordes del A4 // marco de dos hojas superpuestas. 1.2.0: // alérgenos de sabores en línea con el nombre. 1.1.0: // helado más pequeño, escala por botella, alérgenos como el editor
+    window.APP_VERSIONS.postres_print = '1.8.5'; // 3 nov: rangos desde datos.json (categorias.js). 1.8.4: marco con más aire lateral. 1.8.3: sabor con descripción: ES+descripción en 1ª línea, inglés debajo. 1.8.2: descripción //..// también en sabores de helado. 1.8.1: pantalla = impresión (neutraliza styles.css), hoja centrada con márgenes "Ninguno". 1.8.0: puntitos a todo el ancho en helados, tarro centrado con los sabores, sin "Todos / All", logo mayor. 1.7.0: inglés en 1 línea + alérgenos comunes de helados una sola vez. 1.6.1: // botella+copa agrupadas y solapadas. 1.6.0: // varias imágenes por bebida (botella + copa). 1.5.0: // bebidas en una sola línea. 1.4.0: // puntitos desde el nombre ES. 1.3.3: // marco separado de los bordes del A4 // marco de dos hojas superpuestas. 1.2.0: // alérgenos de sabores en línea con el nombre. 1.1.0: // helado más pequeño, escala por botella, alérgenos como el editor
 
-    const R = POSTRES_HOJA_RANGOS;
+    // 3 nov: rangos de la categoría "hoja-postres" de datos.json (categorias.js); si no hay, config.js.
+    const rangos = () => (window.Categorias && window.Categorias.rangosHojaPostres()) || POSTRES_HOJA_RANGOS;
     const enRango = (id, r) => id >= r[0] && id <= r[1];
-    const ID_MIN = R.postres[0], ID_MAX = R.bebidas[1];
 
     const POSTRES_CONFIG = {
         restaurante001: {
@@ -190,6 +190,7 @@
     function procesarYRender(fuente, contenedor, config, modo) {
         aplicarParcheOptimista(fuente, modo);
         const ex = excluidos[modo], est = estado[modo], M = motor();
+        const R = rangos(), ID_MIN = R.postres[0], ID_MAX = R.bebidas[1];
         const todos = fuente.filter(p => p && p.activa && parseInt(p.id, 10) >= ID_MIN && parseInt(p.id, 10) <= ID_MAX)
             .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
         const visibles = todos.filter(p => !ex.has(parseInt(p.id, 10)));

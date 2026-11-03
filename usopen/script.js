@@ -7,7 +7,7 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.3.0'; // 3 nov: idiomas de la web elegibles desde el editor (base.json "idiomas")
+const APP_VERSION = 'v4.4.0'; // 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
@@ -26,6 +26,7 @@ const RTL_LANGS = (R.idiomas && R.idiomas.rtl) || ['AR'];
 const CACHE_PREFIX = (R.id || 'carta') + (BUILD.entorno === 'pruebas' ? '-pruebas' : '');
 const MENU_CACHE_KEY = CACHE_PREFIX + '-menu-v1';
 const TOGGLES_CACHE_KEY = CACHE_PREFIX + '-toggles-v1';
+const PESTANAS_CACHE_KEY = CACHE_PREFIX + '-pestanas-v1';
 
 // Sello ?v= para imágenes insertadas por JS (miniaturas fijas). Lo pone construir.ps1; si no
 // hay (abriendo el núcleo a mano), se usa la hora para no servir una copia vieja.
@@ -96,14 +97,60 @@ const ALERGENOS_PESTANA_NOMBRE = {
         KO: '알레르기 유발물질 및 불내증', CA: 'Al·lèrgens i Intoleràncies', EU: 'Alergenoak eta Intolerantziak', GL: 'Alérxenos e Intolerancias', VA: 'Al·lèrgens i Intoleràncies'
 };
 
-// Lista de pestañas de la web: sale de R.pestanas. "let" porque init() la reasigna al filtrar
-// las pestañas desactivadas desde el editor (ver fetchCategoriasDeshabilitadas()).
+// Lista de pestañas de la web. v4.4: salen de datos/base.json ("pestanas", que viene de
+// datos.json -> estructura, la misma que usa el editor); mientras llega, la copia guardada en este
+// navegador de la visita anterior o, si no hay, R.pestanas (restaurante.js, opcional).
+// "let" porque init() la reasigna al filtrar las pestañas desactivadas desde el editor (ver
+// fetchCategoriasDeshabilitadas()) y aplicarPestanasDeBase() al llegar las de base.json.
 // Cada pestaña: { id, nombre:{ES,EN..}, rangos:[[ini,fin],..], grupos?, modoGrupos?, anexos?,
-// precargaFotos? } — ver restaurante.js.
-let categoriesList = (R.pestanas || []).map(p =>
-    p.especial === 'alergenos' ? Object.assign({ nombre: ALERGENOS_PESTANA_NOMBRE }, p) : p
-);
+// precargaFotos?, especial? }.
+function prepararPestanas(lista) {
+    return (lista || []).map(p => {
+        p = Object.assign({}, p, { id: String(p.id) });
+        return p.especial === 'alergenos' ? Object.assign({ nombre: ALERGENOS_PESTANA_NOMBRE }, p) : p;
+    });
+}
+function leerPestanasCacheLocal() {
+    try {
+        const raw = localStorage.getItem(PESTANAS_CACHE_KEY);
+        const p = raw ? JSON.parse(raw) : null;
+        return p && Array.isArray(p.pestanas) && p.pestanas.length ? p.pestanas : null;
+    } catch (e) { return null; }
+}
+function guardarPestanasCacheLocal(lista) {
+    try { localStorage.setItem(PESTANAS_CACHE_KEY, JSON.stringify({ pestanas: lista })); } catch (e) { }
+}
+let pestanasFuente = (DATOS_TIPO === 'json' && leerPestanasCacheLocal()) || R.pestanas || [];
+let categoriesList = prepararPestanas(pestanasFuente);
+// Copia SIN filtrar de categoriesList — base cada vez que se aplica el estado de pestañas
+// desactivadas (filtrar en el sitio sería irreversible).
+let categoriesListOriginal = categoriesList.slice();
+let idsPestanasOcultas = new Set();
 if (!currentCat && categoriesList.length) currentCat = categoriesList[0].id;
+function filtrarPestanas(ocultas) {
+    idsPestanasOcultas = ocultas || new Set();
+    categoriesList = categoriesListOriginal.filter(c => !idsPestanasOcultas.has(c.id));
+    if (!categoriesList.some(c => c.id === currentCat)) {
+        currentCat = categoriesList.length > 0 ? categoriesList[0].id : currentCat;
+    }
+}
+
+// v4.4: al llegar base.json, si trae "pestanas" distintas de las que hay, se cambian (y se
+// repinta si ya había algo pintado). En el caso normal son las mismas y no se toca nada.
+function aplicarPestanasDeBase(base) {
+    if (!base || !Array.isArray(base.pestanas) || !base.pestanas.length) return;
+    guardarPestanasCacheLocal(base.pestanas);
+    if (JSON.stringify(base.pestanas) === JSON.stringify(pestanasFuente)) return;
+    const sinPestanas = !categoriesListOriginal.length;
+    pestanasFuente = base.pestanas;
+    categoriesListOriginal = prepararPestanas(pestanasFuente);
+    if (sinPestanas && !currentCat) currentCat = R.pestanaInicial || '';
+    filtrarPestanas(idsPestanasOcultas);
+    // Primera visita: el enlace con #pestaña no se pudo aplicar al cargar (aún no había pestañas).
+    const hash = sinPestanas ? (location.hash || '').replace('#', '') : '';
+    if (hash && categoriesList.some(c => c.id === hash)) currentCat = hash;
+    if (allData && allData.length) { renderCategories(); renderMenu(); }
+}
 
 // NUEVO (8 septiembre): leyenda de la pestaña fija "Alérgenos e Intolerancias" (última pestaña,
 // sin platos). "code" es el nombre exacto del archivo en imagenes/alergenos/ (ya usado por cada
@@ -336,12 +383,9 @@ async function init() {
         currentLang = IDIOMAS[userLang] ? userLang : 'EN';
         comprobarIdiomasWeb();
 
-        // Copia SIN filtrar de categoriesList — se usa como base cada vez que se aplica un
-        // estado de pestañas desactivadas, para poder tanto ocultar como volver a mostrar una
-        // categoría según el estado más reciente (filtrar en el sitio sería irreversible: una
-        // vez quitada una categoría no habría forma de "recuperarla" si luego resulta que sigue
-        // activa de verdad).
-        const categoriesListOriginal = categoriesList.slice();
+        // v4.4: pestañas de base.json. Se pide aquí, antes que nada, para que (sin caché) estén
+        // puestas antes del primer pintado: fetchAndParseCsv espera a esta misma petición.
+        if (DATOS_TIPO === 'json') jsonBase().then(aplicarPestanasDeBase).catch(() => { });
 
         const categoriasPromise = fetchCategoriasDeshabilitadas();
 
@@ -354,10 +398,7 @@ async function init() {
         const togglesConocidos = leerTogglesCacheLocal();
         if (togglesConocidos) {
             idsGlobalesDesactivados = togglesConocidos;
-            categoriesList = categoriesListOriginal.filter(c => !togglesConocidos.has(c.id));
-            if (!categoriesList.some(c => c.id === currentCat)) {
-                currentCat = categoriesList.length > 0 ? categoriesList[0].id : currentCat;
-            }
+            filtrarPestanas(togglesConocidos);
         }
 
         // NUEVO (26 agosto, caché local + delta por hash): si este navegador ya tiene una copia
@@ -390,10 +431,7 @@ async function init() {
                 // corte lo que corresponda (currentPreloadSession invalida la anterior si hacía
                 // falta cortarla).
                 managePreload();
-                categoriesList = categoriesListOriginal.filter(c => !categoriasDeshabilitadas.has(c.id));
-                if (!categoriesList.some(c => c.id === currentCat)) {
-                    currentCat = categoriesList.length > 0 ? categoriesList[0].id : currentCat;
-                }
+                filtrarPestanas(categoriasDeshabilitadas);
                 renderCategories();
                 renderMenu();
             }).catch(e => console.warn('[Pestañas] No se pudo aplicar el estado de categorías:', e.message));
@@ -458,10 +496,7 @@ async function init() {
             if (idsIguales(categoriasDeshabilitadas, idsGlobalesDesactivados)) return;
 
             idsGlobalesDesactivados = categoriasDeshabilitadas; // fotos/info conviven en el mismo Set
-            categoriesList = categoriesListOriginal.filter(c => !categoriasDeshabilitadas.has(c.id));
-            if (!categoriesList.some(c => c.id === currentCat)) {
-                currentCat = categoriesList.length > 0 ? categoriesList[0].id : currentCat;
-            }
+            filtrarPestanas(categoriasDeshabilitadas);
             if (allData.length > 0) {
                 managePreload();
                 renderCategories();

@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.8.0'; // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.9.0'; // 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -191,6 +191,24 @@
         return lineas.join('\r\n');
     }
 
+    // ---------- estructura de la carta (categorías + pestañas) ----------
+    // La de datos.json; si aún no la tiene, la semilla que trae sitio-editor.js (la escribe al
+    // primer guardado). Ver categorias.js.
+    function estructuraDe(d) {
+        const e = d && d.estructura;
+        if (e && Array.isArray(e.categorias) && e.categorias.length) return e;
+        const s = SITIO && SITIO.estructuraInicial;
+        return (s && Array.isArray(s.categorias) && s.categorias.length) ? s : null;
+    }
+    // Una categoría / pestaña por línea (mismo formato que construir.ps1 en estructura.json).
+    function estructuraTexto(e, sangria) {
+        const J = JSON.stringify, s = sangria || '';
+        const lista = (a) => '[\n' + (a || []).map(x => s + '    ' + J(x)).join(',\n') + '\n' + s + '  ]';
+        return '{\n' + s + '  "version": ' + J(e.version || 1) + ',\n' +
+            s + '  "categorias": ' + lista(e.categorias) + ',\n' +
+            s + '  "pestanas": ' + lista(e.pestanas) + '\n' + s + '}';
+    }
+
     // Mismo formato que hoja-a-json.ps1 (un plato por bloque) para que los cambios se lean bien.
     function serializar(d) {
         const J = JSON.stringify;
@@ -217,6 +235,7 @@
             '  "guardado": ' + J(new Date().toISOString()) + ',\n' +
             '  "ocultas": ' + J(d.ocultas || []).replace(/","/g, '", "') + ',\n' +
             '  "idiomas": ' + J(d.idiomas || []).replace(/","/g, '", "') + ',\n' +
+            (estructuraDe(d) ? '  "estructura": ' + estructuraTexto(estructuraDe(d), '  ') + ',\n' : '') +
             '  "platos": [\n' + platos.join(',\n') + '\n  ]\n}\n';
     }
 
@@ -274,8 +293,11 @@
         }
         // "idiomas" solo si se ha elegido alguno (vacío = los 26, como siempre). Mismo formato que construir.ps1.
         const idi = (datos.idiomas || []).map(x => J(S(x).toUpperCase()));
+        // "pestanas" de la web (de la estructura), como construir.ps1.
+        const estr = estructuraDe(datos);
+        const pes = estr && Array.isArray(estr.pestanas) && estr.pestanas.length ? ',"pestanas":' + J(estr.pestanas) : '';
         const res = { 'datos/base.json': '{"ocultas":[' + (datos.ocultas || []).map(x => J(S(x))).join(',') + ']' +
-            (idi.length ? ',"idiomas":[' + idi.join(',') + ']' : '') + ',"platos":[\n' + filas.join(',\n') + '\n]}\n' };
+            (idi.length ? ',"idiomas":[' + idi.join(',') + ']' : '') + pes + ',"platos":[\n' + filas.join(',\n') + '\n]}\n' };
         IDIOMAS_WEB.forEach(l => { res['datos/' + l.toLowerCase() + '.json'] = '{\n' + porIdioma[l].join(',\n') + '\n}\n'; });
         return res;
     }
@@ -522,6 +544,7 @@
             if (metodo === 'GET') {
                 const d = await vista(modo, true);
                 aplicarIdiomasEditor(d.idiomas);
+                if (window.Categorias) window.Categorias.cargar(estructuraDe(d));
                 if (accion === 'categorias') {
                     return respuesta(['ID,Activa'].concat((d.ocultas || []).map(id => escaparCsv(id) + ',NO')).join('\r\n'), 200, 'text/csv; charset=utf-8');
                 }

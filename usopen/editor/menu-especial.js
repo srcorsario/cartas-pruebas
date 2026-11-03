@@ -14,7 +14,7 @@
 // ventana emergente (window.open + document.write), para no depender de @media print peleándose
 // con el resto de la interfaz del editor.
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión ya NO agranda la letra para "llenar" un menú corto -- ahora, si sobra hueco en la página, se reparte como espacio en blanco entre las secciones (Entrantes/Principales/Postre/Bebida), estirando el marco naranja a lo largo de toda la hoja con justify-content:space-evenly, en vez de dejarlas apelotonadas arriba con un hueco vacío abajo. La letra solo se sigue reduciendo (nunca agrandando) cuando un menú largo no cabe de otra forma. Ver repartirEspacioSobrante() en imprimir(). (1.24.0) "Mis Platos" -- los platos de comida (no vino) que se añaden escribiéndolos a mano (agregarPlatoManual) se guardan automáticamente en una biblioteca propia y permanente en el backend (Codigo_MenusEspeciales.gs, hoja "PlatosManuales", acciones listarPlatosManuales/guardarPlatoManual/eliminarPlatoManual -- deduplica por nombre normalizado, sin acentos ni mayúsculas). Esos platos guardados aparecen mezclados en el mismo buscador "🔍 Elegir platos de la carta" (popup), como una categoría más llamada "Mis Platos" (la primera de la lista), con su propia etiqueta verde y un botón 🗑️ para quitarlos de la biblioteca sin afectar a menús ya guardados que los usen. El guardado en la biblioteca es en segundo plano (no bloquea el añadido del plato al menú) y solo aplica a platos de comida, nunca a vinos. (1.23.0) CORREGIDO: la 1.22.0 añadió el aviso de posible falta de ortografía SOLO en el último paso (al pulsar "Añadir plato"/"Guardar", vía revisarOrtografiaManual()) -- pero al pulsar antes "🌐 Traducir" (traducirAIngles), que YA usa window.PROMPTS.opcionesEN() y esa función YA revisa la ortografía en la misma llamada, el resultado de esa revisión (obj.correccion) se estaba descartando sin más: el traductor entendía bien el plato pese a la falta (p.ej. "gaspaxo" se traducía correctamente) pero no avisaba hasta el paso final. Ahora traducirAIngles() también recoge obj.correccion y, si hay falta, muestra el mismo aviso "¿Quisiste decir...?" justo ahí, nada más traducir -- el aviso del paso de "Añadir/Guardar" se mantiene igual, por si el usuario no llega a pulsar "Traducir" (escribe el inglés a mano o lo deja para luego). (1.22.0) NUEVO: aviso de posible falta de ortografía al añadir un plato manualmente (agregarPlatoManual) o al editar el nombre de uno ya añadido (guardarEdicionPlato) -- mismo patrón "¿Quisiste decir...?" que ya usa el editor de carta normal (mostrarCorreccionOrtografiaEN, en app.js) y que se inspiró originalmente en la web de Cartelitos Buffet. Usa un prompt nuevo y más ligero (window.PROMPTS.revisionOrtografica, en prompts.js) que solo revisa ortografía sin pedir traducciones. Nunca se aplica a vinos (nombres propios/marca), y si falla por lo que sea no bloquea el añadido/guardado.
+window.APP_VERSIONS.menuEspecial = '1.26.0'; // 3 nov: vinos/copas/bebidas según la estructura de datos.json (categorias.js). 1.25.0: // NUEVO (27 sept): la impresión ya NO agranda la letra para "llenar" un menú corto -- ahora, si sobra hueco en la página, se reparte como espacio en blanco entre las secciones (Entrantes/Principales/Postre/Bebida), estirando el marco naranja a lo largo de toda la hoja con justify-content:space-evenly, en vez de dejarlas apelotonadas arriba con un hueco vacío abajo. La letra solo se sigue reduciendo (nunca agrandando) cuando un menú largo no cabe de otra forma. Ver repartirEspacioSobrante() en imprimir(). (1.24.0) "Mis Platos" -- los platos de comida (no vino) que se añaden escribiéndolos a mano (agregarPlatoManual) se guardan automáticamente en una biblioteca propia y permanente en el backend (Codigo_MenusEspeciales.gs, hoja "PlatosManuales", acciones listarPlatosManuales/guardarPlatoManual/eliminarPlatoManual -- deduplica por nombre normalizado, sin acentos ni mayúsculas). Esos platos guardados aparecen mezclados en el mismo buscador "🔍 Elegir platos de la carta" (popup), como una categoría más llamada "Mis Platos" (la primera de la lista), con su propia etiqueta verde y un botón 🗑️ para quitarlos de la biblioteca sin afectar a menús ya guardados que los usen. El guardado en la biblioteca es en segundo plano (no bloquea el añadido del plato al menú) y solo aplica a platos de comida, nunca a vinos. (1.23.0) CORREGIDO: la 1.22.0 añadió el aviso de posible falta de ortografía SOLO en el último paso (al pulsar "Añadir plato"/"Guardar", vía revisarOrtografiaManual()) -- pero al pulsar antes "🌐 Traducir" (traducirAIngles), que YA usa window.PROMPTS.opcionesEN() y esa función YA revisa la ortografía en la misma llamada, el resultado de esa revisión (obj.correccion) se estaba descartando sin más: el traductor entendía bien el plato pese a la falta (p.ej. "gaspaxo" se traducía correctamente) pero no avisaba hasta el paso final. Ahora traducirAIngles() también recoge obj.correccion y, si hay falta, muestra el mismo aviso "¿Quisiste decir...?" justo ahí, nada más traducir -- el aviso del paso de "Añadir/Guardar" se mantiene igual, por si el usuario no llega a pulsar "Traducir" (escribe el inglés a mano o lo deja para luego). (1.22.0) NUEVO: aviso de posible falta de ortografía al añadir un plato manualmente (agregarPlatoManual) o al editar el nombre de uno ya añadido (guardarEdicionPlato) -- mismo patrón "¿Quisiste decir...?" que ya usa el editor de carta normal (mostrarCorreccionOrtografiaEN, en app.js) y que se inspiró originalmente en la web de Cartelitos Buffet. Usa un prompt nuevo y más ligero (window.PROMPTS.revisionOrtografica, en prompts.js) que solo revisa ortografía sin pedir traducciones. Nunca se aplica a vinos (nombres propios/marca), y si falla por lo que sea no bloquea el añadido/guardado.
 
 (function () {
     'use strict';
@@ -342,6 +342,28 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
                 (id >= 13450 && id <= 13459);
         }
 
+        // 3 nov: qué es cada ID para el Menú Especial. Con la estructura de datos.json
+        // (categorias.js, solo la carta de este editor): categorías "vino" (y su subcategoría
+        // "copas"), y fuera las "bebida", "hoja-postres", "alergenos" o sin categoría. Sin ella,
+        // los rangos fijos de siempre.
+        // Devuelve { vino, copa } | 'fuera' | null (plato normal).
+        function clasificarParaMenu(id, modo) {
+            const C = window.Categorias;
+            const propia = C && C.activa() && (!window.EDITOR_SITIO || modo === window.EDITOR_SITIO.modo);
+            if (propia) {
+                const c = C.categoriaDe(id);
+                if (c && c.tipo === 'vino') return { vino: c.vino || 'blanco', copa: !!C.esCopa(id) };
+                if (!c || c.tipo === 'bebida' || c.tipo === 'hoja-postres' || c.tipo === 'alergenos') return 'fuera';
+                return null;
+            }
+            if (id >= 13100 && id <= 14499) {
+                return { vino: id <= 13199 ? 'blanco' : id <= 13299 ? 'rosado' : id <= 13399 ? 'tinto' : 'cava', copa: esCopaDeVino(id) };
+            }
+            if (id >= 13000) return 'fuera'; // otro ID de vino fuera del rango reconocido: se descarta (ni plato ni vino)
+            if (id >= 9000 && id <= 11999) return 'fuera'; // Cafés / Refrescos-Bebidas / Cervezas
+            return null;
+        }
+
         // Si el mismo plato/vino (mismo nombre normalizado y mismo "tipo") aparece en RG Y en US
         // Open -- muy habitual, muchos vinos y algunos platos son idénticos en las dos cartas --
         // se queda con UNA sola entrada marcada "ambos:true" (nunca se ofrece duplicado en el
@@ -392,27 +414,22 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
                 // Bebida, nunca al de comida. Se etiquetan con su "tipo" exacto para que el
                 // popup de cada uno de los 4 vinos de Bebida ofrezca SOLO su propio tipo (un
                 // Vino Blanco jamás debe poder añadir un tinto, ni un Cava un rosado, etc.).
-                if (item.id >= 13100 && item.id <= 14499) {
-                    if (esCopaDeVino(item.id)) return; // "Copas" (venta por copa): fuera del selector
+                const clase = clasificarParaMenu(item.id, modo);
+                if (clase && clase.vino) {
+                    if (clase.copa) return; // "Copas" (venta por copa): fuera del selector
                     const nombreVino = limpiarNombre(item.es);
                     // Salvaguarda extra por nombre, por si algún dato no tuviera el ID exacto de
                     // "Copas" bien puesto -- una botella real no debería empezar por "Copa".
                     if (nombreVino && /^copas?\b/i.test(nombreVino)) return;
                     if (nombreVino) {
-                        let tipoVino;
-                        if (item.id <= 13199) tipoVino = 'blanco';
-                        else if (item.id <= 13299) tipoVino = 'rosado';
-                        else if (item.id <= 13399) tipoVino = 'tinto';
-                        else tipoVino = 'cava';
+                        const tipoVino = clase.vino;
                         indiceVinos.push({ modo: modo, id: item.id, es: nombreVino, en: limpiarNombre(item.en), tipo: tipoVino });
                     }
                     return;
                 }
-                if (item.id >= 13000) return; // otro ID de vino fuera del rango reconocido: se descarta (ni plato ni vino)
-
-                // Cafés / Refrescos-Bebidas / Cervezas: nunca son "platos" de Entrantes,
-                // Primero, Principal o Postre.
-                if (item.id >= 9000 && item.id <= 11999) return;
+                // Otros vinos fuera de rango, Cafés / Refrescos-Bebidas / Cervezas, Hoja Postres...:
+                // nunca son "platos" de Entrantes, Primero, Principal o Postre.
+                if (clase === 'fuera') return;
                 const carpeta = (item.carpeta || '').toLowerCase().trim();
                 if (CARPETAS_EXCLUIDAS_DE_PLATOS.indexOf(carpeta) !== -1) return;
 
