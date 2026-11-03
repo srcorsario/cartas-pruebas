@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-02T19:41:28.827Z",
+  "guardado": "2026-11-03T08:39:55.734Z",
   "ocultas": ["pizzas", "sugerencias"],
   "platos": [
     {
@@ -5686,6 +5686,40 @@
             "HASH_FICHA": "52848320",
             "HASH_NOMBRE": "6bb06c6b"
         }
+    },
+    {
+        "id": "12110", "activa": "si", "precio": "1.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "tortilla01.webp",
+        "alergenos": ["GLUTEN", "HUEVO"], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "tortilla",
+            "EN": "Spanish Omelette",
+            "DE": "Spanisches Omelett",
+            "FR": "Omelette espagnole",
+            "IT": "Frittata spagnola",
+            "RU": "Испанский омлет",
+            "NL": "Spaanse omelet",
+            "PL": "Omlet hiszpański",
+            "SV": "Spansk omelett",
+            "NO": "Spansk omelett",
+            "DA": "Spansk omelet",
+            "FI": "Espanjalainen munakas",
+            "PT": "Omelete espanhola",
+            "RO": "Omletă spaniolă",
+            "HU": "Spanyol omlett",
+            "CS": "Španělská omeleta",
+            "EL": "Ισπανική ομελέτα",
+            "TR": "İspanyol omleti",
+            "AR": "أومليت إسباني",
+            "ZH": "西班牙蛋饼",
+            "JA": "スパニッシュオムレツ",
+            "CA": "Truita espanyola",
+            "EU": "Espainiar tortilla",
+            "GL": "Tortilla española",
+            "VA": "Truita espanyola",
+            "KO": "스패니시 오믈렛"
+        },
+        "info": {}
     },
     {
         "id": "12201", "activa": "no", "precio": "16.50", "precioMedia": "",
