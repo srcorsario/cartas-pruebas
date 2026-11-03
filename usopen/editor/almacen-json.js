@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.9.1'; // 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.10.0'; // 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -487,6 +487,27 @@
         try { window.dispatchEvent(new CustomEvent('idiomas-editor')); } catch (x) { }
     }
 
+    // Cambio de estructura (organizador.js). Se aplica sobre lo último de GitHub; si al reaplicarlo
+    // tras un conflicto ya no cabe (otro dispositivo cogió ese rango), se descarta con aviso en consola.
+    function opEstructura(cuerpo) {
+        let primera = true;
+        return (datos) => {
+            const ini = primera; primera = false;
+            try {
+                const r = window.Organizador.aplicar(estructuraDe(datos), cuerpo, (datos.platos || []).map(p => idNum(p.id)));
+                datos.estructura = r.estructura;
+                if (r.ocultar && r.ocultar.length) {
+                    const s = new Set((datos.ocultas || []).map(String));
+                    r.ocultar.forEach(x => s.add(String(x)));
+                    datos.ocultas = Array.from(s);
+                }
+            } catch (err) {
+                if (ini) throw err;
+                console.warn('[almacen-json] cambio de estructura descartado:', err.message);
+            }
+        };
+    }
+
     function opCategoria(cuerpo) {
         return (datos) => {
             const id = String(cuerpo.id || '').trim();
@@ -558,6 +579,12 @@
             if (accion === 'idiomas') {
                 await encolar(modo, opIdiomas(cuerpo), 'idiomas de la web', 300);
                 return respuesta('OK: idiomas');
+            }
+            if (accion === 'estructura') {
+                if (!window.Organizador) return respuesta('Error: falta organizador.js en el editor (CONSTRUIR).');
+                await encolar(modo, opEstructura(cuerpo), 'estructura: ' + ((cuerpo && cuerpo.categoria && cuerpo.categoria.nombre) || 'cambio'), 300);
+                if (window.Categorias) window.Categorias.cargar(estructuraDe(est(modo).vista));
+                return respuesta('OK: estructura');
             }
             if (accion === 'infoplato') {
                 // No se espera al commit: los lotes de Info mandan muchas seguidas y se agrupan.
