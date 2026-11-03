@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v2.9.9-Abstract-Keys',
+            versionStr: 'v3.0.0-Abstract-Keys',
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -23,7 +23,7 @@
             vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE001,
                     },
         restaurante002: {
-            versionStr: 'v2.9.9-Abstract-Keys',
+            versionStr: 'v3.0.0-Abstract-Keys',
             versionKey: 'sugerencias_restaurante002',
             containerId: 'sugerencias-contenido-usopen',
             logoSrc: LOGO_RESTAURANTE002,
@@ -820,6 +820,24 @@
     const rangoVinosSug = () => (window.Categorias && window.Categorias.rangoVinosSugerencias()) || [12990, 12999];
     const enSugerencias = (id) => { const n = parseInt(id, 10), r = rangoSug(); return n >= r[0] && n <= r[1]; };
     const esVinoSugerencias = (id) => { const n = parseInt(id, 10), r = rangoVinosSug(); return n >= r[0] && n <= r[1]; };
+    // 3 nov (v3.0.0): secciones de la hoja = grupos de la pestaña Sugerencias de la web (datos.json ->
+    // estructura), en su orden; el grupo "tipo":"vino" es el bloque de vinos/aperitivos (con imágenes).
+    // Sin grupos: los rangos fijos de siempre (12100-12399 / 12400-12899 / 12900-12999 + vinos).
+    const TITULO_VINOS_SUG = "VINOS Y APERITIVOS RECOMENDADOS / RECOMMENDED WINES & APERITIFS";
+    const TITULOS_SUG = { entrantes: "ENTRANTES / STARTERS", principales: "PRINCIPALES / MAIN COURSES", postres: "POSTRES / DESSERTS" };
+    function seccionesSugerencias() {
+        const g = window.Categorias && window.Categorias.gruposSugerencias ? window.Categorias.gruposSugerencias() : null;
+        if (!g || !g.length) return [
+            { titulo: TITULOS_SUG.entrantes, rangos: [[12100, 12399]] }, { titulo: TITULOS_SUG.principales, rangos: [[12400, 12899]] },
+            { titulo: TITULOS_SUG.postres, rangos: [[12900, 12999]] }, { titulo: TITULO_VINOS_SUG, vino: true, rangos: [] }];
+        const sec = g.map(x => {
+            const n = x.nombre || {}, es = String(n.ES || '').trim(), en = String(n.EN || '').trim();
+            const titulo = x.tipo === 'vino' ? TITULO_VINOS_SUG : (TITULOS_SUG[es.toLowerCase()] || (es.toUpperCase() + (en && en.toLowerCase() !== es.toLowerCase() ? ' / ' + en.toUpperCase() : '')));
+            return { titulo, vino: x.tipo === 'vino', rangos: x.rangos || [] };
+        });
+        if (!sec.some(s => s.vino)) sec.push({ titulo: TITULO_VINOS_SUG, vino: true, rangos: [] });
+        return sec;
+    }
 
     function aplicarParcheOptimista(fuente, modo) {
         const state = window.optimisticState ? window.optimisticState[modo] : { t: 0, s: [] };
@@ -841,8 +859,23 @@
         const platos = todosLosPlatos.filter(p => !excluidos.has(parseInt(p.id, 10)));
         // NUEVO: aperitivo Canonita ("Usopen Splitz") — ID 12993, ver config.js
         const esAperitivoCanonita = (p) => p && parseInt(p.id, 10) === APERITIVO_CANONITA_ID;
-        let entrantes = [], principales = [], postres = [], vinos = [];
-        platos.forEach(p => { const id = parseInt(p.id, 10); if (esVinoSugerencias(id)) vinos.push(p); /* MODIFICADO: rango 12990-12999 reservado a vinos de Sugerencias (antes solo 12990) */ else if (id >= 12100 && id <= 12399) entrantes.push(p); else if (id >= 12400 && id <= 12899) principales.push(p); else if (id >= 12900 && id <= 12999) postres.push(p); else entrantes.push(p); });
+        // 3 nov (v3.0.0): por secciones de la estructura (seccionesSugerencias). Un plato que no cae en
+        // ninguna sección va, como siempre, a Entrantes/Principales/Postres por su número (delante).
+        let secciones = seccionesSugerencias().map(s => Object.assign(s, { lista: [] }));
+        const secVino = secciones.find(s => s.vino);
+        const fijas = [
+            { titulo: TITULOS_SUG.entrantes, rangos: [[12100, 12399]], lista: [] }, { titulo: TITULOS_SUG.principales, rangos: [[12400, 12899]], lista: [] },
+            { titulo: TITULOS_SUG.postres, rangos: [[12900, 12999]], lista: [] }];
+        platos.forEach(p => {
+            const id = parseInt(p.id, 10);
+            if (esVinoSugerencias(id)) { secVino.lista.push(p); return; }
+            const s = secciones.find(x => !x.vino && x.rangos.some(r => id >= r[0] && id <= r[1])) || secciones.find(x => x.rangos.some(r => id >= r[0] && id <= r[1]));
+            if (s) { s.lista.push(p); return; }
+            const f = secciones.find(x => x.titulo === (fijas.find(y => y.rangos.some(r => id >= r[0] && id <= r[1])) || fijas[0]).titulo);
+            (f || fijas.find(y => y.rangos.some(r => id >= r[0] && id <= r[1])) || fijas[0]).lista.push(p);
+        });
+        secciones = fijas.filter(f => f.lista.length && !secciones.includes(f)).concat(secciones);
+        const vinos = secVino.lista;
 
         // MODIFICADO: la hoja A4 real (.sugerencias-panel) ya NO contiene el botón de imprimir ni
         // ninguna opción — así lo que se ve dentro de ella en pantalla es EXACTAMENTE lo que se
@@ -918,10 +951,9 @@
             ? `<div class="sugerencias-vino-imagen-wrapper" id="${config.vinoImagenWrapperId}" data-n="${nImgsIniciales}">${imagenesVino.map(im => `<img src="${im.src}" class="sugerencias-vino-imagen" data-img="${im.cual}" style="display:${vinoImagenDefaultCon ? '' : 'none'}; height:${vinoImgAlturaInicial}px;" onerror="this.style.display='none'; window.repartirImagenesVino('${modoSeguro}')">`).join('')}<img src="${initialImgSrc}" class="sugerencias-qr-img" id="${config.qrImgId}" style="width:${qrTamanoInicial}px !important; height:${qrTamanoInicial}px !important; display:${qrInicialOculto ? 'none' : ''};"></div>`
             : '';
 
-        html += renderCat("ENTRANTES / STARTERS", entrantes);
-        html += renderCat("PRINCIPALES / MAIN COURSES", principales);
-        html += renderCat("POSTRES / DESSERTS", postres);
-        html += renderCat("VINOS Y APERITIVOS RECOMENDADOS / RECOMMENDED WINES & APERITIFS", vinos, vinoImagenHtml, 'sugerencias-seccion-bodega');
+        secciones.forEach(s => {
+            html += s.vino ? renderCat(s.titulo, s.lista, vinoImagenHtml, 'sugerencias-seccion-bodega') : renderCat(s.titulo, s.lista);
+        });
 
         let qrButtonsHtml = '';
         config.qrOptions.forEach(opt => {
