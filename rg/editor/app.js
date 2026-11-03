@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '2.21.0'; // NUEVO (3 nov, 4): la Info ES/EN se adelanta EN SEGUNDO PLANO en cuanto se elige el inglés (y al pulsar traducir al resto), en paralelo con la traducción; al pulsar "Generar Info y Aplicar" se reutiliza si el nombre/alérgenos no han cambiado (o se espera a que termine). 2.20.0: NUEVO (3 nov, 3): traducciones con el mismo aviso que la Info (tenis + contador + nota según nº de idiomas) y botón Cancelar en ambos; si Gemini está saturado (503/429) se reintenta solo (varias rondas con espera) en vez de dar error; casillas en la lista para eliminar varios platos a la vez. 2.19.0: NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
+window.APP_VERSIONS.app = '2.22.0'; // NUEVO (3 nov, 5): antes de traducir del español (Generar opciones en inglés) pide revisar los alérgenos (la Info se genera con ellos). 2.21.0: NUEVO (3 nov, 4): la Info ES/EN se adelanta EN SEGUNDO PLANO en cuanto se elige el inglés (y al pulsar traducir al resto), en paralelo con la traducción; al pulsar "Generar Info y Aplicar" se reutiliza si el nombre/alérgenos no han cambiado (o se espera a que termine). 2.20.0: NUEVO (3 nov, 3): traducciones con el mismo aviso que la Info (tenis + contador + nota según nº de idiomas) y botón Cancelar en ambos; si Gemini está saturado (503/429) se reintenta solo (varias rondas con espera) en vez de dar error; casillas en la lista para eliminar varios platos a la vez. 2.19.0: NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
 
 console.group("%c[Editor] Inicializando sistema de control...", "color: orange; font-weight: bold;");
 
@@ -1218,6 +1218,25 @@ async function generarTraduccionEN() {
     let keys = [];
     if (typeof getKeys === 'function') keys = getKeys();
     if (keys.length === 0) { alert("❌ No hay API Keys de Gemini configuradas."); return; }
+
+    // NUEVO (3 nov): recordatorio de los alérgenos antes de empezar — la Info del plato (que se
+    // adelanta en cuanto se elige el inglés) se genera con ellos. No en vinos ni café/refrescos.
+    const pAl = esNuevoPlato ? datosTempNuevo : datosLocales.find(x => x.id === platoEditandoId);
+    if (!esVino && pAl && !CARPETAS_SIN_IA_INFO.includes(String(pAl.carpeta || '').trim().toLowerCase())) {
+        const marcados = Array.from(document.querySelectorAll('.alergeno-btn.selected')).map(el => (el.textContent || el.dataset.code || '').trim()).filter(Boolean);
+        const texto = '⚠️ Revisa los alérgenos del plato antes de empezar.\n\nMarcados ahora: ' + (marcados.length ? marcados.join(', ') : 'NINGUNO') +
+            '.\n\nLa Info del plato (descripción y preguntas) se genera con ellos.';
+        const ok = window.confirmarEditor ? await window.confirmarEditor(texto, { si: 'Están bien, traducir', no: 'Revisar alérgenos' }) : confirm(texto);
+        if (!ok) {
+            const grid = document.getElementById('alergenos-grid');
+            if (grid) {
+                grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                grid.style.transition = 'box-shadow .3s'; grid.style.boxShadow = '0 0 0 3px #f39c12'; grid.style.borderRadius = '8px';
+                setTimeout(() => { grid.style.boxShadow = ''; }, 2500);
+            }
+            return;
+        }
+    }
 
     const btn = document.getElementById('btn-generar-en');
     const originalText = btn.innerText;
