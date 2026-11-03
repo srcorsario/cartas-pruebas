@@ -3,7 +3,8 @@
 // todos los editores (v3 y clubhouse). Lo inserta construir.ps1. No toca el editor oficial.
 //   1) Traductor Pro (pestaña 3): la carta viene de la web (datos.json en GitHub) o de un
 //      archivo local (datos.json o CSV); se guarda en la web; se descarga datos.json o CSV.
-//   2) Eliminar plato: sin contraseña fija (ya hay login); se confirma escribiendo BORRAR.
+//   2) Eliminar plato(s): sin contraseña (ya hay login); doble confirmación: el botón pide
+//      "¿Seguro? Pulsa otra vez" antes de borrar.
 //      Si el plato tiene fotos, casilla "Borrar también sus fotos": desmarcada = se mueven a
 //      imagenes/<carpeta>/desactivadas/. Las fotos se tocan DESPUÉS de "Guardar cambios en web".
 //   3) Tras cada guardado en GitHub, recuadro abajo a la derecha con cada plato cambiado:
@@ -18,7 +19,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.editorWeb = '1.4.0'; // 3 nov: eliminar varios platos a la vez
+    window.APP_VERSIONS.editorWeb = '1.5.0'; // 3 nov: borrar sin escribir BORRAR (doble confirmación con el botón). 1.4.0: eliminar varios platos a la vez
 
     var $ = function (id) { return document.getElementById(id); };
     var log = function (t) { try { if (window.UI && window.UI.log) window.UI.log(t); } catch (e) { } console.log(t); };
@@ -138,10 +139,12 @@
         var modal = $('modal-eliminar-plato'), input = $('password-eliminar-plato'), error = $('error-password-eliminar');
         if (!modal || !input || $('ew-borrar-fotos')) return;
         Array.prototype.forEach.call(modal.querySelectorAll('p'), function (p) {
-            if (/contraseña/i.test(p.textContent) && p !== error) p.textContent = 'Escribe BORRAR para confirmar. Esta acción no se puede deshacer.';
+            if (/contraseña/i.test(p.textContent) && p !== error) { p.id = 'ew-aviso-irreversible'; p.innerHTML = '<b style="color:#c0392b;">⚠️ Esta acción NO se puede deshacer.</b>'; }
         });
-        input.type = 'text'; input.placeholder = 'BORRAR'; input.setAttribute('autocapitalize', 'characters'); input.setAttribute('spellcheck', 'false');
-        if (error) error.textContent = '❌ Escribe BORRAR para confirmar.';
+        input.style.display = 'none';
+        if (error) error.style.display = 'none';
+        var btnDef = modal.querySelector('.btn-modal-eliminar');
+        if (btnDef) btnDef.id = 'ew-btn-eliminar-def';
         var lab = document.createElement('label');
         lab.id = 'ew-fila-fotos';
         lab.style.cssText = 'display:none; margin-top:14px; font-size:0.85rem; color:#444; text-align:left; cursor:pointer;';
@@ -153,9 +156,18 @@
     // ids = varios platos (barra "Eliminar seleccionados"); sin ids = el plato abierto.
     function idsAEliminar() { return window.__idsAEliminar || [platoEditandoId]; }   // eslint-disable-line no-undef
     function platoDe(id) { return datosLocales.find(function (x) { return x.id === id; }); }   // eslint-disable-line no-undef
+    var armado = false;
+    function desarmar() {
+        armado = false;
+        var b = $('ew-btn-eliminar-def');
+        if (b) { b.textContent = '🗑️ Eliminar definitivamente'; b.style.background = ''; b.style.boxShadow = ''; }
+    }
     function abrirModalEliminarPlato(ids) {
         adaptarModalEliminar();
         __abrirOriginal(ids);
+        desarmar();
+        var n = idsAEliminar().length, h3 = document.querySelector('#modal-eliminar-plato h3');
+        if (h3) h3.textContent = n > 1 ? '⚠️ Eliminar ' + n + ' platos' : '⚠️ Eliminar plato';
         var conFotos = idsAEliminar().some(function (id) { return tieneFotos(platoDe(id)); });
         var fila = $('ew-fila-fotos'), chk = $('ew-borrar-fotos');
         if (chk) chk.checked = false;
@@ -164,12 +176,14 @@
     var __abrirOriginal = function () { };
 
     function confirmarEliminarPlato() {
-        var input = $('password-eliminar-plato'), error = $('error-password-eliminar');
-        if (!input || input.value.trim().toUpperCase() !== 'BORRAR') {
-            if (error) error.style.display = 'block';
-            if (input) { input.value = ''; input.focus(); }
+        // 1er clic: el botón pide confirmación; 2º clic: se borra.
+        if (!armado) {
+            armado = true;
+            var b = $('ew-btn-eliminar-def'), n = idsAEliminar().length;
+            if (b) { b.textContent = '⚠️ ¿Seguro? Pulsa otra vez para eliminar' + (n > 1 ? ' los ' + n : ''); b.style.background = '#a93226'; b.style.boxShadow = '0 0 0 3px #f5b7b1'; }
             return;
         }
+        desarmar();
         /* global datosLocales, platoEditandoId, renderizar */
         var chk = $('ew-borrar-fotos'), borrar = !!(chk && chk.checked), n = 0, conFotos = false;
         idsAEliminar().forEach(function (id) {
