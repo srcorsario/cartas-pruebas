@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T10:08:14.839Z",
+  "guardado": "2026-11-03T10:08:43.027Z",
   "ocultas": ["pizzas"],
   "platos": [
     {
@@ -6096,7 +6096,11 @@
             "VA": "Amanida de canonges i tomàquet",
             "KO": "마슈와 토마토 샐러드"
         },
-        "info": {}
+        "info": {
+            "ES": "{\"desc\":\"Ensalada elaborada a base de canónigos y tomate.\",\"q1\":\"¿Qué son los canónigos?\",\"r1\":\"Son una hortaliza de hoja verde pequeña y tierna que se consume cruda.\",\"q2\":\"¿Cuáles son los ingredientes de este plato?\",\"r2\":\"Los ingredientes indicados en la carta son canónigos y tomate.\"}",
+            "EN": "{\"desc\":\"Salad made with lamb's lettuce and tomato.\",\"q1\":\"What is lamb's lettuce?\",\"r1\":\"It is a small, tender green leafy vegetable commonly eaten raw.\",\"q2\":\"What are the ingredients in this dish?\",\"r2\":\"The ingredients listed on the menu are lamb's lettuce and tomato.\"}",
+            "HASH_FICHA": "19c1d39f"
+        }
     },
     {
         "id": "12301", "activa": "no", "precio": "18.00", "precioMedia": "",
