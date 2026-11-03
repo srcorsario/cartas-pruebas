@@ -139,7 +139,7 @@
             .sugerencias-qr-toggle input:checked + span { font-weight: bold; }
             .sugerencias-qr-img { transition: opacity 0.3s; }
             .sugerencias-vino-imagen-wrapper { display: flex !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: center !important; gap: 90px !important; padding: 20px 0 8px 0 !important; }
-            .sugerencias-vino-imagen-wrapper[data-n="3"] { justify-content: space-evenly !important; gap: 0 !important; }
+            .sugerencias-vino-imagen-wrapper[data-n="3"], .sugerencias-vino-imagen-wrapper[data-n="4"], .sugerencias-vino-imagen-wrapper[data-n="5"], .sugerencias-vino-imagen-wrapper[data-n="6"] { justify-content: space-evenly !important; gap: 0 !important; }
             .sugerencias-descripcion-aperitivo { font-size: 0.75em !important; color: #555 !important; font-style: italic !important; font-weight: 400 !important; }
             .sugerencias-vino-imagen { justify-self: center !important; height: 140px; width: auto; max-width: 300px; object-fit: contain !important; transition: height 0.15s ease !important; }
             .vino-imagen-selector-wrapper { font-size: 0.75rem !important; color: #64748b !important; }
@@ -230,6 +230,26 @@
     // que el QR vive en la misma fila, ocultar el wrapper apagaba el QR también.
     // MODIFICADO: un control por imagen ('tenista' / 'canonita'); el QR sigue con toggleQR.
     // Tras cada cambio se recalcula el reparto según cuántas imágenes quedan visibles.
+    // NUEVO (3 nov): imágenes de "Vinos y aperitivos": las fijas (El Tenista 12990, Canonita) y,
+    // para el resto, la foto principal asignada al plato (Carpeta + Nombre Imagen) — solo en el
+    // editor dentro de la web, donde las fotos están en ../imagenes/.
+    const FOTOS_WEB_SUGERENCIAS = window.EDITOR_SITIO ? '../imagenes/' : '';
+    function imagenesDeVinos(vinos, config) {
+        const out = [];
+        vinos.forEach(p => {
+            const id = parseInt(p.id, 10);
+            let src = '';
+            if (id === 12990) src = config.vinoImagenSrc;
+            else if (id === APERITIVO_CANONITA_ID) src = APERITIVO_IMAGEN_CANONITA;
+            else if (FOTOS_WEB_SUGERENCIAS && String(p.carpeta || '').trim() && /01\.webp$/i.test(String(p.imagen || ''))) src = FOTOS_WEB_SUGERENCIAS + encodeURI(String(p.carpeta).trim() + '/' + p.imagen);
+            if (!src) return;
+            let nombre = (window.desglosarNombre ? window.desglosarNombre(p.es || '').nombre : p.es) || ('ID ' + id);
+            if (nombre.length > 28) nombre = nombre.slice(0, 26) + '…';
+            out.push({ cual: 'p' + id, src, etiqueta: nombre.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])) });
+        });
+        return out;
+    }
+
     window.repartirImagenesVino = function(modo) {
         const config = SUGERENCIAS_CONFIG[modo];
         if (!config) return;
@@ -879,18 +899,17 @@
         // la imagen del vino — imagen del vino centrada (columna central de un grid de 3), QR
         // pegado a la derecha (columna derecha) — en vez de vivir abajo del todo junto al aviso
         // de alérgenos.
-        const tieneVinoTenista = vinos.some(p => parseInt(p.id, 10) === 12990);
-        const tieneAperitivoCanonita = vinos.some(esAperitivoCanonita);
-        const tieneVinoEspecial = tieneVinoTenista || tieneAperitivoCanonita;
+        const imagenesVino = imagenesDeVinos(vinos, config);
+        const tieneVinoEspecial = imagenesVino.length > 0;
         const vinoImagenDefaultCon = !!config.vinoImagenDefault;
         // MODIFICADO: tamaño inicial ya a VINO_IMAGEN_ESCALA_DEFAULT (1.2x) en vez del 1x base,
         // tanto para la botella como para el QR (proporcional, ver QR_IMAGEN_BASE_SIZE). El
         // !important en el QR es necesario para ganarle al width/height !important de su CSS base.
         const vinoImgAlturaInicial = VINO_IMAGEN_BASE_MAX_HEIGHT * VINO_IMAGEN_ESCALA_DEFAULT;
         const qrTamanoInicial = QR_IMAGEN_BASE_SIZE * VINO_IMAGEN_ESCALA_DEFAULT;
-        const nImgsIniciales = (tieneVinoTenista && vinoImagenDefaultCon ? 1 : 0) + (tieneAperitivoCanonita && vinoImagenDefaultCon ? 1 : 0) + (qrInicialOculto ? 0 : 1);
+        const nImgsIniciales = (vinoImagenDefaultCon ? imagenesVino.length : 0) + (qrInicialOculto ? 0 : 1);
         const vinoImagenHtml = tieneVinoEspecial
-            ? `<div class="sugerencias-vino-imagen-wrapper" id="${config.vinoImagenWrapperId}" data-n="${nImgsIniciales}">${tieneVinoTenista ? `<img src="${config.vinoImagenSrc}" class="sugerencias-vino-imagen" data-img="tenista" style="display:${vinoImagenDefaultCon ? '' : 'none'}; height:${vinoImgAlturaInicial}px;">` : ''}${tieneAperitivoCanonita ? `<img src="${APERITIVO_IMAGEN_CANONITA}" class="sugerencias-vino-imagen" data-img="canonita" style="display:${vinoImagenDefaultCon ? '' : 'none'}; height:${vinoImgAlturaInicial}px;">` : ''}<img src="${initialImgSrc}" class="sugerencias-qr-img" id="${config.qrImgId}" style="width:${qrTamanoInicial}px !important; height:${qrTamanoInicial}px !important; display:${qrInicialOculto ? 'none' : ''};"></div>`
+            ? `<div class="sugerencias-vino-imagen-wrapper" id="${config.vinoImagenWrapperId}" data-n="${nImgsIniciales}">${imagenesVino.map(im => `<img src="${im.src}" class="sugerencias-vino-imagen" data-img="${im.cual}" style="display:${vinoImagenDefaultCon ? '' : 'none'}; height:${vinoImgAlturaInicial}px;" onerror="this.style.display='none'; window.repartirImagenesVino('${modoSeguro}')">`).join('')}<img src="${initialImgSrc}" class="sugerencias-qr-img" id="${config.qrImgId}" style="width:${qrTamanoInicial}px !important; height:${qrTamanoInicial}px !important; display:${qrInicialOculto ? 'none' : ''};"></div>`
             : '';
 
         html += renderCat("ENTRANTES / STARTERS", entrantes);
@@ -910,8 +929,7 @@
         let vinoImagenButtonsHtml = '';
         let vinoImagenEscalaHtml = '';
         if (tieneVinoEspecial) {
-            [[tieneVinoTenista, 'tenista', 'El Tenista'], [tieneAperitivoCanonita, 'canonita', 'Canonita']].forEach(([existe, cual, etiqueta]) => {
-                if (!existe) return;
+            imagenesVino.forEach(({ cual, etiqueta }) => {
                 const isActive = vinoImagenDefaultCon;
                 const style = `cursor: pointer; color: ${isActive ? '#0d5c63' : '#64748b'}; font-weight: ${isActive ? 'bold' : 'normal'};`;
                 vinoImagenButtonsHtml += `<label style="${style}"><input type="checkbox" ${isActive ? 'checked' : ''} onchange="this.parentNode.style.fontWeight=this.checked?'bold':'normal';this.parentNode.style.color=this.checked?'#0d5c63':'#64748b';window.toggleVinoImagen('${cual}', this.checked, '${modoSeguro}')"> ${etiqueta}</label>`;
