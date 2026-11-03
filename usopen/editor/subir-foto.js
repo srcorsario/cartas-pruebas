@@ -384,6 +384,35 @@
         pintar();
     }
 
+    // Al eliminar un plato (editor-web.js, tras guardar): sus fotos se borran (borrar = true) o
+    // pasan a desactivadas/ detrás de las que ya hubiera. Un commit. Devuelve cuántas fotos.
+    async function retirar(p, borrar) {
+        var carpeta = String((p && p.carpeta) || '').trim();
+        var mm = String((p && p.imagen) || '').match(/^(.*)0\d\.webp$/i);
+        if (!carpeta || !mm) return 0;
+        var base = mm[1];
+        var dirAct = dirWeb + 'imagenes/' + carpeta + '/', dirDes = dirAct + DESACT + '/';
+        var patron = new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '0(\\d)\\.webp$', 'i');
+        var coger = function (lista) {
+            var r = [];
+            lista.forEach(function (f) { var m = f.name.match(patron); if (m) r.push({ n: +m[1], path: f.path, sha: f.sha }); });
+            return r.sort(function (x, y) { return x.n - y.n; });
+        };
+        var activas = coger(await listar(dirAct.slice(0, -1))), desact = coger(await listar(dirDes.slice(0, -1)));
+        if (!activas.length && !(borrar && desact.length)) return 0;
+        var originales = activas.concat(desact), finales = {};
+        if (!borrar) desact.concat(activas).slice(0, 9).forEach(function (x, i) { finales[dirDes + base + '0' + (i + 1) + '.webp'] = x.sha; });
+        var cambios = [];
+        originales.forEach(function (o) { if (!(o.path in finales)) cambios.push({ path: o.path, sha: null }); });
+        Object.keys(finales).forEach(function (path) {
+            var o = originales.find(function (q) { return q.path === path; });
+            if (!o || o.sha !== finales[path]) cambios.push({ path: path, sha: finales[path] });
+        });
+        if (cambios.length) await commit(cambios, (borrar ? 'Borrar fotos ' : 'Desactivar fotos ') + base + ' (plato ' + p.id + ' eliminado)');
+        return borrar ? originales.length : activas.length;
+    }
+    window.SubirFoto = { retirar: retirar };
+
     document.addEventListener('DOMContentLoaded', function () {
         var campo = document.getElementById('edit-imagen');
         if (!campo) return;
