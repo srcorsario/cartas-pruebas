@@ -1,6 +1,6 @@
 // --- estructuras.js ---
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.estructuras = '3.5.0'; // NUEVO (30 oct): categoría "Hoja Postres (imprimible)" 16000-16299 en ambas cartas. Anterior 3.4.0: // MODIFICADO: RG Sugerencias -> subcategoría "Vino" 12990-12999 (Postres limitado a 12989). Anterior 3.3.0: // NUEVO: añadido subAcordeon (true) a "Sugerencias" en ambas cartas — activa el acordeón anidado de subcategorías en el Editor (app.js/renderizar) para no perder de vista los platos a medida que crecen
+window.APP_VERSIONS.estructuras = '3.6.0'; // 3 nov: dentro de la web la estructura sale de datos.json ("estructura", ver categorias.js); estas constantes quedan solo de reserva y como origen de la semilla. Anterior '3.5.0': // NUEVO (30 oct): categoría "Hoja Postres (imprimible)" 16000-16299 en ambas cartas. Anterior 3.4.0: // MODIFICADO: RG Sugerencias -> subcategoría "Vino" 12990-12999 (Postres limitado a 12989). Anterior 3.3.0: // NUEVO: añadido subAcordeon (true) a "Sugerencias" en ambas cartas — activa el acordeón anidado de subcategorías en el Editor (app.js/renderizar) para no perder de vista los platos a medida que crecen
 
 // =================================================================================
 // CARTA 01 - ROLAND GARROS (restaurante001)
@@ -206,6 +206,9 @@ window.ESTRUCTURA_RESTAURANTE001 = ESTRUCTURA_RESTAURANTE001;
 window.ESTRUCTURA_RESTAURANTE002 = ESTRUCTURA_RESTAURANTE002;
 
 function getEstructuraActual() {
+    // NUEVO (3 nov): la de datos.json si la hay (editor dentro de la web).
+    const deDatos = window.Categorias && window.Categorias.estructuraEditor();
+    if (deDatos) return deDatos;
     const modo = window.currentMode || 'restaurante001';
     return (modo === 'restaurante002') ? window.ESTRUCTURA_RESTAURANTE002 : window.ESTRUCTURA_RESTAURANTE001;
 }

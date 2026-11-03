@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v2.9.8-Abstract-Keys',
+            versionStr: 'v2.9.9-Abstract-Keys',
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -23,7 +23,7 @@
             vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE001,
                     },
         restaurante002: {
-            versionStr: 'v2.9.8-Abstract-Keys',
+            versionStr: 'v2.9.9-Abstract-Keys',
             versionKey: 'sugerencias_restaurante002',
             containerId: 'sugerencias-contenido-usopen',
             logoSrc: LOGO_RESTAURANTE002,
@@ -807,13 +807,19 @@
         let intentos = 0; const MAX_INTENTOS = 10;
         function intentarRenderizado() {
             let fuente = window.datosLocales || [];
-            const tieneDatosEnRango = fuente.some(p => p && p.activa && parseInt(p.id, 10) >= 12000 && parseInt(p.id, 10) <= 12999);
+            const tieneDatosEnRango = fuente.some(p => p && p.activa && enSugerencias(p.id));
             if (tieneDatosEnRango) procesarYRender(fuente, contenedor, config, modo);
             else if (intentos < MAX_INTENTOS) { intentos++; setTimeout(intentarRenderizado, 500); }
             else contenedor.innerHTML = `<div class="p-4 text-center text-slate-500 italic">Esperando origen de datos...</div>`;
         }
         intentarRenderizado();
     };
+
+    // 3 nov: rangos de Sugerencias y de sus vinos desde datos.json (categorias.js); si no hay, los fijos.
+    const rangoSug = () => (window.Categorias && window.Categorias.rangoSugerencias()) || [12000, 12999];
+    const rangoVinosSug = () => (window.Categorias && window.Categorias.rangoVinosSugerencias()) || [12990, 12999];
+    const enSugerencias = (id) => { const n = parseInt(id, 10), r = rangoSug(); return n >= r[0] && n <= r[1]; };
+    const esVinoSugerencias = (id) => { const n = parseInt(id, 10), r = rangoVinosSug(); return n >= r[0] && n <= r[1]; };
 
     function aplicarParcheOptimista(fuente, modo) {
         const state = window.optimisticState ? window.optimisticState[modo] : { t: 0, s: [] };
@@ -831,12 +837,12 @@
         // NUEVO: los platos que la persona haya quitado a mano de ESTA hoja (ver
         // window.quitarPlatoSugerencia) se excluyen aquí — es independiente de "activa" (el plato
         // sigue en el resto de la carta con normalidad, solo se omite en esta hoja de Sugerencias).
-        const todosLosPlatos = fuente.filter(p => p && p.activa && parseInt(p.id, 10) >= 12000 && parseInt(p.id, 10) <= 12999);
+        const todosLosPlatos = fuente.filter(p => p && p.activa && enSugerencias(p.id));
         const platos = todosLosPlatos.filter(p => !excluidos.has(parseInt(p.id, 10)));
         // NUEVO: aperitivo Canonita ("Usopen Splitz") — ID 12993, ver config.js
         const esAperitivoCanonita = (p) => p && parseInt(p.id, 10) === APERITIVO_CANONITA_ID;
         let entrantes = [], principales = [], postres = [], vinos = [];
-        platos.forEach(p => { const id = parseInt(p.id, 10); if (id >= 12990 && id <= 12999) vinos.push(p); /* MODIFICADO: rango 12990-12999 reservado a vinos de Sugerencias (antes solo 12990) */ else if (id >= 12100 && id <= 12399) entrantes.push(p); else if (id >= 12400 && id <= 12899) principales.push(p); else if (id >= 12900 && id <= 12999) postres.push(p); else entrantes.push(p); });
+        platos.forEach(p => { const id = parseInt(p.id, 10); if (esVinoSugerencias(id)) vinos.push(p); /* MODIFICADO: rango 12990-12999 reservado a vinos de Sugerencias (antes solo 12990) */ else if (id >= 12100 && id <= 12399) entrantes.push(p); else if (id >= 12400 && id <= 12899) principales.push(p); else if (id >= 12900 && id <= 12999) postres.push(p); else entrantes.push(p); });
 
         // MODIFICADO: la hoja A4 real (.sugerencias-panel) ya NO contiene el botón de imprimir ni
         // ninguna opción — así lo que se ve dentro de ella en pantalla es EXACTAMENTE lo que se
@@ -857,7 +863,7 @@
                 let iconsHtml = '';
                 if (p.alergenos) iconsHtml = '<div class="sugerencias-alergenos">' + p.alergenos.split(',').map(a => `<img src="${PATH_ALERGENOS}${a.trim()}.webp" class="sugerencias-alergeno-icon">`).join('') + '</div>';
                 const objEs = window.desglosarNombre(p.es); const objEn = window.desglosarNombre(p.en);
-                const esVino = ((p.id >= 12990 && p.id <= 12999) || p.id >= 13000); // MODIFICADO: 12990-12999 = vinos de Sugerencias
+                const esVino = (esVinoSugerencias(p.id) || p.id >= 13000); // MODIFICADO: 12990-12999 = vinos de Sugerencias
                 let htmlNombreEs = "", htmlNombreEn = "", htmlExtraEs = "";
                 if (esAperitivoCanonita(p)) {
                     // NUEVO: aperitivo — nombre y debajo su línea de explicación (ES y EN)
