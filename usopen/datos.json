@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T10:09:52.219Z",
+  "guardado": "2026-11-03T10:11:36.625Z",
   "ocultas": ["pizzas"],
   "platos": [
     {
@@ -6125,6 +6125,40 @@
             "VA": "{\"desc\":\"Amanida elaborada a base de canonges i tomàquet.\",\"q1\":\"Què són els canonges?\",\"r1\":\"Són una hortalissa de fulla verda petita i tendra que es consumeix crua.\",\"q2\":\"Quins són els ingredients d'aquest plat?\",\"r2\":\"Els ingredients indicats a la carta són canonges i tomàquet.\"}",
             "KO": "{\"desc\":\"마슈와 토마토로 만든 샐러드.\",\"q1\":\"마슈는 무엇인가요?\",\"r1\":\"날것으로 먹는 작고 연한 녹색 잎채소입니다.\",\"q2\":\"이 요리의 재료는 무엇인가요?\",\"r2\":\"메뉴판에 표시된 재료는 마슈와 토마토입니다.\"}"
         }
+    },
+    {
+        "id": "12207", "activa": "si", "precio": "1.00", "precioMedia": "",
+        "carpeta": "ensaladas", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Ensalada verde",
+            "EN": "Green salad",
+            "DE": "Grüner Salat",
+            "FR": "Salade verte",
+            "IT": "Insalata verde",
+            "RU": "Зелёный салат",
+            "NL": "Groene salade",
+            "PL": "Sałatka zielona",
+            "SV": "Grönsallad",
+            "NO": "Grønn salat",
+            "DA": "Grøn salat",
+            "FI": "Vihreä salaatti",
+            "PT": "Salada verde",
+            "RO": "Salată verde",
+            "HU": "Zöldsaláta",
+            "CS": "Zelený salát",
+            "EL": "Πράσινη σαλάτα",
+            "TR": "Yeşil salata",
+            "AR": "سلطة خضراء",
+            "ZH": "绿色沙拉",
+            "JA": "グリーンサラダ",
+            "CA": "Amanida verda",
+            "EU": "Entsalada berdea",
+            "GL": "Ensalada verde",
+            "VA": "Amanida verda",
+            "KO": "그린 샐러드"
+        },
+        "info": {}
     },
     {
         "id": "12301", "activa": "no", "precio": "18.00", "precioMedia": "",
