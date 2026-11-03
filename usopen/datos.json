@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T09:45:50.163Z",
+  "guardado": "2026-11-03T09:46:19.037Z",
   "ocultas": ["pizzas"],
   "platos": [
     {
@@ -5719,7 +5719,11 @@
             "VA": "Calamar a l'Andalusa, calamar lleugerament enfarinat i fregit",
             "KO": "Calamar a la Andaluza, 얇게 밀가루를 묻혀 바삭하게 튀긴 오징어"
         },
-        "info": {}
+        "info": {
+            "ES": "{\"desc\":\"Calamar pasado por harina y frito según la técnica tradicional a la andaluza.\",\"q1\":\"¿En qué consiste la técnica de cocina a la andaluza?\",\"r1\":\"Es una técnica tradicional de fritura que consiste en cubrir el ingrediente con una fina capa de harina, retirar el exceso y freírlo en aceite a alta temperatura.\",\"q2\":\"¿Cuál es el ingrediente principal de esta receta?\",\"r2\":\"El ingrediente principal de este plato es el calamar.\"}",
+            "EN": "{\"desc\":\"Squid coated in flour and fried using the traditional Andalusian-style technique.\",\"q1\":\"What does the Andalusian-style technique consist of?\",\"r1\":\"It is a traditional frying technique where the ingredient is lightly coated in flour, shaken to remove the excess, and fried in oil at a high temperature.\",\"q2\":\"What is the main ingredient in this dish?\",\"r2\":\"The main ingredient in this dish is squid.\"}",
+            "HASH_FICHA": "16c9311e"
+        }
     },
     {
         "id": "12201", "activa": "no", "precio": "16.50", "precioMedia": "",
