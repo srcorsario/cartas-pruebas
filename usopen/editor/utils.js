@@ -24,6 +24,15 @@ function esIdVino(id) {
     return n >= 13000 && n < 15000;
 }
 
+/**
+ * NUEVO (3 nov): primera letra del nombre en mayúscula ("ensalada verde" -> "Ensalada verde").
+ * Salta signos iniciales (¿ ¡ " ' ( ...) y no toca el resto del texto.
+ */
+function mayusculaInicial(texto) {
+    const s = String(texto == null ? '' : texto);
+    return s.replace(/\p{L}/u, c => c.toLocaleUpperCase('es-ES'));
+}
+
 function desglosarNombre(texto) {
     if (!texto) return { nombre: "", uvas: "", opciones: [] };
     const partes = texto.split('//');
