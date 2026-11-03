@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.4.0';
+    window.APP_VERSIONS.almacenJson = '1.5.0';
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -324,7 +324,10 @@
                 if (err.status === 422 || err.status === 409) continue; // alguien subió algo a la vez: otra vuelta
                 throw err;
             }
+            const antes = e.ultimosWeb;
             e.ultimosWeb = web;
+            // Para el aviso ⏳/✔ "ya visible en la web" (editor-web.js).
+            try { window.dispatchEvent(new CustomEvent('almacen-guardado', { detail: { base: web['datos/base.json'], antes: antes ? antes['datos/base.json'] : null } })); } catch (x) { }
             return shaBlob(archivos[cfg.ruta]);
         }
         throw new Error('El repo cambia sin parar; vuelve a guardar en un momento.');
