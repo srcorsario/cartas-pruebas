@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v2.9.7-Abstract-Keys',
+            versionStr: 'v2.9.9-Abstract-Keys',
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -20,14 +20,10 @@
             ],
             vinoImagenSrc: VINO_IMAGEN_TENISTA,
             vinoImagenWrapperId: 'vino-imagen-rg',
-            vinoImagenRadioName: 'vino-imagen-mode-rg-footer',
-            vinoImagenOptions: [
-                { value: 'con', label: 'Con imagen Vino', isDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE001 },
-                { value: 'sin', label: 'Sin imagen Vino', isDefault: !VINO_IMAGEN_DEFAULT_RESTAURANTE001 }
-            ]
-        },
+            vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE001,
+                    },
         restaurante002: {
-            versionStr: 'v2.9.7-Abstract-Keys',
+            versionStr: 'v2.9.9-Abstract-Keys',
             versionKey: 'sugerencias_restaurante002',
             containerId: 'sugerencias-contenido-usopen',
             logoSrc: LOGO_RESTAURANTE002,
@@ -43,12 +39,8 @@
             ],
             vinoImagenSrc: VINO_IMAGEN_TENISTA,
             vinoImagenWrapperId: 'vino-imagen-usopen',
-            vinoImagenRadioName: 'vino-imagen-mode-usopen-footer',
-            vinoImagenOptions: [
-                { value: 'con', label: 'Con imagen Vino', isDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE002 },
-                { value: 'sin', label: 'Sin imagen Vino', isDefault: !VINO_IMAGEN_DEFAULT_RESTAURANTE002 }
-            ]
-        }
+            vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE002,
+                    }
     };
 
     if (!document.getElementById('sugerencias-print-styles')) {
@@ -111,6 +103,10 @@
             .sugerencias-seccion { flex: 0 1 auto !important; display: flex !important; flex-direction: column !important; margin-bottom: 12px !important; }
             .sugerencias-seccion-titulo { font-size: 0.85em !important; font-weight: 700 !important; color: #d97706 !important; border-bottom: 1px solid #334155 !important; margin-bottom: 8px !important; text-transform: uppercase !important; }
             .sugerencias-plato { display: flex !important; align-items: baseline !important; margin-bottom: 5px !important; width: 100% !important; }
+            .sugerencias-plato-col { flex-direction: column !important; align-items: stretch !important; }
+            .sugerencias-linea1 { display: flex !important; align-items: baseline !important; width: 100% !important; }
+            .sugerencias-linea1 > .sugerencias-nombre-es { flex: 0 1 auto !important; max-width: 93% !important; }
+            .sugerencias-plato-resto { display: flex !important; flex-direction: column !important; max-width: 93% !important; }
             .sugerencias-plato-nombres { flex: 0 1 auto !important; max-width: 93% !important; display: flex !important; flex-direction: column !important; }
             .sugerencias-nombre-es { font-size: 0.9em !important; font-weight: 600 !important; color: #000000 !important; }
             .sugerencias-nombre-en { font-size: 0.8em !important; color: #7f8c8d !important; font-style: italic !important; }
@@ -118,6 +114,15 @@
             .sugerencias-alergenos { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; margin-top: 2px !important; align-items: center !important; }
             .sugerencias-alergeno-icon { display: inline-block !important; width: 20px !important; height: 20px !important; object-fit: contain !important; vertical-align: middle !important; margin-right: 3px !important; }
             .sugerencias-puntos { flex: 1 !important; border-bottom: 1px dotted #94a3b8 !important; margin: 0 8px !important; height: 1px !important; }
+            /* NUEVO: neutraliza reglas de styles.css (solo existen en la página del editor, no en la ventana
+               de impresión) que hacían la vista previa ~16mm más alta que la impresión: margen superior y
+               línea del footer, margen del inglés, espaciado de letras y borde del panel. Así pantalla e
+               impresión miden lo mismo y no se quita la imagen de las bebidas "por falta de sitio". */
+            .sugerencias-footer { margin-top: 0 !important; border-top: none !important; }
+            .sugerencias-nombre-en { margin-top: 0 !important; }
+            .sugerencias-seccion-titulo { letter-spacing: normal !important; }
+            .sugerencias-puntos { top: 0 !important; }
+            .sugerencias-panel { border: none !important; }
             .sugerencias-precio { font-size: 0.9em !important; font-weight: 700 !important; flex-shrink: 0 !important; }
             .sugerencias-footer { padding-top: 15px !important; display: flex !important; flex-direction: column !important; align-items: center !important; width: 100% !important; }
             /* MODIFICADO: font-size en "em" en vez de "rem" en todas las reglas de dentro de
@@ -133,9 +138,10 @@
             .sugerencias-qr-toggle { font-size: 0.7rem !important; color: #64748b !important; cursor: pointer !important; display: flex !important; user-select: none !important; gap: 5px !important; }
             .sugerencias-qr-toggle input:checked + span { font-weight: bold; }
             .sugerencias-qr-img { transition: opacity 0.3s; }
-            .sugerencias-vino-imagen-wrapper { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center !important; padding: 20px 0 8px 0 !important; column-gap: 10px !important; }
+            .sugerencias-vino-imagen-wrapper { display: flex !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: center !important; gap: 90px !important; padding: 20px 0 8px 0 !important; }
+            .sugerencias-vino-imagen-wrapper[data-n="3"], .sugerencias-vino-imagen-wrapper[data-n="4"], .sugerencias-vino-imagen-wrapper[data-n="5"], .sugerencias-vino-imagen-wrapper[data-n="6"] { justify-content: space-evenly !important; gap: 0 !important; }
+            .sugerencias-descripcion-aperitivo { font-size: 0.75em !important; color: #555 !important; font-style: italic !important; font-weight: 400 !important; }
             .sugerencias-vino-imagen { justify-self: center !important; height: 140px; width: auto; max-width: 300px; object-fit: contain !important; transition: height 0.15s ease !important; }
-            .sugerencias-vino-imagen-wrapper .sugerencias-qr-img { justify-self: end !important; }
             .vino-imagen-selector-wrapper { font-size: 0.75rem !important; color: #64748b !important; }
             .btn-imprimir-a4 { display: block; width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; margin-bottom: 15px; text-align: center; }
             /* NUEVO: box de controles, deliberadamente separado y con estilo distinto (fondo gris,
@@ -198,9 +204,10 @@
         if (!config) return;
         const img = document.getElementById(config.qrImgId);
         if (!img) return;
-        if (tipo === 'none') { img.style.display = 'none'; reajustarVistaPrevia(modo); return; }
-        img.style.display = 'block';
+        if (tipo === 'none') { img.style.display = 'none'; window.repartirImagenesVino(modo); reajustarVistaPrevia(modo); return; }
+        img.style.display = '';
         img.src = (tipo === 'default') ? config.qrDefault : config.qrMod;
+        window.repartirImagenesVino(modo);
         reajustarVistaPrevia(modo);
     };
 
@@ -221,13 +228,44 @@
 
     // MODIFICADO: solo oculta/muestra la imagen del vino en sí, NUNCA el wrapper entero — desde
     // que el QR vive en la misma fila, ocultar el wrapper apagaba el QR también.
-    window.toggleVinoImagen = function(tipo, modo) {
+    // MODIFICADO: un control por imagen ('tenista' / 'canonita'); el QR sigue con toggleQR.
+    // Tras cada cambio se recalcula el reparto según cuántas imágenes quedan visibles.
+    // NUEVO (3 nov): imágenes de "Vinos y aperitivos": las fijas (El Tenista 12990, Canonita) y,
+    // para el resto, la foto principal asignada al plato (Carpeta + Nombre Imagen) — solo en el
+    // editor dentro de la web, donde las fotos están en ../imagenes/.
+    const FOTOS_WEB_SUGERENCIAS = window.EDITOR_SITIO ? '../imagenes/' : '';
+    function imagenesDeVinos(vinos, config) {
+        const out = [];
+        vinos.forEach(p => {
+            const id = parseInt(p.id, 10);
+            let src = '';
+            if (id === 12990) src = config.vinoImagenSrc;
+            else if (id === APERITIVO_CANONITA_ID) src = APERITIVO_IMAGEN_CANONITA;
+            else if (FOTOS_WEB_SUGERENCIAS && String(p.carpeta || '').trim() && /01\.webp$/i.test(String(p.imagen || ''))) src = FOTOS_WEB_SUGERENCIAS + encodeURI(String(p.carpeta).trim() + '/' + p.imagen);
+            if (!src) return;
+            let nombre = (window.desglosarNombre ? window.desglosarNombre(p.es || '').nombre : p.es) || ('ID ' + id);
+            if (nombre.length > 28) nombre = nombre.slice(0, 26) + '…';
+            out.push({ cual: 'p' + id, src, etiqueta: nombre.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])) });
+        });
+        return out;
+    }
+
+    window.repartirImagenesVino = function(modo) {
         const config = SUGERENCIAS_CONFIG[modo];
         if (!config) return;
         const wrapper = document.getElementById(config.vinoImagenWrapperId);
         if (!wrapper) return;
-        const img = wrapper.querySelector('.sugerencias-vino-imagen');
-        if (img) img.style.display = (tipo === 'con') ? '' : 'none';
+        const n = Array.from(wrapper.children).filter(el => el.style.display !== 'none').length;
+        wrapper.dataset.n = String(n);
+    };
+    window.toggleVinoImagen = function(cual, visible, modo) {
+        const config = SUGERENCIAS_CONFIG[modo];
+        if (!config) return;
+        const wrapper = document.getElementById(config.vinoImagenWrapperId);
+        if (!wrapper) return;
+        const img = wrapper.querySelector('.sugerencias-vino-imagen[data-img="' + cual + '"]');
+        if (img) img.style.display = visible ? '' : 'none';
+        window.repartirImagenesVino(modo);
         reajustarVistaPrevia(modo);
     };
 
@@ -243,10 +281,8 @@
         if (!config) return;
         const wrapper = document.getElementById(config.vinoImagenWrapperId);
         if (!wrapper) return;
-        const img = wrapper.querySelector('.sugerencias-vino-imagen');
-        if (img) {
-            img.style.height = (VINO_IMAGEN_BASE_MAX_HEIGHT * escala) + 'px';
-        }
+        // MODIFICADO: escala todas las imágenes (vino + aperitivo) a la misma altura
+        wrapper.querySelectorAll('.sugerencias-vino-imagen').forEach(img => { img.style.height = (VINO_IMAGEN_BASE_MAX_HEIGHT * escala) + 'px'; });
         const qrImg = wrapper.querySelector('.sugerencias-qr-img');
         if (qrImg) {
             const qrTamano = (QR_IMAGEN_BASE_SIZE * escala) + 'px';
@@ -431,11 +467,9 @@
         var alturaFooter = footer ? footer.getBoundingClientRect().height : 0;
 
         var alturaBodega = 0;
-        panel.querySelectorAll('.sugerencias-seccion-titulo').forEach(function(titulo) {
-            if (titulo.textContent.indexOf('BODEGA') !== -1 && titulo.parentElement) {
-                alturaBodega = titulo.parentElement.getBoundingClientRect().height;
-            }
-        });
+        // MODIFICADO: se detecta por clase (antes por el texto 'BODEGA' del título, que ya no existe)
+        var secBodega = panel.querySelector('.sugerencias-seccion-bodega');
+        if (secBodega) alturaBodega = secBodega.getBoundingClientRect().height;
 
         return { alturaHeader: alturaHeader, alturaFooter: alturaFooter, alturaBodega: alturaBodega, alturaFija: alturaHeader + alturaFooter + alturaBodega };
     }
@@ -487,10 +521,9 @@
         // fallo real de carga (ver esperarImagenes, más arriba) podía quedar sin avisar nunca,
         // aunque la imagen llevara ya un buen rato en blanco por un problema de red y no por falta
         // de sitio en la hoja.
-        var vinoImgParaCarga = panel.querySelector('.sugerencias-vino-imagen');
-        if (vinoImgParaCarga && vinoImgParaCarga.dataset.cargaFallida === '1') {
-            resultado.imagenVinoFalloCarga = true;
-        }
+        panel.querySelectorAll('.sugerencias-vino-imagen').forEach(function(vinoImgParaCarga) {
+            if (vinoImgParaCarga.dataset.cargaFallida === '1') resultado.imagenVinoFalloCarga = true;
+        });
 
         // IMPORTANTE: el aviso de alérgenos es información de seguridad alimentaria — es MÁS
         // IMPORTANTE que cualquier plato de la hoja, así que nunca debe encogerse junto con el
@@ -541,7 +574,7 @@
             var alturaMm = mmDesdePx(alturaContenidoReal, maxAlturaPx);
             var pieFijoMm = mmDesdePx(bloqueFijo.alturaFija, maxAlturaPx);
             var disponibleCategoriasMm = mmDesdePx(maxAlturaPx - bloqueFijo.alturaFija, maxAlturaPx);
-            resultado.medidas.push(etiqueta + ': ' + alturaMm + 'mm de 267mm (cabecera+alérgenos+BODEGA: ' + pieFijoMm + 'mm → tope máximo disponible para Entrantes/Principales/Postres: ' + disponibleCategoriasMm + 'mm)');
+            resultado.medidas.push(etiqueta + ': ' + alturaMm + 'mm de 267mm (cabecera+alérgenos+vinos/aperitivos: ' + pieFijoMm + 'mm → tope máximo disponible para Entrantes/Principales/Postres: ' + disponibleCategoriasMm + 'mm)');
             var pxPorMm = maxAlturaPx / 267;
             return alturaContenidoReal <= (maxAlturaPx + pxPorMm);
         }
@@ -562,12 +595,16 @@
         if (pasosGap > 0) resultado.espacioCategoriasReducido = true;
         if (medir('Tras apretar categorías')) return resultado;
 
-        var vinoImg = panel.querySelector('.sugerencias-vino-imagen');
-        if (vinoImg && vinoImg.style.display !== 'none') {
-            ocultarPorAjuste(vinoImg);
-            resultado.imagenVinoQuitada = true;
-        }
-        if (medir('Sin imagen vino')) return resultado;
+        // NUEVO: con data-texto-primero (hoja de Postres) se reduce antes la letra y solo al final se quitan imagen/QR.
+        var textoPrimero = panel.getAttribute('data-texto-primero') === '1';
+        function quitarImagenYQr() {
+        panel.querySelectorAll('.sugerencias-vino-imagen').forEach(function(vinoImg) {
+            if (vinoImg.style.display !== 'none') {
+                ocultarPorAjuste(vinoImg);
+                resultado.imagenVinoQuitada = true;
+            }
+        });
+        if (medir('Sin imagen vino')) return true;
 
         var qrImg = panel.querySelector('.sugerencias-qr-img');
         var qrYaEstabaVisible = qrImg && qrImg.style.display !== 'none' && qrImg.offsetHeight > 0;
@@ -575,7 +612,10 @@
             ocultarPorAjuste(qrImg);
             if (qrYaEstabaVisible) resultado.qrQuitado = true;
         }
-        if (medir('Sin QR')) return resultado;
+        if (medir('Sin QR')) return true;
+            return false;
+        }
+        if (!textoPrimero && quitarImagenYQr()) return resultado;
 
         var factor = 1, pasos = 0, MAX_PASOS = 12;
         // NUEVO: suelo de legibilidad — el texto de los platos no se reduce por debajo de este
@@ -588,8 +628,7 @@
         var disponibleParaCategoriasPx = maxAlturaPx - bloqueFijoActual.alturaFija;
         var alturaCategoriasActualPx = 0;
         panel.querySelectorAll('.sugerencias-seccion').forEach(function(sec) {
-            var titulo = sec.querySelector('.sugerencias-seccion-titulo');
-            if (titulo && titulo.textContent.indexOf('BODEGA') !== -1) return;
+            if (sec.classList.contains('sugerencias-seccion-bodega')) return;
             alturaCategoriasActualPx += sec.getBoundingClientRect().height;
         });
         if (alturaCategoriasActualPx > 0 && disponibleParaCategoriasPx > 0) {
@@ -633,6 +672,7 @@
         // NUEVO: comprobación final — si ni reduciendo el texto hasta el mínimo legible cabe todo
         // en una página, no se sigue encogiendo: se marca para pedirle a la persona que quite algún
         // plato de la hoja (ver el desplegable "Quitar un plato de esta hoja" en los controles).
+        if (textoPrimero && !medir('Antes de quitar imagen') && quitarImagenYQr()) return resultado;
         if (!medir('Comprobación final')) {
             resultado.noCabeNiReduciendo = true;
         }
@@ -660,8 +700,7 @@
 
         var secciones = [];
         panel.querySelectorAll('.sugerencias-seccion').forEach(function(sec) {
-            var titulo = sec.querySelector('.sugerencias-seccion-titulo');
-            if (titulo && titulo.textContent.indexOf('BODEGA') === -1) secciones.push(sec);
+            if (!sec.classList.contains('sugerencias-seccion-bodega')) secciones.push(sec);
         });
         if (secciones.length === 0) return;
 
@@ -776,9 +815,11 @@
         intentarRenderizado();
     };
 
-    // 3 nov: rango de Sugerencias desde datos.json (categorias.js); si no hay, el fijo.
+    // 3 nov: rangos de Sugerencias y de sus vinos desde datos.json (categorias.js); si no hay, los fijos.
     const rangoSug = () => (window.Categorias && window.Categorias.rangoSugerencias()) || [12000, 12999];
+    const rangoVinosSug = () => (window.Categorias && window.Categorias.rangoVinosSugerencias()) || [12990, 12999];
     const enSugerencias = (id) => { const n = parseInt(id, 10), r = rangoSug(); return n >= r[0] && n <= r[1]; };
+    const esVinoSugerencias = (id) => { const n = parseInt(id, 10), r = rangoVinosSug(); return n >= r[0] && n <= r[1]; };
 
     function aplicarParcheOptimista(fuente, modo) {
         const state = window.optimisticState ? window.optimisticState[modo] : { t: 0, s: [] };
@@ -798,8 +839,10 @@
         // sigue en el resto de la carta con normalidad, solo se omite en esta hoja de Sugerencias).
         const todosLosPlatos = fuente.filter(p => p && p.activa && enSugerencias(p.id));
         const platos = todosLosPlatos.filter(p => !excluidos.has(parseInt(p.id, 10)));
+        // NUEVO: aperitivo Canonita ("Usopen Splitz") — ID 12993, ver config.js
+        const esAperitivoCanonita = (p) => p && parseInt(p.id, 10) === APERITIVO_CANONITA_ID;
         let entrantes = [], principales = [], postres = [], vinos = [];
-        platos.forEach(p => { const id = parseInt(p.id, 10); if (id === 12990) vinos.push(p); else if (id >= 12100 && id <= 12399) entrantes.push(p); else if (id >= 12400 && id <= 12899) principales.push(p); else if (id >= 12900 && id <= 12999) postres.push(p); else entrantes.push(p); });
+        platos.forEach(p => { const id = parseInt(p.id, 10); if (esVinoSugerencias(id)) vinos.push(p); /* MODIFICADO: rango 12990-12999 reservado a vinos de Sugerencias (antes solo 12990) */ else if (id >= 12100 && id <= 12399) entrantes.push(p); else if (id >= 12400 && id <= 12899) principales.push(p); else if (id >= 12900 && id <= 12999) postres.push(p); else entrantes.push(p); });
 
         // MODIFICADO: la hoja A4 real (.sugerencias-panel) ya NO contiene el botón de imprimir ni
         // ninguna opción — así lo que se ve dentro de ella en pantalla es EXACTAMENTE lo que se
@@ -813,16 +856,24 @@
                 <img src="${config.logoSrc}" class="sugerencias-logo-img" onerror="this.src='${config.logoFallback}';">
             </div><div class="sugerencias-body">`;
 
-        const renderCat = (titulo, lista, extraHtml = '') => {
+        const renderCat = (titulo, lista, extraHtml = '', claseExtra = '') => {
             if (lista.length === 0) return '';
-            let h = `<div class="sugerencias-seccion"><div class="sugerencias-seccion-titulo">${titulo}</div>`;
+            let h = `<div class="sugerencias-seccion${claseExtra ? ' ' + claseExtra : ''}"><div class="sugerencias-seccion-titulo">${titulo}</div>`;
             lista.forEach(p => {
                 let iconsHtml = '';
                 if (p.alergenos) iconsHtml = '<div class="sugerencias-alergenos">' + p.alergenos.split(',').map(a => `<img src="${PATH_ALERGENOS}${a.trim()}.webp" class="sugerencias-alergeno-icon">`).join('') + '</div>';
                 const objEs = window.desglosarNombre(p.es); const objEn = window.desglosarNombre(p.en);
-                const esVino = (p.id === 12990 || p.id >= 13000);
-                let htmlNombreEs = "", htmlNombreEn = "";
-                if (esVino) htmlNombreEs = objEs.uvas ? `<span class="sugerencias-nombre-es">${objEs.nombre} <span class="sugerencias-detalles-uvas-inline">(${objEs.uvas})</span></span>` : `<span class="sugerencias-nombre-es">${objEs.nombre}</span>`;
+                const esVino = (esVinoSugerencias(p.id) || p.id >= 13000); // MODIFICADO: 12990-12999 = vinos de Sugerencias
+                let htmlNombreEs = "", htmlNombreEn = "", htmlExtraEs = "";
+                if (esAperitivoCanonita(p)) {
+                    // NUEVO: aperitivo — nombre y debajo su línea de explicación (ES y EN)
+                    const descEs = objEs.opciones.join(' // ');
+                    const descEn = objEn.opciones.join(' // ');
+                    htmlNombreEs = `<span class="sugerencias-nombre-es">${objEs.nombre}</span>`;
+                    htmlExtraEs = descEs ? `<span class="sugerencias-descripcion-aperitivo">${descEs}</span>` : '';
+                    htmlNombreEn = (descEn && descEn !== descEs) ? `<span class="sugerencias-nombre-en">${descEn}</span>` : '';
+                }
+                else if (esVino) htmlNombreEs = objEs.uvas ? `<span class="sugerencias-nombre-es">${objEs.nombre} <span class="sugerencias-detalles-uvas-inline">(${objEs.uvas})</span></span>` : `<span class="sugerencias-nombre-es">${objEs.nombre}</span>`;
                 else {
                     // NUEVO: igual que ya se hacía con la uva del vino, si el plato tiene una
                     // segunda línea tras "//" (ingredientes/opciones) también se muestra aquí,
@@ -834,7 +885,8 @@
                     htmlNombreEn = `<span class="sugerencias-nombre-en">${objEn.nombre}${detalleEn ? ` <span class="sugerencias-detalles-uvas-inline">(${detalleEn})</span>` : ''}</span>`;
                 }
                 const precioFormateado = p.precio ? parseFloat(p.precio).toFixed(2) + '€' : '0.00€';
-                h += `<div class="sugerencias-plato"><div class="sugerencias-plato-nombres">${htmlNombreEs}${htmlNombreEn}${iconsHtml}</div><div class="sugerencias-puntos"></div><div class="sugerencias-precio">${precioFormateado}</div></div>`;
+                // MODIFICADO: los puntitos van del final del nombre ES al precio (1ª línea); EN, descripción y alérgenos debajo.
+                h += `<div class="sugerencias-plato sugerencias-plato-col"><div class="sugerencias-linea1">${htmlNombreEs}<div class="sugerencias-puntos"></div><div class="sugerencias-precio">${precioFormateado}</div></div><div class="sugerencias-plato-resto">${htmlExtraEs}${htmlNombreEn}${iconsHtml}</div></div>`;
             });
             if (extraHtml) h += extraHtml;
             return h + '</div>';
@@ -853,25 +905,23 @@
         // la imagen del vino — imagen del vino centrada (columna central de un grid de 3), QR
         // pegado a la derecha (columna derecha) — en vez de vivir abajo del todo junto al aviso
         // de alérgenos.
-        const tieneVinoEspecial = vinos.some(p => parseInt(p.id, 10) === 12990);
-        const vinoImagenDefaultCon = config.vinoImagenOptions.find(o => o.isDefault)?.value === 'con';
+        const imagenesVino = imagenesDeVinos(vinos, config);
+        const tieneVinoEspecial = imagenesVino.length > 0;
+        const vinoImagenDefaultCon = !!config.vinoImagenDefault;
         // MODIFICADO: tamaño inicial ya a VINO_IMAGEN_ESCALA_DEFAULT (1.2x) en vez del 1x base,
         // tanto para la botella como para el QR (proporcional, ver QR_IMAGEN_BASE_SIZE). El
         // !important en el QR es necesario para ganarle al width/height !important de su CSS base.
         const vinoImgAlturaInicial = VINO_IMAGEN_BASE_MAX_HEIGHT * VINO_IMAGEN_ESCALA_DEFAULT;
         const qrTamanoInicial = QR_IMAGEN_BASE_SIZE * VINO_IMAGEN_ESCALA_DEFAULT;
+        const nImgsIniciales = (vinoImagenDefaultCon ? imagenesVino.length : 0) + (qrInicialOculto ? 0 : 1);
         const vinoImagenHtml = tieneVinoEspecial
-            ? `<div class="sugerencias-vino-imagen-wrapper" id="${config.vinoImagenWrapperId}">
-                <span></span>
-                <img src="${config.vinoImagenSrc}" class="sugerencias-vino-imagen" style="display:${vinoImagenDefaultCon ? '' : 'none'}; height:${vinoImgAlturaInicial}px;">
-                <img src="${initialImgSrc}" class="sugerencias-qr-img" id="${config.qrImgId}" style="width:${qrTamanoInicial}px !important; height:${qrTamanoInicial}px !important; display:${qrInicialOculto ? 'none' : ''};">
-               </div>`
+            ? `<div class="sugerencias-vino-imagen-wrapper" id="${config.vinoImagenWrapperId}" data-n="${nImgsIniciales}">${imagenesVino.map(im => `<img src="${im.src}" class="sugerencias-vino-imagen" data-img="${im.cual}" style="display:${vinoImagenDefaultCon ? '' : 'none'}; height:${vinoImgAlturaInicial}px;" onerror="this.style.display='none'; window.repartirImagenesVino('${modoSeguro}')">`).join('')}<img src="${initialImgSrc}" class="sugerencias-qr-img" id="${config.qrImgId}" style="width:${qrTamanoInicial}px !important; height:${qrTamanoInicial}px !important; display:${qrInicialOculto ? 'none' : ''};"></div>`
             : '';
 
         html += renderCat("ENTRANTES / STARTERS", entrantes);
         html += renderCat("PRINCIPALES / MAIN COURSES", principales);
         html += renderCat("POSTRES / DESSERTS", postres);
-        html += renderCat("BODEGA / WINE CELLAR", vinos, vinoImagenHtml);
+        html += renderCat("VINOS Y APERITIVOS RECOMENDADOS / RECOMMENDED WINES & APERITIFS", vinos, vinoImagenHtml, 'sugerencias-seccion-bodega');
 
         let qrButtonsHtml = '';
         config.qrOptions.forEach(opt => {
@@ -885,10 +935,10 @@
         let vinoImagenButtonsHtml = '';
         let vinoImagenEscalaHtml = '';
         if (tieneVinoEspecial) {
-            config.vinoImagenOptions.forEach(opt => {
-                const isActive = opt.isDefault;
+            imagenesVino.forEach(({ cual, etiqueta }) => {
+                const isActive = vinoImagenDefaultCon;
                 const style = `cursor: pointer; color: ${isActive ? '#0d5c63' : '#64748b'}; font-weight: ${isActive ? 'bold' : 'normal'};`;
-                vinoImagenButtonsHtml += `<label style="${style}"><input type="radio" name="${config.vinoImagenRadioName}" value="${opt.value}" ${isActive ? 'checked' : ''} onchange="window.toggleVinoImagen('${opt.value}', '${modoSeguro}')"> ${opt.label}</label>`;
+                vinoImagenButtonsHtml += `<label style="${style}"><input type="checkbox" ${isActive ? 'checked' : ''} onchange="this.parentNode.style.fontWeight=this.checked?'bold':'normal';this.parentNode.style.color=this.checked?'#0d5c63':'#64748b';window.toggleVinoImagen('${cual}', this.checked, '${modoSeguro}')"> ${etiqueta}</label>`;
             });
             VINO_IMAGEN_ESCALAS.forEach((escala, idx) => {
                 const isActive = escala === VINO_IMAGEN_ESCALA_DEFAULT; // MODIFICADO: 1.2x por defecto (antes 1.4x)
@@ -944,7 +994,7 @@
                     <button onclick="window.imprimirSugerencias('${modoSeguro}')" class="btn-imprimir-a4" style="margin-bottom:0; flex:1;">🖨️ Imprimir Sugerencias ${getModoAlias(modoSeguro)} (A4)</button>
                     <button type="button" onclick="window.reajustarVistaPreviaSugerencias('${modoSeguro}')" title="Vuelve a calcular el ajuste a una página, por si algo no se ha actualizado solo" style="flex:0 0 auto; padding:12px 14px; background:#e2e8f0; color:#334155; border:none; border-radius:8px; font-weight:700; font-size:0.9rem; cursor:pointer;">🔄</button>
                 </div>
-                ${(vinoImagenButtonsHtml || vinoImagenEscalaHtml) ? `<div class="qr-selector-wrapper" style="font-size: 0.75rem; color: #64748b; text-align: center; margin-bottom: 3px; user-select:none; display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 8px; white-space: nowrap;">${vinoImagenButtonsHtml ? `<span class="vino-imagen-selector-wrapper" style="display:flex; align-items:center; gap:8px; padding-right:10px; border-right:1px solid #cbd5e1;">Imagen Vino: ${vinoImagenButtonsHtml}</span>` : ''}${vinoImagenEscalaHtml ? `<span class="vino-imagen-selector-wrapper" style="display:flex; align-items:center; gap:6px;">Tamaño: ${vinoImagenEscalaHtml}</span>` : ''}</div>` : ''}
+                ${(vinoImagenButtonsHtml || vinoImagenEscalaHtml) ? `<div class="qr-selector-wrapper" style="font-size: 0.75rem; color: #64748b; text-align: center; margin-bottom: 3px; user-select:none; display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 8px; white-space: nowrap;">${vinoImagenButtonsHtml ? `<span class="vino-imagen-selector-wrapper" style="display:flex; align-items:center; gap:8px; padding-right:10px; border-right:1px solid #cbd5e1;">Imágenes: ${vinoImagenButtonsHtml}</span>` : ''}${vinoImagenEscalaHtml ? `<span class="vino-imagen-selector-wrapper" style="display:flex; align-items:center; gap:6px;">Tamaño: ${vinoImagenEscalaHtml}</span>` : ''}</div>` : ''}
                 <div class="qr-selector-wrapper" style="font-size: 0.75rem; color: #64748b; text-align: center; margin-bottom: 0; user-select:none; display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 8px; white-space: nowrap;">Tipo de QR: ${qrButtonsHtml}</div>
                 ${selectorQuitarHtml}
                 ${listaQuitadosHtml}
@@ -980,33 +1030,11 @@
         });
     }
 
-    window.imprimirSugerencias = function(modo) {
-        const config = SUGERENCIAS_CONFIG[modo];
-        if (!config) return;
-        const contenedor = document.getElementById(config.containerId);
-        if (!contenedor) return;
-        // MODIFICADO: contenedor ya no ES la hoja — ahora también incluye debajo el box de
-        // controles (botón imprimir, opciones). Se busca el div.sugerencias-panel real dentro,
-        // que es exactamente lo único que debe imprimirse.
-        const panelReal = contenedor.querySelector('.sugerencias-panel');
-        if (!panelReal) return;
-        const styleContent = document.getElementById('sugerencias-print-styles').innerHTML;
-        const pWin = window.open('', '_blank', 'width=800,height=1000');
-
-        // MODIFICADO: el aviso ya no depende de window.opener (poco fiable: bloqueadores de
-        // popups, o que el admin corra embebido en un iframe de Apps Script pueden romper esa
-        // comunicación en silencio, sin error visible). Ahora el aviso se muestra DENTRO de esta
-        // misma ventana de impresión, antes de imprimir, con las medidas reales en mm para poder
-        // depurar si algo se quita sin hacer falta.
-        // MODIFICADO: el algoritmo de ajuste ya NO está duplicado aquí a mano — se serializan con
-        // .toString() las mismas funciones que usa la vista previa en pantalla (definidas arriba,
-        // ajustarAUnaPagina / repartirEspacioSobrante y sus auxiliares), para que solo exista UNA
-        // copia del cálculo y no puedan divergir con el tiempo. Sigue sin depender de window.opener
-        // por el mismo motivo de siempre: esta ventana es un documento JS completamente aparte. El
-        // panel que se copia (panelReal.outerHTML, más abajo) ya llega con el ajuste de la vista
-        // previa aplicado; aquí se resetea (limpiarAjustePrevio, al principio de ajustarAUnaPagina)
-        // y se recalcula desde cero por si la fuente o el layout rinden distinto en la ventana nueva.
-        const scriptAjuste = `
+    // NUEVO (30 oct): el script de ajuste que se inyecta en la ventana de impresión pasa a
+    // construirse en una función propia, para poder reutilizarlo tal cual desde la hoja de
+    // Postres (postres-print.js) sin duplicar el motor de ajuste a una página A4.
+    function construirScriptImpresion() {
+        return `
             var SELECTOR_IMAGENES_CON_REINTENTO = ${JSON.stringify(SELECTOR_IMAGENES_CON_REINTENTO)};
             var MAX_REINTENTOS_IMG = ${MAX_REINTENTOS_IMG};
             var RETRASO_REINTENTO_IMG_MS = ${RETRASO_REINTENTO_IMG_MS};
@@ -1067,8 +1095,48 @@
                 }
             });
         `;
+    }
+
+    window.imprimirSugerencias = function(modo) {
+        const config = SUGERENCIAS_CONFIG[modo];
+        if (!config) return;
+        const contenedor = document.getElementById(config.containerId);
+        if (!contenedor) return;
+        // MODIFICADO: contenedor ya no ES la hoja — ahora también incluye debajo el box de
+        // controles (botón imprimir, opciones). Se busca el div.sugerencias-panel real dentro,
+        // que es exactamente lo único que debe imprimirse.
+        const panelReal = contenedor.querySelector('.sugerencias-panel');
+        if (!panelReal) return;
+        const styleContent = document.getElementById('sugerencias-print-styles').innerHTML;
+        const pWin = window.open('', '_blank', 'width=800,height=1000');
+
+        // MODIFICADO: el aviso ya no depende de window.opener (poco fiable: bloqueadores de
+        // popups, o que el admin corra embebido en un iframe de Apps Script pueden romper esa
+        // comunicación en silencio, sin error visible). Ahora el aviso se muestra DENTRO de esta
+        // misma ventana de impresión, antes de imprimir, con las medidas reales en mm para poder
+        // depurar si algo se quita sin hacer falta.
+        // MODIFICADO: el algoritmo de ajuste ya NO está duplicado aquí a mano — se serializan con
+        // .toString() las mismas funciones que usa la vista previa en pantalla (definidas arriba,
+        // ajustarAUnaPagina / repartirEspacioSobrante y sus auxiliares), para que solo exista UNA
+        // copia del cálculo y no puedan divergir con el tiempo. Sigue sin depender de window.opener
+        // por el mismo motivo de siempre: esta ventana es un documento JS completamente aparte. El
+        // panel que se copia (panelReal.outerHTML, más abajo) ya llega con el ajuste de la vista
+        // previa aplicado; aquí se resetea (limpiarAjustePrevio, al principio de ajustarAUnaPagina)
+        // y se recalcula desde cero por si la fuente o el layout rinden distinto en la ventana nueva.
+        const scriptAjuste = construirScriptImpresion();
 
         pWin.document.write(`<html><head><title>Sugerencias ${getModoAlias(modo)}</title><style>${styleContent}@media print { #sugerencias-aviso-ajuste { display: none !important; } }</style></head><body>${panelReal.outerHTML}<script>${scriptAjuste}<\/script></body></html>`);
         pWin.document.close();
+    };
+    // NUEVO (30 oct): motor de ajuste A4 expuesto para la hoja de Postres (postres-print.js),
+    // que reutiliza las mismas clases .sugerencias-* y el mismo cálculo — una sola copia.
+    window.MotorA4Sugerencias = {
+        ajustarYRepartir: ajustarYRepartir,
+        mostrarAvisoInline: mostrarAvisoInline,
+        posicionarDebugA4: posicionarDebugA4,
+        construirScriptImpresion: construirScriptImpresion,
+        VINO_IMAGEN_BASE_MAX_HEIGHT: VINO_IMAGEN_BASE_MAX_HEIGHT,
+        QR_IMAGEN_BASE_SIZE: QR_IMAGEN_BASE_SIZE,
+        VINO_IMAGEN_ESCALAS: VINO_IMAGEN_ESCALAS
     };
 })();

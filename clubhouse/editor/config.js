@@ -1,7 +1,7 @@
 // --- config.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.config = '2.3.0'; // NUEVO: PASSWORD_ELIMINAR_PLATO — contraseña que pide el editor antes de borrar un plato de verdad
+window.APP_VERSIONS.config = '2.4.0'; // 3 nov: hoja de Postres (7001-7099) y Menús Especiales sin hoja. 2.3.0: NUEVO: PASSWORD_ELIMINAR_PLATO — contraseña que pide el editor antes de borrar un plato de verdad
 
 // =====================================================================
 // NUEVO: SISTEMA DE ENABLE/DISABLE DE RESTAURANTES (Desacoplamiento Visual)
@@ -188,6 +188,40 @@ const VINO_IMAGEN_ESCALA_DEFAULT = 1.2;
 // permitidos: 'none' (Sin QR), 'default' (Oficial), 'mod' (Alternativo).
 const QR_TIPO_DEFAULT_RESTAURANTE001 = 'none';
 const QR_TIPO_DEFAULT_RESTAURANTE002 = 'none';
+// Hoja de Sugerencias (mismo sugerencias-print.js que el editor v3): Club House no tiene
+// aperitivo con foto fija (en RG/US Open es la Canonita, 12993). null = ninguno.
+const APERITIVO_CANONITA_ID = null;
+const APERITIVO_IMAGEN_CANONITA = '';
+
+// =====================================================================
+// NUEVO (3 nov): HOJA IMPRIMIBLE DE POSTRES (pestaña "2.1. Postres")
+// =====================================================================
+// Club House usa los Postres de su carta (7001-7099), los mismos de la web pública: sin
+// bloque de helados ni de bebidas. Con la estructura de datos.json manda la categoría que
+// lleve "hojaPostres": true (categorias.js); esto es solo la reserva.
+const POSTRES_HOJA_RANGOS = { postres: [7001, 7099], helados: null, bebidas: null };
+const POSTRES_SECCION_TITULO = 'NUESTROS POSTRES / OUR DESSERTS';
+const POSTRES_HELADOS_TITULO_ES = '';
+const POSTRES_HELADOS_TITULO_EN = '';
+const POSTRES_HELADOS_SUBTITULO_ES = '';
+const POSTRES_HELADOS_SUBTITULO_EN = '';
+const POSTRES_HELADO_IMAGEN = '';
+const POSTRES_HELADO_IMAGEN_DEFAULT = false;
+const POSTRES_HELADO_ALTURA = 64;
+const POSTRES_BEBIDAS_IMAGENES = {};
+const POSTRES_BEBIDAS_IMAGEN_DEFAULT = true;
+const POSTRES_BEBIDAS_ALTURA = 110;
+const POSTRES_QR_TIPO_DEFAULT_RESTAURANTE001 = 'none';
+const POSTRES_QR_TIPO_DEFAULT_RESTAURANTE002 = 'none';
+
+// =====================================================================
+// NUEVO (3 nov): MENÚS ESPECIALES (pestaña "6. Menú Especial")
+// =====================================================================
+// Club House no tiene hoja de Menús Especiales: almacen-json.js guarda sus menús y "Mis
+// Platos" en menus-especiales.json (junto a datos.json) y, al no ser una URL http, empieza
+// vacío sin copiar nada. Es solo la "dirección" que intercepta almacen-json.js.
+const WEBAPP_URL_MENUS_ESPECIALES = 'sin-hoja://menus-especiales-clubhouse';
+window.WEBAPP_URL_MENUS_ESPECIALES = WEBAPP_URL_MENUS_ESPECIALES;
 
 
 // =====================================================================

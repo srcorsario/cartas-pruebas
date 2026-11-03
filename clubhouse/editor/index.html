@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow">
-    <script src="sitio-editor.js?v=fd8e3d04"></script>
-    <script src="categorias.js?v=fd8e3d04"></script>
-    <script src="acceso.js?v=fd8e3d04"></script>
-    <script src="subir-foto.js?v=fd8e3d04"></script>
-    <script src="editor-web.js?v=fd8e3d04"></script>
-    <script src="mapa-ids.js?v=fd8e3d04"></script>
+    <script src="sitio-editor.js?v=e0bcc0e0"></script>
+    <script src="categorias.js?v=e0bcc0e0"></script>
+    <script src="acceso.js?v=e0bcc0e0"></script>
+    <script src="subir-foto.js?v=e0bcc0e0"></script>
+    <script src="editor-web.js?v=e0bcc0e0"></script>
+    <script src="mapa-ids.js?v=e0bcc0e0"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Editor Pro - Club House</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -26,7 +26,7 @@
         // todo el JS/CSS de golpe en cada visita.
         // OJO: esto NO afecta a los datos del menu (platos/precios) — esos se piden
         // siempre en fresco con cache:"no-store" en app.js, y eso no cambia.
-        window.__CACHE_BUST__ = '2026.11.03.1-fd8e3d04';
+        window.__CACHE_BUST__ = '2026.11.03.2-e0bcc0e0';
     </script>
     <script>document.write('<link rel="stylesheet" href="styles.css?v=' + window.__CACHE_BUST__ + '">');</script>
 </head>
@@ -55,8 +55,13 @@
             <button id="tab-btn-apikeys" class="tab-btn" onclick="switchTab('apikeys', this)">0. Gestión de API Keys Gemini</button>
             <button id="tab-btn-rg" class="tab-btn active" onclick="switchTab('editor', this)">1. Editor Carta RG</button>
             <button id="tab-btn-sug-rg" class="tab-btn" onclick="switchTab('sugerencias', this)">2. Sugerencias RG</button>
+            <!-- NUEVO (3 nov, igual que el editor v3): hoja imprimible de Postres (los Postres de la carta) -->
+            <button id="tab-btn-pos-rg" class="tab-btn" onclick="switchTab('postres', this)">2.1. Postres</button>
             <button id="tab-btn-pro" class="tab-btn" onclick="switchTab('pro', this)" style="margin-left: auto; margin-right: auto;">3. Traductor Pro</button>
             <button id="tab-btn-qa" class="tab-btn" onclick="switchTab('qa', this)">3.1. Preguntas y respuestas</button>
+            <!-- NUEVO (3 nov, igual que el editor v3): plantillas de menú de evento (menu-especial.js),
+                 guardadas en menus-especiales.json junto a datos.json (almacen-json.js). -->
+            <button id="tab-btn-menu-especial" class="tab-btn" onclick="switchTab('menu-especial', this)">6. Menú Especial</button>
         </div>
 
         <div id="tab-apikeys" class="tab-content" style="display: none;">
@@ -161,6 +166,16 @@
 
         <div id="tab-sugerencias" class="tab-content" style="display: none;">
             <div id="sugerencias-contenido"></div>
+        </div>
+
+        <!-- NUEVO (3 nov): hoja de Postres, la construye postres-print.js -->
+        <div id="tab-postres" class="tab-content" style="display: none;">
+            <div id="postres-contenido"></div>
+        </div>
+
+        <!-- NUEVO (3 nov): "6. Menú Especial", lo construye menu-especial.js -->
+        <div id="tab-menu-especial" class="tab-content" style="display: none;">
+            <div id="menu-especial-contenido"></div>
         </div>
 
         <button class="btn-add-float" onclick="abrirSelector()">+</button>
@@ -344,6 +359,8 @@
             if (tabRG) tabRG.innerText = `1. Editor Carta ${getModoAlias('restaurante001')}`;
             const tabSugRG = document.getElementById('tab-btn-sug-rg');
             if (tabSugRG) tabSugRG.innerText = `2. Sugerencias ${getModoAlias('restaurante001')}`;
+            const tabPosRG = document.getElementById('tab-btn-pos-rg');
+            if (tabPosRG) tabPosRG.innerText = `2.1. Postres ${getModoAlias('restaurante001')}`;
 
             const modalDestRG = document.getElementById('modal-dest-rg');
             if (modalDestRG) modalDestRG.innerText = getModoAlias('restaurante001');
@@ -362,6 +379,7 @@
             if (!RESTAURANTES_CONFIG.restaurante001.enabled) {
                 const t1 = document.getElementById('tab-btn-rg'); if(t1) t1.style.display = 'none';
                 const t2 = document.getElementById('tab-btn-sug-rg'); if(t2) t2.style.display = 'none';
+                const t2b = document.getElementById('tab-btn-pos-rg'); if(t2b) t2b.style.display = 'none';
             }
         }
 
@@ -466,6 +484,8 @@
         document.write('<scr' + 'ipt src="app.js?v=' + __v + '"></scr' + 'ipt>');
         document.write('<scr' + 'ipt type="module" src="ui.js?v=' + __v + '"></scr' + 'ipt>');
         document.write('<scr' + 'ipt src="sugerencias-print.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="postres-print.js?v=' + __v + '"></scr' + 'ipt>');
+        document.write('<scr' + 'ipt src="menu-especial.js?v=' + __v + '"></scr' + 'ipt>');
     </script>
 
     <div id="loading-overlay" class="loading-overlay">
@@ -506,7 +526,8 @@
 
         async function switchTab(tabId, btnElement) {
             const loader = document.getElementById('loading-overlay');
-            if (loader) loader.style.display = 'flex';
+            // Menú Especial gestiona su propio "Cargando..." (mostrarCargando en menu-especial.js).
+            if (loader && tabId !== 'menu-especial') loader.style.display = 'flex';
 
             try {
                 const esEditorActual = document.getElementById('tab-editor').style.display !== 'none' || document.getElementById('tab-editor').classList.contains('active');
@@ -574,7 +595,8 @@
                 // (primera vez, o la carga anterior falló).
                 const necesitaRecargar = (window.currentMode !== modoAnterior) ||
                     !Array.isArray(window.datosLocales) || window.datosLocales.length === 0;
-                if (necesitaRecargar && typeof window.cargar === 'function') {
+                // Menú Especial carga lo suyo (MenuEspecial.init, con su caché): no recarga la carta.
+                if (tabId !== 'menu-especial' && necesitaRecargar && typeof window.cargar === 'function') {
                     try { await window.cargar(); } catch (e) { console.error("[Editor] Error cargando datos:", e); }
                 }
 
@@ -583,8 +605,14 @@
                     if (typeof window.renderCarta === 'function') window.renderCarta('restaurante001');
                 } else if (tabId === 'sugerencias-usopen') {
                     if (typeof window.renderCarta === 'function') window.renderCarta('restaurante002');
+                } else if (tabId === 'postres') {
+                    if (typeof window.renderHojaPostres === 'function') window.renderHojaPostres('restaurante001');
                 } else if (tabId === 'qa') {
                     if (window.UI && typeof window.UI.renderQA === 'function') window.UI.renderQA();
+                } else if (tabId === 'menu-especial') {
+                    if (window.MenuEspecial && typeof window.MenuEspecial.init === 'function') {
+                        try { await window.MenuEspecial.init(); } catch (e) { console.error('[MenuEspecial] Error al iniciar:', e); }
+                    }
                 }
                 
                 actualizarTextoBotonGuardar();
@@ -617,7 +645,9 @@
                 'tab-btn-rg': 'editor',
                 'tab-btn-sug-rg': 'sugerencias',
                 'tab-btn-pro': 'pro',
-                'tab-btn-qa': 'qa'
+                'tab-btn-qa': 'qa',
+                'tab-btn-pos-rg': 'postres',
+                'tab-btn-menu-especial': 'menu-especial'
             };
             const tabIdInicial = MAPA_ID_A_TABID[tabBtnInicial.id] || 'editor';
             switchTab(tabIdInicial, tabBtnInicial);
