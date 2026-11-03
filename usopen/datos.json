@@ -2,8 +2,9 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T10:49:24.218Z",
+  "guardado": "2026-11-03T11:12:39.113Z",
   "ocultas": ["pizzas"],
+  "idiomas": [],
   "platos": [
     {
         "id": "1", "activa": "no", "precio": "0.00", "precioMedia": "",
