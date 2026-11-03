@@ -27,7 +27,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.categorias = '1.1.0'; // 3 nov: "hojaPostres": true en una categoría normal (Club House: la hoja sale de sus Postres). 1.0.0: Fase 1 del organizador — estructura en datos.json
+    window.APP_VERSIONS.categorias = '1.2.0'; // 3 nov: gruposSugerencias() (secciones de la hoja de Sugerencias). 1.1.0: 3 nov: "hojaPostres": true en una categoría normal (Club House: la hoja sale de sus Postres). 1.0.0: Fase 1 del organizador — estructura en datos.json
 
     let est = null;
     const num = (x) => parseInt(x, 10);
@@ -111,9 +111,15 @@
         return g && g.rangos && g.rangos.length ? g.rangos[0].slice() : null;
     }
 
+    // Grupos de la pestaña Sugerencias de la web = secciones de la hoja imprimible (en su orden).
+    function gruposSugerencias() {
+        const p = pestanaDeSugerencias();
+        return p && Array.isArray(p.grupos) && p.grupos.length ? JSON.parse(JSON.stringify(p.grupos)) : null;
+    }
+
     window.Categorias = {
         cargar, activa, estructura, categoriaDe, subDe, estructuraEditor,
         esVino, tipoVino, esCopa, esCroqueta, esCroquetaVeg, imagenInicial,
-        rangosHojaPostres, rangoSugerencias, rangoVinosSugerencias
+        rangosHojaPostres, rangoSugerencias, rangoVinosSugerencias, gruposSugerencias
     };
 })();
