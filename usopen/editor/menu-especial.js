@@ -1254,7 +1254,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
             try {
                 const resultado = await revisarOrtografiaManual(valor);
                 if (resultado.hayError && typeof mostrarCorreccionOrtografiaEN === 'function') {
-                    const corregido = await mostrarCorreccionOrtografiaEN(resultado.texto);
+                    const corregido = await mostrarCorreccionOrtografiaEN(resultado.texto, valor);
                     if (corregido) valor = corregido;
                 }
             } finally {
@@ -1335,7 +1335,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
             try {
                 const resultado = await revisarOrtografiaManual(valorEs);
                 if (resultado.hayError && typeof mostrarCorreccionOrtografiaEN === 'function') {
-                    const corregido = await mostrarCorreccionOrtografiaEN(resultado.texto);
+                    const corregido = await mostrarCorreccionOrtografiaEN(resultado.texto, valorEs);
                     if (corregido) valorEs = corregido;
                 }
             } finally {
@@ -1448,7 +1448,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
 
         if (exito) {
             if (correccionDetectada && typeof mostrarCorreccionOrtografiaEN === 'function') {
-                const corregido = await mostrarCorreccionOrtografiaEN(correccionDetectada.texto);
+                const corregido = await mostrarCorreccionOrtografiaEN(correccionDetectada.texto, inputEs.value);
                 if (corregido) inputEs.value = corregido;
             }
             inputEn.value = formatearTituloInteligente(traduccion);
