@@ -1457,9 +1457,9 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
         }
     }
 
-    function nuevoMenu() {
+    async function nuevoMenu() {
         if (menuActual && (menuActual.nombre || algunaSeccionConPlatos(menuActual)) &&
-            !confirm('¿Empezar un menú nuevo? Se perderá cualquier cambio sin guardar del que estás editando ahora.')) return;
+            !(window.confirmarEditor ? await window.confirmarEditor('¿Empezar un menú nuevo? Se perderá cualquier cambio sin guardar del que estás editando ahora.') : confirm('¿Empezar un menú nuevo? Se perderá cualquier cambio sin guardar del que estás editando ahora.'))) return;
         menuActual = nuevoMenuVacio();
         renderFormulario();
         renderSidebarLista();
@@ -1519,7 +1519,7 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
     async function eliminarMenu(id) {
         const m = buscarMenuPorId(id);
         const nombre = nombreVisible(m);
-        if (!confirm(`¿Seguro que quieres borrar el menú "${nombre}"? Esta acción no se puede deshacer.`)) return;
+        if (!(window.confirmarEditor ? await window.confirmarEditor(`¿Seguro que quieres borrar el menú "${nombre}"? Esta acción no se puede deshacer.`) : confirm(`¿Seguro que quieres borrar el menú "${nombre}"? Esta acción no se puede deshacer.`))) return;
         mostrarCargando(true, '🗑️ Borrando menú...');
         try {
             await eliminarMenuEnServidor(id);
@@ -1643,10 +1643,10 @@ window.APP_VERSIONS.menuEspecial = '1.25.0'; // NUEVO (27 sept): la impresión y
         </div></div>`;
     }
 
-    function imprimir(menu) {
+    async function imprimir(menu) {
         if (!menu) return;
         if (!menu.nombre && !algunaSeccionConPlatos(menu)) {
-            if (!confirm('El menú está vacío y sin nombre. ¿Imprimir igualmente?')) return;
+            if (!(window.confirmarEditor ? await window.confirmarEditor('El menú está vacío y sin nombre. ¿Imprimir igualmente?') : confirm('El menú está vacío y sin nombre. ¿Imprimir igualmente?'))) return;
         }
         const menuHtml = construirHtmlMenuImpreso(menu);
         // ALTO_DISPONIBLE_MM = 210mm (A4 horizontal) - 2×6mm de margen VERTICAL de @page = 198mm
