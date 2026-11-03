@@ -91,7 +91,9 @@
         var f = document.createElement('div');
         f.id = 'aviso-ed';
         f.innerHTML = '<div class="caja" role="dialog" aria-modal="true"><div class="txt"></div><div class="bts">' +
-            (a.confirmar ? '<button type="button" class="no">Cancelar</button>' : '') + '<button type="button" class="ok">Aceptar</button></div></div>';
+            (a.confirmar ? '<button type="button" class="no"></button>' : '') + '<button type="button" class="ok"></button></div></div>';
+        f.querySelector('.ok').textContent = (a.op && a.op.si) || 'Aceptar';
+        if (a.confirmar) f.querySelector('.no').textContent = (a.op && a.op.no) || 'Cancelar';
         f.querySelector('.txt').textContent = String(a.texto == null ? '' : a.texto);
         var cerrar = function (v) { document.removeEventListener('keydown', tecla, true); f.remove(); abierto = false; a.fin(v); setTimeout(siguiente, 0); };
         var tecla = function (e) {
@@ -104,12 +106,13 @@
         document.body.appendChild(f);
         f.querySelector('.ok').focus();
     }
-    function encolar(texto, confirmar) {
+    function encolar(texto, confirmar, op) {
         return new Promise(function (fin) {
-            cola.push({ texto: texto, confirmar: confirmar, fin: fin });
+            cola.push({ texto: texto, confirmar: confirmar, op: op || null, fin: fin });
             if (document.body) siguiente(); else document.addEventListener('DOMContentLoaded', siguiente);
         });
     }
     window.alert = function (texto) { encolar(texto, false); };
-    window.confirmarEditor = function (texto) { return encolar(texto, true); };
+    // op opcional: { si: 'texto botón Aceptar', no: 'texto botón Cancelar' }
+    window.confirmarEditor = function (texto, op) { return encolar(texto, true, op); };
 })();
