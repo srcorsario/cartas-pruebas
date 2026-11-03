@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "guardado": "2026-11-03T19:46:06.831Z",
+  "guardado": "2026-11-03T20:19:29.541Z",
   "ocultas": [],
   "idiomas": [],
   "estructura": {
@@ -11,7 +11,7 @@
       {"nombre":"Sugerencias","desde":12100,"hasta":13099,"pestana":"12","subAcordeon":true,"tipo":"sugerencias","sub":[{"nombre":"Croquetas","desde":12100,"hasta":12199,"carpeta":"entrantes","tipo":"croquetas","imagen":"croquetas01.webp"},{"nombre":"Croquetas Veg.","desde":12200,"hasta":12299,"carpeta":"entrantes","tipo":"croquetas-veg","imagen":"croquetasvegetarianas01.webp"},{"nombre":"Entrantes","desde":12300,"hasta":12399,"carpeta":"entrantes"},{"nombre":"Pasta","desde":12400,"hasta":12499,"carpeta":"pasta"},{"nombre":"Arroz","desde":12500,"hasta":12599,"carpeta":"arroz"},{"nombre":"Pescado","desde":12700,"hasta":12799,"carpeta":"pescado"},{"nombre":"Carne","desde":12800,"hasta":12899,"carpeta":"carne"},{"nombre":"Postres","desde":12900,"hasta":12989,"carpeta":"postres"},{"nombre":"Vino","desde":12990,"hasta":12999,"carpeta":"vinos","tipo":"vino"}]},
       {"nombre":"1- Entrantes","desde":1000,"hasta":1999,"pestana":"1","sub":[{"nombre":"Entrantes","desde":1000,"hasta":1099,"carpeta":"entrantes"},{"nombre":"Pan","desde":1100,"hasta":1199,"carpeta":"entrantes"}]},
       {"nombre":"2- Ensaladas","desde":2000,"hasta":2999,"pestana":"2","sub":[{"nombre":"Clasicas","desde":2000,"hasta":2099,"carpeta":"ensaladas"},{"nombre":"Pokes","desde":2100,"hasta":2199,"carpeta":"ensaladas"},{"nombre":"Otras","desde":2200,"hasta":2299,"carpeta":"ensaladas"}]},
-      {"nombre":"Platos veganos","desde":14501,"hasta":14599,"pestana":"platos_veganos","carpeta":"platos_veganos"},
+      {"nombre":"Platos veganos","desde":14501,"hasta":14599,"pestana":"platos_veganos","carpeta":"platos_veganos","sub":[{"nombre":"Platos veganos","desde":14501,"hasta":14549,"carpeta":"platos_veganos"},{"nombre":"Platos frios","desde":14550,"hasta":14569,"carpeta":"platos_frios"}]},
       {"nombre":"3- Arroz y Pasta","desde":3000,"hasta":3999,"pestana":"3","sub":[{"nombre":"Risotto","desde":3000,"hasta":3099,"carpeta":"arroz"},{"nombre":"Arroz","desde":3100,"hasta":3199,"carpeta":"arroz"},{"nombre":"Fideuá","desde":3200,"hasta":3299,"carpeta":"pasta"},{"nombre":"Pasta","desde":3300,"hasta":3399,"carpeta":"pasta"}]},
       {"nombre":"4- Recetas","desde":4000,"hasta":4999,"pestana":"4","sub":[{"nombre":"Pescado","desde":4000,"hasta":4099,"carpeta":"pescado"},{"nombre":"Carne","desde":4100,"hasta":4199,"carpeta":"carne"}]},
       {"nombre":"5- Platos principales","desde":5000,"hasta":5999,"pestana":"5","sub":[{"nombre":"Pescado","desde":5000,"hasta":5099,"carpeta":"pescado"},{"nombre":"Carne","desde":5100,"hasta":5199,"carpeta":"carne"}]},
