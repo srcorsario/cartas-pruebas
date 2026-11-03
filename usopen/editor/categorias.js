@@ -14,6 +14,8 @@
 //   "categorias": [            el acordeón del editor, en su orden
 //     { "nombre", "desde", "hasta", "pestana" (id en la web o null), "carpeta" (si no hay sub),
 //       "subAcordeon", "sinPlatos",
+//       "hojaPostres": true  (categoría normal que también es la hoja de Postres imprimible; sin
+//                         helados ni bebidas. Si hay una "hoja-postres" con sub, manda esa.)
 //       "tipo": "sugerencias" | "vino" | "bebida" | "alergenos" | "hoja-postres",
 //       "vino": "blanco" | "rosado" | "tinto" | "cava",
 //       "sub": [ { "nombre", "desde", "hasta", "carpeta",
@@ -25,7 +27,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.categorias = '1.0.0'; // 3 nov: Fase 1 del organizador — estructura en datos.json
+    window.APP_VERSIONS.categorias = '1.1.0'; // 3 nov: "hojaPostres": true en una categoría normal (Club House: la hoja sale de sus Postres). 1.0.0: Fase 1 del organizador — estructura en datos.json
 
     let est = null;
     const num = (x) => parseInt(x, 10);
@@ -79,10 +81,16 @@
 
     function rangosHojaPostres() {
         const c = conTipo('hoja-postres')[0];
-        if (!c || !c.sub) return null;
+        if (!c || !c.sub) return hojaPostresSimple();
         const r = {};
         c.sub.forEach(s => { if (s.tipo && !r[s.tipo]) r[s.tipo] = [s.desde, s.hasta]; });
-        return (r.postres && r.helados && r.bebidas) ? r : null;
+        if (r.postres && r.helados && r.bebidas) return r;
+        return hojaPostresSimple();
+    }
+    // Hoja de Postres hecha con una categoría normal de la carta ("hojaPostres": true).
+    function hojaPostresSimple() {
+        const c = est && est.categorias.find(x => x.hojaPostres);
+        return c ? { postres: [c.desde, c.hasta], helados: null, bebidas: null } : null;
     }
     function pestanaDeSugerencias() {
         const c = conTipo('sugerencias')[0];

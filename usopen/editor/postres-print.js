@@ -12,11 +12,13 @@
     'use strict';
 
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.postres_print = '1.8.5'; // 3 nov: rangos desde datos.json (categorias.js). 1.8.4: marco con más aire lateral. 1.8.3: sabor con descripción: ES+descripción en 1ª línea, inglés debajo. 1.8.2: descripción //..// también en sabores de helado. 1.8.1: pantalla = impresión (neutraliza styles.css), hoja centrada con márgenes "Ninguno". 1.8.0: puntitos a todo el ancho en helados, tarro centrado con los sabores, sin "Todos / All", logo mayor. 1.7.0: inglés en 1 línea + alérgenos comunes de helados una sola vez. 1.6.1: // botella+copa agrupadas y solapadas. 1.6.0: // varias imágenes por bebida (botella + copa). 1.5.0: // bebidas en una sola línea. 1.4.0: // puntitos desde el nombre ES. 1.3.3: // marco separado de los bordes del A4 // marco de dos hojas superpuestas. 1.2.0: // alérgenos de sabores en línea con el nombre. 1.1.0: // helado más pequeño, escala por botella, alérgenos como el editor
+    window.APP_VERSIONS.postres_print = '1.9.0'; // 3 nov: helados y bebidas opcionales (Club House: solo sus Postres de la carta) + título de la sección en config.js (POSTRES_SECCION_TITULO). 1.8.5: 3 nov: rangos desde datos.json (categorias.js). 1.8.4: marco con más aire lateral. 1.8.3: sabor con descripción: ES+descripción en 1ª línea, inglés debajo. 1.8.2: descripción //..// también en sabores de helado. 1.8.1: pantalla = impresión (neutraliza styles.css), hoja centrada con márgenes "Ninguno". 1.8.0: puntitos a todo el ancho en helados, tarro centrado con los sabores, sin "Todos / All", logo mayor. 1.7.0: inglés en 1 línea + alérgenos comunes de helados una sola vez. 1.6.1: // botella+copa agrupadas y solapadas. 1.6.0: // varias imágenes por bebida (botella + copa). 1.5.0: // bebidas en una sola línea. 1.4.0: // puntitos desde el nombre ES. 1.3.3: // marco separado de los bordes del A4 // marco de dos hojas superpuestas. 1.2.0: // alérgenos de sabores en línea con el nombre. 1.1.0: // helado más pequeño, escala por botella, alérgenos como el editor
 
     // 3 nov: rangos de la categoría "hoja-postres" de datos.json (categorias.js); si no hay, config.js.
     const rangos = () => (window.Categorias && window.Categorias.rangosHojaPostres()) || POSTRES_HOJA_RANGOS;
-    const enRango = (id, r) => id >= r[0] && id <= r[1];
+    // helados / bebidas pueden faltar (null): esa parte de la hoja no sale.
+    const enRango = (id, r) => !!r && id >= r[0] && id <= r[1];
+    const SECCION_TITULO = (typeof POSTRES_SECCION_TITULO === 'string' && POSTRES_SECCION_TITULO) || 'POSTRES / DESSERTS';
 
     const POSTRES_CONFIG = {
         restaurante001: {
@@ -190,8 +192,10 @@
     function procesarYRender(fuente, contenedor, config, modo) {
         aplicarParcheOptimista(fuente, modo);
         const ex = excluidos[modo], est = estado[modo], M = motor();
-        const R = rangos(), ID_MIN = R.postres[0], ID_MAX = R.bebidas[1];
-        const todos = fuente.filter(p => p && p.activa && parseInt(p.id, 10) >= ID_MIN && parseInt(p.id, 10) <= ID_MAX)
+        const R = rangos();
+        const usados = [R.postres, R.helados, R.bebidas].filter(Boolean);
+        const ID_MIN = Math.min(...usados.map(r => r[0])), ID_MAX = Math.max(...usados.map(r => r[1]));
+        const todos = fuente.filter(p => p && p.activa && usados.some(r => enRango(parseInt(p.id, 10), r)))
             .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
         const visibles = todos.filter(p => !ex.has(parseInt(p.id, 10)));
         const postres = visibles.filter(p => enRango(parseInt(p.id, 10), R.postres));
@@ -207,7 +211,7 @@
             </div><div class="sugerencias-body">`;
 
         if (postres.length) {
-            html += `<div class="sugerencias-seccion"><div class="sugerencias-seccion-titulo">POSTRES / DESSERTS</div>${postres.map(filaPlato).join('')}</div>`;
+            html += `<div class="sugerencias-seccion"><div class="sugerencias-seccion-titulo">${SECCION_TITULO}</div>${postres.map(filaPlato).join('')}</div>`;
         }
 
         // --- Bloque único de helados: un precio + los sabores activos + foto del tarro ---
@@ -251,7 +255,7 @@
         // Admite 'ruta.webp' o { src, escala } (escala relativa a la altura base: 0.75 = 3/4)
         // Admite 'ruta.webp', { src, escala } o una LISTA de ellos (p. ej. botella + copa).
         const norm = (v) => typeof v === 'string' ? { src: v, escala: 1 } : { src: v.src, escala: v.escala || 1 };
-        const imgDe = (id) => { const v = POSTRES_BEBIDAS_IMAGENES[id]; return !v ? null : (Array.isArray(v) ? v.map(norm) : [norm(v)]); };
+        const imgDe = (id) => { const v = (typeof POSTRES_BEBIDAS_IMAGENES === 'object' && POSTRES_BEBIDAS_IMAGENES) ? POSTRES_BEBIDAS_IMAGENES[id] : null; return !v ? null : (Array.isArray(v) ? v.map(norm) : [norm(v)]); };
         const conImagen = bebidas.filter(p => imgDe(parseInt(p.id, 10)));
         const imgVisible = (id) => est.bebidasImg[id] !== undefined ? est.bebidasImg[id] : POSTRES_BEBIDAS_IMAGEN_DEFAULT;
         const qrHtml = `<img src="${qrSrc}" class="sugerencias-qr-img" id="${config.qrImgId}" style="width:${qrTam}px !important; height:${qrTam}px !important; display:${qrOculto ? 'none' : ''};">`;
@@ -290,7 +294,7 @@
                 <button type="button" onclick="window.restaurarTodosPostres('${modo}')" style="margin-top:6px; font-size:0.7rem; color:#64748b; background:none; border:none; text-decoration:underline; cursor:pointer;">Restaurar todos</button></div>` : '';
 
         const vacio = todos.length === 0
-            ? `<div style="margin-bottom:10px; font-size:0.8rem; color:#92400e; text-align:center;">No hay ningún elemento activo en el rango ${ID_MIN}-${ID_MAX}. Actívalos en el Editor de Carta ("Hoja Postres").</div>` : '';
+            ? `<div style="margin-bottom:10px; font-size:0.8rem; color:#92400e; text-align:center;">No hay ningún elemento activo en el rango ${ID_MIN}-${ID_MAX}. Actívalos en el Editor de Carta.</div>` : '';
 
         const controles = `<div class="sugerencias-controles-box">${vacio}
                 <div style="display:flex; gap:8px; margin-bottom:15px;">
