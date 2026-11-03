@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.9.0'; // 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.9.1'; // 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -607,7 +607,7 @@
         // 1ª vez: se parte de lo que haya en la hoja de Menús Especiales (solo lectura).
         const datos = { menus: [], platosManuales: [] };
         const u = urlMenus();
-        if (u) {
+        if (/^https?:/i.test(u)) {   // sin hoja propia (p. ej. Club House): empieza vacío
             try {
                 const [m, p] = await Promise.all([
                     fetchOriginal(u + '?accion=listarMenus&zx=' + Date.now(), { cache: 'no-store' }).then(x => x.json()),
