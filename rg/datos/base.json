@@ -215,6 +215,7 @@
 {"id":"13404","activa":"si","precio":"97.00","precioMedia":"","carpeta":"vinos","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"5ab7e288b684"},
 {"id":"13450","activa":"si","precio":"4.80","precioMedia":"","carpeta":"vinos","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"3d39fdcbd997"},
 {"id":"14501","activa":"si","precio":"1.00","precioMedia":"","carpeta":"platos_veganos","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"65c0aa0ef8a4"},
+{"id":"14550","activa":"si","precio":"0.00","precioMedia":"","carpeta":"platos_frios","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"9364c4f43301"},
 {"id":"16000","activa":"si","precio":"8.00","precioMedia":"","carpeta":"postres","archivo":"tennisball01.webp","alergenos":["FRUTOSCASCARA","CACAHUETE","SOJA","HUEVO","SESAMO","MOSTAZA","GLUTEN","LACTOSA","VEGETARIANO"],"opcionesInactivas":[],"h":"96c6d08e46cc"},
 {"id":"16001","activa":"si","precio":"8.00","precioMedia":"","carpeta":"postres","archivo":"pistacho01.webp","alergenos":["FRUTOSCASCARA","CACAHUETE","SOJA","HUEVO","SESAMO","MOSTAZA","GLUTEN","LACTOSA","VEGETARIANO"],"opcionesInactivas":[],"h":"84e155c51336"},
 {"id":"16002","activa":"si","precio":"8.00","precioMedia":"","carpeta":"postres","archivo":"tartaqueso01.webp","alergenos":["FRUTOSCASCARA","CACAHUETE","SOJA","HUEVO","SESAMO","MOSTAZA","GLUTEN","LACTOSA","VEGETARIANO"],"opcionesInactivas":[],"h":"8753a2777cbe"},
