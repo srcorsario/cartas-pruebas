@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T10:08:43.027Z",
+  "guardado": "2026-11-03T10:09:09.040Z",
   "ocultas": ["pizzas"],
   "platos": [
     {
@@ -6099,7 +6099,31 @@
         "info": {
             "ES": "{\"desc\":\"Ensalada elaborada a base de canónigos y tomate.\",\"q1\":\"¿Qué son los canónigos?\",\"r1\":\"Son una hortaliza de hoja verde pequeña y tierna que se consume cruda.\",\"q2\":\"¿Cuáles son los ingredientes de este plato?\",\"r2\":\"Los ingredientes indicados en la carta son canónigos y tomate.\"}",
             "EN": "{\"desc\":\"Salad made with lamb's lettuce and tomato.\",\"q1\":\"What is lamb's lettuce?\",\"r1\":\"It is a small, tender green leafy vegetable commonly eaten raw.\",\"q2\":\"What are the ingredients in this dish?\",\"r2\":\"The ingredients listed on the menu are lamb's lettuce and tomato.\"}",
-            "HASH_FICHA": "19c1d39f"
+            "HASH_FICHA": "19c1d39f",
+            "DE": "{\"desc\":\"Salat aus Feldsalat und Tomaten.\",\"q1\":\"Was ist Feldsalat?\",\"r1\":\"Es ist ein kleines, zartes grünes Blattgemüse, das roh verzehrt wird.\",\"q2\":\"Welche Zutaten hat dieses Gericht?\",\"r2\":\"Die auf der Karte angegebenen Zutaten sind Feldsalat und Tomaten.\"}",
+            "FR": "{\"desc\":\"Salade à base de mâche et de tomate.\",\"q1\":\"Qu'est-ce que la mâche ?\",\"r1\":\"C'est un légume feuille vert, petit et tendre, qui se consomme cru.\",\"q2\":\"Quels sont les ingrédients de ce plat ?\",\"r2\":\"Les ingrédients indiqués sur la carte sont la mâche et la tomate.\"}",
+            "IT": "{\"desc\":\"Insalata a base di songino e pomodoro.\",\"q1\":\"Che cos'è il songino?\",\"r1\":\"È un ortaggio a foglia verde piccolo e tenero che si consuma crudo.\",\"q2\":\"Quali sono gli ingredienti di questo piatto?\",\"r2\":\"Gli ingredienti indicati nel menu sono songino e pomodoro.\"}",
+            "RU": "{\"desc\":\"Салат из маш-салата и томатов.\",\"q1\":\"Что такое маш-салат?\",\"r1\":\"Это нежный листовой овощ с небольшими зелеными листьями, который употребляют в сыром виде.\",\"q2\":\"Каковы ингредиенты этого блюда?\",\"r2\":\"Ингредиенты, указанные в меню, — маш-салат и томат.\"}",
+            "NL": "{\"desc\":\"Salade op basis van veldsla en tomaat.\",\"q1\":\"Wat is veldsla?\",\"r1\":\"Het is een kleine, malse groene bladgroente die rauw wordt gegeten.\",\"q2\":\"Wat zijn de ingrediënten van dit gerecht?\",\"r2\":\"De op de menukaart vermelde ingrediënten zijn veldsla en tomaat.\"}",
+            "PL": "{\"desc\":\"Sałatka na bazie roszponki i pomidora.\",\"q1\":\"Czym jest roszponka?\",\"r1\":\"Jest to małe, delikatne zielone warzywo liściaste spożywane na surowo.\",\"q2\":\"Jakie są składniki tego dania?\",\"r2\":\"Składniki podane w menu to roszponka i pomidor.\"}",
+            "SV": "{\"desc\":\"Sallad gjord på vårsallat och tomat.\",\"q1\":\"Vad är vårsallat?\",\"r1\":\"Det är en liten och späd grön bladväxt som äts rå.\",\"q2\":\"Vilka ingredienser ingår i denna rätt?\",\"r2\":\"Ingredienserna som anges på menyn är vårsallat och tomat.\"}",
+            "NO": "{\"desc\":\"Salat laget av vårsalat og tomat.\",\"q1\":\"Hva er vårsalat?\",\"r1\":\"Det er en liten, mør grønn bladgrønnsak som spises rå.\",\"q2\":\"Hva er ingrediensene i denne retten?\",\"r2\":\"Ingrediensene som står på menyen er vårsalat og tomat.\"}",
+            "DA": "{\"desc\":\"Salat lavet med vårsalat og tomat.\",\"q1\":\"Hvad er vårsalat?\",\"r1\":\"Det er en lille, mør grøn bladgrøntsag, som spises rå.\",\"q2\":\"Hvilke ingredienser er der i denne ret?\",\"r2\":\"De ingredienser, der fremgår af menukortet, er vårsalat og tomat.\"}",
+            "FI": "{\"desc\":\"Vuonankaalista ja tomaatista valmistettu salaatti.\",\"q1\":\"Mitä vuonankaali on?\",\"r1\":\"Se on pieni ja murea vihreä lehtivihannes, joka syödään raakana.\",\"q2\":\"Mitkä ovat tämän annoksen ainesosat?\",\"r2\":\"Ruokalistalla ilmoitetut ainesosat ovat vuonankaali ja tomaatti.\"}",
+            "PT": "{\"desc\":\"Salada à base de canónigos e tomate.\",\"q1\":\"O que são canónigos?\",\"r1\":\"São uma hortaliça de folha verde pequena e tenra que se consome crua.\",\"q2\":\"Quais são os ingredientes deste prato?\",\"r2\":\"Os ingredientes indicados na ementa são canónigos e tomate.\"}",
+            "RO": "{\"desc\":\"Salată preparată din fetică și roșie.\",\"q1\":\"Ce este fetica?\",\"r1\":\"Este o legumă cu frunze verzi, mică și fragedă, care se consumă crudă.\",\"q2\":\"Care sunt ingredientele acestui preparat?\",\"r2\":\"Ingredientele menționate în meniu sunt fetica și roșia.\"}",
+            "HU": "{\"desc\":\"Madársalátából és paradicsomból készült saláta.\",\"q1\":\"Mi az a madársaláta?\",\"r1\":\"Egy kis méretű, zsenge zöld leveles zöldség, amelyet nyersen fogyasztanak.\",\"q2\":\"Melyek az étel összetevői?\",\"r2\":\"Az étlapon feltüntetett összetevők a madársaláta és a paradicsom.\"}",
+            "CS": "{\"desc\":\"Salát z polníčku a rajčete.\",\"q1\":\"Co je to polníček?\",\"r1\":\"Je to malá, křehká zelená listová zelenina, která se konzumuje zasyrova.\",\"q2\":\"Jaké jsou ingredience tohoto pokrmu?\",\"r2\":\"Ingredience uvedené v jídelním lístku jsou polníček a rajče.\"}",
+            "EL": "{\"desc\":\"Σαλάτα με βάση τη βαλεριανέλα και τη ντομάτα.\",\"q1\":\"Τι είναι η βαλεριανέλα;\",\"r1\":\"Είναι ένα μικρό και τρυφερό πράσινο φυλλώδες λαχανικό που καταναλώνεται ωμό.\",\"q2\":\"Ποια είναι τα συστατικά αυτού του πιάτου;\",\"r2\":\"Τα συστατικά που αναγράφονται στον κατάλογο είναι η βαλεριανέλα και η ντομάτα.\"}",
+            "TR": "{\"desc\":\"Kuzu salatası ve domatesten yapılan salata.\",\"q1\":\"Kuzu salatası nedir?\",\"r1\":\"Çiğ olarak tüketilen, küçük ve taze yeşil yapraklı bir sebzedir.\",\"q2\":\"Bu yemeğin malzemeleri nelerdir?\",\"r2\":\"Menüde belirtilen malzemeler kuzu salatası ve domatestir.\"}",
+            "AR": "{\"desc\":\"سلطة محضرة من خس الحمل والطماطم.\",\"q1\":\"ما هو خس الحمل؟\",\"r1\":\"هو خضار ورقي أخضر صغير وطري يؤكل طازجًا.\",\"q2\":\"ما هي مكونات هذا الطبق؟\",\"r2\":\"المكونات المذكورة في قائمة الطعام هي خس الحمل والطماطم.\"}",
+            "ZH": "{\"desc\":\"以野苣和番茄为原料制作的沙拉。\",\"q1\":\"什么是野苣？\",\"r1\":\"它是一种小巧嫩绿的叶菜，通常生吃。\",\"q2\":\"这道菜有哪些食材？\",\"r2\":\"菜单上标明的食材是野苣和番茄。\"}",
+            "JA": "{\"desc\":\"マーシュとトマトをベースにしたサラダ。\",\"q1\":\"マーシュとは何ですか？\",\"r1\":\"生で食べる、小ぶりで柔らかい緑の葉野菜です。\",\"q2\":\"この料理の原材料は何ですか？\",\"r2\":\"メニューに記載されている原材料はマーシュとトマトです。\"}",
+            "CA": "{\"desc\":\"Amanida elaborada a base de canonges i tomàquet.\",\"q1\":\"Què són els canonges?\",\"r1\":\"Són una hortalissa de fulla verda petita i tendra que es consumeix crua.\",\"q2\":\"Quins són els ingredients d'aquest plat?\",\"r2\":\"Els ingredients indicats a la carta són canonges i tomàquet.\"}",
+            "EU": "{\"desc\":\"Kanonigoz eta tomatez egindako entsalada.\",\"q1\":\"Zer dira kanonigoak?\",\"r1\":\"Hosto berde txiki eta samurreko baratzekia dira, gordina jaten dena.\",\"q2\":\"Zeintzuk dira plater honen osagaiak?\",\"r2\":\"Kartan adierazitako osagaiak kanonigoak eta tomatea dira.\"}",
+            "GL": "{\"desc\":\"Ensalada elaborada a base de cónegos e tomate.\",\"q1\":\"Que son os cónegos?\",\"r1\":\"Son unha hortaliza de folla verde pequena e tenra que se consome crua.\",\"q2\":\"Cales son os ingredientes deste prato?\",\"r2\":\"Os ingredientes indicados na carta son cónegos e tomate.\"}",
+            "VA": "{\"desc\":\"Amanida elaborada a base de canonges i tomàquet.\",\"q1\":\"Què són els canonges?\",\"r1\":\"Són una hortalissa de fulla verda petita i tendra que es consumeix crua.\",\"q2\":\"Quins són els ingredients d'aquest plat?\",\"r2\":\"Els ingredients indicats a la carta són canonges i tomàquet.\"}",
+            "KO": "{\"desc\":\"마슈와 토마토로 만든 샐러드.\",\"q1\":\"마슈는 무엇인가요?\",\"r1\":\"날것으로 먹는 작고 연한 녹색 잎채소입니다.\",\"q2\":\"이 요리의 재료는 무엇인가요?\",\"r2\":\"메뉴판에 표시된 재료는 마슈와 토마토입니다.\"}"
         }
     },
     {
