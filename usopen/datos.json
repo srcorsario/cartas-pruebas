@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "usopen",
   "generado": "2026-11-02T11:51:02",
-  "guardado": "2026-11-03T09:50:41.873Z",
+  "guardado": "2026-11-03T10:08:14.839Z",
   "ocultas": ["pizzas"],
   "platos": [
     {
@@ -6063,6 +6063,40 @@
             "HASH_FICHA": "35a8add9",
             "HASH_NOMBRE": "972b6c24"
         }
+    },
+    {
+        "id": "12206", "activa": "si", "precio": "1.00", "precioMedia": "",
+        "carpeta": "ensaladas", "archivo": "ensalada_de_canonigos_y_tomate01.webp",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "ensalada de canónigos y tomate",
+            "EN": "Lamb's lettuce and tomato salad",
+            "DE": "Feldsalat und Tomatensalat",
+            "FR": "Salade de mâche et tomates",
+            "IT": "Insalata di songino e pomodoro",
+            "RU": "Салат из корн-салата и томатов",
+            "NL": "Veldsla- en tomatensalade",
+            "PL": "Sałatka z roszponki i pomidorów",
+            "SV": "Sallad med fältsallad och tomat",
+            "NO": "Salat med feltsalat og tomat",
+            "DA": "Salat med vårsalat og tomat",
+            "FI": "Vuonankaali- ja tomaattisalaatti",
+            "PT": "Salada de canónigos e tomate",
+            "RO": "Salată de fetică și roșii",
+            "HU": "Madársaláta- és paradicsomsaláta",
+            "CS": "Salát z polníčku a rajčat",
+            "EL": "Σαλάτα με βαλεριανέλα και ντομάτα",
+            "TR": "Mache ve domates salatası",
+            "AR": "سلطة خس النعجة والطماطم",
+            "ZH": "羊莴苣番茄沙拉",
+            "JA": "マーシュとトマトのサラダ",
+            "CA": "Amanida de canonges i tomàquet",
+            "EU": "Kanonigo eta tomate entsalada",
+            "GL": "Ensalada de canónigos e tomate",
+            "VA": "Amanida de canonges i tomàquet",
+            "KO": "마슈와 토마토 샐러드"
+        },
+        "info": {}
     },
     {
         "id": "12301", "activa": "no", "precio": "18.00", "precioMedia": "",
