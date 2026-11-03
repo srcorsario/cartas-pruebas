@@ -1,0 +1,137 @@
+{
+ "formato": 1,
+ "restaurante": "clubhouse",
+ "guardado": "2026-11-03T19:17:45.524Z",
+ "menus": [
+  {
+   "id": "51da9122-b3c9-439c-98e9-7ffc8ae5a501",
+   "nombre": "Prueba Club house 01",
+   "config": {
+    "id": null,
+    "nombre": "Prueba Club house 01",
+    "logo": true,
+    "mostrarNombre": true,
+    "idiomas": {
+     "es": true,
+     "en": false
+    },
+    "secciones": {
+     "entrantes": {
+      "activo": true,
+      "compartir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1602,
+        "es": "Alitas de Pollo con Salsa Ranchera y Salsa Gaucha",
+        "en": "Chicken Wings with Ranch Sauce and Gaucha Sauce",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1102,
+        "es": "Jamón Serrano",
+        "en": "Serrano Ham",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1601,
+        "es": "Chipirones Fritos con Alioli",
+        "en": "Fried Baby Squid with Alioli",
+        "ambos": false
+       }
+      ]
+     },
+     "primero": {
+      "activo": false,
+      "aElegir": false,
+      "platos": []
+     },
+     "principal": {
+      "activo": true,
+      "aElegir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 2003,
+        "es": "Ensalada de Burriana (Tomate de Pera, Atún en Conserva, Cebolla Roja y Aceituna Negra)",
+        "en": "Burriana Salad (Plum Tomatoes, Canned Tuna, Red Onion and Black Olives)",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 4001,
+        "es": "Pechuga a la Plancha (con Ensalada de Lechuga, Tomate, Pimiento, Zanahoria, Cebolla Morada y Patatas Fritas)",
+        "en": "Grilled Chicken Breast (with Lettuce, Tomato, Bell Pepper, Carrot, Red Onion Salad and French Fries)",
+        "ambos": false
+       }
+      ]
+     },
+     "postre": {
+      "activo": true,
+      "aElegir": false,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 7001,
+        "es": "Verrine Helada de Cookies (Helado de Nata con Salsa de Chocolate y Trocitos de Galletas de Cacao)",
+        "en": "Frozen Cookie Verrine (Cream Ice Cream with Chocolate Sauce and Cocoa Cookie Pieces)",
+        "ambos": false
+       }
+      ]
+     }
+    },
+    "bebida": {
+     "agua": true,
+     "cerveza": true,
+     "refresco": true,
+     "cafe": true,
+     "vinoBlanco": {
+      "activo": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 13100,
+        "es": "Projecte Terra Blanc (I.G.P. Mallorca)",
+        "en": "Projecte Terra Blanc (Mallorca - White)",
+        "ambos": false
+       }
+      ]
+     },
+     "vinoRosado": {
+      "activo": false,
+      "platos": []
+     },
+     "vinoTinto": {
+      "activo": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 13332,
+        "es": "Viña Pomal 500 (D.O. Rioja)",
+        "en": "Viña Pomal 500 (Rioja - Aged Red)",
+        "ambos": false
+       }
+      ]
+     },
+     "cava": {
+      "activo": false,
+      "platos": []
+     }
+    }
+   },
+   "fechaCreacion": "2026-11-03T19:17:44.987Z",
+   "fechaModificacion": "2026-11-03T19:17:44.987Z"
+  }
+ ],
+ "platosManuales": []
+}
