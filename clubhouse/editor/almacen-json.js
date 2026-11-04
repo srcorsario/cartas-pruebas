@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.11.0'; // 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.12.0'; // 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -508,6 +508,11 @@
                     (datos.platos || []).forEach(p => { const n = r.renumerar[idNum(p.id)]; if (n != null) p.id = String(n); });
                     datos.platos.sort((a, b) => idNum(a.id) - idNum(b.id));
                 }
+                // Borrar con platos (NUEVO 4 nov): fuera esos platos.
+                if (r.borrarPlatos && r.borrarPlatos.length) {
+                    const fuera = new Set(r.borrarPlatos.map(Number));
+                    datos.platos = (datos.platos || []).filter(p => !fuera.has(idNum(p.id)));
+                }
                 hecho.ultimo = r;
             } catch (err) {
                 if (ini) throw err;
@@ -532,6 +537,25 @@
             })(d.menus);
             return n ? { ok: true } : { ok: false };
         }, 'ID de platos renumerados (organizador)');
+        return n;
+    }
+
+    // Tras borrar platos: en los Menús Especiales que los usaban pasan a "manual" (el menú ya guarda
+    // su nombre ES/EN, así siguen saliendo igual y el ID no apunta a un plato que ya no existe).
+    async function desvincularMenus(modo, ids) {
+        if (!SITIO || !urlMenus() || SITIO.modo !== modo) return 0;
+        const fuera = new Set(ids.map(Number));
+        let n = 0;
+        await cambiarMenus(d => {
+            n = 0;
+            (function buscar(o) {
+                if (!o || typeof o !== 'object') return;
+                if (Array.isArray(o)) { o.forEach(buscar); return; }
+                if (o.modo === modo && o.id != null && !o.manual && fuera.has(idNum(o.id))) { o.manual = true; o.modo = null; o.id = null; n++; }
+                Object.keys(o).forEach(k => buscar(o[k]));
+            })(d.menus);
+            return n ? { ok: true } : { ok: false };
+        }, 'platos borrados: pasan a manual (organizador)');
         return n;
     }
 
@@ -616,6 +640,11 @@
                 if (ren && Object.keys(ren).length) {
                     try { const n = await renumerarMenus(modo, ren); if (n) console.log('[almacen-json] Menús Especiales: ' + n + ' plato(s) con ID nuevo.'); }
                     catch (err) { console.warn('[almacen-json] No se pudieron actualizar los Menús Especiales:', err); alert('⚠️ Los platos se han movido, pero no se pudieron actualizar los Menús Especiales (' + err.message + '). Revisa los menús que usaran esos platos.'); }
+                }
+                const bor = op.ultimo && op.ultimo.borrarPlatos;
+                if (bor && bor.length) {
+                    try { const n = await desvincularMenus(modo, bor); if (n) console.log('[almacen-json] Menús Especiales: ' + n + ' plato(s) borrado(s) pasan a manual.'); }
+                    catch (err) { console.warn('[almacen-json] No se pudieron actualizar los Menús Especiales:', err); alert('⚠️ Se ha borrado, pero no se pudieron actualizar los Menús Especiales (' + err.message + '). Los platos siguen saliendo con su nombre.'); }
                 }
                 return respuesta('OK: estructura');
             }
