@@ -5,6 +5,7 @@
 //   window.MARCA = { nombre, logo, logoMenu, qr, qrAlt, src(clave) }
 //     logo     = cabecera de la web pública y del editor (y de las hojas imprimibles)
 //     logoMenu = cabecera del Menú Especial (si está vacío, usa logo)
+//     favicon  = icono de la pestaña del navegador (web y editor); vacío = el logo
 //     qr/qrAlt = QR "Oficial" / "Alternativo" de las hojas de Sugerencias y Postres
 //   Rutas relativas a la web (imagenes/marca/...). Se guardan en datos.json -> "marca"
 //   (POST ?accion=marca, almacen-json.js) y van a datos/base.json (la web pública lo lee).
@@ -18,11 +19,12 @@
     window.MARCA = null;
     if (!S || !S.marca) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.marca = '1.0.0';
+    window.APP_VERSIONS.marca = '1.1.0'; // 4 nov: favicon (icono de la pestaña)
 
     var CLAVES = [
         { k: 'logo', t: 'Logo del restaurante', d: 'Cabecera de la web, del editor y de las hojas de Sugerencias y Postres.', lado: 800, transparente: true },
         { k: 'logoMenu', t: 'Logo del Menú Especial', d: 'Cabecera del Menú Especial impreso. Vacío = el logo del restaurante.', lado: 800, transparente: true },
+        { k: 'favicon', t: 'Icono de la pestaña (favicon)', d: 'El dibujito de la pestaña del navegador y del acceso directo del móvil. Mejor cuadrado (recorta en 1:1). Vacío = el logo.', lado: 512, transparente: true },
         { k: 'qr', t: 'QR oficial', d: 'Hojas de Sugerencias y Postres (opción "Oficial").', lado: 1000, calidad: 1 },
         { k: 'qrAlt', t: 'QR alternativo', d: 'Hojas de Sugerencias y Postres (opción "Alternativo").', lado: 1000, calidad: 1 }
     ];
@@ -69,6 +71,12 @@
         var b = $('marca-btn');
         if (b) b.textContent = '🏷️ Logos y QR';
         document.title = 'Editor · ' + M.nombre;
+        var ico = M.src('favicon') || M.src('logo');
+        if (ico) {
+            var l = document.querySelector('link[rel="icon"]');
+            if (!l) { l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
+            l.href = ico;
+        }
     }
     function crearBoton() {
         if ($('marca-btn')) return;
@@ -117,7 +125,7 @@
             var src = M[c.k] ? '../' + M[c.k] : '';
             var vista = src
                 ? '<img src="' + esc(src) + '" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">'
-                : '<span style="color:#94a3b8; font-size:.75rem;">' + (c.k === 'logoMenu' && M.logo ? '(usa el logo)' : 'vacío') + '</span>';
+                : '<span style="color:#94a3b8; font-size:.75rem;">' + ((c.k === 'logoMenu' || c.k === 'favicon') && M.logo ? '(usa el logo)' : 'vacío') + '</span>';
             return '<div style="display:flex; gap:12px; align-items:center; border:1px solid #e2e8f0; border-radius:10px; padding:10px; margin-bottom:8px;">' +
                 '<div style="width:110px; height:70px; flex:0 0 auto; background:repeating-conic-gradient(#f1f5f9 0 25%, #fff 0 50%) 0 0/16px 16px; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden;">' + vista + '</div>' +
                 '<div style="flex:1; min-width:0;"><b>' + c.t + '</b><div style="font-size:.78rem; color:#64748b;">' + c.d + '</div></div>' +
