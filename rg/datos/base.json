@@ -21,8 +21,6 @@
 {"id":"1008","activa":"si","precio":"19.50","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["GLUTEN","SESAMO","CACAHUETE","SOJA","FRUTOSCASCARA","APIO","HUEVO","PESCADO","MOSTAZA","MOLUSCO","SULFITOS"],"opcionesInactivas":[],"h":"32b6064e2cab"},
 {"id":"1009","activa":"no","precio":"18.00","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["LACTOSA","MOSTAZA","SULFITOS","MOLUSCO"],"opcionesInactivas":[],"h":"d3efcd45b429"},
 {"id":"1010","activa":"si","precio":"18.50","precioMedia":"","carpeta":"entrantes","archivo":"alcachofas01.webp","alergenos":["GLUTEN","LACTOSA","CACAHUETE","APIO","FRUTOSCASCARA","HUEVO","PESCADO"],"opcionesInactivas":[],"h":"8b779561d084"},
-{"id":"1011","activa":"si","precio":"1.00","precioMedia":"","carpeta":"platos_veganos","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"dfb2e97a8093"},
-{"id":"1012","activa":"si","precio":"0.00","precioMedia":"","carpeta":"platos_frios","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"b419739561cd"},
 {"id":"1100","activa":"si","precio":"5.00","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":["GLUTEN","SESAMO","CACAHUETE","SOJA","FRUTOSCASCARA","APIO","HUEVO","PESCADO","MOSTAZA","VEGETARIANO"],"opcionesInactivas":[],"h":"e1e0f0912b99"},
 {"id":"1101","activa":"si","precio":"3.00","precioMedia":"","carpeta":"entrantes","archivo":"pan01.webp","alergenos":["GLUTEN","SESAMO","CACAHUETE","SOJA","FRUTOSCASCARA","APIO","HUEVO","PESCADO","MOSTAZA","VEGETARIANO"],"opcionesInactivas":[],"h":"5b1b62be0dfa"},
 {"id":"1102","activa":"si","precio":"3.00","precioMedia":"","carpeta":"entrantes","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"c723fac9e0c2"},
