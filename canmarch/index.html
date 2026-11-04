@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can March</title>
+    <link rel="icon" type="image/png" href="data:,">
+    <meta name="theme-color" content="#f7f7f5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&amp;display=swap">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="base.css?v=a989de64">
+    <link rel="stylesheet" href="tema.css?v=108daebd">
+</head>
+<body>
+    <header>
+        <div class="header-logos">
+            
+            <span id="header-menu-title"></span>
+            
+        </div>
+
+        <div id="language-selector">
+            <button id="btn-ES" onclick="changeLanguage('ES')" class="active">Español</button>
+            <button id="btn-EN" onclick="changeLanguage('EN')">English</button>
+            <button id="btn-DE" onclick="changeLanguage('DE')">Deutsch</button>
+            <button id="btn-FR" onclick="changeLanguage('FR')">Français</button>
+            <button id="btn-IT" onclick="changeLanguage('IT')">Italiano</button>
+            <select id="more-langs" onchange="changeLanguage(this.value)">
+                <option value="">🌐 Más...</option>
+            </select>
+        </div>
+        <div class="category-wrapper">
+            <nav id="category-selector"></nav>
+        </div>
+    </header>
+
+    <main id="menu-container">
+        <h2 id="current-category-name"></h2>
+        <div id="items-list">
+            <div class="item-row skeleton-row">
+                <div class="item-content">
+                    <span class="skeleton-text line-70"></span>
+                    <span class="skeleton-text line-40"></span>
+                </div>
+                <div class="price-box">
+                    <span class="skeleton-text line-20"></span>
+                </div>
+            </div>
+            <div class="item-row skeleton-row">
+                <div class="item-content">
+                    <span class="skeleton-text line-60"></span>
+                    <span class="skeleton-text line-30"></span>
+                </div>
+                <div class="price-box">
+                    <span class="skeleton-text line-20"></span>
+                </div>
+            </div>
+            <div class="item-row skeleton-row">
+                <div class="item-content">
+                    <span class="skeleton-text line-50"></span>
+                    <span class="skeleton-text line-40"></span>
+                </div>
+                <div class="price-box">
+                    <span class="skeleton-text line-20"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="photo-modal" onclick="closeModal()">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <button id="prev-btn" class="nav-btn" onclick="changePhoto(-1); event.stopPropagation();">❮</button>
+        <img id="modal-img" src="" alt="Vista previa" onclick="event.stopPropagation();">
+        <button id="next-btn" class="nav-btn" onclick="changePhoto(1); event.stopPropagation();">❯</button>
+    </div>
+
+    <!-- Generado por construir.ps1: no editar aquí sino en nucleo/ y restaurantes/. -->
+    <script>window.CARTA_BUILD = {"restaurante":"canmarch","entorno":"pruebas","v":"20261104195723","marca":true};</script>
+    <script src="restaurante.js?v=bb1f4b5f"></script>
+    <script src="script.js?v=bc04faff"></script>
+</body>
+</html>

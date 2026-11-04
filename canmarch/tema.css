@@ -1,0 +1,26 @@
+/* =========================================================
+   CAN MARCH — TEMA (colores y fuentes). Se carga después de base.css.
+   Plantilla neutra: gris claro + azul agua (como su carta). Fuente Roboto (sitio.json).
+   ========================================================= */
+:root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --text: #3b4246;
+    --text-soft: #5c6468;
+    --grey: #8a9195;
+    --border: #dde5e7;
+    --accent: #4f8796;        /* azul agua oscuro */
+    --on-accent: #ffffff;
+    --clay: #4f8796;
+    --gold: #9cc2cc;          /* azul agua claro (títulos de su carta) */
+    --header-bg: rgba(247, 247, 245, 0.94);
+    --panel-bg: rgba(247, 247, 245, 0.98);
+    --overlay: rgba(25, 32, 35, 0.72);
+    --skeleton-a: #eceeee;
+    --skeleton-b: #dde5e7;
+    --serif: "Roboto", -apple-system, system-ui, "Segoe UI", sans-serif;
+    --sans: "Roboto", -apple-system, system-ui, "Segoe UI", sans-serif;
+}
+
+/* Solo un logo (el de la marca): centrado */
+.header-logos { justify-content: center; }

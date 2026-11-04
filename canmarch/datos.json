@@ -1,0 +1,289 @@
+{
+  "formato": 1,
+  "restaurante": "canmarch",
+  "generado": "2026-11-04T19:30:00",
+  "guardado": "",
+  "ocultas": [],
+  "idiomas": [],
+  "marca": {"nombre": "Can March"},
+  "estructura": {
+    "version": 1,
+    "categorias": [
+      {"nombre":"Entrantes","desde":1001,"hasta":1099,"pestana":"entrantes","carpeta":"entrantes"},
+      {"nombre":"Servicio de pan","desde":1101,"hasta":1199,"pestana":null,"carpeta":"entrantes"},
+      {"nombre":"Arroces","desde":3001,"hasta":3099,"pestana":"arroces","carpeta":"arroz"},
+      {"nombre":"Nota arroces","desde":3901,"hasta":3999,"pestana":null,"carpeta":"arroz"},
+      {"nombre":"Principales","desde":4001,"hasta":4099,"pestana":"principales","carpeta":"principales"},
+      {"nombre":"Alérgenos e Intolerancias","desde":15001,"hasta":15099,"pestana":"alergenos","carpeta":"alergenos","sinPlatos":true,"tipo":"alergenos"}
+    ],
+    "pestanas": [
+      {"id":"entrantes","rangos":[[1000,1199]],"nombre":{"ES":"Entrantes","EN":"Starters","DE":"Vorspeisen","FR":"Entrées","IT":"Antipasti","RU":"Закуски","NL":"Voorgerechten","PL":"Przystawki","SV":"Förrätter","NO":"Forretter","DA":"Forretter","FI":"Alkuruoat","PT":"Entradas","RO":"Gustări","HU":"Előételek","CS":"Předkrmy","EL":"Ορεκτικά","TR":"Başlangıçlar","AR":"مقبلات","ZH":"前菜","JA":"前菜","KO":"에피타이저","CA":"Entrants","EU":"Hastekoak","GL":"Entrantes","VA":"Entrants"},"grupos":[{"rangos":[[1100,1199]],"nombre":{"ES":"Pan","EN":"Bread","DE":"Brot","FR":"Pain","IT":"Pane","RU":"Хлеб","NL":"Brood","PL":"Pieczywo","SV":"Bröd","NO":"Brød","DA":"Brød","FI":"Leipä","PT":"Pão","RO":"Pâine","HU":"Kenyér","CS":"Chléb","EL":"Ψωμί","TR":"Ekmek","AR":"الخبز","ZH":"面包","JA":"パン","KO":"빵","CA":"Pa","EU":"Ogia","GL":"Pan","VA":"Pa"}}]},
+      {"id":"principales","rangos":[[4000,4099]],"nombre":{"ES":"Principales","EN":"Mains","DE":"Hauptspeisen","FR":"Plats","IT":"Piatti","RU":"Основные блюда","NL":"Hoofdgerechten","PL":"Dania główne","SV":"Huvudrätter","NO":"Hovedretter","DA":"Hovedretter","FI":"Pääruoat","PT":"Pratos principais","RO":"Feluri principale","HU":"Főételek","CS":"Hlavní jídla","EL":"Κυρίως Πιάτα","TR":"Ana Yemekler","AR":"أطباق رئيسية","ZH":"主菜","JA":"メインディッシュ","KO":"메인 요리","CA":"Principals","EU":"Plater Nagusiak","GL":"Principais","VA":"Principals"}},
+      {"id":"arroces","rangos":[[3000,3099],[3900,3999]],"nombre":{"ES":"Arroces","EN":"Rice Dishes","DE":"Reisgerichte","FR":"Riz","IT":"Risi","RU":"Блюда из риса","NL":"Rijstgerechten","PL":"Dania z ryżu","SV":"Risrätter","NO":"Risretter","DA":"Risretter","FI":"Riisiruoat","PT":"Arrozes","RO":"Preparate din orez","HU":"Rizsételek","CS":"Rýžová jídla","EL":"Πιάτα με ρύζι","TR":"Pilavlar","AR":"أطباق الأرز","ZH":"米饭类","JA":"ライス料理","KO":"쌀 요리","CA":"Arrossos","EU":"Arrozak","GL":"Arroces","VA":"Arrossos"}},
+      {"id":"alergenos","especial":"alergenos"}
+    ]
+  },
+  "platos": [
+    {
+        "id": "1001", "activa": "si", "precio": "15.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Hilos de calamar en su tinta // Panceta y soja"
+        },
+        "info": {}
+    },
+    {
+        "id": "1002", "activa": "si", "precio": "17.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Tartar de tres pescados // Aguacate, flores y sésamo"
+        },
+        "info": {}
+    },
+    {
+        "id": "1003", "activa": "si", "precio": "13.50", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Coca de trigo de “xeixa” integral ecológica // Calabacín, cebolla confitada y queso de cabra artesano de Mallorca"
+        },
+        "info": {}
+    },
+    {
+        "id": "1004", "activa": "si", "precio": "13.50", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Coca de trigo de “xeixa” integral ecológica // Verduras con bacalao, tomate de ramillete y Tap de Cortí"
+        },
+        "info": {}
+    },
+    {
+        "id": "1005", "activa": "si", "precio": "13.50", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Surtido de 3 mini cocas"
+        },
+        "info": {}
+    },
+    {
+        "id": "1006", "activa": "si", "precio": "14.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Croquetas //de merluza y espinacas// //de pollo campero y jamón ibérico// //de setas y avellanas// //mixtas//"
+        },
+        "info": {}
+    },
+    {
+        "id": "1007", "activa": "si", "precio": "13.50", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Cuadrados de bacalao // Dulce de berenjena y ajo negro"
+        },
+        "info": {}
+    },
+    {
+        "id": "1008", "activa": "si", "precio": "14.50", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Ensalada // Queso de cabra artesano de Mallorca, brotes tiernos con membrillo casero, fruta fresca y frutos secos"
+        },
+        "info": {}
+    },
+    {
+        "id": "1009", "activa": "si", "precio": "14.50", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Carpaccio de calabacín // Queso DO Menorca madurado, manzana y tomate seco de Manacor aliñado con frutos secos"
+        },
+        "info": {}
+    },
+    {
+        "id": "1010", "activa": "si", "precio": "17.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Carpaccio de lengua de ternera // Alcaparras crujientes y tallarines de sepia al ajo"
+        },
+        "info": {}
+    },
+    {
+        "id": "1011", "activa": "si", "precio": "17.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Carpaccio de manitas de cerdo // Manzana ácida, apio blanco, piñones tostados y vinagreta de mistela"
+        },
+        "info": {}
+    },
+    {
+        "id": "1012", "activa": "si", "precio": "15.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Huevos rotos camperos // Sobrasada de cerdo negro mallorquín y patatas"
+        },
+        "info": {}
+    },
+    {
+        "id": "1013", "activa": "si", "precio": "19.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Alcachofas, gambas y sobrasada // Con el dulce de albaricoque"
+        },
+        "info": {}
+    },
+    {
+        "id": "1101", "activa": "si", "precio": "2.00", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Servicio de pan de trigo de “xeixa” integral y aceite DO Mallorca"
+        },
+        "info": {}
+    },
+    {
+        "id": "1199", "activa": "si", "precio": "", "precioMedia": "",
+        "carpeta": "entrantes", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Precios con IVA incluido"
+        },
+        "info": {}
+    },
+    {
+        "id": "3001", "activa": "si", "precio": "18.50", "precioMedia": "",
+        "carpeta": "arroz", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Paella mixta // Paella típica mallorquina"
+        },
+        "info": {}
+    },
+    {
+        "id": "3002", "activa": "si", "precio": "19.50", "precioMedia": "",
+        "carpeta": "arroz", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Paella ciega // Paella sin cáscaras ni huesos"
+        },
+        "info": {}
+    },
+    {
+        "id": "3003", "activa": "si", "precio": "20.00", "precioMedia": "",
+        "carpeta": "arroz", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Arroz de “señorito” // Arroz típico valenciano de pescado y marisco sin cáscaras ni espinas"
+        },
+        "info": {}
+    },
+    {
+        "id": "3004", "activa": "si", "precio": "28.50", "precioMedia": "",
+        "carpeta": "arroz", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Arròs de bogavante // Arroz seco o puede cocinarse caldoso"
+        },
+        "info": {}
+    },
+    {
+        "id": "3005", "activa": "si", "precio": "20.00", "precioMedia": "",
+        "carpeta": "arroz", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Paella de marisco // Paella típica de Alicante"
+        },
+        "info": {}
+    },
+    {
+        "id": "3006", "activa": "si", "precio": "18.00", "precioMedia": "",
+        "carpeta": "arroz", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Arroz negro // Arroz seco con sepia y su tinta natural"
+        },
+        "info": {}
+    },
+    {
+        "id": "3007", "activa": "si", "precio": "18.00", "precioMedia": "",
+        "carpeta": "arroz", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Arroz seco de verduras // Arroz vegetariano cocinado con caldo de verduras"
+        },
+        "info": {}
+    },
+    {
+        "id": "3901", "activa": "si", "precio": "", "precioMedia": "",
+        "carpeta": "arroz", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "* Los arroces se elaboran con arroz de la variedad Bomba y son libres de gluten."
+        },
+        "info": {}
+    },
+    {
+        "id": "4001", "activa": "si", "precio": "26.00", "precioMedia": "",
+        "carpeta": "principales", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Pescado de lonja // Cebolletas, tomates de ramillete, pasas, piñones y “Tap de Cortí”"
+        },
+        "info": {}
+    },
+    {
+        "id": "4002", "activa": "si", "precio": "23.00", "precioMedia": "",
+        "carpeta": "principales", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Terrina de cochinillo de cerdo negro mallorquín de Ca'n Company // Con el jugo de asado, el dulce de albaricoque y trinchado de patatas con romero"
+        },
+        "info": {}
+    },
+    {
+        "id": "4003", "activa": "si", "precio": "23.00", "precioMedia": "",
+        "carpeta": "principales", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Terrina de paletilla de cordero asado // Salsa de algarroba, boniato blanco y rojo"
+        },
+        "info": {}
+    },
+    {
+        "id": "4004", "activa": "si", "precio": "28.00", "precioMedia": "",
+        "carpeta": "principales", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Solomillo de ternera de cebón // Con setas, nueces, crema de tomate seco y queso DO Menorca madurado"
+        },
+        "info": {}
+    },
+    {
+        "id": "4005", "activa": "si", "precio": "22.00", "precioMedia": "",
+        "carpeta": "principales", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Bacalao // Huevo, patata y sobrasada (cocción a baja temperatura)"
+        },
+        "info": {}
+    },
+    {
+        "id": "4006", "activa": "si", "precio": "25.00", "precioMedia": "",
+        "carpeta": "principales", "archivo": "",
+        "alergenos": [], "opcionesInactivas": [],
+        "nombre": {
+            "ES": "Lomo de merluza // Gamba roja, avellanas y acelgas"
+        },
+        "info": {}
+    }
+  ]
+}
