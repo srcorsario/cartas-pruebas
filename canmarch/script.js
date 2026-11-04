@@ -7,7 +7,7 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.5.0'; // 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
+const APP_VERSION = 'v4.6.0'; // 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
@@ -105,10 +105,73 @@ const ALERGENOS_PESTANA_NOMBRE = {
 // Cada pestaña: { id, nombre:{ES,EN..}, rangos:[[ini,fin],..], grupos?, modoGrupos?, anexos?,
 // precargaFotos?, especial? }.
 function prepararPestanas(lista) {
-    return (lista || []).map(p => {
+    const r = (lista || []).map(p => {
         p = Object.assign({}, p, { id: String(p.id) });
         return p.especial === 'alergenos' ? Object.assign({ nombre: ALERGENOS_PESTANA_NOMBRE }, p) : p;
     });
+    // v4.6: "Contacto y horario", la última, si la web tiene datos de contacto (base.json "contacto").
+    if (contactoTieneDatos(contactoWeb) && !r.some(p => p.especial === 'contacto')) r.push({ id: 'contacto', especial: 'contacto', nombre: CONTACTO_TEXTOS.pestana });
+    return r;
+}
+
+// ---------- v4.6: pestaña "Contacto y horario" ----------
+// base.json "contacto": { direccion, mapa?, telefono, email?, horario: [lun..dom] (texto libre por
+// día, "" = cerrado), nota? }. Lo escribe el editor (📍 Contacto) en datos.json. Los nombres de los
+// días salen del navegador (Intl) en el idioma elegido: no hay que traducirlos.
+const CONTACTO_CACHE_KEY = 'contacto_' + (R.id || 'web') + '_' + ((window.CARTA_BUILD || {}).entorno || '');
+const CONTACTO_TEXTOS = {
+    pestana: { ES: 'Contacto y horario', EN: 'Contact & opening hours', DE: 'Kontakt & Öffnungszeiten', FR: 'Contact & horaires', IT: 'Contatti e orari', RU: 'Контакты и часы работы', NL: 'Contact & openingstijden', PL: 'Kontakt i godziny otwarcia', SV: 'Kontakt & öppettider', NO: 'Kontakt og åpningstider', DA: 'Kontakt & åbningstider', FI: 'Yhteystiedot ja aukioloajat', PT: 'Contacto e horário', RO: 'Contact și program', HU: 'Kapcsolat és nyitvatartás', CS: 'Kontakt a otevírací doba', EL: 'Επικοινωνία & ωράριο', TR: 'İletişim ve çalışma saatleri', AR: 'الاتصال ومواعيد العمل', ZH: '联系方式与营业时间', JA: 'お問い合わせ・営業時間', KO: '연락처 및 영업시간', CA: 'Contacte i horari', EU: 'Harremana eta ordutegia', GL: 'Contacto e horario', VA: 'Contacte i horari' },
+    direccion: { ES: 'Dirección', EN: 'Address', DE: 'Adresse', FR: 'Adresse', IT: 'Indirizzo', RU: 'Адрес', NL: 'Adres', PL: 'Adres', SV: 'Adress', NO: 'Adresse', DA: 'Adresse', FI: 'Osoite', PT: 'Morada', RO: 'Adresă', HU: 'Cím', CS: 'Adresa', EL: 'Διεύθυνση', TR: 'Adres', AR: 'العنوان', ZH: '地址', JA: '住所', KO: '주소', CA: 'Adreça', EU: 'Helbidea', GL: 'Enderezo', VA: 'Adreça' },
+    comoLlegar: { ES: 'Cómo llegar', EN: 'Get directions', DE: 'Route planen', FR: 'Itinéraire', IT: 'Indicazioni', RU: 'Как добраться', NL: 'Route', PL: 'Wyznacz trasę', SV: 'Vägbeskrivning', NO: 'Veibeskrivelse', DA: 'Rutevejledning', FI: 'Reittiohjeet', PT: 'Como chegar', RO: 'Indicații', HU: 'Útvonal', CS: 'Navigovat', EL: 'Οδηγίες', TR: 'Yol tarifi', AR: 'الاتجاهات', ZH: '导航', JA: '経路案内', KO: '길찾기', CA: 'Com arribar-hi', EU: 'Nola iritsi', GL: 'Como chegar', VA: 'Com arribar-hi' },
+    telefono: { ES: 'Teléfono', EN: 'Phone', DE: 'Telefon', FR: 'Téléphone', IT: 'Telefono', RU: 'Телефон', NL: 'Telefoon', PL: 'Telefon', SV: 'Telefon', NO: 'Telefon', DA: 'Telefon', FI: 'Puhelin', PT: 'Telefone', RO: 'Telefon', HU: 'Telefon', CS: 'Telefon', EL: 'Τηλέφωνο', TR: 'Telefon', AR: 'الهاتف', ZH: '电话', JA: '電話', KO: '전화', CA: 'Telèfon', EU: 'Telefonoa', GL: 'Teléfono', VA: 'Telèfon' },
+    email: { ES: 'Correo', EN: 'Email', DE: 'E-Mail', FR: 'E-mail', IT: 'E-mail', RU: 'Эл. почта', NL: 'E-mail', PL: 'E-mail', SV: 'E-post', NO: 'E-post', DA: 'E-mail', FI: 'Sähköposti', PT: 'E-mail', RO: 'E-mail', HU: 'E-mail', CS: 'E-mail', EL: 'Email', TR: 'E-posta', AR: 'البريد الإلكتروني', ZH: '电子邮件', JA: 'メール', KO: '이메일', CA: 'Correu', EU: 'Posta', GL: 'Correo', VA: 'Correu' },
+    horario: { ES: 'Horario', EN: 'Opening hours', DE: 'Öffnungszeiten', FR: 'Horaires', IT: 'Orari', RU: 'Часы работы', NL: 'Openingstijden', PL: 'Godziny otwarcia', SV: 'Öppettider', NO: 'Åpningstider', DA: 'Åbningstider', FI: 'Aukioloajat', PT: 'Horário', RO: 'Program', HU: 'Nyitvatartás', CS: 'Otevírací doba', EL: 'Ωράριο', TR: 'Çalışma saatleri', AR: 'مواعيد العمل', ZH: '营业时间', JA: '営業時間', KO: '영업시간', CA: 'Horari', EU: 'Ordutegia', GL: 'Horario', VA: 'Horari' },
+    cerrado: { ES: 'Cerrado', EN: 'Closed', DE: 'Geschlossen', FR: 'Fermé', IT: 'Chiuso', RU: 'Закрыто', NL: 'Gesloten', PL: 'Zamknięte', SV: 'Stängt', NO: 'Stengt', DA: 'Lukket', FI: 'Suljettu', PT: 'Fechado', RO: 'Închis', HU: 'Zárva', CS: 'Zavřeno', EL: 'Κλειστό', TR: 'Kapalı', AR: 'مغلق', ZH: '休息', JA: '定休日', KO: '휴무', CA: 'Tancat', EU: 'Itxita', GL: 'Pechado', VA: 'Tancat' }
+};
+const LOCALE_DE_IDIOMA = { NO: 'nb', VA: 'ca' };
+function contactoTieneDatos(c) {
+    return !!(c && (c.direccion || c.telefono || c.email || (Array.isArray(c.horario) && c.horario.some(x => x))));
+}
+let contactoWeb = (() => { try { return JSON.parse(localStorage.getItem(CONTACTO_CACHE_KEY) || 'null'); } catch (e) { return null; } })();
+function aplicarContactoDeBase(base) {
+    if (!base) return;
+    const nuevo = contactoTieneDatos(base.contacto) ? base.contacto : null;
+    try { if (nuevo) localStorage.setItem(CONTACTO_CACHE_KEY, JSON.stringify(nuevo)); else localStorage.removeItem(CONTACTO_CACHE_KEY); } catch (e) { }
+    if (JSON.stringify(nuevo) === JSON.stringify(contactoWeb)) return;
+    contactoWeb = nuevo;
+    categoriesListOriginal = prepararPestanas(pestanasFuente);
+    filtrarPestanas(idsPestanasOcultas);
+    if (allData && allData.length) { renderCategories(); renderMenu(); }
+}
+function generateContactoPageHtml() {
+    const c = contactoWeb || {};
+    const e = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, x => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[x]));
+    const T = (k) => txt(CONTACTO_TEXTOS[k]);
+    let h = '<div class="contacto-pagina">';
+    if (c.direccion) {
+        const q = encodeURIComponent(c.mapa || c.direccion);
+        h += `<section class="contacto-bloque"><h3 class="sub-category-title">${T('direccion')}</h3>` +
+            `<p class="contacto-direccion">${e(c.direccion).replace(/\n/g, '<br>')}</p>` +
+            `<a class="contacto-boton" href="https://www.google.com/maps/dir/?api=1&destination=${q}" target="_blank" rel="noopener">📍 ${T('comoLlegar')}</a>` +
+            `<div class="contacto-mapa"><iframe src="https://maps.google.com/maps?q=${q}&z=16&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${e(c.direccion)}"></iframe></div></section>`;
+    }
+    if (c.telefono || c.email) {
+        h += `<section class="contacto-bloque"><h3 class="sub-category-title">${T('telefono')}</h3>`;
+        if (c.telefono) h += `<p><a class="contacto-boton" href="tel:${e(String(c.telefono).replace(/[^+\d]/g, ''))}">📞 ${e(c.telefono)}</a></p>`;
+        if (c.email) h += `<p><a href="mailto:${e(c.email)}">✉️ ${e(c.email)}</a></p>`;
+        h += '</section>';
+    }
+    if (Array.isArray(c.horario) && c.horario.some(x => x)) {
+        let loc = (LOCALE_DE_IDIOMA[currentLang] || currentLang || 'es').toLowerCase();
+        const dia = (i) => { try { const d = new Date(2024, 0, 1 + i).toLocaleDateString(loc, { weekday: 'long' }); return d.charAt(0).toUpperCase() + d.slice(1); } catch (x) { return ['L', 'M', 'X', 'J', 'V', 'S', 'D'][i]; } };
+        const hoy = (new Date().getDay() + 6) % 7;
+        h += `<section class="contacto-bloque"><h3 class="sub-category-title">${T('horario')}</h3><table class="contacto-horario">` +
+            [0, 1, 2, 3, 4, 5, 6].map(i => { const v = String(c.horario[i] || '').trim();
+                return `<tr class="${i === hoy ? 'hoy' : ''}"><th>${e(dia(i))}</th><td>${v ? e(v) : '<span class="cerrado">' + T('cerrado') + '</span>'}</td></tr>`; }).join('') +
+            '</table></section>';
+    }
+    if (c.nota) h += `<p class="contacto-nota">${e(c.nota)}</p>`;
+    return h + '</div>';
 }
 function leerPestanasCacheLocal() {
     try {
@@ -411,7 +474,7 @@ async function init() {
 
         // v4.4: pestañas de base.json. Se pide aquí, antes que nada, para que (sin caché) estén
         // puestas antes del primer pintado: fetchAndParseCsv espera a esta misma petición.
-        if (DATOS_TIPO === 'json') jsonBase().then(b => { aplicarMarcaDeBase(b); aplicarPestanasDeBase(b); }).catch(() => { });
+        if (DATOS_TIPO === 'json') jsonBase().then(b => { aplicarMarcaDeBase(b); aplicarContactoDeBase(b); aplicarPestanasDeBase(b); }).catch(() => { });
 
         const categoriasPromise = fetchCategoriasDeshabilitadas();
 
@@ -1127,6 +1190,10 @@ function renderMenu() {
     // Página fija de contenido (sin platos).
     if (catObj.especial === 'alergenos') {
         grid.innerHTML = generateAlergenosPageHtml();
+        return;
+    }
+    if (catObj.especial === 'contacto') {
+        grid.innerHTML = generateContactoPageHtml();
         return;
     }
 

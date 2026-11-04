@@ -731,3 +731,19 @@ img.header-logo[src*="negro.png"] {
     color: var(--text-soft);
 }
 .item-row-nota .alergenos-list { justify-content: center; }
+
+/* ---------- v4.6: pestaña "Contacto y horario" (script.js generateContactoPageHtml) ---------- */
+.contacto-pagina { display: grid; gap: 28px; padding: 6px 0 30px; }
+.contacto-bloque { text-align: center; }
+.contacto-bloque p { margin: 8px 0; color: var(--text-soft); font-family: var(--sans); font-size: 1.05rem; line-height: 1.5; }
+.contacto-direccion { font-size: 1.1rem !important; color: var(--text) !important; }
+.contacto-boton { display: inline-block; margin: 6px 0 12px; padding: 10px 20px; border-radius: 999px; background: var(--accent); color: var(--on-accent) !important; text-decoration: none; font-family: var(--sans); font-weight: 500; letter-spacing: .02em; }
+.contacto-bloque a { color: var(--accent); }
+.contacto-mapa { margin: 6px auto 0; max-width: 640px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); aspect-ratio: 4 / 3; background: var(--surface); }
+.contacto-mapa iframe { width: 100%; height: 100%; border: 0; display: block; }
+.contacto-horario { margin: 4px auto 0; border-collapse: collapse; font-family: var(--sans); min-width: min(100%, 360px); }
+.contacto-horario th, .contacto-horario td { padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: left; color: var(--text-soft); font-weight: 400; }
+.contacto-horario th { color: var(--text); font-weight: 500; }
+.contacto-horario tr.hoy th, .contacto-horario tr.hoy td { color: var(--accent); font-weight: 600; }
+.contacto-horario .cerrado { color: var(--grey); font-style: italic; }
+.contacto-nota { text-align: center; color: var(--grey); font-style: italic; }

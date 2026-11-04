@@ -19,7 +19,7 @@
     window.MARCA = null;
     if (!S || !S.marca) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.marca = '1.1.0'; // 4 nov: favicon (icono de la pestaña)
+    window.APP_VERSIONS.marca = '1.1.1'; // 4 nov: al subir/quitar, se repintan las hojas de Sugerencias/Postres abiertas. 1.1.0: 4 nov: favicon (icono de la pestaña)
 
     var CLAVES = [
         { k: 'logo', t: 'Logo del restaurante', d: 'Cabecera de la web, del editor y de las hojas de Sugerencias y Postres.', lado: 800, transparente: true },
@@ -98,6 +98,13 @@
         var t = await r.text();
         if (!r.ok || /^Error/.test(t)) throw new Error(t);
         M.aplicar(cambios);
+        refrescarHojas();
+    }
+    // Hojas imprimibles abiertas: repintar con el logo/QR nuevo.
+    function refrescarHojas() {
+        var vis = function (id) { var e = $(id); return e && e.offsetParent !== null; };
+        try { if (vis('tab-sugerencias') && window.renderCarta) window.renderCarta(S.modo); } catch (e) { }
+        try { if (vis('tab-postres') && window.renderHojaPostres) window.renderHojaPostres(S.modo); } catch (e) { }
     }
 
     // ---------- ventana ----------
