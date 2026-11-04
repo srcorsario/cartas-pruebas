@@ -2,10 +2,10 @@
   "formato": 1,
   "restaurante": "canmarch",
   "generado": "2026-11-04T19:30:00",
-  "guardado": "2026-11-04T20:23:36.088Z",
+  "guardado": "2026-11-04T20:26:22.430Z",
   "ocultas": ["postres"],
   "idiomas": [],
-  "marca": {"nombre":"Can March"},
+  "marca": {"nombre":"Can March","qr":"imagenes/marca/qr.webp?v=mw2khezr"},
   "estructura": {
     "version": 1,
     "categorias": [
