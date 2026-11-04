@@ -16,7 +16,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.organizador = '1.2.0'; // 3 nov: paso 3 — ✏️ renombrar (y en la web), visible, ampliar/reducir rango (quitando tramo vacío a la vecina), unir (renumera platos), borrar vacía; ↕️ ordenar. 1.1.0: 3 nov: crear subcategoría (también en Sugerencias; sección propia en la web y en la hoja). 1.0.0: Fase 3 — crear categoría
+    window.APP_VERSIONS.organizador = '1.3.0'; // 4 nov: borrar categoría/subcategoría CON sus platos (antes ofrece moverlos con Unir). 1.2.0: 3 nov: paso 3 — ✏️ renombrar (y en la web), visible, ampliar/reducir rango (quitando tramo vacío a la vecina), unir (renumera platos), borrar vacía; ↕️ ordenar. 1.1.0: 3 nov: crear subcategoría (también en Sugerencias; sección propia en la web y en la hoja). 1.0.0: Fase 3 — crear categoría
 
     var IDIOMAS = ['ES', 'EN', 'DE', 'FR', 'IT', 'RU', 'NL', 'PL', 'SV', 'NO', 'DA', 'FI', 'PT', 'RO', 'HU', 'CS', 'EL', 'TR', 'AR', 'ZH', 'JA', 'KO', 'CA', 'EU', 'GL', 'VA'];
     var MIN_ID = 1000, MAX_ID = 99999;
@@ -497,7 +497,8 @@
             if (!o.sub && especialDe(o.cat)) throw new Error('"' + o.cat.nombre + '" es especial (' + especialDe(o.cat) + '): no se puede ' + (cambio.tipo === 'unir' ? 'unir' : 'borrar') + '.');
             var dentro = ids.filter(function (i) { return i >= o.d && i <= o.h; }).sort(function (a, b) { return a - b; });
             if (cambio.tipo === 'borrar') {
-                if (dentro.length) throw new Error('"' + o.nombre + '" tiene ' + dentro.length + ' plato(s) (activos o no): muévelos antes con "Unir" o bórralos en el editor.');
+                if (dentro.length && !cambio.conPlatos) throw new Error('"' + o.nombre + '" tiene ' + dentro.length + ' plato(s) (activos o no): muévelos antes con "Unir" o bórralos en el editor.');
+                if (dentro.length) r.borrarPlatos = dentro; // NUEVO (4 nov): borrar con sus platos
                 r.quitarOcultas = quitar(est, o);
                 return r;
             }
@@ -927,10 +928,10 @@
                     '<small style="color:#64748b;">Los platos cambian de ID (en orden, detrás del último del destino). Fotos, Info y traducciones se quedan; los Menús Especiales se actualizan.</small>'
                     : '<small style="color:#64748b;">No tiene platos: usa "Borrar".</small>') + '</fieldset>' : '') +
             // Borrar
-            (!esp ? '<fieldset style="' + CAJA + '"><legend><b>Borrar</b></legend>' + (dentro.length
-                ? '<small style="color:#64748b;">Solo se puede borrar vacía: tiene ' + dentro.length + ' plato(s) (activos o no). Muévelos con "Unir" o bórralos en el editor.</small>'
-                : '<button type="button" id="ew-g-borrar" style="' + ESTILO_BTN + ' border-color:#b91c1c; color:#b91c1c;">🗑️ Borrar ' + (o.sub ? 'subcategoría' : 'categoría') + '</button>' +
-                    (!o.sub && pes && !pes.especial ? ' <small style="color:#64748b;">(también su pestaña de la web)</small>' : '')) + '</fieldset>' : '<small style="color:#64748b;">Categoría especial: se puede renombrar y cambiar su rango, pero no unir ni borrar.</small>');
+            (!esp ? '<fieldset style="' + CAJA + '"><legend><b>Borrar</b></legend>' +
+                '<button type="button" id="ew-g-borrar" style="' + ESTILO_BTN + ' border-color:#b91c1c; color:#b91c1c;">🗑️ Borrar ' + (o.sub ? 'subcategoría' : 'categoría') + (dentro.length ? ' y sus ' + dentro.length + ' plato(s)' : '') + '</button>' +
+                    (!o.sub && pes && !pes.especial ? ' <small style="color:#64748b;">(también su pestaña de la web)</small>' : '') +
+                (dentro.length ? '<div style="margin-top:6px;"><small style="color:#64748b;">Tiene ' + dentro.length + ' plato(s) (activos o no). Si quieres conservarlos, muévelos antes con "Unir".</small></div>' : '') + '</fieldset>' : '<small style="color:#64748b;">Categoría especial: se puede renombrar y cambiar su rango, pero no unir ni borrar.</small>');
 
         // --- renombrar ---
         $('ew-g-renombrar').onclick = async function () {
@@ -1019,12 +1020,24 @@
         // --- borrar ---
         if ($('ew-g-borrar')) $('ew-g-borrar').onclick = async function () {
             var b = this;
-            if (b.dataset.seguro !== '1') { b.dataset.seguro = '1'; b.textContent = '¿Seguro? Pulsa otra vez'; return; }
-            var cambio = { tipo: 'borrar', objetivo: objetivo, mensaje: 'borrar ' + o.nombre };
+            if (dentro.length) {
+                // NUEVO (4 nov): con platos, primero ofrece moverlos a otra categoría.
+                if (hayPendiente()) { alert('Antes guarda los cambios del editor ("Guardar cambios en web") y espera a que termine.'); return; }
+                var conf = typeof window.confirmarEditor === 'function' ? window.confirmarEditor : function (t) { return Promise.resolve(confirm(t)); };
+                var mover = await conf('"' + o.nombre + '" tiene ' + dentro.length + ' plato(s). ¿Quieres moverlos a otra categoría antes de borrarla?', { si: 'Sí, moverlos', no: 'No, borrarlos' });
+                if (mover) {
+                    var sel = $('ew-g-destino');
+                    if (sel) { sel.scrollIntoView({ block: 'center' }); sel.focus(); sel.style.outline = '3px solid #f59e0b'; setTimeout(function () { sel.style.outline = ''; }, 2500); }
+                    else alert('No hay otra categoría a la que moverlos.');
+                    return;
+                }
+                if (!(await conf('Se borrarán "' + o.nombre + '" y sus ' + dentro.length + ' plato(s) (' + dentro[0] + (dentro.length > 1 ? '–' + dentro[dentro.length - 1] : '') + '), con su Info y traducciones. En los Menús Especiales que los usen se quedan con su nombre (como platos manuales). No se puede deshacer. ¿Borrar?', { si: 'Sí, borrar todo', no: 'Cancelar' }))) return;
+            } else if (b.dataset.seguro !== '1') { b.dataset.seguro = '1'; b.textContent = '¿Seguro? Pulsa otra vez'; return; }
+            var cambio = { tipo: 'borrar', objetivo: objetivo, conPlatos: dentro.length > 0, mensaje: 'borrar ' + o.nombre + (dentro.length ? ' (' + dentro.length + ' platos)' : '') };
             try { aplicar(est, cambio, ids); } catch (err) { alert(err.message); return; }
             b.disabled = true;
             if (!(await guardarCambio(cambio))) { b.disabled = false; return; }
-            await trasGuardar(v, '✔ "' + o.nombre + '" borrada.');
+            await trasGuardar(v, '✔ "' + o.nombre + '" borrada' + (dentro.length ? ' con sus ' + dentro.length + ' plato(s)' : '') + '.', dentro.length > 0);
         };
     }
 
