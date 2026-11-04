@@ -12,7 +12,7 @@
     'use strict';
 
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.postres_print = '1.9.0'; // 3 nov: helados y bebidas opcionales (Club House: solo sus Postres de la carta) + título de la sección en config.js (POSTRES_SECCION_TITULO). 1.8.5: 3 nov: rangos desde datos.json (categorias.js). 1.8.4: marco con más aire lateral. 1.8.3: sabor con descripción: ES+descripción en 1ª línea, inglés debajo. 1.8.2: descripción //..// también en sabores de helado. 1.8.1: pantalla = impresión (neutraliza styles.css), hoja centrada con márgenes "Ninguno". 1.8.0: puntitos a todo el ancho en helados, tarro centrado con los sabores, sin "Todos / All", logo mayor. 1.7.0: inglés en 1 línea + alérgenos comunes de helados una sola vez. 1.6.1: // botella+copa agrupadas y solapadas. 1.6.0: // varias imágenes por bebida (botella + copa). 1.5.0: // bebidas en una sola línea. 1.4.0: // puntitos desde el nombre ES. 1.3.3: // marco separado de los bordes del A4 // marco de dos hojas superpuestas. 1.2.0: // alérgenos de sabores en línea con el nombre. 1.1.0: // helado más pequeño, escala por botella, alérgenos como el editor
+    window.APP_VERSIONS.postres_print = '1.10.0'; // 4 nov: plantilla neutra (window.MARCA): logo y QR propios, solo los QR subidos. 1.9.0: 3 nov: helados y bebidas opcionales (Club House: solo sus Postres de la carta) + título de la sección en config.js (POSTRES_SECCION_TITULO). 1.8.5: 3 nov: rangos desde datos.json (categorias.js). 1.8.4: marco con más aire lateral. 1.8.3: sabor con descripción: ES+descripción en 1ª línea, inglés debajo. 1.8.2: descripción //..// también en sabores de helado. 1.8.1: pantalla = impresión (neutraliza styles.css), hoja centrada con márgenes "Ninguno". 1.8.0: puntitos a todo el ancho en helados, tarro centrado con los sabores, sin "Todos / All", logo mayor. 1.7.0: inglés en 1 línea + alérgenos comunes de helados una sola vez. 1.6.1: // botella+copa agrupadas y solapadas. 1.6.0: // varias imágenes por bebida (botella + copa). 1.5.0: // bebidas en una sola línea. 1.4.0: // puntitos desde el nombre ES. 1.3.3: // marco separado de los bordes del A4 // marco de dos hojas superpuestas. 1.2.0: // alérgenos de sabores en línea con el nombre. 1.1.0: // helado más pequeño, escala por botella, alérgenos como el editor
 
     // 3 nov: rangos de la categoría "hoja-postres" de datos.json (categorias.js); si no hay, config.js.
     const rangos = () => (window.Categorias && window.Categorias.rangosHojaPostres()) || POSTRES_HOJA_RANGOS;
@@ -42,6 +42,13 @@
             bebidasWrapperId: 'postres-bebidas-img-usopen'
         }
     };
+    // 4 nov: PLANTILLA NEUTRA (marca.js): logo y QR de la propia web, leídos al pintar.
+    if (window.MARCA && window.EDITOR_SITIO && POSTRES_CONFIG[window.EDITOR_SITIO.modo]) {
+        const c = POSTRES_CONFIG[window.EDITOR_SITIO.modo], MK = window.MARCA;
+        Object.defineProperty(c, 'logoSrc', { get: () => MK.src('logo') });
+        Object.defineProperty(c, 'qrDefault', { get: () => MK.src('qr') });
+        Object.defineProperty(c, 'qrMod', { get: () => MK.src('qrAlt') });
+    }
 
     if (!document.getElementById('postres-print-styles')) {
         const st = document.createElement('style');
@@ -207,7 +214,7 @@
             <div class="sugerencias-debug-a4"></div>
             <div class="sugerencias-header-layout">
                 <div class="sugerencias-brand-title-group"><div class="sugerencias-title-es">POSTRES</div><div class="sugerencias-title-en">DESSERTS</div></div>
-                <img src="${config.logoSrc}" class="sugerencias-logo-img">
+                ${config.logoSrc ? `<img src="${config.logoSrc}" class="sugerencias-logo-img">` : ''}
             </div><div class="sugerencias-body">`;
 
         if (postres.length) {
@@ -280,7 +287,7 @@
         if (helados.length && POSTRES_HELADO_IMAGEN) imagenesCtl += `<label style="${lbl(est.heladoImg)}"><input type="checkbox" ${est.heladoImg ? 'checked' : ''} onchange="window.setOpcionPostres('${modo}','heladoImg',this.checked)"> Helado</label>`;
         conImagen.forEach(p => { const id = parseInt(p.id, 10); const on = imgVisible(id); imagenesCtl += `<label style="${lbl(on)}"><input type="checkbox" ${on ? 'checked' : ''} onchange="window.setOpcionPostres('${modo}','bebidaImg',this.checked,${id})"> ${window.desglosarNombre(p.es).nombre}</label>`; });
         const escalaCtl = M.VINO_IMAGEN_ESCALAS.map(x => `<label style="${lbl(x === est.escala)}"><input type="radio" name="postres-escala-${modo}" ${x === est.escala ? 'checked' : ''} onchange="window.setOpcionPostres('${modo}','escala',${x})"> ${x}x</label>`).join('');
-        const qrCtl = [['none', 'Sin QR'], ['default', 'Oficial'], ['mod', 'Alternativo']].map(([v, t]) => `<label style="${lbl(v === est.qr)}"><input type="radio" name="${config.qrRadioName}" ${v === est.qr ? 'checked' : ''} onchange="window.setOpcionPostres('${modo}','qr','${v}')"> ${t}</label>`).join('');
+        const qrCtl = [['none', 'Sin QR'], ['default', 'Oficial'], ['mod', 'Alternativo']].filter(([v]) => v === 'none' || !window.MARCA || (v === 'default' ? config.qrDefault : config.qrMod)).map(([v, t]) => `<label style="${lbl(v === est.qr)}"><input type="radio" name="${config.qrRadioName}" ${v === est.qr ? 'checked' : ''} onchange="window.setOpcionPostres('${modo}','qr','${v}')"> ${t}</label>`).join('');
 
         const nombreCorto = (p) => window.desglosarNombre(p.es).nombre || p.es || ('#' + p.id);
         const quitarCtl = visibles.length ? `<div class="sugerencias-selector-quitar-plato" style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:10px; padding-top:10px; border-top:1px solid #cbd5e1;">

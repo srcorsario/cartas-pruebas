@@ -138,6 +138,10 @@ header {
     vertical-align: middle;
 }
 
+/* Plantilla neutra: logo propio de la web (datos.json -> "marca", ver script.js aplicarMarcaDeBase) */
+img.header-logo.logo-marca { height: 80px; max-height: 80px; max-width: 70vw; }
+@media (max-width: 480px) { img.header-logo.logo-marca { height: 64px; max-height: 64px; } }
+
 /* Tamaños de logo ajustados a mano (ver historial): no tocar sin probar visualmente */
 img.header-logo[src*="logo RG_REST.png"] {
     height: 90px;

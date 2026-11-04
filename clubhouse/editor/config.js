@@ -1,7 +1,14 @@
 // --- config.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.config = '2.4.0'; // 3 nov: hoja de Postres (7001-7099) y Menús Especiales sin hoja. 2.3.0: NUEVO: PASSWORD_ELIMINAR_PLATO — contraseña que pide el editor antes de borrar un plato de verdad
+window.APP_VERSIONS.config = '2.5.0-clubhouse'; // 4 nov: plantilla neutra (window.MARCA, marca.js): sin nombres, logos, QR ni imágenes de RG/US Open/Club House. Anterior 2.4.0: 3 nov: hoja de Postres (7001-7099) y Menús Especiales sin hoja. 2.3.0: NUEVO: PASSWORD_ELIMINAR_PLATO — contraseña que pide el editor antes de borrar un plato de verdad
+
+// =====================================================================
+// 4 nov: PLANTILLA NEUTRA. Webs nuevas (sitio.json con "marca"): marca.js define window.MARCA
+// (nombre, logo, logoMenu, qr, qrAlt) y aquí se usa en lugar de lo de RG/US Open/Club House.
+// Sin "marca" (RG, US Open, Club House) window.MARCA = null y todo sigue igual que antes.
+// =====================================================================
+const MARCA_WEB = window.MARCA || null;
 
 // =====================================================================
 // NUEVO: SISTEMA DE ENABLE/DISABLE DE RESTAURANTES (Desacoplamiento Visual)
@@ -33,6 +40,7 @@ const MODOS_ALIAS = {
 // NUEVO: Función helper para obtener el nombre visual seguro
 function getModoAlias(modoInterno) {
     if (typeof modoInterno === 'undefined' || modoInterno === null) return '';
+    if (window.MARCA && window.EDITOR_SITIO && modoInterno === window.EDITOR_SITIO.modo) return window.MARCA.nombre;
     return MODOS_ALIAS[modoInterno] || modoInterno;
 }
 
@@ -42,8 +50,9 @@ function getModoAlias(modoInterno) {
 // =====================================================================
 
 // CONFIGURACION CLUB HOUSE (restaurante001)
-const CSV_URL_RESTAURANTE001 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpVWFPsuWkDT5wtr5mM8H0JFC8d0ePBCKJxcXDyyfX7M5FOZ1UXUqRrPiOaLeq_tYt9n9-a1iabKPR/pub?output=csv';
-const WEB_APP_URL_RESTAURANTE001 = 'https://script.google.com/macros/s/AKfycbxzwOUB9Bb7HbngjGuvqhDPF0JCQsuOfwnqZNsUBzS6TDTrJjuC3ZTTe0N0sZElu1jXrg/exec';
+// Plantilla neutra: direcciones ficticias (solo las intercepta almacen-json.js; nunca la hoja de otro restaurante).
+const CSV_URL_RESTAURANTE001 = MARCA_WEB ? 'sin-hoja://carta-csv' : 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpVWFPsuWkDT5wtr5mM8H0JFC8d0ePBCKJxcXDyyfX7M5FOZ1UXUqRrPiOaLeq_tYt9n9-a1iabKPR/pub?output=csv';
+const WEB_APP_URL_RESTAURANTE001 = MARCA_WEB ? 'sin-hoja://carta' : 'https://script.google.com/macros/s/AKfycbxzwOUB9Bb7HbngjGuvqhDPF0JCQsuOfwnqZNsUBzS6TDTrJjuC3ZTTe0N0sZElu1jXrg/exec';
 
 // restaurante002: ranura inactiva en esta copia independiente de Club House (enabled: false
 // arriba). Se vacían las URLs para no dejar en este proyecto ninguna referencia a la hoja/
@@ -161,12 +170,12 @@ const PATH_IMAGENES = 'imagenes/imagenes/';
 const PATH_ALERGENOS = 'imagenes/alergenos/';
 
 // Logos Principales (Header del Editor)
-const LOGO_RESTAURANTE001 = PATH_IMAGENES + 'logo-clubhouse.png';
+const LOGO_RESTAURANTE001 = MARCA_WEB ? MARCA_WEB.src('logo') : PATH_IMAGENES + 'logo-clubhouse.png';
 const LOGO_RESTAURANTE002 = PATH_IMAGENES + 'logo_web02.png';
 
 // Códigos QR Roland Garros
-const QR_RESTAURANTE001_DEFAULT = PATH_IMAGENES + 'qr-web01-02.png'; 
-const QR_RESTAURANTE001_MOD = PATH_IMAGENES + 'qr-web01-01.png';            
+const QR_RESTAURANTE001_DEFAULT = MARCA_WEB ? MARCA_WEB.src('qr') : PATH_IMAGENES + 'qr-web01-02.png'; 
+const QR_RESTAURANTE001_MOD = MARCA_WEB ? MARCA_WEB.src('qrAlt') : PATH_IMAGENES + 'qr-web01-01.png';            
 
 // Códigos QR US Open
 const QR_RESTAURANTE002_DEFAULT = PATH_IMAGENES + 'qr-web02-01.png'; 
@@ -175,7 +184,7 @@ const QR_RESTAURANTE002_MOD = PATH_IMAGENES + 'qr-web02-02.png';
 // =====================================================================
 // NUEVO: IMAGEN DEL VINO "EL TENISTA" (ID 12990) EN LA HOJA DE SUGERENCIAS
 // =====================================================================
-const VINO_IMAGEN_TENISTA = 'imagenes/vinos/tenista_pegado.webp';
+const VINO_IMAGEN_TENISTA = MARCA_WEB ? '' : 'imagenes/vinos/tenista_pegado.webp';
 const VINO_IMAGEN_DEFAULT_RESTAURANTE001 = true;  // true = "Con imagen Vino" marcado por defecto
 const VINO_IMAGEN_DEFAULT_RESTAURANTE002 = true;
 
@@ -200,7 +209,7 @@ const APERITIVO_IMAGEN_CANONITA = '';
 // bloque de helados ni de bebidas. Con la estructura de datos.json manda la categoría que
 // lleve "hojaPostres": true (categorias.js); esto es solo la reserva.
 const POSTRES_HOJA_RANGOS = { postres: [7001, 7099], helados: null, bebidas: null };
-const POSTRES_SECCION_TITULO = 'NUESTROS POSTRES / OUR DESSERTS';
+const POSTRES_SECCION_TITULO = 'NUESTROS POSTRES / OUR DESSERTS';  // genérico, vale también para la plantilla neutra
 const POSTRES_HELADOS_TITULO_ES = '';
 const POSTRES_HELADOS_TITULO_EN = '';
 const POSTRES_HELADOS_SUBTITULO_ES = '';
@@ -220,7 +229,7 @@ const POSTRES_QR_TIPO_DEFAULT_RESTAURANTE002 = 'none';
 // Club House no tiene hoja de Menús Especiales: almacen-json.js guarda sus menús y "Mis
 // Platos" en menus-especiales.json (junto a datos.json) y, al no ser una URL http, empieza
 // vacío sin copiar nada. Es solo la "dirección" que intercepta almacen-json.js.
-const WEBAPP_URL_MENUS_ESPECIALES = 'sin-hoja://menus-especiales-clubhouse';
+const WEBAPP_URL_MENUS_ESPECIALES = MARCA_WEB ? 'sin-hoja://menus-especiales' : 'sin-hoja://menus-especiales-clubhouse';
 window.WEBAPP_URL_MENUS_ESPECIALES = WEBAPP_URL_MENUS_ESPECIALES;
 
 

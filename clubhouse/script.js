@@ -7,7 +7,7 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.4.0'; // 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
+const APP_VERSION = 'v4.5.0'; // 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
@@ -137,6 +137,26 @@ function filtrarPestanas(ocultas) {
 
 // v4.4: al llegar base.json, si trae "pestanas" distintas de las que hay, se cambian (y se
 // repinta si ya había algo pintado). En el caso normal son las mismas y no se toca nada.
+// v4.5: plantilla neutra (webs con "marca" en sitio.json): logo de la cabecera desde base.json
+// ("marca" -> "logo", ruta relativa a la web). construir.ps1 ya lo pone en index.html; esto lo
+// cambia sin reconstruir cuando se sube otro desde el editor (🏷️ Logos y QR).
+function aplicarMarcaDeBase(base) {
+    const B = window.CARTA_BUILD || {};
+    if (!base || (!base.marca && !B.marca)) return;
+    const m = base.marca || {};
+    const cont = document.querySelector('.header-logos');
+    if (!cont) return;
+    let img = document.getElementById('logo-marca');
+    if (!m.logo) { if (img) img.remove(); return; }
+    if (!img) {
+        img = document.createElement('img');
+        img.id = 'logo-marca'; img.className = 'header-logo logo-marca';
+        cont.insertBefore(img, cont.firstChild);
+    }
+    img.alt = m.nombre || img.alt || '';
+    if (img.getAttribute('src') !== m.logo) img.setAttribute('src', m.logo);
+}
+
 function aplicarPestanasDeBase(base) {
     if (!base || !Array.isArray(base.pestanas) || !base.pestanas.length) return;
     guardarPestanasCacheLocal(base.pestanas);
@@ -385,7 +405,7 @@ async function init() {
 
         // v4.4: pestañas de base.json. Se pide aquí, antes que nada, para que (sin caché) estén
         // puestas antes del primer pintado: fetchAndParseCsv espera a esta misma petición.
-        if (DATOS_TIPO === 'json') jsonBase().then(aplicarPestanasDeBase).catch(() => { });
+        if (DATOS_TIPO === 'json') jsonBase().then(b => { aplicarMarcaDeBase(b); aplicarPestanasDeBase(b); }).catch(() => { });
 
         const categoriasPromise = fetchCategoriasDeshabilitadas();
 
