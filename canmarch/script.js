@@ -144,6 +144,12 @@ function aplicarMarcaDeBase(base) {
     const B = window.CARTA_BUILD || {};
     if (!base || (!base.marca && !B.marca)) return;
     const m = base.marca || {};
+    const ico = m.favicon || m.logo;
+    if (ico) {
+        let l = document.querySelector('link[rel="icon"]');
+        if (!l) { l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
+        if (l.getAttribute('href') !== ico) { l.removeAttribute('type'); l.setAttribute('href', ico); }
+    }
     const cont = document.querySelector('.header-logos');
     if (!cont) return;
     let img = document.getElementById('logo-marca');
