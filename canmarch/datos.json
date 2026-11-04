@@ -2,10 +2,10 @@
   "formato": 1,
   "restaurante": "canmarch",
   "generado": "2026-11-04T19:30:00",
-  "guardado": "",
+  "guardado": "2026-11-04T19:17:35.505Z",
   "ocultas": [],
   "idiomas": [],
-  "marca": {"nombre": "Can March"},
+  "marca": {"nombre":"Can March"},
   "estructura": {
     "version": 1,
     "categorias": [
@@ -29,261 +29,1044 @@
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Hilos de calamar en su tinta // Panceta y soja"
+            "ES": "Hilos de calamar en su tinta // Panceta y soja",
+            "EN": "Squid strands in its ink //Pork belly and soy//",
+            "DE": "Tintenfischfäden in eigener Tinte //Schweinebauch und Soja//",
+            "FR": "Filaments de calamar dans son encre //Poitrine de porc et soja//",
+            "IT": "Fili di calamaro nel suo nero //Pancetta di maiale e soia//",
+            "RU": "Нити из кальмара в своих чернилах //Свиная грудинка и соя//",
+            "NL": "Inktvisdraden in eigen inkt //Buikspek en soja//",
+            "PL": "Nitki z kałamarnicy w własnym atramencie //Boczek wieprzowy i soja//",
+            "SV": "Bläckfisktrådar i sitt eget bläck //Sidfläsk och soja//",
+            "NO": "Akkarstrimler i sitt eget blekk //Svineribbe og soya//",
+            "DA": "Blækspruttetråde i eget blæk //Brystflæsk og soja//",
+            "FI": "Mustekalasäikeet omassa musteessaan //Porsaankylki ja soija//",
+            "PT": "Fios de lula na sua tinta //Barriga de porco e soja//",
+            "RO": "Fire de calmar în cerneală proprie //Burtă de porc și soia//",
+            "HU": "Tintahalszálak saját tintájában //Császárhús és szója//",
+            "CS": "Sépiové nitě ve vlastním inkoustu //Vepřový bůček a sója//",
+            "EL": "Νήματα καλαμαριού στο μελάνι του //Πανσέτα και σόγια//",
+            "TR": "Mürekkebinde mürekkepbalığı iplikçikleri //Domuz döşü ve soya//",
+            "AR": "خيوط الحبار بحبره //بطن الخنزير والصويا//",
+            "ZH": "墨汁鱿鱼丝 //猪五花肉和酱油//",
+            "JA": "イカ墨のイカヌードル //豚バラ肉と醤油//",
+            "CA": "Fils de calamar en la seva tinta //Cansalada i soja//",
+            "EU": "Zekale-tintako kalamar-hariak //Pantseta eta soja//",
+            "GL": "Fíos de calamar na súa tinta //Panceta e soia//",
+            "VA": "Fils de calamar en la seua tinta //Cansalada i soja//",
+            "KO": "오징어먹물 오징어 채 //돼지 삼겹살과 간장//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "d7c4932f"
+        }
     },
     {
         "id": "1002", "activa": "si", "precio": "17.00", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Tartar de tres pescados // Aguacate, flores y sésamo"
+            "ES": "Tartar de tres pescados // Aguacate, flores y sésamo",
+            "EN": "Three-fish tartare //Avocado, flowers and sesame//",
+            "DE": "Tartar von drei Fischsorten //Avocado, Blüten und Sesam//",
+            "FR": "Tartare de trois poissons //Avocat, fleurs et sésame//",
+            "IT": "Tartare di tre pesci //Avocado, fiori e sesamo//",
+            "RU": "Тартар из трех видов рыбы //Авокадо, цветы и кунжут//",
+            "NL": "Tartaar van drie soorten vis //Avocado, bloemen en sesam//",
+            "PL": "Tatar z trzech ryb //Awokado, kwiaty i sezam//",
+            "SV": "Tartar på tre sorters fisk //Avokado, blommor och sesam//",
+            "NO": "Tartar av tre typer fisk //Avokado, blomster og sesam//",
+            "DA": "Tartar af tre slags fisk //Avocado, blomster og sesam//",
+            "FI": "Kolmen kalan tartare //Avokado, kukat ja seesami//",
+            "PT": "Tártaro de três peixes //Abacate, flores e sésamo//",
+            "RO": "Tartar din trei tipuri de pește //Avocado, flori și susan//",
+            "HU": "Háromféle hal-tartár //Avokádó, virágok és szezámmag//",
+            "CS": "Tartár ze tří druhů ryb //Avokádo, květiny a sezam//",
+            "EL": "Ταρτάρ τριών ψαριών //Αβοκάντο, λουλούδια και σησάμι//",
+            "TR": "Üç çeşit balık tartarı //Avokado, çiçekler ve susam//",
+            "AR": "تارتار من ثلاثة أنواع من الأسماك //أفوكادو، أزهار وسمسم//",
+            "ZH": "三色鱼塔塔 //牛油果、鲜花和芝麻//",
+            "JA": "3種の魚のタルタル //アボカド、エディブルフラワー、セサミ//",
+            "CA": "Tartar de tres peixos //Alvocat, flors i sèsam//",
+            "EU": "Hiru arrainen tartarra //Abokatua, loreak eta sesamoa//",
+            "GL": "Tártaro de tres peixes //Aguacate, flores e sésamo//",
+            "VA": "Tartar de tres peixos //Alvocat, flors i sèsam//",
+            "KO": "세 가지 생선 타르타르 //아보카도, 꽃, 참깨//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "eeea5bc3"
+        }
     },
     {
         "id": "1003", "activa": "si", "precio": "13.50", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Coca de trigo de “xeixa” integral ecológica // Calabacín, cebolla confitada y queso de cabra artesano de Mallorca"
+            "ES": "Coca de trigo de “xeixa” integral ecológica // Calabacín, cebolla confitada y queso de cabra artesano de Mallorca",
+            "EN": "Organic whole wheat “xeixa” coca //Zucchini, confit onion and artisan Mallorcan goat cheese//",
+            "DE": "Bio-Vollkorn-„Xeixa“-Coca //Zucchini, Zwiebelconfit und handwerklicher Ziegenkäse aus Mallorca//",
+            "FR": "Coca au blé complet « xeixa » biologique //Courgette, oignon confit et fromage de chèvre artisanal de Majorque//",
+            "IT": "Coca di grano \"xeixa\" integrale biologica //Zucchine, cipolla confit e formaggio artigianale di capra di Maiorca//",
+            "RU": "Органическая цельнозерновая кока из пшеницы «ксейша» //Cуккини, лук конфи и ремесленный козий сыр с Майорки//",
+            "NL": "Biologische volkoren \"xeixa\"-coca //Courgette, geconfijte ui en ambachtelijke geitenkaas uit Mallorca//",
+            "PL": "Ekologiczna razowa coca z pszenicy „xeixa” //Cukinia, kandyzowana cebula i rzemieślniczy ser kozi z Majorki//",
+            "SV": "Ekologisk fullkorns-coca på xeixa-vete //Zucchini, lökconfit och hantverksmässig getost från Mallorca//",
+            "NO": "Økologisk fullkorns-coca av «xeixa»-hvetemeel //Squash, konfitert løk og håndverksmessig geitost fra Mallorca//",
+            "DA": "Økologisk fuldkorns «xeixa» hvede-coca //Squash, confiteret løg og håndværksmæssig gedeost fra Mallorca//",
+            "FI": "Luomu täysjyvä \"xeixa\" -vehnäcoca //Kesäkurpitsa, sipulikonfitti ja mallorcalainen käsintehty vuohenjuusto//",
+            "PT": "Coca de trigo “xeixa” integral biológica //Abobrinha, cebola confitada e queijo de cabra artesanal de Maiorca//",
+            "RO": "Coca din grâu integral ecologic „xeixa” //Dovlecel, ceapă confiată și brânză artizanală de capră din Mallorca//",
+            "HU": "Bio teljes kiőrlésű „xeixa” búza coca //Cukkini, konfitált hagyma és kézműves mallorcai kecskesajt//",
+            "CS": "Biologická celozrnná coca z pšenice „xeixa” //Cuketa, konfitovaná cibule a řemeslný kozí sýr z Mallorky//",
+            "EL": "Βιολογική coca ολικής άλεσης από σιτάρι «xeixa» //Κολοκυθάκι, καραμελωμένο κρεμμύδι και χειροποίητο κατσικίσιο τυρί Μαγιόρκας//",
+            "TR": "Organik tam buğday \"xeixa\" cocası //Kabak, konfi soğan ve Mayorka zanaatkar keçi peyniri//",
+            "AR": "كوكا القمح الخيشة الكامل العضوي //كوسا، بصل معقود وجبن ماعز حرفي من مايوركا//",
+            "ZH": "有机全麦“xeixa”小麦可卡薄饼 //西葫芦、糖渍洋葱和马略卡手工山羊奶酪//",
+            "JA": "オーガニック全粒粉「xeixa」小麦のコカ //ズッキーニ、玉ねぎのコンフィ、マヨルカ産手作りヤギのチーズ//",
+            "CA": "Coca de blat de “xeixa” integral ecològica //Carbassó, ceba confitada i formatge de cabra artesà de Mallorca//",
+            "EU": "\"Xeixa\" ogi-koka oso ekologikoa //Kalabazina, tipula konfitatua eta Mallorcako artisau ahuntz gasna//",
+            "GL": "Coca de trigo de “xeixa” integral ecolóxica //Calabacín, cebola confitada e queixo de cabra artesán de Mallorca//",
+            "VA": "Coca de blat de “xeixa” integral ecològica //Carbassó, ceba confitada i formatge de cabra artesà de Mallorca//",
+            "KO": "유기농 통밀 \"xeixa\" 밀 코카 //애호박, 양파 콘피, 마요르카산 수제 염소 치즈//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "7586f10"
+        }
     },
     {
         "id": "1004", "activa": "si", "precio": "13.50", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Coca de trigo de “xeixa” integral ecológica // Verduras con bacalao, tomate de ramillete y Tap de Cortí"
+            "ES": "Coca de trigo de “xeixa” integral ecológica // Verduras con bacalao, tomate de ramillete y Tap de Cortí",
+            "EN": "Organic wholemeal “xeixa” wheat coca //Vegetables with cod, ramellet tomato and Tap de Cortí//",
+            "DE": "Bio-Vollkorn-„Xeixa“-Weizen-Coca //Gemüse mit Kabeljau, Ramellet-Tomate und Tap de Cortí//",
+            "FR": "Coca de blé « xeixa » complet biologique //Légumes au cabillaud, tomate de ramillete et Tap de Cortí//",
+            "IT": "Coca di grano \"xeixa\" integrale biologico //Verdure con merluzzo, pomodoro ramellet e Tap de Cortí//",
+            "RU": "Органическая цельнозерновая кока из пшеницы «xeixa» //Овощи с треской, томатами рамильете и Tap de Cortí//",
+            "NL": "Biologische volkoren \"xeixa\"-tarwecoca //Groenten met kabeljauw, ramellet-tomaat en Tap de Cortí//",
+            "PL": "Ekologiczna pełnoziarnista coca z pszenicy „xeixa” //Warzywa z dorszem, pomidorem ramillete i Tap de Cortí//",
+            "SV": "Ekologisk fullkorns \"xeixa\"-vetecoca //Grönsaker med torsk, ramellet-tomat och Tap de Cortí//",
+            "NO": "Økologisk fullkorns «xeixa»-hvetecoca //Grønnsaker med torsk, ramellet-tomat og Tap de Cortí//",
+            "DA": "Økologisk fuldkorns \"xeixa\"-hvedecoca //Grøntsager med torsk, ramellet-tomat og Tap de Cortí//",
+            "FI": "Luomu täysjyväinen \"xeixa\"-vehnäcoca //Kasviksia, turskaa, ramellet-tomaattia ja Tap de Cortí -paprikaa//",
+            "PT": "Coca de trigo \"xeixa\" integral biológica //Legumes com bacalhau, tomate ramellet e Tap de Cortí//",
+            "RO": "Coca din grâu „xeixa” integral ecologic //Legume cu cod, roșie ramillete și Tap de Cortí//",
+            "HU": "Bio teljes kiőrlésű „xeixa” búza coca //Zöldségek tőkehallal, ramillete paradicsommal és Tap de Cortí-val//",
+            "CS": "Bio celozrnná coca z pšenice „xeixa“ //Zelenina s treskou, rajčetem ramillete a Tap de Cortí//",
+            "EL": "Βιολογική coca ολικής άλεσης από σιτάρι «xeixa» //Λαχανικά με μπακαλιάρο, ντομάτα ramillete και Tap de Cortí//",
+            "TR": "Organik tam buğday \"xeixa\" cocası //Berlam balığı, ramillete domatesi ve Tap de Cortí ile sebzeler//",
+            "AR": "كوكا قمح \"شيشا\" الكاملة العضوية //خضروات مع سمك القد، طماطم راماييت وTap de Cortí//",
+            "ZH": "有机全麦“xeixa”小麦考卡饼 //鳕鱼挂藤番茄配Tap de Cortí蔬菜//",
+            "JA": "有機全粒「xeixa」小麦のコカ //タラ、ラミジェテトマト、Tap de Cortí入り野菜//",
+            "CA": "Coca de blat de “xeixa” integral ecològica //Verdures amb bacallà, tomàquet de ramellet i Tap de Cortí//",
+            "EU": "“Xeixa” garnis wits osoko koka ekologikoa //Barazkiak bakailaoarekin, ramellet tomatearekin eta Tap de Cortí-rekin//",
+            "GL": "Coca de trigo de “xeixa” integral ecolóxica //Verduras con bacallau, tomate de ramillete e Tap de Cortí//",
+            "VA": "Coca de blat de xeixa integral ecològica //Verdures amb bacallà, tomaca de penjar i Tap de Cortí//",
+            "KO": "유기농 통밀 \"xeixa\" 코카 //대구, 라밀레테 토마토, Tap de Cortí를 넣은 야채//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "cede94f1"
+        }
     },
     {
         "id": "1005", "activa": "si", "precio": "13.50", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Surtido de 3 mini cocas"
+            "ES": "Surtido de 3 mini cocas",
+            "EN": "Assortment of 3 mini cocas",
+            "DE": "Auswahl von 3 Mini-Cocas",
+            "FR": "Assortiment de 3 mini cocas",
+            "IT": "Assortimento di 3 mini cocas",
+            "RU": "Ассорти из 3 мини-кока",
+            "NL": "Assortiment van 3 mini-coca's",
+            "PL": "Zestaw 3 mini coca",
+            "SV": "Sortiment av 3 mini-cocas",
+            "NO": "Utvalg av 3 mini-cocas",
+            "DA": "Udvalg af 3 mini-cocas",
+            "FI": "Valikoima 3 mini-cogaa",
+            "PT": "Sortido de 3 mini cocas",
+            "RO": "Selecție de 3 mini cocas",
+            "HU": "3 db mini coca válogatás",
+            "CS": "Výběr 3 mini cocas",
+            "EL": "Ποικιλία από 3 mini cocas",
+            "TR": "3'lü mini coca çeşitleri",
+            "AR": "تشكيلة من 3 كوكا صغيرة",
+            "ZH": "3款迷你考卡饼拼盘",
+            "JA": "3種のミニコカ盛り合わせ",
+            "CA": "Sortiment de 3 mini coques",
+            "EU": "3 mini koka sorta",
+            "GL": "Surtido de 3 mini cocas",
+            "VA": "Sortiment de 3 mini coques",
+            "KO": "3가지 미니 코카 모듬"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "6b69c485"
+        }
     },
     {
         "id": "1006", "activa": "si", "precio": "14.00", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Croquetas //de merluza y espinacas// //de pollo campero y jamón ibérico// //de setas y avellanas// //mixtas//"
+            "ES": "Croquetas //de merluza y espinacas// //de pollo campero y jamón ibérico// //de setas y avellanas// //mixtas//",
+            "EN": "Croquettes //hake and spinach// , //free-range chicken and Iberian ham// , //wild mushroom and hazelnut// , //mixed//",
+            "DE": "Kroketten //mit Seehecht und Spinat// , //mit Freilandhuhn und Iberischem Schinken// , //mit Pilzen und Haselnüssen// , //gemischt//",
+            "FR": "Croquettes //de merlu et épinards// , //de poulet fermier et jambon ibérique// , //de champignons et noisettes// , //mixtes//",
+            "IT": "Crocchette //di nasello e spinaci// , //di pollo ruspante e prosciutto iberico// , //di funghi e nocciole// , //miste//",
+            "RU": "Крокеты //с хэком и шпинатом// , //с фермерской курицей и иберийским хамоном// , //с грибами и фундуком// , //ассорти//",
+            "NL": "Kroketten //met heek en spinazie// , //met scharrelkip en Iberische ham// , //met paddenstoelen en hazelnoten// , //gemengd//",
+            "PL": "Krokety //z morszczukiem i szpinakiem// , //z kurczakiem zagrodowym i szynką iberyjską// , //z grzybami i orzechami laskowymi// , //mieszane//",
+            "SV": "Kroketter //med kummel och spenat// , //med frigående kyckling och iberisk skinka// , //med svamp och hasselnötter// , //blandade//",
+            "NO": "Kroketter //med lysing og spinat// , //med frittgående kylling og iberisk skinke// , //med sopp og hasselnøtter// , //blandede//",
+            "DA": "Kroketter //med kulmule og spinat// , //med frilandskylling og iberisk skinke// , //med svampe og hasselnødder// , //blandede//",
+            "FI": "Kroketit //kummeliturskalla ja pinaatilla// , //maalaiskanalla ja ibérico-kinkulla// , //sienillä ja hasselpähkinällä// , //sekoitus//",
+            "PT": "Croquetes //de pescada e espinafres// , //de frango do campo e presunto ibérico// , //de cogumelos e avelãs// , //mistos//",
+            "RO": "Crochete //cu merluciu și spanac// , //cu pui de țară și șuncă iberică// , //cu ciuperci și alune de pădure// , //mixte//",
+            "HU": "Krokettek //tőkehallal és spenóttal// , //tanyasi csirkével és ibériai sonkával// , //gombával és mogyoróval// , //vegyes//",
+            "CS": "Krokety //s hejkem a špenátem// , //s farmářským kuřetem a iberskou šunkou// , //s houbami a lískovými oříšky// , //míchané//",
+            "EL": "Κροκέτες //με μπακαλιάρο μερλούκιο και σπανάκι// , //με κοτόπουλο ελευθέρας βοσκής και ιβηρικό χαμόν// , //με μανιτάρια και φουντούκια// , //ανάμεικτες//",
+            "TR": "Kroketler //berlam balığı ve ıspanaklı// , //gezen tavuk ve İber jambonlu// , //mantar ve fındıklı// , //karışık//",
+            "AR": "كروكيت //بالسمك المرلوظ والسبانخ// , //بالدجاج البلدي والجامون الإيبيري// , //بالفطر والبندق// , //مشكّلة//",
+            "ZH": "炸可乐饼 //鳕鱼菠菜味// , //走地鸡与伊比利亚火腿味// , //野蕈榛果味// , //综合拼盘//",
+            "JA": "クロケット //メルルーサとほうれん草// , //地鶏とイベリコ生ハム// , //キノコとヘーゼルナッツ// , //ミックス//",
+            "CA": "Croquetes //de lluç i espinacs// , //de pollastre camper i pernil ibèric// , //de bolets i avellanes// , //mixtes//",
+            "EU": "Kroketak //legatz eta espinakadunak// , //baserriko oilasko eta urdaiazpiko iberikodunak// , //perretxiko eta hurdunak// , //mistoak//",
+            "GL": "Croquetas //de pescada e espinafres// , //de polo campero e xamón ibérico// , //de cogomelos e avelás// , //mixtas//",
+            "VA": "Croquetes //de lluç i espinacs// , //de pollastre camper i pernil ibèric// , //de bolets i avellanes// , //mixtes//",
+            "KO": "크로켓 //대구와 시금치// , //방목 닭고기와 이베리코 하몽// , //버섯과 헤이즐넛// , //모듬//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "109af0b5"
+        }
     },
     {
         "id": "1007", "activa": "si", "precio": "13.50", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Cuadrados de bacalao // Dulce de berenjena y ajo negro"
+            "ES": "Cuadrados de bacalao // Dulce de berenjena y ajo negro",
+            "EN": "Cod squares //Sweet eggplant and black garlic//",
+            "DE": "Kabeljau-Würfel //Süßes Auberginenkompott und schwarzer Knoblauch//",
+            "FR": "Carrés de cabillaud //Douceur d'aubergine et ail noir//",
+            "IT": "Quadretti di merluzzo //Dolce di melanzane e aglio nero//",
+            "RU": "Квадратики из трески //Сладость из баклажанов и чёрный чеснок//",
+            "NL": "Kabeljauwblokjes //Zoete aubergine en zwarte knoflook//",
+            "PL": "Kwadraciki z dorsza //Słodka konfitura z bakłażana i czarny czosnek//",
+            "SV": "Torskkuber //Söt aubergine och svart vitlök//",
+            "NO": "Torsketerninger //Søt aubergine og svart hvitløk//",
+            "DA": "Torskefirkanter //Søde auberginer og sort hvidløg//",
+            "FI": "Turskaneliöt //Makea munakoiso ja mustavalkosipuli//",
+            "PT": "Quadrados de bacalhau //Doce de berinjela e alho negro//",
+            "RO": "Pătrățele de cod //Dulceață de vinete și usturoi negru//",
+            "HU": "Tőkehal kockák //Édes padlizsán és fekete fokhagyma//",
+            "CS": "Čtverečky z tresky //Sladký baklažán a černý česnek//",
+            "EL": "Τετράγωνα μπακαλιάρου //Γλυκό μελιτζάνας και μαύρο σκόρδο//",
+            "TR": "Morina kareleri //Tatlı patlıcan ve siyah sarımsak//",
+            "AR": "مربعات سمك القد //حلوى الباذنجان والثوم الأسود//",
+            "ZH": "鳕鱼方块 //甜茄子和黑蒜//",
+            "JA": "鱈のスクエア //茄子のコンフィチュールと黒ニンニク//",
+            "CA": "Quadrats de bacallà //Dolç d'albergínia i all negre//",
+            "EU": "Bakailao koadroak //Berenjena gozoa eta baratxuri beltza//",
+            "GL": "Cuadrados de bacallá //Doce de berenxena e allo negro//",
+            "VA": "Quadrats de bacallà //Dolç d'albergínia i all negre//",
+            "KO": "대구 사각형 조각 //달콤한 가지와 흑마늘//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "96997739"
+        }
     },
     {
         "id": "1008", "activa": "si", "precio": "14.50", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Ensalada // Queso de cabra artesano de Mallorca, brotes tiernos con membrillo casero, fruta fresca y frutos secos"
+            "ES": "Ensalada // Queso de cabra artesano de Mallorca, brotes tiernos con membrillo casero, fruta fresca y frutos secos",
+            "EN": "Salad //Artisan Mallorcan goat cheese, baby greens with homemade quince paste, fresh fruit and nuts//",
+            "DE": "Salat //Handwerklicher Ziegenkäse aus Mallorca, junge Salatsprossen mit hausgemachtem Quittengelee, frisches Obst und Nüsse//",
+            "FR": "Salade //Fromage de chèvre artisanal de Majorque, jeunes pousses à la pâte de coing maison, fruits frais et fruits secs//",
+            "IT": "Insalata //Formaggio di capra artigianale di Maiorca, germogli teneri con cotognata fatta in casa, frutta fresca e frutta secca//",
+            "RU": "Салат //Ремесленный козий сыр с Майорки, молодые побеги с домашней мармеладой из айвы, свежие фрукты и орехи//",
+            "NL": "Salade //Ambachtelijke geitenkaas uit Mallorca, jonge scheuten met ambachtelijke kweeperengelei, vers fruit en noten//",
+            "PL": "Sałatka //Rzemieślniczy ser kozi z Majorki, młode pędy z domową pigwą, świeże owoce i bakalie//",
+            "SV": "Sallad //Hantverksmässig getost från Mallorca, späda skott med hemgjord kvittengelé, färsk frukt och nötter//",
+            "NO": "Salat //Håndverksmessig geitost fra Mallorca, spirede skudd med hjemmelaget kvede, frisk frukt og nøtter//",
+            "DA": "Salat //Håndværksfremstillet gedost fra Mallorca, spæde skud med hjemmelavet kvæde, frisk frugt og nødder//",
+            "FI": "Salaatti //Käsityönä valmistettu mallorcalainen vuohenjuusto, nuoret versot kotitekoisella kvittenihillolla, tuoreita hedelmiä ja pähkinöitä//",
+            "PT": "Salada //Queijo de cabra artesanal de Maiorca, brotos tenros com marmelada caseira, fruta fresca e frutos secos//",
+            "RO": "Salată //Brânză artizanală de capră din Mallorca, vlăstari fragezi cu pastă de gutui de casă, fructe proaspete și nuci//",
+            "HU": "Saláta //Kézműves mallorcai kecskesajt, zsenge hajtások házi birsalmasajttal, friss gyümölcsök és diófélék//",
+            "CS": "Salát //Řemeslný kozí sýr z Mallorky, mladé výhonky s domácím kdoulovým želé, čerstvé ovoce a ořechy//",
+            "EL": "Σαλάτα //Βιοτεχνικό κατσικίσιο τυρί Μαγιόρκας, τρυφερά φύλλα με σπιτικό κυδωνόπαστο, φρέσκα φρούτα και ξηροί καρποί//",
+            "TR": "Salata //Mallorca el yapımı keçi peyniri, ev yapımı ayva tatlısı ile taze filizler, taze meyve ve kuruyemiş//",
+            "AR": "سلطة //جبن ماعز حرفي من مايوركا، براعم طرية مع سفرجل منزلي، فاكهة طازجة ومكسرات//",
+            "ZH": "沙拉 //马略卡手工山羊奶酪、嫩芽配自制榅桲糕、新鲜水果和坚果//",
+            "JA": "サラダ //マヨルカ産手作りヤギのチーズ、自家製マルメロジャム添えの若芽野菜、フレッシュフルーツとナッツ//",
+            "CA": "Amanida //Formatge de cabra artesà de Mallorca, brots tendres amb codonyat casolà, fruita fresca i fruits secs//",
+            "EU": "Amanida //Mallorcako artisau ahuntz gazta, kimu samurrak etxeko koinatuz, fruta freskoa eta fruitu lehorrak//",
+            "GL": "Ensalada //Queixo de cabra artesán de Mallorca, brotos tenros con membrillo caseiro, froita fresca e froitos secos//",
+            "VA": "Amanida //Formatge de cabra artesà de Mallorca, brots tendres amb codonyat casolà, fruita fresca i fruits secs//",
+            "KO": "샐러드 //마요르카 수제 염소 치즈, 수제 모과 페이스트를 첨가한 어린 잎 채소, 신선한 과일과 견과류//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "7557d66c"
+        }
     },
     {
         "id": "1009", "activa": "si", "precio": "14.50", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Carpaccio de calabacín // Queso DO Menorca madurado, manzana y tomate seco de Manacor aliñado con frutos secos"
+            "ES": "Carpaccio de calabacín // Queso DO Menorca madurado, manzana y tomate seco de Manacor aliñado con frutos secos",
+            "EN": "Zucchini carpaccio //Aged DO Menorca cheese, apple and sun-dried tomato from Manacor dressed with nuts//",
+            "DE": "Zucchini-Carpaccio //Gereifter DO Menorca Käse, Apfel und getrocknete Tomaten aus Manacor, angerichtet mit Nüssen//",
+            "FR": "Carpaccio de courgettes //Fromage AOP Menorca affiné, pomme et tomate séchée de Manacor assaisonnés aux fruits secs//",
+            "IT": "Carpaccio di zucchine //Formaggio DO Menorca stagionato, mela e pomodoro secco di Manacor condito con frutta secca//",
+            "RU": "Карпаччо из кабачков //Выдержанный сыр DO Menorca, яблоко и сушёный томат из Манакора с заправкой из орехов//",
+            "NL": "Zucchini-carpaccio //Rijpe DO Menorca kaas, appel en gedroogde tomaat uit Manacor op smaak gebracht met noten//",
+            "PL": "Carpaccio z cukinii //Dojrzały ser DO Menorca, jabłko i suszony pomidor z Manacor z dodatkiem bakalii//",
+            "SV": "Zuccinicarpaccio //Lagrad DO Menorca-ost, äpple och soltorkad tomat från Manacor med nötter//",
+            "NO": "Squashcarpaccio //Lagret DO Menorca-ost, eple og soltørket tomat fra Manacor dresset med nøtter//",
+            "DA": "Squashcarpaccio //Modnet DO Menorca-ost, æble og soltørret tomat fra Manacor dresseret med nødder//",
+            "FI": "Kesäkurpitsa-carpaccio //Kypsytetty DO Menorca -juusto, omena ja Manacorin kuivattu tomaatti pähkinäkastikkeella//",
+            "PT": "Carpaccio de abobrinha //Queijo DO Menorca curado, maçã e tomate seco de Manacor temperado com frutos secos//",
+            "RO": "Carpaccio de dovlecel //Brânză maturată DO Menorca, măr și roșie uscată din Manacor asezonate cu nuci//",
+            "HU": "Cukkini carpaccio //Élelt DO Menorca sajt, alma és manacori szárított paradicsom diófélékkel ízesítve//",
+            "CS": "Cuketové carpaccio //Zralý sýr DO Menorca, jablko a sušené rajče z Manacoru ochucené ořechy//",
+            "EL": "Καρπάτσιο κολοκυθιού //Παλαιωμένο τυρί DO Menorca, μήλο και αποξηραμένη τομάτα Μανακόρ με ντρέσινγκ ξηρών καρπών//",
+            "TR": "Kabak carpaccio //Olgunlaşmış DO Menorca peyniri, Manacor kuru domatesi ve elma, kuruyemiş soslu//",
+            "AR": "كارباتشيو الكوسة //جبن دو مينوركا المعتق، تفاح وطماطم مجففة من ماناكور متبلة بالمكسرات//",
+            "ZH": "栉瓜卡帕丘 //熟成梅诺卡DO奶酪、苹果和马纳科尔干番茄配坚果//",
+            "JA": "ズッキーニのカルパッチョ //熟成DOメノルカチーズ、リンゴ、マナコール産ドライトマトのナッツドレッシング添え//",
+            "CA": "Carpaccio de carbassó //Formatge DO Menorca madurat, poma i tomàquet sec de Manacor amanit amb fruits secs//",
+            "EU": "Kalabazin-karpatxioa //DO Menorca gazta heldua, sagarra eta Manacorreko tomate lehorra fruitu lehorrekin gozatua//",
+            "GL": "Carpaccio de calabacín //Queixo DO Menorca madurado, mazá e tomate seco de Manacor aliñado con froitos secos//",
+            "VA": "Carpaccio de carbassó //Formatge DO Menorca madurat, poma i tomaca seca de Manacor amanit amb fruits secs//",
+            "KO": "주키니 카르파초 //숙성 DO 메노르카 치즈, 사과 및 마나코르산 말린 토마토와 견과류 드레싱//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "b4ac4e01"
+        }
     },
     {
         "id": "1010", "activa": "si", "precio": "17.00", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Carpaccio de lengua de ternera // Alcaparras crujientes y tallarines de sepia al ajo"
+            "ES": "Carpaccio de lengua de ternera // Alcaparras crujientes y tallarines de sepia al ajo",
+            "EN": "Beef tongue carpaccio //Crispy capers and garlic cuttlefish tagliatelle//",
+            "DE": "Rinderzungen-Carpaccio //Knusprige Kapern und Knoblauch-Tintenfisch-Tagliatelle//",
+            "FR": "Carpaccio de langue de bœuf //Câpres croustillantes et tagliatelles de seiche à l'ail//",
+            "IT": "Carpaccio di lingua di manzo //Capperi croccanti e tagliatelle di seppia all'aglio//",
+            "RU": "Карпаччо из говяжьего языка //Хрустящие каперсы и тальятелле из каракатицы с чесноком//",
+            "NL": "Carpaccio van rundertong //Krokante kappertjes en zeekat-tagliatelle met knoflook//",
+            "PL": "Carpaccio z ozora wołowego //Chrupiące kapary i tagliatelle z mątwy z czosnkiem//",
+            "SV": "Carpaccio på oxtunga //Krispig kapris och bläckfisk-tagliatelle med vitlök//",
+            "NO": "Carpaccio av oksetunge //Sprø kapers og akkar-tagliatelle med hvitløk//",
+            "DA": "Carpaccio af oxetunge //Sprøde kapers og blæksprutte-tagliatelle med hvidløg//",
+            "FI": "Häränkielicarpaccio //Rapeita kapriksia ja valkosipulista seepiatagliatellaa//",
+            "PT": "Carpaccio de língua de novilho //Alcaparras crocantes e tagliatelle de choco com alho//",
+            "RO": "Carpaccio din limbă de vită //Capere crocante și tagliatelle de sepie cu usturoi//",
+            "HU": "Marhanyelv-carpaccio //Ropogós kapribogyó és fokhagymás szépia-tagliatelle//",
+            "CS": "Carpaccio z hovězího jazyka //Křupavé kapary a sépiové tagliatelle s česnekem//",
+            "EL": "Καρπάτσιο από βοδινή γλώσσα //Τραγανή κάπαρη και ταλιατέλες σουπιάς με σκόρδο//",
+            "TR": "Dana dili carpaccio //Çıtır kapari ve sarımsaklı mürekkep balığı tagliatelle//",
+            "AR": "كارباتشيو لسان البقر //كبَر مقرمش وتاليانيتي حبار بالثوم//",
+            "ZH": "生牛肉舌卡帕丘 //香脆山柑与蒜香墨鱼切面//",
+            "JA": "牛舌のカルパッチョ //サクサクのカッパリとコウイカのガーリックタリアテッレ//",
+            "CA": "Carpaccio de llengua de vedella //Tàperes cruixents i tagliatelle de sépia a l'all//",
+            "EU": "Behi-mihi carpaccioa //Kaparra kraspatsuak eta sepiezko tagliatelleak baratxuritan//",
+            "GL": "Carpaccio de lingua de tenreira //Alcaparras crocantes e tagliatelles de xiba ao allo//",
+            "VA": "Carpaccio de llengua de vedella //Tàperes cruixents i tagliatelle de sépia a l'all//",
+            "KO": "소혀 카르파치오 //바삭한 카퍼와 마늘 갑오징어 탈리아텔레//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "145428a3"
+        }
     },
     {
         "id": "1011", "activa": "si", "precio": "17.00", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Carpaccio de manitas de cerdo // Manzana ácida, apio blanco, piñones tostados y vinagreta de mistela"
+            "ES": "Carpaccio de manitas de cerdo // Manzana ácida, apio blanco, piñones tostados y vinagreta de mistela",
+            "EN": "Pork trotters carpaccio //Tart apple, white celery, toasted pine nuts and mistela vinaigrette//",
+            "DE": "Schweinefuß-Carpaccio //Saurer Apfel, weißer Sellerie, geröstete Pinienkerne und Mistela-Vinaigrette//",
+            "FR": "Carpaccio de pieds de porc //Pomme acide, céleri blanc, pignons de pin grillés et vinaigrette de mistelle//",
+            "IT": "Carpaccio di piedini di maiale //Mela acida, sedano bianco, pinoli tostati e vinaigrette di mistela//",
+            "RU": "Карпаччо из свиных ножек //Кислые яблоки, белый сельдерей, жареные кедровые орехи и винегрет из мистелы//",
+            "NL": "Carpaccio van varkenspootjes //Zure appel, witte selderij, geroosterde pijnboompitten en mistela-vinaigrette//",
+            "PL": "Carpaccio z nóżek wieprzowych //Kwaśne jabłko, biały seler, prażone orzeszki piniowe i vinaigrette z misteli//",
+            "SV": "Carpaccio på grisfötter //Surt äpple, vit selleri, rostade pinjenötter och mistela-vinaigrette//",
+            "NO": "Carpaccio av svinelabber //Surt eple, hvit selleri, ristede pinjekjerner og mistela-vinaigrette//",
+            "DA": "Carpaccio af tæer fra svin //Surt æble, hvid selleri, ristede pinjekerner og mistela-vinaigrette//",
+            "FI": "Siansorkkacarpaccio //Hapan omena, valkoinen selleri, paahdetut pinjansiemenet ja mistela-kastike//",
+            "PT": "Carpaccio de pezinhos de porco //Maçã ácida, aipo branco, pinhões tostados e vinagrete de mistela//",
+            "RO": "Carpaccio din picioare de porc //Măr acru, ţelină albă, muguri de pin prăjiți și vinaigrette de mistela//",
+            "HU": "Disznóláb-carpaccio //Savanykás alma, fehér zeller, pirított fenyőmag és mistela vinaigrette//",
+            "CS": "Carpaccio z vepřových nožiček //Kyselé jablko, bílý celer, pražené piniové oříšky a vinaigrette z mistely//",
+            "EL": "Καρπάτσιο από ποδαράκια χοιρινού //Ξινό μήλο, λευκό σέλινο, καβουρδισμένοι κουκουναρόσποροι και βινεγκρέτ μιστέλα//",
+            "TR": "Domuz paça carpaccio //Ekşi elma, beyaz kereviz, kavrulmuş çam fıstığı ve mistela vinagret//",
+            "AR": "كارباتشيو أقدام الخنزير //تفاح حامض، كرفس أبيض، صنوبر محمص وتتبيلة الميستيلا//",
+            "ZH": "猪蹄卡帕丘 //酸苹果、白芹菜、香烤松子与密斯提拉甜酒油醋汁//",
+            "JA": "豚足のカルパッチョ //酸味のあるリンゴ、ホワイトセロリ、ロースト松の実、ミステラドレッシング//",
+            "CA": "Carpaccio de peus de porc //Poma àcida, celerí blanc, pinyons torrats i vinaigrette de mistela//",
+            "EU": "Txerri-hankatxoen carpaccioa //Sagarratsa, zeleri zuria, pinazi erreciak eta mistela binaigreta//",
+            "GL": "Carpaccio de pés de porco //Maza ácida, apio branco, piñóns torrados e vinagreta de mistela//",
+            "VA": "Carpaccio de peus de porc //Poma àcida, celerí blanc, pinyons torrats i vinaigrette de mistela//",
+            "KO": "돼지족발 카르파치오 //사과, 화이트 셀러리, 볶은 잣과 미스테라 비네그레트//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "e99fad64"
+        }
     },
     {
         "id": "1012", "activa": "si", "precio": "15.00", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Huevos rotos camperos // Sobrasada de cerdo negro mallorquín y patatas"
+            "ES": "Huevos rotos camperos // Sobrasada de cerdo negro mallorquín y patatas",
+            "EN": "Free-range broken eggs //Majorcan black pork sobrasada and potatoes//",
+            "DE": "Freilandeier \"Huevos Rotos\" //Sobrasada vom mallorquinischen schwarzen Schwein und Kartoffeln//",
+            "FR": "Œufs cassés de plein air //Sobrasada de porc noir de Majorque et pommes de terre//",
+            "IT": "Uova rotte biologiche //Sobrasada di maiale nero maiorchino e patate//",
+            "RU": "Яйца \"Huevos rotos\" из фермерского яйца //Собрасада из майоркской черной свиньи и картофель//",
+            "NL": "Scharreleieren \"Huevos rotos\" //Sobrasada van Mallorcaans zwart varken en aardappelen//",
+            "PL": "Jajka \"Huevos rotos\" z wolnego wybiegu //Sobrasada z czarnej świni majorkańskiej i ziemniaki//",
+            "SV": "Frigående spruckna ägg //Sobrasada på mallorkinskt svart svin och potatis//",
+            "NO": "Frittgående \"Huevos rotos\" egg //Sobrasada av mallorkinsk svart gris og poteter//",
+            "DA": "Frilands \"Huevos rotos\" æg //Sobrasada af mallorcansk sort svin og kartofler//",
+            "FI": "Vapaan kana munan \"Huevos rotos\" //Mallorcalaisen mustaporsaan sobrasada-makkaraa ja perunoita//",
+            "PT": "Ovos rotos do campo //Sobrasada de porco preto maiorquino e batatas//",
+            "RO": "Ouă sparte de țară //Sobrasada din porc negru maiorcan și cartofi//",
+            "HU": "Tanyasi \"Huevos rotos\" tojások //Mallorcai fekete sertés sobrasada és burgonya//",
+            "CS": "Rozbitá vejce z volného chovu //Sobrasada z mallorského černého prasete a brambory//",
+            "EL": "Σπασμένα αυγά ελευθέρας βοσκής //Σοβρασάδα από μαύρο χοιρινό Μαγιόρκας και πατάτες//",
+            "TR": "Köy yumurtasından \"Huevos rotos\" //Mayorka siyah domuz sobrasada sucuğu ve patates//",
+            "AR": "بيض بلد مكسور //سوبراسادا الخنزير الأسود المايوركي والبطاطس//",
+            "ZH": "农家破壳煎蛋 //马略卡黑猪肉肠与土豆//",
+            "JA": "地鶏の崩し目玉焼き //マヨルカ産黒豚のソブラサーダとポテト//",
+            "CA": "Ous trencats camperols //Sobrassada de porc negre mallorquí i patates//",
+            "EU": "Baserriko arrautza hautsiak //Mallorcako txerri beltzaren sobrasada eta patatak//",
+            "GL": "Ovos rotos do campo //Sobrasada de porco negro mallorquín e patacas//",
+            "VA": "Ous trencats camperols //Sobrassada de porc negre mallorquí i creïlles//",
+            "KO": "방목 유정란 프라이 \"후에보스 로토스\" //마요르카 흑돼지 소브라사다와 감자//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "82cabeee"
+        }
     },
     {
         "id": "1013", "activa": "si", "precio": "19.00", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Alcachofas, gambas y sobrasada // Con el dulce de albaricoque"
+            "ES": "Alcachofas, gambas y sobrasada // Con el dulce de albaricoque",
+            "EN": "Artichokes, prawns and sobrasada //With apricot jam//",
+            "DE": "Artischocken, Garnelen und Sobrasada //Mit Aprikosenmarmelade//",
+            "FR": "Artichauts, crevettes et sobrasada //Avec la douceur d'abricot//",
+            "IT": "Carciofi, gamberi e sobrasada //Con la confettura di albicocche//",
+            "RU": "Артишоки, креветки и собрасада //С абрикосовым джемом//",
+            "NL": "Artisjokken, garnalen en sobrasada //Met abrikozenjam//",
+            "PL": "Karczochy, krewetki i sobrasada //Z dżemem morelowym//",
+            "SV": "Kronärtskockor, räkor och sobrasada //Med aprikossylt//",
+            "NO": "Artisjokker, reker og sobrasada //Med aprikossyltetøy//",
+            "DA": "Artiskokker, rejer og sobrasada //Med abrikossyltetøj//",
+            "FI": "Artisokkoja, katkarapuja ja sobrasadaa //Aprikoosihillon kera//",
+            "PT": "Alcachofras, camarões e sobrasada //Com doce de albaricoque//",
+            "RO": "Anghinare, creveți și sobrasada //Cu dulceață de caise//",
+            "HU": "Articsóka, garnélarák és sobrasada //Sárgabarack-lekvárral//",
+            "CS": "Artyčoky, krevety a sobrasada //S meruňkovým džemem//",
+            "EL": "Αγκινάρες, γαρίδες και σομπρασάδα //Με γλυκό βερίκοκο//",
+            "TR": "Enginar, karides ve sobrasada //Kayısı reçeli ile//",
+            "AR": "أرضي شوكي، روبيان وصوبراسادا //مع مربى المشمش//",
+            "ZH": "洋蓟、大虾和索布拉萨达香肠 //配杏子果酱//",
+            "JA": "アーティチョーク、エビ、ソブラサーダ //アプリコットジャム添え//",
+            "CA": "Carciofi, gambes i sobrasada //Amb el dolç d'albercoc//",
+            "EU": "Artxafak, ganbak eta sobrasada //Abrikot-gozokiarekin//",
+            "GL": "Alcachofas, camaróns e sobrasada //Co doce de albaricoque//",
+            "VA": "Carxofes, gambes i sobrasada //Amb el dolç d'albercoc//",
+            "KO": "아티초크, 새우, 소브라사다 //살구 잼과 함께//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "6c560019"
+        }
     },
     {
         "id": "1101", "activa": "si", "precio": "2.00", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Servicio de pan de trigo de “xeixa” integral y aceite DO Mallorca"
+            "ES": "Servicio de pan de trigo de “xeixa” integral y aceite DO Mallorca",
+            "EN": "Wholemeal \"xeixa\" wheat bread service and DO Mallorca olive oil",
+            "DE": "Brotservice: Vollkorn-„Xeixa“-Weizenbrot und Olivenöl D.O. Mallorca",
+            "FR": "Service de pain au blé complet « xeixa » et huile d'olive DO Mallorca",
+            "IT": "Servizio pane di grano integrale \"xeixa\" e olio DOP Mallorca",
+            "RU": "Хлебная корзина: цельнозерновой пшеничный хлеб «xeixa» и оливковое масло DO Mallorca",
+            "NL": "Broodservice van volkoren \"xeixa\"-tarwe en olijfolie DO Mallorca",
+            "PL": "Serwis pieczywa z razowej pszenicy „xeixa” i oliwa z oliwek DO Mallorca",
+            "SV": "Brödservice av fullkorns \"xeixa\"-vete och DO Mallorca-olivolja",
+            "NO": "Brødservice av fullkorns \"xeixa\"-hvete og DO Mallorca-olivenolje",
+            "DA": "Brødservice af fuldkorns \"xeixa\"-hvede og DO Mallorca-olivenolie",
+            "FI": "Leipäpalvelu: täysjyvä-\"xeixa\"-vehnäleipää ja DO Mallorca -oliiviöljyä",
+            "PT": "Serviço de pão de trigo \"xeixa\" integral e azeite DO Mallorca",
+            "RO": "Serviciu de pâine din grâu integral „xeixa” și ulei de măsline DO Mallorca",
+            "HU": "Teljes kiőrlésű „xeixa” búzakenyér-felszolgálás és DO Mallorca olívaolaj",
+            "CS": "Pečivový servis: celozrnný pšeničný chléb „xeixa“ a olivový olej DO Mallorca",
+            "EL": "Υπηρεσία ψωμιού από ολικής άλεσης σιτάρι «xeixa» και ελαιόλαδο DO Mallorca",
+            "TR": "Tam buğday \"xeixa\" ekmeği servisi ve DO Mallorca zeytinyağı",
+            "AR": "خدمة خبز قمح \"شيخا\" الكامل وزيت زيتون تسمية المنشأ مايوركا",
+            "ZH": "“xeixa”全麦小麦面包服务及马略卡原产地保护（DO）橄榄油",
+            "JA": "全粒粉「xeixa」小麦のパンサービスとDOマヨルカオリーブオイル",
+            "CA": "Servei de pa de blat de xeixa integral i oli DO Mallorca",
+            "EU": "\"Xeixa\" gari osoko ogi-zerbitzua eta DO Mallorca olioa",
+            "GL": "Servizo de pan de trigo de “xeixa” integral e aceite DO Mallorca",
+            "VA": "Servei de pa de blat de xeixa integral i oli DO Mallorca",
+            "KO": "통밀 \"xeixa\" 밀빵 서비스 및 DO 마요르카 올리브 오일"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "67b998d4"
+        }
     },
     {
-        "id": "1199", "activa": "si", "precio": "", "precioMedia": "",
+        "id": "1199", "activa": "si", "precio": "0.00", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Precios con IVA incluido"
+            "ES": "Precios con IVA incluido",
+            "EN": "Prices include VAT",
+            "DE": "Preise inklusive Mehrwertsteuer",
+            "FR": "Prix TVA comprise",
+            "IT": "Prezzi IVA inclusa",
+            "RU": "Цены включают НДС",
+            "NL": "Prijzen inclusief btw",
+            "PL": "Ceny zawierają VAT",
+            "SV": "Priser inklusive moms",
+            "NO": "Priser inkludert mva.",
+            "DA": "Priser inkl. moms",
+            "FI": "Hinnat sisältävät arvonlisäveron",
+            "PT": "Preços com IVA incluído",
+            "RO": "Prețurile includ TVA",
+            "HU": "Az árak az ÁFA-t tartalmazzák",
+            "CS": "Ceny jsou uvedeny včetně DPH",
+            "EL": "Οι τιμές περιλαμβάνουν ΦΠΑ",
+            "TR": "Fiyatlara KDV dahildir",
+            "AR": "الأسعار شاملة ضريبة القيمة المضافة",
+            "ZH": "价格已含增值税",
+            "JA": "税込価格",
+            "CA": "Preus amb IVA inclòs",
+            "EU": "Prezioak BEZa barne",
+            "GL": "Prezos con IVE incluído",
+            "VA": "Preus amb IVA inclòs",
+            "KO": "부가세 포함 가격"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "91468689"
+        }
     },
     {
         "id": "3001", "activa": "si", "precio": "18.50", "precioMedia": "",
         "carpeta": "arroz", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Paella mixta // Paella típica mallorquina"
+            "ES": "Paella mixta // Paella típica mallorquina",
+            "EN": "Mixed Paella //Typical Mallorcan paella//",
+            "DE": "Gemischte Paella //Typisch mallorquinische Paella//",
+            "FR": "Paella mixte //Paella typique de Majorque//",
+            "IT": "Paella mista //Paella tipica maiorchina//",
+            "RU": "Смешанная паэлья //Типичная майоркинская паэлья//",
+            "NL": "Gemengde paella //Typische Mallorquijnse paella//",
+            "PL": "Paella mieszana //Typowa paella z Majorki//",
+            "SV": "Blandad paella //Typisk mallorkinsk paella//",
+            "NO": "Blandet paella //Typisk mallorkinsk paella//",
+            "DA": "Blandet paella //Typisk mallorcansk paella//",
+            "FI": "Sekapaella //Tyypillinen mallorcalainen paella//",
+            "PT": "Paella mista //Paella típica maiorquina//",
+            "RO": "Paella mixtă //Paella tipică din Mallorca//",
+            "HU": "Vegyes paella //Tipikus mallorcai paella//",
+            "CS": "Míchaná paella //Typická mallorská paella//",
+            "EL": "Μικτή παέγια //Τυπική παέγια της Μαγιόρκα//",
+            "TR": "Karışık Paella //Tipik Mayorka usulü paella//",
+            "AR": "بائيا مشكلة //بائيا مايوركية تقليدية//",
+            "ZH": "什锦西班牙海鲜饭 //典型的马略卡风味西班牙海鲜饭//",
+            "JA": "ミックス・パエリア //マヨルカの伝統的なパエリア//",
+            "CA": "Paella mixta //Paella típica mallorquina//",
+            "EU": "Paella mistoa //Mallorcako paella tipikoa//",
+            "GL": "Paella mixta //Paella típica maiorquina//",
+            "VA": "Paella mixta //Paella típica mallorquina//",
+            "KO": "믹스 파에야 //마요르카 전통 파에야//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "ddbbfdd3"
+        }
     },
     {
         "id": "3002", "activa": "si", "precio": "19.50", "precioMedia": "",
         "carpeta": "arroz", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Paella ciega // Paella sin cáscaras ni huesos"
+            "ES": "Paella ciega // Paella sin cáscaras ni huesos",
+            "EN": "Paella ciega //Paella without shells or bones//",
+            "DE": "Paella ciega //Paella ohne Schalen und Knochen//",
+            "FR": "Paella ciega //Paella sans coquilles ni os//",
+            "IT": "Paella ciega //Paella senza gusci né ossa//",
+            "RU": "Паэлья сьега //Паэлья без ракушек и костей//",
+            "NL": "Paella ciega //Paella zonder schelpen en botten//",
+            "PL": "Paella ciega //Paella bez skorupek i kości//",
+            "SV": "Paella ciega //Paella utan skal och ben//",
+            "NO": "Paella ciega //Paella uten skall og ben//",
+            "DA": "Paella ciega //Paella uden skaller og ben//",
+            "FI": "Paella ciega //Paella ilman kuoria ja luita//",
+            "PT": "Paella ciega //Paella sem conchas nem ossos//",
+            "RO": "Paella ciega //Paella fără coji și oase//",
+            "HU": "Paella ciega //Paella héj és csont nélkül//",
+            "CS": "Paella ciega //Paella bez skořápek a kostí//",
+            "EL": "Paella ciega //Παέγια χωρίς όστρακα και κόκαλα//",
+            "TR": "Paella ciega //Kabuksuz ve kemiksiz paella//",
+            "AR": "بائيا سييغا //بائيا بدون قشور أو عظام//",
+            "ZH": "无壳无骨西班牙海鲜饭 //无壳无骨西班牙海鲜饭//",
+            "JA": "パエリア・シエガ //殻・骨なしのパエリア//",
+            "CA": "Paella ciega //Paella sense closques ni ossos//",
+            "EU": "Paella ciega //Azal eta hezurrik gabeko paella//",
+            "GL": "Paella cega //Paella sen cunchas nin osos//",
+            "VA": "Paella ciega //Paella sense closques ni ossos//",
+            "KO": "파에야 시에가 //껍질과 가시가 없는 파에야//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "c7cb89c1"
+        }
     },
     {
         "id": "3003", "activa": "si", "precio": "20.00", "precioMedia": "",
         "carpeta": "arroz", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Arroz de “señorito” // Arroz típico valenciano de pescado y marisco sin cáscaras ni espinas"
+            "ES": "Arroz de “señorito” // Arroz típico valenciano de pescado y marisco sin cáscaras ni espinas",
+            "EN": "“Señorito” Rice //Typical Valencian fish and seafood rice without shells or bones//",
+            "DE": "“Señorito”-Reis //Typischer valencianischer Fisch- und Meeresfrüchtereis ohne Schalen und Gräten//",
+            "FR": "Riz « señorito » //Riz typique valencien au poisson et fruits de mer sans carcasses ni arêtes//",
+            "IT": "Riso del “señorito” //Riso tipico valenciano di pesce e frutti di mare senza gusci né spine//",
+            "RU": "Рис «сеньорито» //Традиционный валенсийский рис с рыбой и морепродуктами без ракушек и костей//",
+            "NL": "“Señorito”-rijst //Typische Valenciaanse rijst met vis en zeevruchten zonder schelpen en graten//",
+            "PL": "Ryż „señorito” //Typowy walencki ryż z rybami i owocami morza bez skorupek i ości//",
+            "SV": "”Señorito”-ris //Typiskt valencianskt ris med fisk och skaldjur utan skal och ben//",
+            "NO": "«Señorito»-ris //Typisk valenciansk ris med fisk og sjømat uten skall og ben//",
+            "DA": "»Señorito«-ris //Typisk valenciansk ris med fisk og skaldyr uden skaller og ben//",
+            "FI": "”Señorito”-riisi //Tyypillinen valencialainen kala- ja äyriäisriisi ilman kuoria ja ruotoja//",
+            "PT": "Arroz de “señorito” //Arroz típico valenciano de peixe e marisco sem conchas nem espinhas//",
+            "RO": "Orez „señorito” //Orez tipic valencian cu pește și fructe de mare fără coji și oase//",
+            "HU": "„Señorito” rizs //Tipikus valenciai hal- és tenger gyümölcsei rizs héj és szálka nélkül//",
+            "CS": "Rýže „señorito“ //Typická valencijská rýže s rybami a mořskými plody bez skořápek a kostí//",
+            "EL": "Ρύζι «señorito» //Τυπικό ρυθι Βαλένθιας με ψάρι και θαλασσινά χωρίς όστρακα και κόκαλα//",
+            "TR": "“Señorito” Pilavı //Kabuksuz ve kılçıksız tipik Valensiya usulü balıklı ve deniz ürünlü pilav//",
+            "AR": "أرز \"سينيوريتو\" //أرز فالنسي تقليدي بالسمك والمأكولات البحرية بدون قشور أو أشواك//",
+            "ZH": "“绅士”风味西班牙烩饭 //典型的巴伦西亚鱼类和海鲜烩饭，无壳无刺//",
+            "JA": "「セニョリート」風ライス //殻や小骨のない伝統的なバレンシア風魚介ライス//",
+            "CA": "Arròs del senyoret //Arròs típic valencià de peix i marisc sense closques ni espines//",
+            "EU": "“Señorito” arroza //Valentziako arrain eta marisko arroz tipikoa, azal eta hezurrik gabea//",
+            "GL": "Arroz de “señorito” //Arroz típico valenciano de peixe e marisco sen cunchas nin espiñas//",
+            "VA": "Arròs del senyoret //Arròs típic valencià de peix i marisc sense closques ni espines//",
+            "KO": "“세뇨리토” 파에야 //껍질과 가시가 없는 전형적인 발렌시아식 생선 및 해산물 밥//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "457850e1"
+        }
     },
     {
         "id": "3004", "activa": "si", "precio": "28.50", "precioMedia": "",
         "carpeta": "arroz", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Arròs de bogavante // Arroz seco o puede cocinarse caldoso"
+            "ES": "Arròs de bogavante // Arroz seco o puede cocinarse caldoso",
+            "EN": "Lobster rice //Dry rice or can be cooked brothy//",
+            "DE": "Hummerreis //Trockener Reis oder suppig zubereitbar//",
+            "FR": "Riz au homard //Riz sec ou peut être cuisiné en bouillon//",
+            "IT": "Riso con astice //Riso asciutto o preparabile brodoso//",
+            "RU": "Рис с омаром //Сухой рис или может быть приготовлен с бульонами//",
+            "NL": "Kreeftenrijst //Droge rijst of kan smeuïg bereid worden//",
+            "PL": "Ryż z homarem //Ryż na sypko lub w formie zupistej//",
+            "SV": "Hummerris //Torrt ris eller kan tillagas soppliknande//",
+            "NO": "Hummerris //Tørr ris eller kan tilberedes med kraft//",
+            "DA": "Hummerris //Tør ris eller kan tilberedes som suppeaktig ris//",
+            "FI": "Hummeririisi //Kuiva riisi tai voidaan valmistaa liemisenä//",
+            "PT": "Arroz de lavagante //Arroz seco ou pode ser cozinhado malandrinho//",
+            "RO": "Orez cu homar //Orez uscat sau poate fi gătit zemos//",
+            "HU": "Homáros rizs //Száraz rizs vagy levesesen is elkészíthető//",
+            "CS": "Rýže s homárem //Suchá rýže nebo ji lze připravit jako šťavnatou//",
+            "EL": "Ρύζι με αστακό //Στεγνό ρύζι ή μπορεί να μαγειρευτεί με ζωμό//",
+            "TR": "Istakozlu pilav //Kuru pilav veya sulu pişirilebilir//",
+            "AR": "أرز مع الكركند //أرز جاف أو يمكن طهيه مع المرق//",
+            "ZH": "龙虾饭 //干饭或可做成汤饭//",
+            "JA": "オマールエビご飯 //ドライライスまたはスープ仕立てにできます//",
+            "CA": "Arròs de bogavant //Arròs sec o es pot cuinar caldós//",
+            "EU": "Otarrain-arroza //Arroz lehorra edo zopatsua egin daiteke//",
+            "GL": "Arroz de bogavante //Arroz seco ou pódese cociñar caldoso//",
+            "VA": "Arròs de bogavant //Arròs sec o es pot cuinar caldós//",
+            "KO": "바닷가재 밥 //드라이 라이스 또는 국물 있게 조리 가능//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "73e0832f"
+        }
     },
     {
         "id": "3005", "activa": "si", "precio": "20.00", "precioMedia": "",
         "carpeta": "arroz", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Paella de marisco // Paella típica de Alicante"
+            "ES": "Paella de marisco // Paella típica de Alicante",
+            "EN": "Seafood paella //Typical paella from Alicante//",
+            "DE": "Meeresfrüchte-Paella //Typische Paella aus Alicante//",
+            "FR": "Paella aux fruits de mer //Paella typique d'Alicante//",
+            "IT": "Paella ai frutti di mare //Paella tipica di Alicante//",
+            "RU": "Паэлья с морепродуктами //Типичная паэлья из Аликанте//",
+            "NL": "Zeevruchtenpaella //Typische paella uit Alicante//",
+            "PL": "Paella z owocami morza //Typowa paella z Alicante//",
+            "SV": "Skaldjurspaella //Typisk paella från Alicante//",
+            "NO": "Sjømatpaella //Typisk paella fra Alicante//",
+            "DA": "Skaldyrspaella //Typisk paella fra Alicante//",
+            "FI": "Äyriäispaella //Tyypillinen alicantelainen paella//",
+            "PT": "Paelha de marisco //Paelha típica de Alicante//",
+            "RO": "Paella cu fructe de mare //Paella tipică din Alicante//",
+            "HU": "Tenger gyümölcsei paella //Alicantei tipikus paella//",
+            "CS": "Paella s mořskými plody //Typická paella z Alicante//",
+            "EL": "Παέλια θαλασσινών //Παραδοσιακή παέλια του Αλικάντε//",
+            "TR": "Deniz ürünlü paella //Alicante'ye özgü paella//",
+            "AR": "بايلية الفواكه البحرية //بايلية تقليدية من أليكانتي//",
+            "ZH": "海鲜西班牙烩饭 //阿利坎特特色烩饭//",
+            "JA": "シーフードパエリア //アリカンテの伝統的なパエリア//",
+            "CA": "Paella de marisc //Paella típica d'Alacant//",
+            "EU": "Itsaski-paella //Alacanteko paella tipikoa//",
+            "GL": "Paella de marisco //Paella típica de Alicante//",
+            "VA": "Paella de marisc //Paella típica d'Alacant//",
+            "KO": "해산물 빠에야 //알리칸테 전통 빠에야//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "94ca79ba"
+        }
     },
     {
         "id": "3006", "activa": "si", "precio": "18.00", "precioMedia": "",
         "carpeta": "arroz", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Arroz negro // Arroz seco con sepia y su tinta natural"
+            "ES": "Arroz negro // Arroz seco con sepia y su tinta natural",
+            "EN": "Black rice //Dry rice with cuttlefish and its natural ink//",
+            "DE": "Schwarzer Reis //Trockener Reis mit Tintenfisch und seiner natürlichen Tinte//",
+            "FR": "Riz noir //Riz sec à la seiche et son encre naturelle//",
+            "IT": "Riso nero //Riso asciutto con seppia e il suo nero naturale//",
+            "RU": "Черный рис //Сухой рис с каракатицей и ее натуральными чернилами//",
+            "NL": "Zwarte rijst //Droge rijst met zeekat en zijn natuurlijke inkt//",
+            "PL": "Czarny ryż //Ryż na sypko z mątwą i jej naturalnym atramentem//",
+            "SV": "Svart ris //Torrt ris med bläckfisk och dess naturliga bläck//",
+            "NO": "Svart ris //Tørr ris med akkar og dets naturlige blekk//",
+            "DA": "Sort ris //Tør ris med blæksprutte og dens naturlige blæk//",
+            "FI": "Musta riisi //Kuiva riisi, jossa on seepiaa ja sen omaa luonnollista mustetta//",
+            "PT": "Arroz negro //Arroz seco com choco e a sua tinta natural//",
+            "RO": "Orez negru //Orez uscat cu sepie și cerneala sa naturală//",
+            "HU": "Fekete rizs //Száraz rizs tintahallal és annak természetes tintájával//",
+            "CS": "Černá rýže //Suchá rýže se sépií a jejím přírodním inkoustem//",
+            "EL": "Μαύρο ρύζι //Στεγνό ρύζι με σουπιά και το φυσικό μελάνι της//",
+            "TR": "Siyah pilav //Sübye ve doğal mürekkebi ile kuru pilav//",
+            "AR": "أرز أسود //أرز جاف مع الحبار وحبره الطبيعي//",
+            "ZH": "墨鱼汁黑米饭 //墨鱼及天然墨汁干饭//",
+            "JA": "黒いご飯 //コウイカと天然イカスミのドライライス//",
+            "CA": "Arròs negre //Arròs sec amb sípia i la seua tinta natural//",
+            "EU": "Arroz beltza //Arroz lehorra sepiekin eta bere tinta naturalarekin//",
+            "GL": "Arroz negro //Arroz seco con xiba e a súa tinta natural//",
+            "VA": "Arròs negre //Arròs sec amb sípia i la seua tinta natural//",
+            "KO": "먹물 밥 //갑오징어와 천연 먹물을 넣은 드라이 라이스//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "2899ca78"
+        }
     },
     {
         "id": "3007", "activa": "si", "precio": "18.00", "precioMedia": "",
         "carpeta": "arroz", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Arroz seco de verduras // Arroz vegetariano cocinado con caldo de verduras"
+            "ES": "Arroz seco de verduras // Arroz vegetariano cocinado con caldo de verduras",
+            "EN": "Dry vegetable rice //Vegetarian rice cooked in vegetable stock//",
+            "DE": "Trockener Gemüsereis //Vegetarischer Reis gekocht in Gemüsebrühe//",
+            "FR": "Riz sec aux légumes //Riz végétarien cuit au bouillon de légumes//",
+            "IT": "Riso asciutto alle verdure //Riso vegetariano cucinato con brodo vegetale//",
+            "RU": "Сухой рис с овощами //Вегетарианский рис, приготовленный на овощном бульоне//",
+            "NL": "Droge groenterijst //Vegetarische rijst bereid met groentebouillon//",
+            "PL": "Suchy ryż z warzywami //Wegetariański ryż gotowany na wywarze warzywnym//",
+            "SV": "Torrt grönsaksris //Vegetariskt ris tillagat med grönsaksbuljong//",
+            "NO": "Tørt grønnsaksris //Vegetarisk ris tilberedt med grønnsakskraft//",
+            "DA": "Tørt grøntsagsris //Vegetarisk ris tilberedt med grøntsagsbouillon//",
+            "FI": "Kuiva kasvisriisi //Kasvisliemessä keitetty kasvisriisi//",
+            "PT": "Arroz seco de legumes //Arroz vegetariano cozinhado com caldo de legumes//",
+            "RO": "Orez uscat cu legume //Orez vegetarian gătit în supă de legume//",
+            "HU": "Száraz zöldséges rizs //Zöldségalaplében főzött vegetáriánus rizs//",
+            "CS": "Suchá zeleninová rýže //Vegetariánská rýže vařená v zeleninovém vývaru//",
+            "EL": "Ξερό ρύζι λαχανικών //Βεγεταριανό ρύζι μαγειρεμένο με ζωμό λαχανικών//",
+            "TR": "Kuru sebzeli pilav //Sebze suyunda pişirilmiş vejetaryen pilav//",
+            "AR": "أرز خضار جاف //أرز نباتي مطبوخ بمرق الخضار//",
+            "ZH": "蔬菜干饭 //用蔬菜汤烹制的素食米饭//",
+            "JA": "野菜のドライライス //野菜だしで炊いたベジタリアンライス//",
+            "CA": "Arròs sec de verdures //Arròs vegetarià cuinat amb brou de verdures//",
+            "EU": "Barazki arroz lehorra //Barazki-brouarekin egositako arroz begetarianoa//",
+            "GL": "Arroz seco de verduras //Arroz vexetariano cociñado con caldo de verduras//",
+            "VA": "Arròs sec de verdures //Arròs vegetarià cuinat amb brou de verdures//",
+            "KO": "채소 드라이 라이스 //채소 육수로 밥을 지은 베지테리언 라이스//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "4c316bd9"
+        }
     },
     {
-        "id": "3901", "activa": "si", "precio": "", "precioMedia": "",
+        "id": "3901", "activa": "si", "precio": "0.00", "precioMedia": "",
         "carpeta": "arroz", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "* Los arroces se elaboran con arroz de la variedad Bomba y son libres de gluten."
+            "ES": "* Los arroces se elaboran con arroz de la variedad Bomba y son libres de gluten.",
+            "EN": "* The rice dishes are made with Bomba variety rice and are gluten-free.",
+            "DE": "* Die Reisgerichte werden mit Reis der Sorte Bomba zubereitet und sind glutenfrei.",
+            "FR": "* Les plats de riz sont préparés avec du riz de la variété Bomba et sont sans gluten.",
+            "IT": "* I risi sono preparati con riso della varietà Bomba e sono privi di glutine.",
+            "RU": "* Блюда из риса готовятся из риса сорта Bomba и не содержат глютена.",
+            "NL": "* De rijstgerechten worden bereid met rijst van het ras Bomba en zijn glutenvrij.",
+            "PL": "* Dania z ryżu przygotowywane są z ryżu odmiany Bomba i są bezglutenowe.",
+            "SV": "* Risrätterna tillagas med ris av sorten Bomba och är glutenfria.",
+            "NO": "* Risrettene lages med ris av Bomba-varianten og er glutenfrie.",
+            "DA": "* Risretterne tilberedes med ris af Bomba-sorten og er glutenfri.",
+            "FI": "* Riisiannokset valmistetaan Bomba-lajikkeen riisistä ja ne ovat gluteenittomia.",
+            "PT": "* Os arrozes são elaborados com arroz da variedade Bomba e são isentos de glúten.",
+            "RO": "* Preparatele din orez sunt elaborate cu orez din soiul Bomba și nu conțin gluten.",
+            "HU": "* A rizses ételek Bomba fajtájú rizsből készülnek és gluténmentesek.",
+            "CS": "* Rýžové pokrmy se připravují z rýže odrůdy Bomba a jsou bezlepkové.",
+            "EL": "* Τα πιάταρυζιού παρασκευάζονται με ρύζι της ποικιλίας Bomba και δεν περιέχουν γλουτένη.",
+            "TR": "* Pilavlar Bomba çeşidi pirinçle hazırlanır ve glütensizdir.",
+            "AR": "* تُعد أطباق الأرز بأرز من صنف بومبا وهي خالية من الغلوتين.",
+            "ZH": "* 米饭类菜肴均采用Bomba品种大米烹制，不含麸质。",
+            "JA": "* 米料理はボンバ（Bomba）種の米を使用しており、グルテンフリーです。",
+            "CA": "* Els arrossos s'elaboren amb arròs de la varietat Bomba i són lliures de gluten.",
+            "EU": "* Arroz-platerak Bomba varietateko arrozarekin egiten dira eta glutenik gabeak dira.",
+            "GL": "* Os arroces elabóranse con arroz da variedade Bomba e son libres de glute.",
+            "VA": "* Els arrossos s'elaboren amb arròs de la varietat Bomba i són lliures de gluten.",
+            "KO": "* 쌀 요리는 봄바(Bomba) 품종의 쌀로 조리되며 글루텐 프리입니다."
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "7d731c61"
+        }
     },
     {
         "id": "4001", "activa": "si", "precio": "26.00", "precioMedia": "",
         "carpeta": "principales", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Pescado de lonja // Cebolletas, tomates de ramillete, pasas, piñones y “Tap de Cortí”"
+            "ES": "Pescado de lonja // Cebolletas, tomates de ramillete, pasas, piñones y “Tap de Cortí”",
+            "EN": "Fish market catch //Spring onions, vine tomatoes, raisins, pine nuts and “Tap de Cortí”//",
+            "DE": "Marktfrischer Fisch //Lauchzwiebeln, Strauchtomaten, Rosinen, Pinienkerne und „Tap de Cortí“//",
+            "FR": "Poisson du marché //Cébettes, tomates en grappe, raisins secs, pignons de pin et « Tap de Cortí »//",
+            "IT": "Pescato del giorno //Cipollotti, pomodori a grappolo, uvetta, pinoli e “Tap de Cortí”//",
+            "RU": "Рыба с рынка //Зеленый лук, томаты на ветке, изюм, кедровые орехи и «Tap de Cortí»//",
+            "NL": "Verse vis van de afslag //Bosuitjes, trostomaten, rozijnen, pijnboompitten en “Tap de Cortí”//",
+            "PL": "Świeża ryba z targu //Dymka, pomidory gałązkowe, rodzynki, orzeszki piniowe i „Tap de Cortí”//",
+            "SV": "Färsk fisk från marknaden //Salladslök, kvisttomater, russin, pinjenötter och ”Tap de Cortí”//",
+            "NO": "Fersk fisk fra markedet //Vårløk, klasetomater, rosiner, pinjekjerner og «Tap de Cortí»//",
+            "DA": "Frisk fisk fra markedet //Forårsløg, stilktomater, rosiner, pinjekerner og »Tap de Cortí«//",
+            "FI": "Tuore kala markkinoilta //Kevätsipulia, terttutomaatteja, rusinoita, pinjansiemeniä ja ”Tap de Cortí”//",
+            "PT": "Peixe da lota //Cebolinhas, tomates em cacho, passas, pinhões e “Tap de Cortí”//",
+            "RO": "Pește de la bursă //Ceapă verde, roșii cu ciorchine, stafide, muguri de pin și „Tap de Cortí”//",
+            "HU": "Friss hal a piacról //Újhagyma, fürtös paradicsom, mazsola, fenyőmag és „Tap de Cortí”//",
+            "CS": "Čerstvá ryba z trhu //Jarní cibulky, keříčková rajčata, rozinky, piniové oříšky a „Tap de Cortí“//",
+            "EL": "Ψάρι ημέρας από την αγορά //Φρέσκα κρεμμυδάκια, ντομάτες τσαμπί, σταφίδες, κουκουνάρι και «Tap de Cortí»//",
+            "TR": "Balık halinden taze balık //Taze soğan, salkım domates, kuru üzüm, çam fıstığı ve “Tap de Cortí”//",
+            "AR": "سمك طازج من السوق //بصل أخضر، طماطم عناقيد، زبيب، صنوبر و\"Tap de Cortí\"//",
+            "ZH": "鱼市鲜鱼 //青葱、串番茄、葡萄干、松子和“Tap de Cortí”//",
+            "JA": "鮮魚市場の魚 //小ねぎ、枝付きトマト、レーズン、松の実、「Tap de Cortí」//",
+            "CA": "Peix de llotja //Ceba tendra, tomàquets de ramellet, panses, pinyons i “Tap de Cortí”//",
+            "EU": "Arrantzale-merkkatuko arraina //Tipulinak, adar-tomateak, mahaspatsuak, pinaziak eta “Tap de Cortí”//",
+            "GL": "Peixe de lonxa //Cebolas tenras, tomates de ramiño, pasas, piñóns e “Tap de Cortí”//",
+            "VA": "Peix de llotja //Ceba tendra, tomàquets de ramellet, panses, pinyons i “Tap de Cortí”//",
+            "KO": "당일 직송 생선 //쪽파, 송이 토마토, 건포도, 잣, “Tap de Cortí”//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "3bd77082"
+        }
     },
     {
         "id": "4002", "activa": "si", "precio": "23.00", "precioMedia": "",
         "carpeta": "principales", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Terrina de cochinillo de cerdo negro mallorquín de Ca'n Company // Con el jugo de asado, el dulce de albaricoque y trinchado de patatas con romero"
+            "ES": "Terrina de cochinillo de cerdo negro mallorquín de Ca'n Company // Con el jugo de asado, el dulce de albaricoque y trinchado de patatas con romero",
+            "EN": "Majorcan black suckling pig terrine from Ca'n Company //With roast jus, sweet apricot paste and rosemary crushed potatoes//",
+            "DE": "Terrine vom schwarzen mallorquinischen Spanferkel von Ca'n Company //Mit Bratensaft, Aprikosensüße und Rosmarin-Kartoffelstampf//",
+            "FR": "Terrine de cochon de lait noir majorquin de Ca'n Company //Avec jus de rôtissage, douce d'abricot et écrasé de pommes de terre au romarin//",
+            "IT": "Terrina di maialino da latte nero maiorchino di Ca'n Company //Con fondo di cottura, dolce di albicocca e schiacciata di patate al rosmarino//",
+            "RU": "Террин из молочного поросенка майоркинской черной породы от Ca'n Company //С соком от жарки, абрикосовым джемом и толченым картофелем с розмарином//",
+            "NL": "Terrine van Mallorcaans zwart speenvarken van Ca'n Company //Met jus van het braadstuk, zoete abrikoos en gestampte aardappelen met rozemarijn//",
+            "PL": "Terrina z majorkańskiego czarnego prosięcia ssącego z Ca'n Company //Z sosem z pieczeni, konfiturą morelową i gniecionymi ziemniakami z rozmarynem//",
+            "SV": "Terrin på mallorkinskt svart spädgris från Ca'n Company //Med skysås, aprikoskompott och krossad potatis med rosmarin//",
+            "NO": "Terrine av mallorkinsk svart pattegris fra Ca'n Company //Med stekesky, aprikoskompott og knuste poteter med rosmarin//",
+            "DA": "Terrine af mallorcansk sort pattegris fra Ca'n Company //Med stegesky, aprikoskompot og knuste kartofler med rosmarin//",
+            "FI": "Mallorcalaisen mustan porsaan porsasterriini Ca'n Companylta //Paistoliemen, aprikoosihillon ja rosmariiniperunamuusin kera//",
+            "PT": "Terrina de leitão de porco preto maiorquino da Ca'n Company //Com o molho do assado, doce de albaricoque e esmagado de batata com alecrim//",
+            "RO": "Terină de purcel de lapte din porc negru maiorcan de la Ca'n Company //Cu sos de friptură, dulceață de caise și cartofi zdrobiți cu rozmarin//",
+            "HU": "Mallorcai fekete malac terrin a Ca'n Company-tól //Pecsenyelével, sárgabarack-édességgel és rozmaringos tört burgonyával//",
+            "CS": "Terina z mallorského černého podsvinčete od Ca'n Company //S výpekem, meruňkovým pyré a šťouchanými bramborami s rozmarýnem//",
+            "EL": "Τερρίνα από μαγιορκέζικο μαύρο γουρουνόπουλο της Ca'n Company //Με χυμό ψητού, γλυκό βερίκοκο και πατάτες τσακιστές με δενδρολίβανο//",
+            "TR": "Ca'n Company'den Majorka siyah süt domuzu terrini //Kızartma suyu, kayısı tatlısı ve biberiyeli patates ezmesi ile//",
+            "AR": "تيرين خنزير رضيع أسود مايوركي من Ca'n Company //مع عصارة الشواء، حلوى المشمش وبطاطس مهروسة بالروزماري//",
+            "ZH": "Ca'n Company 马略卡黑毛乳猪肉冻 //附烤肉汁、甜杏酱及迷迭香碎土豆//",
+            "JA": "Ca'n Company産マヨルカ黒豚の乳飲み豚のテリーヌ //肉汁のソース、アプリコットのコンフィチュール、ローズマリー風味のクラッシュポテト添え//",
+            "CA": "Terrina de porcella de porc negre mallorquí de Ca'n Company //Amb el suc de rostit, el dolç d'albercoc i trinxat de patates amb romaní//",
+            "EU": "Ca'n Companyko Mallorca txerri beltzaren esne-txerri terrina //Erreki mehiarekin, alberchigo gozoarekin eta patata trintxatuarekin erromeroarekin//",
+            "GL": "Terrina de lechón de porco negro maiorquino de Ca'n Company //Co zume de asado, o doce de albaricoque e trinchado de patacas con romero//",
+            "VA": "Terrina de porcella de porc negre mallorquí de Ca'n Company //Amb el suc de rostit, el dolç d'albercoc i trinxat de patates amb romaní//",
+            "KO": "Ca'n Company 마요르카 흑돼지 새끼돼지 테린 //로스트 육즙, 살구 잼, 로즈마리 으깬 감자 첨가//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "3bf90409"
+        }
     },
     {
         "id": "4003", "activa": "si", "precio": "23.00", "precioMedia": "",
         "carpeta": "principales", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Terrina de paletilla de cordero asado // Salsa de algarroba, boniato blanco y rojo"
+            "ES": "Terrina de paletilla de cordero asado // Salsa de algarroba, boniato blanco y rojo",
+            "EN": "Roast lamb shoulder terrine //Carob sauce, white and red sweet potato//",
+            "DE": "Terrine von der gebratenen Lammschulter //Johannisbrotsauce, weiße und rote Süßkartoffel//",
+            "FR": "Terrine d'épaule d'agneau rôtie //Sauce à la caroube, patate douce blanche et rouge//",
+            "IT": "Terrina di spalla d'agnello arrosto //Salsa di carruba, patata dolce bianca e rossa//",
+            "RU": "Террин из жареной лопатки ягненка //Соус из кэроба, белый и красный батат//",
+            "NL": "Terrine van gebraden lamsschouder //Johannesbroodboomsaus, witte en rode zoete aardappel//",
+            "PL": "Terrina z pieczonej łopatki jagnięcej //Sos z karobu, biały i czerwony batat//",
+            "SV": "Terrin på rostad lammbog //Johannesbrödsås, vit och röd sötpotatis//",
+            "NO": "Terrine av stekt lammebog //Johannesbrødsaus, hvit og rød søtpotet//",
+            "DA": "Terrine af stegt lammebov //Johannesbrødsauce, hvid og rød sød kartoffel//",
+            "FI": "Paahdetun lampaanlavan terriini //Johanneksenleipäpuukastike, valkoinen ja punainen bataatti//",
+            "PT": "Terrina de pá de cordeiro assado //Molho de alfarroba, batata-doce branca e vermelha//",
+            "RO": "Terină de spată de miel friptă //Sos de roșcove, cartof dulce alb și roșu//",
+            "HU": "Sült báránylapocka terrin //Szentjánoskenyér-szósz, fehér és piros édesburgonya//",
+            "CS": "Terina z pečené jehněčí plece //Karobová omáčka, bílé a červené batáty//",
+            "EL": "Τερρίνα από ψητή αρνίσια σπάλα //Σάλτσα χαρουπιού, λευκή και κόκκινη γλυκοπατάτα//",
+            "TR": "Kızarmış kuzu kol terrini //Keçiboynuzu sosu, beyaz ve kırmızı tatlı patates//",
+            "AR": "تيرين كتف حمل مشوي //صلصة الخروب، بطاطا حلوة بيضاء وحمراء//",
+            "ZH": "烤羊肩肉冻 //角豆酱、白红番薯//",
+            "JA": "ローストラムショルダーのテリーヌ //キャロブソース、白と赤のサツマイモ//",
+            "CA": "Terrina d'espatlla de me rostit //Salsa de garrofa, moniato blanc i vermell//",
+            "EU": "Arkume erretako sorbalda terrina //Karob saltsa, batata zuri eta gorria//",
+            "GL": "Terrina de pá de cordeiro asado //Salsa de algarroba, batata branca e vermella//",
+            "VA": "Terrina d'espatlla de me rostit //Salsa de garrofa, moniato blanc i vermell//",
+            "KO": "구운 양 어깨살 테린 //캐롭 소스, 흰색 및 빨간색 고구마//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "11226b10"
+        }
     },
     {
         "id": "4004", "activa": "si", "precio": "28.00", "precioMedia": "",
         "carpeta": "principales", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Solomillo de ternera de cebón // Con setas, nueces, crema de tomate seco y queso DO Menorca madurado"
+            "ES": "Solomillo de ternera de cebón // Con setas, nueces, crema de tomate seco y queso DO Menorca madurado",
+            "EN": "Fattened beef tenderloin //With mushrooms, walnuts, sun-dried tomato cream and aged D.O. Menorca cheese//",
+            "DE": "Mastrinderfilet //Mit Pilzen, Walnüssen, Creme aus getrockneten Tomaten und gereiftem DO Menorca Käse//",
+            "FR": "Filet de bœuf d'engrais //Avec champignons, noix, crème de tomates séchées et fromage D.O. Menorca affiné//",
+            "IT": "Filetto di manzo ingrassato //Con funghi, noci, crema di pomodori secchi e formaggio DO Menorca stagionato//",
+            "RU": "Филе откормленного бычка //С грибами, грецкими орехами, кремом из вяленых томатов и выдержанным сыром DO Menorca//",
+            "NL": "Mastrunderhaas //Met paddenstoelen, walnoten, crème van gedroogde tomaat en gerijpte DO Menorca kaas//",
+            "PL": "Polędwica wołowa z opasu //Z grzybami, orzechami włoskimi, kremem z suszonych pomidorów i dojrzałym serem DO Menorca//",
+            "SV": "Oxfilé av gödoxe //Med svamp, valnötter, soltorkad tomatkräm och lagrad DO Menorca-ost//",
+            "NO": "Indrefilet av gjødfe //Med sopp, valnøtter, soltørket tomatkrem og modnet DO Menorca-ost//",
+            "DA": "Oksemørbrad af fedekvæg //Med svampe, valnødder, soltørret tomatcreme og modnet DO Menorca-ost//",
+            "FI": "Syöttöhärän sisäfilee //Sienten, saksanpähkinöiden, kuivattujen tomaattien kerman ja kypsytetyn DO Menorca -juuston kera//",
+            "PT": "Lombo de novilho de engorda //Com cogumelos, nozes, creme de tomate seco e queijo DO Menorca curado//",
+            "RO": "Mușchi de vită de îngrășare //Cu ciuperci, nuci, cremă de roșii uscate și brânză maturată DO Menorca//",
+            "HU": "Hízott marha bélszín //Gombával, dióval, aszalt paradicsom krémmel és érlelt DO Menorca sajttal//",
+            "CS": "Hovězí svíčková z výkrmu //S houbami, vlašskými ořechy, krémem sušených rajčat a zrajícím sýrem DO Menorca//",
+            "EL": "Φιλέτο παχυνθέντος μόσχου //Με μανιτάρια, καρύδια, κρέμα αποξηραμένης ντομάτας και παλαιωμένο τυρί DO Menorca//",
+            "TR": "Besi sığırı bonfilesi //Mantar, ceviz, kurutulmuş domates kreması ve olgunlaştırılmış DO Menorca peyniri ile//",
+            "AR": "فيليه لحم بقر مسمن //مع فطر، جوز، كريمة الطماطم المجففة وجبن DO Menorca المعتق//",
+            "ZH": "育肥牛肉里脊 //附蘑菇、核桃、风干番茄奶油酱及陈年 DO Menorca 芝士//",
+            "JA": "肥育牛の牛フィレ肉 //キノコ、クルミ、ドライトマトのクリーム、熟成DOメノルカチーズ添え//",
+            "CA": "Filet de vedella de cebó //Amb bolets, nous, crema de tomàquet sec i formatge DO Menorca madurat//",
+            "EU": "Gizen-idi azpizuna //Perretxikoekin, intxaurrekin, tomate lehor krema eta DO Menorca gazta helmugatuarekin//",
+            "GL": "Solomo de vacún de cebón //Con cogomelos, noces, crema de tomate seco e queixo DO Menorca madurado//",
+            "VA": "Filet de vedella de cebó //Amb bolets, nous, crema de tomàquet sec i formatge DO Menorca madurat//",
+            "KO": "비육우 소안심 //버섯, 호두, 말린 토마토 크림 및 숙성 DO 메놀카 치즈 첨가//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "a17d59a"
+        }
     },
     {
         "id": "4005", "activa": "si", "precio": "22.00", "precioMedia": "",
         "carpeta": "principales", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Bacalao // Huevo, patata y sobrasada (cocción a baja temperatura)"
+            "ES": "Bacalao // Huevo, patata y sobrasada (cocción a baja temperatura)",
+            "EN": "Cod //Egg, potato and sobrasada (low temperature cooking)//",
+            "DE": "Kabeljau //Ei, Kartoffel und Sobrasada (Niedertemperaturgaren)//",
+            "FR": "Morue //Œuf, pomme de terre et sobrasada (cuisson à basse température)//",
+            "IT": "Merluzzo //Uovo, patata e sobrasada (cottura a bassa temperatura)//",
+            "RU": "Треска //Яйцо, картофель и собрасада (приготовление при низкой температуре)//",
+            "NL": "Kabeljauw //Ei, aardappel en sobrasada (bereiding op lage temperatuur)//",
+            "PL": "Dorsz //Jajko, ziemniak i sobrasada (gotowanie w niskiej temperaturze)//",
+            "SV": "Torsk //Ägg, potatis och sobrasada (tillagning på låg temperatur)//",
+            "NO": "Torsk //Egg, potet og sobrasada (lavtemperaturtilberedning)//",
+            "DA": "Torsk //Æg, kartoffel og sobrasada (tilberedning ved lav temperatur)//",
+            "FI": "Turska //Kananmuna, peruna ja sobrasada (matalalämpökypsennys)//",
+            "PT": "Bacalhau //Ovo, batata e sobrasada (cozedura a baixa temperatura)//",
+            "RO": "Cod //Ou, cartof și sobrasada (gătire la temperatură scăzută)//",
+            "HU": "Tőkehal //Tojás, burgonya és sobrasada (alacsony hőfokon főzve)//",
+            "CS": "Treska //Vejce, brambory a sobrasada (vaření při nízké teplotě)//",
+            "EL": "Μπακαλιάρος //Αυγό, πατάτα και sobrasada (μαγείρεμα σε χαμηλή θερμοκρασία)//",
+            "TR": "Morina //Yumurta, patates ve sobrasada (düşük sıcaklıkta pişirme)//",
+            "AR": "سمك القد //بيض، بطاطس وصوبراصادا (طهي على درجة حرارة منخفضة)//",
+            "ZH": "鳕鱼 //鸡蛋、土豆和马略卡香肠（低温烹饪）//",
+            "JA": "タラ //卵、ジャガイモ、ソブラサーダ（低温調理）//",
+            "CA": "Bacallà //Ou, patata i sobrassada (cocció a baixa temperatura)//",
+            "EU": "Bakailaoa //Arrautza, patata eta sobrasada (tenperatura baxuko sukaldaritza)//",
+            "GL": "Bacallau //Ovo, pataca e sobrasada (cocción a baixa temperatura)//",
+            "VA": "Bacallà //Ou, creïlla i sobrassada (cocció a baixa temperatura)//",
+            "KO": "대구 //계란, 감자, 소브라사다(저온 조리)//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "14854133"
+        }
     },
     {
         "id": "4006", "activa": "si", "precio": "25.00", "precioMedia": "",
         "carpeta": "principales", "archivo": "",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
-            "ES": "Lomo de merluza // Gamba roja, avellanas y acelgas"
+            "ES": "Lomo de merluza // Gamba roja, avellanas y acelgas",
+            "EN": "Hake loin //Red prawn, hazelnuts and Swiss chard//",
+            "DE": "Seehechtfilet //Rote Garnele, Haselnüsse und Mangold//",
+            "FR": "Dos de merlu //Crevette rouge, noisettes et blettes//",
+            "IT": "Filetto di nasello //Gambero rosso, nocciole e bietole//",
+            "RU": "Филе хека //Красная креветка, фундук и мангольд//",
+            "NL": "Heekhaas //Rode garnaal, hazelnoten en snijbiet//",
+            "PL": "Polędwica z morszczuka //Czerwona krewetka, orzechy laskowe i boćwina//",
+            "SV": "Kummelfilé //Röd räka, hasselnötter och mangold//",
+            "NO": "Kummelrygg //Rød reke, hasselnøtter og mangold//",
+            "DA": "Kulmulefillet //Rød reje, hasselnødder og sølvbede//",
+            "FI": "Kummeliturskafilee //Punainen katkarapu, hasselpähkinät ja mangoldi//",
+            "PT": "Lombo de pescada //Camarão-vermelho, avelãs e acelgas//",
+            "RO": "File de merluc //Crevete roșu, alune de pădure și mangold//",
+            "HU": "Tengeri tőkehal filé //Vörös garnéla, mogyoró és mángold//",
+            "CS": "Hřbet ze štikozubce //Červená kreveta, lískové oříšky a mangold//",
+            "EL": "Φιλέτο μερλούκι //Κόκκινη γαρίδα, φουντούκια και σέσκουλα//",
+            "TR": "Berlam balığı filesi //Kırmızı karides, fındık ve pazı//",
+            "AR": "شرائح سمك الميرلوزا //جمبري أحمر، بندق وسلق//",
+            "ZH": "无须鳕腰肉 //红虾、榛果和牛皮菜//",
+            "JA": "メルルーサのロイン //赤エビ、ヘーゼルナッツ、フダンソウ//",
+            "CA": "Llom de lluç //Gamba vermella, avellanes i bledes//",
+            "EU": "Legatz-solomoa //Gamba gorria, hurrak eta zerbak//",
+            "GL": "Lombo de pescada //Camarón vermello, abelás e acelgas//",
+            "VA": "Llom de lluç //Gamba roja, avellanes i bledes//",
+            "KO": "메를루사 로인 //홍새우, 헤이즐넛, 근대//"
         },
-        "info": {}
+        "info": {
+            "HASH_NOMBRE": "3e740361"
+        }
     }
   ]
 }
