@@ -16,7 +16,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.organizador = '1.3.0'; // 4 nov: borrar categoría/subcategoría CON sus platos (antes ofrece moverlos con Unir). 1.2.0: 3 nov: paso 3 — ✏️ renombrar (y en la web), visible, ampliar/reducir rango (quitando tramo vacío a la vecina), unir (renumera platos), borrar vacía; ↕️ ordenar. 1.1.0: 3 nov: crear subcategoría (también en Sugerencias; sección propia en la web y en la hoja). 1.0.0: Fase 3 — crear categoría
+    window.APP_VERSIONS.organizador = '1.5.0'; // 4 nov (3): porDefecto() — plantilla neutra: Sugerencias y Postres de serie (las crea almacen-json al abrir el editor). 1.4.0: 4 nov (2): tipos nuevos al crear categoría: "Sugerencias (hoja imprimible)" y "Postres (con hoja de Postres)", uno de cada como máximo. 1.3.0: 4 nov: borrar categoría/subcategoría CON sus platos (antes ofrece moverlos con Unir). 1.2.0: 3 nov: paso 3 — ✏️ renombrar (y en la web), visible, ampliar/reducir rango (quitando tramo vacío a la vecina), unir (renumera platos), borrar vacía; ↕️ ordenar. 1.1.0: 3 nov: crear subcategoría (también en Sugerencias; sección propia en la web y en la hoja). 1.0.0: Fase 3 — crear categoría
 
     var IDIOMAS = ['ES', 'EN', 'DE', 'FR', 'IT', 'RU', 'NL', 'PL', 'SV', 'NO', 'DA', 'FI', 'PT', 'RO', 'HU', 'CS', 'EL', 'TR', 'AR', 'ZH', 'JA', 'KO', 'CA', 'EU', 'GL', 'VA'];
     var MIN_ID = 1000, MAX_ID = 99999;
@@ -112,6 +112,15 @@
         var nueva = { nombre: nombre, desde: d, hasta: h, pestana: null, carpeta: slug(c.carpeta || nombre) };
         if (c.tipo === 'bebida') nueva.tipo = 'bebida';
         if (c.tipo === 'vino') { nueva.tipo = 'vino'; if (c.vino) nueva.vino = c.vino; }
+        // 4 nov (2): hojas imprimibles. Solo una de cada en la carta.
+        if (c.tipo === 'sugerencias') {
+            if (est.categorias.some(function (x) { return x.tipo === 'sugerencias'; })) throw new Error('Ya hay una categoría de Sugerencias.');
+            nueva.tipo = 'sugerencias'; nueva.subAcordeon = true;
+        }
+        if (c.tipo === 'postres') {
+            if (est.categorias.some(function (x) { return x.hojaPostres || x.tipo === 'hoja-postres'; })) throw new Error('Ya hay una hoja de Postres en la carta.');
+            nueva.hojaPostres = true;
+        }
 
         var nombres = {};
         IDIOMAS.forEach(function (l) { var v = cambio.nombres && cambio.nombres[l]; if (v && String(v).trim()) nombres[l] = String(v).trim(); });
@@ -132,6 +141,7 @@
                 var a = est.pestanas.findIndex(function (p) { return p.especial === 'alergenos'; });
                 if (a >= 0) pos = a;
             }
+            if (web.alPrincipio) pos = 0;
             est.pestanas.splice(pos, 0, pes);
             nueva.pestana = id;
             ocultar.push(id);
@@ -144,7 +154,8 @@
 
         var tras = cambio.despuesDeCategoria;
         var j = tras == null || tras === '' ? -1 : est.categorias.findIndex(function (x) { return x.desde === parseInt(tras, 10); });
-        if (j >= 0) est.categorias.splice(j + 1, 0, nueva); else est.categorias.push(nueva);
+        if (cambio.alInicio) est.categorias.unshift(nueva);
+        else if (j >= 0) est.categorias.splice(j + 1, 0, nueva); else est.categorias.push(nueva);
         return { estructura: est, ocultar: ocultar };
     }
 
@@ -709,6 +720,8 @@
             '<label><b>Nombre</b> (en español)<br><input id="ew-org-nombre" style="' + ESTILO_IN + ' width:100%;" placeholder="p. ej. Cocktails"></label>' +
             '<div style="display:flex; flex-wrap:wrap; gap:12px;">' +
             '<label><b>Tipo</b><br><select id="ew-org-tipo" style="' + ESTILO_IN + '"><option value="">Normal (comida)</option><option value="bebida">Bebida</option>' +
+            (est.categorias.some(function (x) { return x.tipo === 'sugerencias'; }) ? '' : '<option value="sugerencias">Sugerencias (con hoja imprimible)</option>') +
+            (est.categorias.some(function (x) { return x.hojaPostres || x.tipo === 'hoja-postres'; }) ? '' : '<option value="postres">Postres (con hoja de Postres imprimible)</option>') +
             '<option value="vino:blanco">Vino blanco</option><option value="vino:rosado">Vino rosado</option><option value="vino:tinto">Vino tinto</option><option value="vino:cava">Cava / Champagne</option></select></label>' +
             '<label><b>Carpeta de fotos</b><br><input id="ew-org-carpeta" style="' + ESTILO_IN + '" placeholder="se pone sola"></label></div>' +
             '<fieldset style="border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px;"><legend><b>Rango de ID</b></legend>' +
@@ -777,6 +790,16 @@
         $('ew-org-tras-cat').onchange = proponerAhora;
         $('ew-org-desde').oninput = function () { var d = parseInt(this.value, 10); if (!isNaN(d)) $('ew-org-hasta').value = d + tam() - 1; comprobar(); };
         $('ew-org-hasta').oninput = comprobar;
+        // Sugerencias: si está libre, 12001-12999 (las secciones de siempre de la hoja imprimible:
+        // entrantes 12100-12399, principales 12400-12899, postres 12900-12989, vinos 12990-12999).
+        $('ew-org-tipo').onchange = function () {
+            var t = this.value;
+            if (t === 'sugerencias' && !conflictos(est, 12001, 12999, ids).length) {
+                $('ew-org-tam').value = '999'; $('ew-org-desde').value = 12001; $('ew-org-hasta').value = 12999; comprobar();
+            }
+            var n = $('ew-org-nombre');
+            if (!n.value.trim()) { n.value = t === 'sugerencias' ? 'Sugerencias' : t === 'postres' ? 'Postres' : ''; n.oninput(); }
+        };
         proponerAhora();
         setTimeout(function () { $('ew-org-nombre').focus(); }, 50);
 
@@ -1105,7 +1128,39 @@
         } finally { if (tarea) tarea.fin(); }
     }
 
+    // ---------- 4 nov (3): categorías DE SERIE (plantilla neutra, webs con "marca") ----------
+    // Sugerencias (hoja imprimible; 12001-12999 si está libre, sus secciones de siempre) y Postres
+    // (con hoja de Postres; 7001-7099 si está libre). Sus pestañas de la web empiezan OCULTAS.
+    // Devuelve los cambios que faltan (lista vacía si ya están); los aplica almacen-json.js.
+    var NOMBRES_SUGERENCIAS = {"ES":"Sugerencias","EN":"Chef's Suggestions","DE":"Empfehlungen des Chefs","FR":"Suggestions du Chef","IT":"Suggerimenti dello Chef","RU":"Рекомендации шеф-повара","NL":"Aanbevelingen van de Chef","PL":"Sugestie Szefa Kuchni","SV":"Kockens Förslag","NO":"Kokkens Forslag","DA":"Kokkens Forslag","FI":"Kokin Suositukset","PT":"Sugestões do Chef","RO":"Recomandările Bucătarului-Șef","HU":"A Séf Ajánlata","CS":"Doporučení Šéfkuchaře","EL":"Προτάσεις του Σεφ","TR":"Şefin Önerileri","AR":"اقتراحات الشيف","ZH":"主厨推荐","JA":"シェフのおすすめ","KO":"셰프의 추천","CA":"Suggeriments del Xef","EU":"Sukaldariaren Gomendioak","GL":"Suxestións do Chef","VA":"Suggeriments del Xef"};
+    var NOMBRES_POSTRES = {"ES":"Postres","EN":"Desserts","DE":"Desserts","FR":"Desserts","IT":"Dolci","RU":"Десерты","NL":"Desserts","PL":"Desery","SV":"Efterrätter","NO":"Desserter","DA":"Desserter","FI":"Jälkiruoat","PT":"Sobremesas","RO":"Deserturi","HU":"Desszertek","CS":"Dezerty","EL":"Επιδόρπια","TR":"Tatlılar","AR":"حلويات","ZH":"甜点","JA":"デザート","KO":"디저트","CA":"Postres","EU":"Postreak","GL":"Postres","VA":"Postres"};
+    function porDefecto(est, ids) {
+        if (!est || !Array.isArray(est.categorias)) return [];
+        ids = ids || [];
+        var r = [];
+        var hay = function (f) { return est.categorias.some(f); };
+        var antesDeAlergenos = function () {   // en el acordeón, delante de Alérgenos
+            var i = est.categorias.findIndex(function (x) { return x.tipo === 'alergenos'; });
+            return i > 0 ? est.categorias[i - 1].desde : null;
+        };
+        var nombreLibre = function (n) { return !hay(function (x) { return String(x.nombre).trim().toLowerCase() === n.toLowerCase(); }); };
+        if (!hay(function (x) { return x.tipo === 'sugerencias'; }) && nombreLibre('Sugerencias')) {
+            var rs = conflictos(est, 12001, 12999, ids).length ? proponer(est, ids, 999, 0) : [12001, 12999];
+            if (rs) r.push({ tipo: 'crearCategoria', alInicio: true, mensaje: 'Sugerencias (de serie)',
+                categoria: { nombre: 'Sugerencias', desde: rs[0], hasta: rs[1], carpeta: 'sugerencias', tipo: 'sugerencias' },
+                nombres: NOMBRES_SUGERENCIAS, web: { modo: 'nueva', alPrincipio: true } });
+        }
+        if (!hay(function (x) { return x.hojaPostres || x.tipo === 'hoja-postres'; }) && nombreLibre('Postres')) {
+            var rp = conflictos(est, 7001, 7099, ids).length ? proponer(est, ids, 99, 7001) : [7001, 7099];
+            if (rp && !(r[0] && rp[0] <= r[0].categoria.hasta && r[0].categoria.desde <= rp[1])) r.push({ tipo: 'crearCategoria', mensaje: 'Postres (de serie)',
+                categoria: { nombre: 'Postres', desde: rp[0], hasta: rp[1], carpeta: 'postres', tipo: 'postres' },
+                nombres: NOMBRES_POSTRES, web: { modo: 'nueva' }, despuesDeCategoria: antesDeAlergenos() });
+        }
+        return r;
+    }
+
     window.Organizador = {
+        porDefecto: porDefecto,
         ocupados: ocupados, conflictos: conflictos, libres: libres, proponer: proponer, aplicar: aplicar, slug: slug,
         conflictosSub: conflictosSub, libresSub: libresSub, proponerSub: proponerSub,
         nuevaCategoria: nuevaCategoria, nuevaSubcategoria: nuevaSubcategoria,

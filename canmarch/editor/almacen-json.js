@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.13.1'; // 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.14.0'; // 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -638,6 +638,19 @@
                 const d = await vista(modo, true);
                 aplicarIdiomasEditor(d.idiomas);
                 if (window.MARCA && marcaDe(d)) window.MARCA.aplicar(marcaDe(d));
+                // Plantilla neutra: Sugerencias y Postres vienen de serie (una vez, se guarda en GitHub).
+                if (window.MARCA && window.Organizador && window.Organizador.porDefecto && !est(modo).deSerie && estructuraDe(d)) {
+                    est(modo).deSerie = true;
+                    const faltan = window.Organizador.porDefecto(estructuraDe(d), (d.platos || []).map(p => idNum(p.id)));
+                    if (faltan.length) {
+                        const guardados = faltan.map(c => encolar(modo, opEstructura(c), c.mensaje, 300)
+                            .catch(err => console.warn('[almacen-json] ' + c.mensaje + ':', err.message)));
+                        vista(modo).then(v => { if (window.Categorias) window.Categorias.cargar(estructuraDe(v)); });
+                        Promise.all(guardados).then(() => {
+                            try { window.UI && window.UI.log && window.UI.log('[Carta] Creadas de serie: ' + faltan.map(c => c.categoria.nombre).join(' y ') + ' (pestañas ocultas en la web hasta que las actives).'); } catch (x) { }
+                        });
+                    }
+                }
                 if (window.Categorias) window.Categorias.cargar(estructuraDe(d));
                 if (accion === 'categorias') {
                     return respuesta(['ID,Activa'].concat((d.ocultas || []).map(id => escaparCsv(id) + ',NO')).join('\r\n'), 200, 'text/csv; charset=utf-8');
