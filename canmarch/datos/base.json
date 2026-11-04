@@ -27,5 +27,6 @@
 {"id":"4003","activa":"si","precio":"23.00","precioMedia":"","carpeta":"principales","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"115c147a041b"},
 {"id":"4004","activa":"si","precio":"28.00","precioMedia":"","carpeta":"principales","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"9b54e32005cd"},
 {"id":"4005","activa":"si","precio":"22.00","precioMedia":"","carpeta":"principales","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"fe874c9d535b"},
-{"id":"4006","activa":"si","precio":"25.00","precioMedia":"","carpeta":"principales","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"1eef3df5e21d"}
+{"id":"4006","activa":"si","precio":"25.00","precioMedia":"","carpeta":"principales","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"1eef3df5e21d"},
+{"id":"12001","activa":"si","precio":"0.00","precioMedia":"","carpeta":"sugerencias","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"a80cdfee6958"}
 ]}
