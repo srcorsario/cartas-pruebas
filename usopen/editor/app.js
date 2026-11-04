@@ -1,7 +1,7 @@
 // --- app.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.app = '2.24.0'; // 3 nov (7): plato nuevo en una categoría sin subcategorías puede usar todo su rango (antes solo +99). 2.23.0: 3 nov (6): croquetas e imagen inicial del plato según la estructura de datos.json (categorias.js). 2.22.0: // NUEVO (3 nov, 5): antes de traducir del español (Generar opciones en inglés) pide revisar los alérgenos (la Info se genera con ellos). 2.21.0: NUEVO (3 nov, 4): la Info ES/EN se adelanta EN SEGUNDO PLANO en cuanto se elige el inglés (y al pulsar traducir al resto), en paralelo con la traducción; al pulsar "Generar Info y Aplicar" se reutiliza si el nombre/alérgenos no han cambiado (o se espera a que termine). 2.20.0: NUEVO (3 nov, 3): traducciones con el mismo aviso que la Info (tenis + contador + nota según nº de idiomas) y botón Cancelar en ambos; si Gemini está saturado (503/429) se reintenta solo (varias rondas con espera) en vez de dar error; casillas en la lista para eliminar varios platos a la vez. 2.19.0: NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
+window.APP_VERSIONS.app = '2.25.0'; // 4 nov: cabecera del editor con dónde está el plato (categoría › subcategoría · ID) y mayúscula inicial al salir del campo del nombre. 2.24.0: 3 nov (7): plato nuevo en una categoría sin subcategorías puede usar todo su rango (antes solo +99). 2.23.0: 3 nov (6): croquetas e imagen inicial del plato según la estructura de datos.json (categorias.js). 2.22.0: // NUEVO (3 nov, 5): antes de traducir del español (Generar opciones en inglés) pide revisar los alérgenos (la Info se genera con ellos). 2.21.0: NUEVO (3 nov, 4): la Info ES/EN se adelanta EN SEGUNDO PLANO en cuanto se elige el inglés (y al pulsar traducir al resto), en paralelo con la traducción; al pulsar "Generar Info y Aplicar" se reutiliza si el nombre/alérgenos no han cambiado (o se espera a que termine). 2.20.0: NUEVO (3 nov, 3): traducciones con el mismo aviso que la Info (tenis + contador + nota según nº de idiomas) y botón Cancelar en ambos; si Gemini está saturado (503/429) se reintenta solo (varias rondas con espera) en vez de dar error; casillas en la lista para eliminar varios platos a la vez. 2.19.0: NUEVO (3 nov, 2): botón "Generar Info y Aplicar Cambios"; la Info (ES/EN + resto de idiomas) se ve como UN solo proceso con contador de tiempo, sin opción de segundo plano; solo en los idiomas elegidos (🌐 Idiomas). 2.18.0: mismo app.js para v3 y Club House (estándar); precio de 1/2 ración (antes solo Club House); nombre con la primera letra en mayúscula al aplicar el plato y en "¿Quisiste decir…?"; animación de tenis a pantalla completa mientras se genera la Info del plato abierto (botón "Seguir en segundo plano"). Anterior 2.17.0: // NUEVO (30 oct): esVino vía esIdVino() (13000-14999) para no tratar la Hoja Postres 16xxx como vino. Anterior 2.16.0: // NUEVO (22 sept, parte 2): fix "se queda regenerando la Info al tocar solo el precio", causa nº2. La v2.15.0 ya arregló que INFO_HASH_FICHA se guardara de verdad en la hoja (ver esa entrada de versión más abajo en el historial), pero seguía fallando en pruebas reales: fetchYParsearDatos() (la función que carga los platos al abrir/recargar el editor) leía SIEMPRE getCsvUrl(modo) -- la copia "publicar en la web" que Google cachea varios minutos -- así que justo después de guardar, recargar el editor devolvía una foto vieja de la hoja sin la huella (ni a veces sin la Info) recién guardada, y cualquier "Aplicar Cambios" volvía a disparar una regeneración completa con IA creyendo que nunca se había generado nada. Ahora fetchYParsearDatos() usa PRIMERO el endpoint EN VIVO de Código.gs (?accion=csv, sin caché de Google de por medio, misma vía que ya usaba servirCsvEnVivo() para "Sincronizar"), cayendo de vuelta al CSV publicado solo si esa petición fallara.
 
 console.group("%c[Editor] Inicializando sistema de control...", "color: orange; font-weight: bold;");
 
@@ -909,6 +909,37 @@ function imagenInicialDeId(baseId) {
     return '';
 }
 
+// NUEVO (4 nov): cabecera del editor con dónde se crea/edita el plato ("Nuevo plato en Ensaladas › Verdes · ID 2105").
+function pintarUbicacionPlato(id, esNuevo) {
+    const label = document.getElementById('label-uvas');
+    if (!label || !label.parentNode) return;
+    let caja = document.getElementById('ubicacion-plato');
+    if (!caja) {
+        caja = document.createElement('div');
+        caja.id = 'ubicacion-plato';
+        caja.style.cssText = 'background:#fff4e6;color:#2c3e50;border-left:5px solid #e67e22;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-weight:700;font-size:1.05rem;';
+        label.parentNode.insertBefore(caja, label);
+    }
+    const C = window.Categorias;
+    const cat = C && C.categoriaDe ? C.categoriaDe(id) : null;
+    const sub = C && C.subDe ? C.subDe(id) : null;
+    let donde = cat ? cat.nombre : '';
+    if (sub && sub.nombre && sub.nombre !== donde) donde += (donde ? ' › ' : '') + sub.nombre;
+    if (!donde) donde = 'Sin categoría';
+    caja.textContent = (esNuevo ? '➕ Nuevo plato en ' : '✏️ Editando en ') + donde + ' · ID ' + id;
+}
+
+// NUEVO (4 nov): mayúscula inicial al salir del campo del nombre (antes solo al aplicar).
+document.addEventListener('focusout', function (e) {
+    const el = e.target;
+    if (!el || el.tagName !== 'INPUT' || !/^edit-[a-z]{2,3}$/.test(el.id || '')) return;
+    if (!el.closest || !el.closest('#modal-editor')) return;
+    const v = el.value;
+    if (!v || !v.trim()) return;
+    const nuevo = esIdVino(platoEditandoId) ? formatWineName(v.trim()) : mayusculaInicial(v.replace(/^\s+/, ''));
+    if (nuevo !== v) el.value = nuevo;
+}, true);
+
 function abrirEditor(id, esNuevo = false) {
     let p = esNuevo ? datosTempNuevo : datosLocales.find(x => x.id === id);
     if (!p) return;
@@ -927,6 +958,7 @@ function abrirEditor(id, esNuevo = false) {
     // ingredientes" de más abajo, que sustituye este campo simple por una lista editable.
     const labelUvas = document.getElementById('label-uvas');
     if (labelUvas) labelUvas.innerText = esVino ? "Nombres y Detalles del Plato / Vino (Uvas)" : "Nombres y Detalles del Plato";
+    pintarUbicacionPlato(id, esNuevo); // NUEVO (4 nov)
 
     const dataEs = desglosarNombre(p['es'] || "");
     const editEs = document.getElementById('edit-es');
