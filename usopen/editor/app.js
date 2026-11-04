@@ -920,11 +920,20 @@ function pintarUbicacionPlato(id, esNuevo) {
         caja.style.cssText = 'background:#fff4e6;color:#2c3e50;border-left:5px solid #e67e22;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-weight:700;font-size:1.05rem;';
         label.parentNode.insertBefore(caja, label);
     }
-    const C = window.Categorias;
-    const cat = C && C.categoriaDe ? C.categoriaDe(id) : null;
-    const sub = C && C.subDe ? C.subDe(id) : null;
-    let donde = cat ? cat.nombre : '';
-    if (sub && sub.nombre && sub.nombre !== donde) donde += (donde ? ' › ' : '') + sub.nombre;
+    // La misma estructura que pinta el acordeón (datos.json o, si no, estructuras.js).
+    const n = parseInt(id, 10);
+    const est = (typeof getEstructuraActual === 'function' ? getEstructuraActual() : null) || [];
+    const cat = est.find(c => n >= c.id && n <= c.id + (c.rango != null ? c.rango : 999));
+    let sub = null;
+    if (cat && Array.isArray(cat.sub)) {
+        const subs = cat.sub.slice().sort((a, b) => a.id - b.id);
+        sub = subs.find((s, i) => {
+            const fin = s.max != null ? s.max : (subs[i + 1] ? subs[i + 1].id - 1 : cat.id + (cat.rango != null ? cat.rango : 999));
+            return n >= s.id && n <= fin;
+        }) || null;
+    }
+    let donde = cat ? String(cat.name || '').replace(/^\d+\s*-\s*/, '') : '';
+    if (sub && sub.name && sub.name !== donde) donde += (donde ? ' › ' : '') + sub.name;
     if (!donde) donde = 'Sin categoría';
     caja.textContent = (esNuevo ? '➕ Nuevo plato en ' : '✏️ Editando en ') + donde + ' · ID ' + id;
 }
