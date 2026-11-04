@@ -15,6 +15,8 @@
     'use strict';
     var S = window.EDITOR_SITIO;
     if (!S) return;
+    window.APP_VERSIONS = window.APP_VERSIONS || {};
+    window.APP_VERSIONS.subirFoto = '1.1.0'; // 4 nov: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -113,26 +115,29 @@
             img.src = url;
         });
     }
-    async function canvasAWebp(c) {
-        var blob = await new Promise(function (ok) { c.toBlob(ok, 'image/webp', CALIDAD); });
+    async function canvasAWebp(c, calidad) {
+        calidad = calidad || CALIDAD;
+        var blob = await new Promise(function (ok) { c.toBlob(ok, 'image/webp', calidad); });
         if (!blob || blob.type !== 'image/webp') {
             var mod = await import(JSQUASH);
-            var buf = await mod.default(c.getContext('2d').getImageData(0, 0, c.width, c.height), { quality: Math.round(CALIDAD * 100) });
+            var buf = await mod.default(c.getContext('2d').getImageData(0, 0, c.width, c.height), { quality: Math.round(calidad * 100) });
             blob = new Blob([buf], { type: 'image/webp' });
         }
         return blob;
     }
     // Sin recorte (si no carga Cropper.js): solo reducir.
-    async function aWebp(file) {
+    async function aWebp(file, op) {
+        op = op || {};
+        var lado = op.maxLado || MAX_LADO;
         var img = await abrirImagen(file);
-        var w = img.width, h = img.height, f = Math.min(1, MAX_LADO / Math.max(w, h));
+        var w = img.width, h = img.height, f = Math.min(1, lado / Math.max(w, h));
         var cw = Math.max(1, Math.round(w * f)), ch = Math.max(1, Math.round(h * f));
         var c = document.createElement('canvas');
         c.width = cw; c.height = ch;
         var cx = c.getContext('2d');
         cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high';
         cx.drawImage(img, 0, 0, cw, ch);
-        var blob = await canvasAWebp(c);
+        var blob = await canvasAWebp(c, op.calidad);
         return { blob: blob, info: w + '×' + h + ' → ' + cw + '×' + ch + ', ' + kb(blob.size) };
     }
 
@@ -151,8 +156,11 @@
     }
     var formatoRec = NaN;   // se recuerda entre fotos (NaN = libre)
     // Devuelve { blob, info } o null si se cancela.
-    async function recortar(fuente, titulo) {
-        try { await cargarCropper(); } catch (e) { return await aWebp(fuente); }
+    // op (opcional, logos/QR de marca.js): { maxLado, calidad, transparente }
+    async function recortar(fuente, titulo, op) {
+        op = op || {};
+        var lado = op.maxLado || MAX_LADO;
+        try { await cargarCropper(); } catch (e) { return await aWebp(fuente, op); }
         var url = URL.createObjectURL(fuente);
         var ok = await new Promise(function (r) { var im = new Image(); im.onload = function () { r(true); }; im.onerror = function () { r(false); }; im.src = url; });
         if (!ok) {
@@ -177,7 +185,7 @@
                 viewMode: 1, autoCropArea: 1, aspectRatio: formatoRec, background: false, responsive: true,
                 checkOrientation: true, movable: true, zoomable: true, toggleDragModeOnDblclick: false,
                 crop: function (e) {
-                    var w = Math.round(e.detail.width), h = Math.round(e.detail.height), f = Math.min(1, MAX_LADO / Math.max(w, h));
+                    var w = Math.round(e.detail.width), h = Math.round(e.detail.height), f = Math.min(1, lado / Math.max(w, h));
                     info.textContent = w + '×' + h + ' → se guarda a ' + Math.round(w * f) + '×' + Math.round(h * f) + ' px';
                 }
             });
@@ -196,9 +204,9 @@
             capa.querySelector('.sf-ok').onclick = async function () {
                 this.disabled = true; this.textContent = 'Preparando…';
                 var d = cr.getData(true);
-                var f = Math.min(1, MAX_LADO / Math.max(d.width, d.height));
-                var c = cr.getCroppedCanvas({ width: Math.round(d.width * f), height: Math.round(d.height * f), imageSmoothingEnabled: true, imageSmoothingQuality: 'high', fillColor: '#fff' });
-                var blob = await canvasAWebp(c);
+                var f = Math.min(1, lado / Math.max(d.width, d.height));
+                var c = cr.getCroppedCanvas({ width: Math.round(d.width * f), height: Math.round(d.height * f), imageSmoothingEnabled: true, imageSmoothingQuality: 'high', fillColor: op.transparente ? 'transparent' : '#fff' });
+                var blob = await canvasAWebp(c, op.calidad);
                 fin({ blob: blob, info: d.width + '×' + d.height + ' → ' + c.width + '×' + c.height + ', ' + kb(blob.size) });
             };
         });
@@ -414,12 +422,26 @@
         if (cambios.length) await commit(cambios, (borrar ? 'Borrar fotos ' : 'Desactivar fotos ') + base + ' (plato ' + p.id + ' eliminado)');
         return borrar ? originales.length : activas.length;
     }
-    window.SubirFoto = { retirar: retirar };
+    // Para marca.js (logos y QR de la plantilla neutra): elegir imagen -> recortar -> WebP ->
+    // subir a <web>/<rutaWeb> en un commit. Devuelve la ruta (relativa a la web) o null si se cancela.
+    function ponerEstilos() {
+        if (document.getElementById('sf-estilos')) return;
+        var st = document.createElement('style'); st.id = 'sf-estilos'; st.textContent = CSS; document.head.appendChild(st);
+    }
+    async function subirImagen(file, rutaWeb, titulo, op) {
+        ponerEstilos();
+        var r = await recortar(file, titulo, op);
+        if (!r) return null;
+        var sha = await subirBlob(r.blob);
+        await commit([{ path: dirWeb + rutaWeb, sha: sha }], 'Subir ' + rutaWeb);
+        return rutaWeb;
+    }
+    window.SubirFoto = { retirar: retirar, subirImagen: subirImagen };
 
     document.addEventListener('DOMContentLoaded', function () {
         var campo = document.getElementById('edit-imagen');
         if (!campo) return;
-        var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
+        ponerEstilos();
         var btn = document.createElement('button');
         btn.type = 'button'; btn.className = 'sf-btn'; btn.textContent = '📷 Fotos del plato';
         btn.onclick = gestor;

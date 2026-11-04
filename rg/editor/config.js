@@ -1,7 +1,14 @@
 // --- config.js ---
 // NUEVO: Registro de versión del archivo
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.config = '2.8.0'; // NUEVO (30 oct): bloque HOJA IMPRIMIBLE DE POSTRES (rango 16000-16299). Anterior 2.7.0: // ACTUALIZADO (22 sept): WEB_APP_URL_RESTAURANTE001 vuelve a apuntar a OTRA implementación nueva de Codigo_RG.gs -- la anterior (AKfycbyNg...) enviaba "GUARDAR CAMBIOS EN WEB" sin error visible (alert de "Petición enviada") pero la hoja NUNCA se actualizaba (sospecha: "Quién tiene acceso" de esa implementación no estaba en "Cualquier usuario", así que Google bloqueaba en silencio las peticiones anónimas -- con no-cors el navegador no puede detectarlo). WEB_APP_URL_RESTAURANTE002 (US Open) no cambia en este commit.
+window.APP_VERSIONS.config = '2.9.0'; // 4 nov: plantilla neutra (window.MARCA, marca.js): sin nombres, logos, QR ni imágenes de RG/US Open/Club House. Anterior 2.8.0: NUEVO (30 oct): bloque HOJA IMPRIMIBLE DE POSTRES (rango 16000-16299). Anterior 2.7.0: // ACTUALIZADO (22 sept): WEB_APP_URL_RESTAURANTE001 vuelve a apuntar a OTRA implementación nueva de Codigo_RG.gs -- la anterior (AKfycbyNg...) enviaba "GUARDAR CAMBIOS EN WEB" sin error visible (alert de "Petición enviada") pero la hoja NUNCA se actualizaba (sospecha: "Quién tiene acceso" de esa implementación no estaba en "Cualquier usuario", así que Google bloqueaba en silencio las peticiones anónimas -- con no-cors el navegador no puede detectarlo). WEB_APP_URL_RESTAURANTE002 (US Open) no cambia en este commit.
+
+// =====================================================================
+// 4 nov: PLANTILLA NEUTRA. Webs nuevas (sitio.json con "marca"): marca.js define window.MARCA
+// (nombre, logo, logoMenu, qr, qrAlt) y aquí se usa en lugar de lo de RG/US Open/Club House.
+// Sin "marca" (RG, US Open, Club House) window.MARCA = null y todo sigue igual que antes.
+// =====================================================================
+const MARCA_WEB = window.MARCA || null;
 
 // =====================================================================
 // NUEVO: SISTEMA DE ENABLE/DISABLE DE RESTAURANTES (Desacoplamiento Visual)
@@ -33,6 +40,7 @@ const MODOS_ALIAS = {
 // NUEVO: Función helper para obtener el nombre visual seguro
 function getModoAlias(modoInterno) {
     if (typeof modoInterno === 'undefined' || modoInterno === null) return '';
+    if (window.MARCA && window.EDITOR_SITIO && modoInterno === window.EDITOR_SITIO.modo) return window.MARCA.nombre;
     return MODOS_ALIAS[modoInterno] || modoInterno;
 }
 
@@ -42,8 +50,9 @@ function getModoAlias(modoInterno) {
 // =====================================================================
 
 // CONFIGURACION ROLAND GARROS (restaurante001)
-const CSV_URL_RESTAURANTE001 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv';
-const WEB_APP_URL_RESTAURANTE001 = 'https://script.google.com/macros/s/AKfycbz6mX3oj9_-Kd-BiREXq318PPx3MeI8rdg4d8bFWuE6W7QhTih3rcgYOqExcFGgpD3YaA/exec';
+// Plantilla neutra: direcciones ficticias (solo las intercepta almacen-json.js; nunca la hoja de otro restaurante).
+const CSV_URL_RESTAURANTE001 = MARCA_WEB ? 'sin-hoja://carta-csv' : 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9rPlxpax2lE0rN97c6Hoy_OxUwREqRb48juEBr9C91ZFY2UvaKgC8JdiRcwDrtBErXFVmFRh0Zr5e/pub?gid=0&single=true&output=csv';
+const WEB_APP_URL_RESTAURANTE001 = MARCA_WEB ? 'sin-hoja://carta' : 'https://script.google.com/macros/s/AKfycbz6mX3oj9_-Kd-BiREXq318PPx3MeI8rdg4d8bFWuE6W7QhTih3rcgYOqExcFGgpD3YaA/exec';
 
 // CONFIGURACION US OPEN (restaurante002)
 const CSV_URL_RESTAURANTE002 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOWewZgqWZEFYiIMh8DTUX5tr6EEXBwvUJGr7hrpkCG91UhE5xU8fDJ12qcRVrT69xfZ5NGGGyhNCE/pub?output=csv';
@@ -145,7 +154,7 @@ const TRADUCCION_CONCURRENCIA = null;     // Paso 2 (nombres) — null = usar el
 // especial en su propia Google Sheet — ver Codigo_MenusEspeciales.gs (repo aparte). Común a los
 // dos restaurantes: un menú especial puede mezclar platos de ambas cartas, así que no tiene
 // sentido que "pertenezca" a WEB_APP_URL_RESTAURANTE001 ni a WEB_APP_URL_RESTAURANTE002.
-const WEBAPP_URL_MENUS_ESPECIALES = 'https://script.google.com/macros/s/AKfycby8566r5531M-iAvqYs7QRjmW5VVnBPbbQqbzRbsRHenRIOzsaVbDjj7GuVfnSGh7n1/exec';
+const WEBAPP_URL_MENUS_ESPECIALES = MARCA_WEB ? 'sin-hoja://menus-especiales' : 'https://script.google.com/macros/s/AKfycby8566r5531M-iAvqYs7QRjmW5VVnBPbbQqbzRbsRHenRIOzsaVbDjj7GuVfnSGh7n1/exec';
 window.WEBAPP_URL_MENUS_ESPECIALES = WEBAPP_URL_MENUS_ESPECIALES;
 
 // NUEVO: Exposición explícita en window para que ui.js (script type="module", con su propio
@@ -169,12 +178,12 @@ const PATH_IMAGENES = 'imagenes/imagenes/';
 const PATH_ALERGENOS = 'imagenes/alergenos/';
 
 // Logos Principales (Header del Editor)
-const LOGO_RESTAURANTE001 = PATH_IMAGENES + 'logo_web01.png';
+const LOGO_RESTAURANTE001 = MARCA_WEB ? MARCA_WEB.src('logo') : PATH_IMAGENES + 'logo_web01.png';
 const LOGO_RESTAURANTE002 = PATH_IMAGENES + 'logo_web02.png';
 
 // Códigos QR Roland Garros
-const QR_RESTAURANTE001_DEFAULT = PATH_IMAGENES + 'qr-web01-02.png'; 
-const QR_RESTAURANTE001_MOD = PATH_IMAGENES + 'qr-web01-01.png';            
+const QR_RESTAURANTE001_DEFAULT = MARCA_WEB ? MARCA_WEB.src('qr') : PATH_IMAGENES + 'qr-web01-02.png'; 
+const QR_RESTAURANTE001_MOD = MARCA_WEB ? MARCA_WEB.src('qrAlt') : PATH_IMAGENES + 'qr-web01-01.png';            
 
 // Códigos QR US Open
 const QR_RESTAURANTE002_DEFAULT = PATH_IMAGENES + 'qr-web02-01.png'; 
@@ -183,11 +192,11 @@ const QR_RESTAURANTE002_MOD = PATH_IMAGENES + 'qr-web02-02.png';
 // =====================================================================
 // NUEVO: IMAGEN DEL VINO "EL TENISTA" (ID 12990) EN LA HOJA DE SUGERENCIAS
 // =====================================================================
-const VINO_IMAGEN_TENISTA = 'imagenes/vinos/tenista_pegado.webp';
+const VINO_IMAGEN_TENISTA = MARCA_WEB ? '' : 'imagenes/vinos/tenista_pegado.webp';
 // NUEVO: imagen del aperitivo Canonita ("Usopen Splitz", ID 12993), que se muestra junto a la
 // del vino El Tenista en "Vinos y aperitivos recomendados" de la hoja de Sugerencias.
-const APERITIVO_IMAGEN_CANONITA = 'imagenes/vinos/canonita.webp';
-const APERITIVO_CANONITA_ID = 12993;
+const APERITIVO_IMAGEN_CANONITA = MARCA_WEB ? '' : 'imagenes/vinos/canonita.webp';
+const APERITIVO_CANONITA_ID = MARCA_WEB ? null : 12993;
 const VINO_IMAGEN_DEFAULT_RESTAURANTE001 = true;  // true = "Con imagen Vino" marcado por defecto
 const VINO_IMAGEN_DEFAULT_RESTAURANTE002 = true;
 
@@ -213,18 +222,18 @@ const POSTRES_HOJA_RANGOS = {
     bebidas: [16200, 16299]   // bebidas sugeridas para acompañar el postre
 };
 // Bloque de helados: título fijo + foto del tarro (deja '' para no usar imagen).
-const POSTRES_HELADOS_TITULO_ES = 'Helados artesanos RNA';
-const POSTRES_HELADOS_TITULO_EN = 'RNA artisan ice cream';
+const POSTRES_HELADOS_TITULO_ES = MARCA_WEB ? 'Helados' : 'Helados artesanos RNA';
+const POSTRES_HELADOS_TITULO_EN = MARCA_WEB ? 'Ice cream' : 'RNA artisan ice cream';
 const POSTRES_HELADOS_SUBTITULO_ES = 'Seleccione el sabor que prefiera';
 const POSTRES_HELADOS_SUBTITULO_EN = 'Choose your favourite flavour';
-const POSTRES_HELADO_IMAGEN = 'imagenes/postres/helado_tarro.webp';
+const POSTRES_HELADO_IMAGEN = MARCA_WEB ? '' : 'imagenes/postres/helado_tarro.webp';
 const POSTRES_HELADO_IMAGEN_DEFAULT = true;   // true = "Con imagen" marcado por defecto
 const POSTRES_HELADO_ALTURA = 64;             // px de alto de la foto del helado (a tamaño 1x)
 // Imagen de botella por ID de bebida (opcional: una bebida sin entrada aquí sale sin imagen).
 // Para añadir una nueva: sube el .webp a imagenes/vinos/ y añade aquí su ID.
 // "escala" = tamaño relativo entre botellas (1 = altura normal, 0.75 = 3/4 de alto).
 // Una bebida puede llevar VARIAS imágenes poniendo una lista [ {...}, {...} ].
-const POSTRES_BEBIDAS_IMAGENES = {
+const POSTRES_BEBIDAS_IMAGENES = MARCA_WEB ? {} : {
     16200: [                                                                // botella + copa de licor
         { src: 'imagenes/vinos/can_axartell_dolc.webp', escala: 0.75 },
         { src: 'imagenes/vinos/copa_vino_dulce.webp', escala: 0.5 }

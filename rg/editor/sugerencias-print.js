@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v3.0.0-Abstract-Keys',
+            versionStr: 'v3.1.0-Abstract-Keys', // 3.1.0 (4 nov): plantilla neutra (window.MARCA)
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -42,6 +42,23 @@
             vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE002,
                     }
     };
+
+    // 4 nov: PLANTILLA NEUTRA (marca.js, webs con "marca"): logo y QR de la propia web, leídos al
+    // pintar (se pueden cambiar con 🏷️ Logos y QR sin recargar); sin imagen fija de vino ni logo
+    // de respaldo; solo se ofrecen los QR que haya subidos. RG/US Open/Club House: sin cambios.
+    if (window.MARCA && window.EDITOR_SITIO && SUGERENCIAS_CONFIG[window.EDITOR_SITIO.modo]) {
+        const c = SUGERENCIAS_CONFIG[window.EDITOR_SITIO.modo], MK = window.MARCA;
+        Object.defineProperty(c, 'logoSrc', { get: () => MK.src('logo') });
+        Object.defineProperty(c, 'qrDefault', { get: () => MK.src('qr') });
+        Object.defineProperty(c, 'qrMod', { get: () => MK.src('qrAlt') });
+        Object.defineProperty(c, 'qrOptions', { get: () => [
+            { value: 'none', label: 'Sin QR', isDefault: true },
+            MK.qr ? { value: 'default', label: 'Oficial', isDefault: false } : null,
+            MK.qrAlt ? { value: 'mod', label: 'Alternativo', isDefault: false } : null
+        ].filter(Boolean) });
+        c.logoFallback = '';
+        c.vinoImagenSrc = '';
+    }
 
     if (!document.getElementById('sugerencias-print-styles')) {
         const stylePrint = document.createElement('style');
@@ -239,8 +256,8 @@
         vinos.forEach(p => {
             const id = parseInt(p.id, 10);
             let src = '';
-            if (id === 12990) src = config.vinoImagenSrc;
-            else if (id === APERITIVO_CANONITA_ID) src = APERITIVO_IMAGEN_CANONITA;
+            if (id === 12990 && config.vinoImagenSrc) src = config.vinoImagenSrc;
+            else if (APERITIVO_CANONITA_ID && id === APERITIVO_CANONITA_ID) src = APERITIVO_IMAGEN_CANONITA;
             else if (FOTOS_WEB_SUGERENCIAS && String(p.carpeta || '').trim() && /01\.webp$/i.test(String(p.imagen || ''))) src = FOTOS_WEB_SUGERENCIAS + encodeURI(String(p.carpeta).trim() + '/' + p.imagen);
             if (!src) return;
             let nombre = (window.desglosarNombre ? window.desglosarNombre(p.es || '').nombre : p.es) || ('ID ' + id);
@@ -886,7 +903,7 @@
             <div class="sugerencias-header-layout">
                 <span class="sugerencias-version-tag" style="display:none;">Módulo ${config.versionStr}</span>
                 <div class="sugerencias-brand-title-group"><div class="sugerencias-title-es">SUGERENCIAS DEL CHEF</div><div class="sugerencias-title-en">CHEF'S SUGGESTIONS</div></div>
-                <img src="${config.logoSrc}" class="sugerencias-logo-img" onerror="this.src='${config.logoFallback}';">
+                ${config.logoSrc ? `<img src="${config.logoSrc}" class="sugerencias-logo-img" onerror="${config.logoFallback ? `this.src='${config.logoFallback}';` : `this.style.display='none';`}">` : ''}
             </div><div class="sugerencias-body">`;
 
         const renderCat = (titulo, lista, extraHtml = '', claseExtra = '') => {
