@@ -1,0 +1,17 @@
+{
+    "formato":  1,
+    "iteraciones":  310000,
+    "secreto":  {
+                    "iv":  "HdnxfKWSBstzncRuYhqN/g==",
+                    "datos":  "TtmwZmkRn5ZmweCTtKwBBMppjfSA+kbynO/3nTFh0huU8apuM4+gKei69vcfSM8dWMUESGeWrAsam5Z/KoAr3rQiqmaRWLOaW2GQece71OAvFMeirLRMKk8tBpQxHTgpYUwyF3PrYtOi/nocm94TGhuPWD9Epl90dBnpy0rikcs=",
+                    "mac":  "HwpB5BRm//goMG3LNso2ciTBFSBSHlcl6p1qHJggl78="
+                },
+    "usuarios":  {
+                     "march":  {
+                                   "sal":  "OneYYQxFFFDmaF5FKerx/A==",
+                                   "iv":  "x3dDopg5gq3ZnWJw8HbzDQ==",
+                                   "datos":  "rzqEckLhsmjpVet4lZ0+xc9PqYeZMZj6vtpRhyGfWSfC7XRycQ4W84XMZsQaStloYaPcFIL/WJv0KDfE5dakcETMktNPZiJa0B0iGjuf+d4=",
+                                   "mac":  "ntyBTq4OCJZ07t4PlFmQjBRR8Fb5qLTsewD1m4jFVTQ="
+                               }
+                 }
+}
