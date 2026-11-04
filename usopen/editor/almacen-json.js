@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.14.0'; // 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.15.0'; // 4 nov (4): "contacto" (dirección, teléfono, horario) en datos.json y base.json + POST ?accion=contacto. 1.14.0: 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -236,6 +236,7 @@
             '  "ocultas": ' + J(d.ocultas || []).replace(/","/g, '", "') + ',\n' +
             '  "idiomas": ' + J(d.idiomas || []).replace(/","/g, '", "') + ',\n' +
             (marcaDe(d) ? '  "marca": ' + J(marcaDe(d)) + ',\n' : '') +
+            (contactoDe(d) ? '  "contacto": ' + J(contactoDe(d)) + ',\n' : '') +
             (estructuraDe(d) ? '  "estructura": ' + estructuraTexto(estructuraDe(d), '  ') + ',\n' : '') +
             '  "platos": [\n' + platos.join(',\n') + '\n  ]\n}\n';
     }
@@ -298,7 +299,7 @@
         const estr = estructuraDe(datos);
         const pes = estr && Array.isArray(estr.pestanas) && estr.pestanas.length ? ',"pestanas":' + J(estr.pestanas) : '';
         // "marca" (plantilla neutra: logos), como construir.ps1.
-        const mar = marcaDe(datos) ? ',"marca":' + J(marcaDe(datos)) : '';
+        const mar = (marcaDe(datos) ? ',"marca":' + J(marcaDe(datos)) : '') + (contactoDe(datos) ? ',"contacto":' + J(contactoDe(datos)) : '');
         const res = { 'datos/base.json': '{"ocultas":[' + (datos.ocultas || []).map(x => J(S(x))).join(',') + ']' +
             (idi.length ? ',"idiomas":[' + idi.join(',') + ']' : '') + mar + pes + ',"platos":[\n' + filas.join(',\n') + '\n]}\n' };
         IDIOMAS_WEB.forEach(l => { res['datos/' + l.toLowerCase() + '.json'] = '{\n' + porIdioma[l].join(',\n') + '\n}\n'; });
@@ -487,6 +488,21 @@
         };
     }
 
+    // Contacto (📍 Contacto, contacto.js): pestaña "Contacto y horario" de la web. Todas las webs.
+    // { direccion, mapa, telefono, email, horario: [lun..dom] ("" = cerrado), nota }
+    function contactoDe(d) {
+        const c = d && d.contacto;
+        if (!c || typeof c !== 'object') return null;
+        const r = {};
+        ['direccion', 'mapa', 'telefono', 'email', 'nota'].forEach(k => { const v = String(c[k] || '').trim(); if (v) r[k] = v; });
+        const h = Array.isArray(c.horario) ? c.horario.slice(0, 7).map(x => String(x || '').trim()) : [];
+        if (h.some(x => x)) { while (h.length < 7) h.push(''); r.horario = h; }
+        return Object.keys(r).length ? r : null;
+    }
+    function opContacto(cuerpo) {
+        return (datos) => { const c = contactoDe({ contacto: cuerpo && cuerpo.contacto }); if (c) datos.contacto = c; else delete datos.contacto; };
+    }
+
     // Idiomas de la web: lista de códigos (ES, EN, ...). ES y EN siempre. Vacío = todos.
     function opIdiomas(cuerpo) {
         return (datos) => {
@@ -638,6 +654,7 @@
                 const d = await vista(modo, true);
                 aplicarIdiomasEditor(d.idiomas);
                 if (window.MARCA && marcaDe(d)) window.MARCA.aplicar(marcaDe(d));
+                window.CONTACTO_WEB = contactoDe(d);
                 // Plantilla neutra: Sugerencias y Postres vienen de serie (una vez, se guarda en GitHub).
                 if (window.MARCA && window.Organizador && window.Organizador.porDefecto && !est(modo).deSerie && estructuraDe(d)) {
                     est(modo).deSerie = true;
@@ -665,6 +682,11 @@
             if (accion === 'idiomas') {
                 await encolar(modo, opIdiomas(cuerpo), 'idiomas de la web', 300);
                 return respuesta('OK: idiomas');
+            }
+            if (accion === 'contacto') {
+                await encolar(modo, opContacto(cuerpo), 'contacto y horario', 300);
+                window.CONTACTO_WEB = contactoDe(est(modo).vista);
+                return respuesta('OK: contacto');
             }
             if (accion === 'marca') {
                 await encolar(modo, opMarca(cuerpo), 'logos y QR', 300);
