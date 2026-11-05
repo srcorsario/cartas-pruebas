@@ -2,10 +2,11 @@
   "formato": 1,
   "restaurante": "canmarch",
   "generado": "2026-11-04T19:30:00",
-  "guardado": "2026-11-04T20:27:02.146Z",
+  "guardado": "2026-11-05T16:53:03.376Z",
   "ocultas": ["postres"],
   "idiomas": [],
   "marca": {"nombre":"Can March","logo":"imagenes/marca/logo.webp?v=mw2ki9mq","qr":"imagenes/marca/qr.webp?v=mw2khezr"},
+  "contacto": {"direccion":"C/ València 7, 07500 Manacor","mapa":"Restaurante Can March manacor","telefono":"+34 971 55 00 02","horario":["13:00–16:00","Cerrado","Cerrado","13:00–16:00","13:00–16:00 - 20:00–23:30","13:00–16:00 - 20:00–23:30","13:00–16:00"]},
   "estructura": {
     "version": 1,
     "categorias": [
