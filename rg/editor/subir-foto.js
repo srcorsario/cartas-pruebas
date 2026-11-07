@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.1.0'; // 4 nov: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.2.0'; // 7 nov: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -102,6 +102,41 @@
             var id = typeof platoEditandoId !== 'undefined' ? platoEditandoId : null;
             return (lista || []).find(function (x) { return x.id === id; }) || null;
         } catch (e) { return null; }
+    }
+
+    // ---------- fotos de Google Maps / TripAdvisor ----------
+    // No se descargan solas (sus condiciones no lo permiten): se abren sus páginas de fotos y la foto
+    // elegida se trae pegándola (clic derecho -> Copiar imagen -> Ctrl+V), arrastrándola o con su URL.
+    var CLAVE_Q = 'sf-busqueda-' + (S.restaurante || S.modo || '');
+    function busquedaLocal() {
+        try { var g = localStorage.getItem(CLAVE_Q); if (g) return g; } catch (e) { }
+        var c = window.CONTACTO_WEB || {};
+        if (c.mapa) return c.mapa;
+        var n = String((window.MARCA && window.MARCA.nombre) || S.titulo || '').replace(/\s+(menu|carta)$/i, '');
+        var pob = String(c.direccion || '').split(/[,\n]/).pop().replace(/\d{5}/, '').trim();
+        return (n + ' ' + (pob || 'Manacor')).trim();
+    }
+    function enlacesExternos(q, plato) {
+        var e = encodeURIComponent;
+        return {
+            maps: 'https://www.google.com/maps/search/?api=1&query=' + e(q),
+            trip: 'https://www.tripadvisor.es/Search?q=' + e(q),
+            img: 'https://www.google.com/search?tbm=isch&q=' + e((plato ? plato + ' ' : '') + q)
+        };
+    }
+    // Fotos de Google en tamaño grande (…=w400-h300-k-no -> …=s1600).
+    function mejorarUrl(u) {
+        if (/googleusercontent\.com\//.test(u) && /=[swh]\d[^/]*$/.test(u)) return u.replace(/=[swh]\d[^/]*$/, '=s1600');
+        return u;
+    }
+    async function archivoDeUrl(u) {
+        var r;
+        try { r = await fetch(mejorarUrl(u), { mode: 'cors', cache: 'no-store' }); }
+        catch (e) { try { r = await fetch(u, { mode: 'cors' }); } catch (e2) { r = null; } }
+        if (!r || !r.ok) throw new Error('Esa web no deja descargar la foto directamente: en la foto, clic derecho → "Copiar imagen", y aquí pulsa Ctrl+V.');
+        var b = await r.blob();
+        if (!/^image\//.test(b.type)) throw new Error('Esa dirección no es una imagen. Abre la foto, clic derecho → "Copiar imagen", y aquí Ctrl+V.');
+        return new File([b], 'foto-web.' + (b.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg'), { type: b.type });
     }
 
     // ---------- imagen -> WebP reducida ----------
@@ -234,6 +269,12 @@
         '.sf-rec-barra{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.sf-rec-barra button{padding:6px 10px;border:1px solid #d6d2c6;border-radius:7px;background:#fff;cursor:pointer;font-size:.85rem}' +
         '.sf-rec-barra button.activo{background:#1f2328;color:#fff;border-color:#1f2328}.sf-sep{flex:0 0 8px}.sf-rec-info{font-size:.8rem;color:#6b6f76}' +
         '.sf-rec-caja .sf-bot{margin-top:0}' +
+        '.sf-ext{border:1px dashed #cbd5e1;border-radius:10px;padding:10px;background:#f8fafc;display:flex;flex-direction:column;gap:8px}' +
+        '.sf-ext-fila{display:flex;flex-wrap:wrap;gap:6px;align-items:center}#sf-caja .sf-ext-fila input{flex:1 1 200px;width:auto}' +
+        '.sf-ext-fila a{padding:6px 10px;border-radius:7px;border:1px solid #d6d2c6;background:#fff;color:#1f2328;text-decoration:none;font-size:.82rem;white-space:nowrap}' +
+        '.sf-drop{border:2px dashed #94a3b8;border-radius:9px;padding:14px;text-align:center;color:#475569;font-size:.85rem;background:#fff;outline:none}' +
+        '.sf-drop.encima,.sf-drop:focus{border-color:#16a34a;background:#f0fdf4}.sf-drop.lleno{opacity:.5}' +
+        '.sf-ext small{color:#6b6f76;font-size:.75rem}' +
         '.sf-btn{margin-top:6px;padding:5px 9px;border-radius:7px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;font-size:.78rem;white-space:nowrap}';
 
     async function gestor() {
@@ -254,7 +295,8 @@
         document.body.appendChild(fondo);
         var caja = fondo.querySelector('#sf-caja');
         var urls = [];
-        var cerrar = function () { urls.forEach(URL.revokeObjectURL); fondo.remove(); };
+        var cerrar = function () { urls.forEach(URL.revokeObjectURL); fondo.remove(); document.removeEventListener('paste', alPegar); };
+        var busq = busquedaLocal();
 
         // Estado: listas de { path (original o null), sha, blob?, info? }
         var activas = [], desact = [], originales = [];
@@ -307,6 +349,14 @@
                 '<h4>En la web (' + activas.length + '/' + MAX_FOTOS + ')</h4>' +
                 (activas.length ? '<div class="sf-rejilla">' + activas.map(function (x, i) { return tarjeta(x, i, true); }).join('') + '</div>' : '<div class="sf-vacio">Ninguna: el plato sale sin 📸 en la web.</div>') +
                 (desact.length ? '<h4>Desactivadas</h4><div class="sf-rejilla">' + desact.map(function (x, i) { return tarjeta(x, i, false); }).join('') + '</div>' : '') +
+                '<h4>Traer de Google Maps / TripAdvisor</h4><div class="sf-ext">' +
+                '<div class="sf-ext-fila"><input type="text" id="sf-q" value="' + esc(busq) + '" title="Qué buscar (se recuerda en este dispositivo)">' +
+                '<a id="sf-l-maps" target="_blank" rel="noopener">🗺️ Google Maps</a><a id="sf-l-trip" target="_blank" rel="noopener">🦉 TripAdvisor</a>' +
+                '<a id="sf-l-img" target="_blank" rel="noopener" title="Google Imágenes: nombre del plato + restaurante">🔍 Este plato</a></div>' +
+                '<div class="sf-drop' + (activas.length >= MAX_FOTOS ? ' lleno' : '') + '" tabindex="0">' +
+                (activas.length >= MAX_FOTOS ? 'Ya hay ' + MAX_FOTOS + ' fotos activas: desactiva o elimina alguna.'
+                    : 'En la foto: clic derecho → <b>Copiar imagen</b>, y aquí <b>Ctrl+V</b><br>· o arrastra la foto aquí · o pega su dirección') + '</div>' +
+                '<small>En Maps: ficha del restaurante → Fotos → "Menú" / "Comida". Usa solo fotos del propio restaurante o con permiso de quien la hizo.</small></div>' +
                 '<p id="sf-msg"></p>' +
                 '<div class="sf-bot"><button class="sf-add" ' + (activas.length >= MAX_FOTOS ? 'disabled' : '') + '>＋ Añadir fotos</button>' +
                 '<button class="sf-no">Cancelar</button><button class="sf-ok">Guardar</button></div>';
@@ -315,6 +365,24 @@
             caja.querySelector('.sf-no').onclick = function () { if (!guardando) cerrar(); };
             caja.querySelector('.sf-add').onclick = function () { entrada.click(); };
             caja.querySelector('.sf-ok').onclick = guardar;
+            var q = caja.querySelector('#sf-q');
+            var ponerEnlaces = function () {
+                var l = enlacesExternos(q.value.trim(), (document.getElementById('edit-es') || {}).value || p.es || '');
+                caja.querySelector('#sf-l-maps').href = l.maps; caja.querySelector('#sf-l-trip').href = l.trip; caja.querySelector('#sf-l-img').href = l.img;
+            };
+            ponerEnlaces();
+            q.oninput = function () { busq = q.value; ponerEnlaces(); try { localStorage.setItem(CLAVE_Q, q.value.trim()); } catch (e) { } };
+            var zona = caja.querySelector('.sf-drop');
+            zona.ondragover = function (e) { e.preventDefault(); zona.classList.add('encima'); };
+            zona.ondragleave = function () { zona.classList.remove('encima'); };
+            zona.ondrop = function (e) {
+                e.preventDefault(); zona.classList.remove('encima');
+                var dt = e.dataTransfer, fs = Array.prototype.filter.call(dt.files || [], function (f) { return /^image\//.test(f.type); });
+                if (fs.length) { añadir(fs); return; }
+                var html = dt.getData('text/html'), m = html && html.match(/<img[^>]+src=["']([^"']+)["']/i);
+                var u = (m && m[1].replace(/&amp;/g, '&')) || (dt.getData('text/uri-list') || dt.getData('text/plain') || '').split('\n')[0].trim();
+                if (u) añadirUrl(u);
+            };
             caja.querySelectorAll('.sf-foto button').forEach(function (b) {
                 b.onclick = function () {
                     var t = b.closest('.sf-foto'), lista = t.dataset.l === 'a' ? activas : desact, i = +t.dataset.i, x = lista[i];
@@ -342,21 +410,41 @@
                 };
             });
         }
-        entrada.onchange = async function () {
+        entrada.onchange = function () {
             var files = Array.prototype.slice.call(entrada.files); entrada.value = '';
-            var msg = caja.querySelector('#sf-msg');
+            añadir(files);
+        };
+        function avisar(t, color) { var m = caja.querySelector('#sf-msg'); if (m) { m.style.color = color || '#b42318'; m.textContent = t; } }
+        async function añadirUrl(u) {
+            if (!/^(https?:|data:image\/)/i.test(u)) { avisar('Eso no es la dirección de una imagen.'); return; }
+            if (activas.length >= MAX_FOTOS) { avisar('Máximo ' + MAX_FOTOS + ' fotos activas: desactiva o elimina alguna.', '#b45309'); return; }
+            avisar('Descargando la foto…', '#555');
+            try { añadir([await archivoDeUrl(u)]); } catch (e) { avisar(e.message || String(e)); }
+        }
+        // Ctrl+V con la ventana abierta (no mientras se recorta ni dentro de un campo de texto con texto pegado)
+        function alPegar(e) {
+            if (!document.body.contains(fondo) || document.getElementById('sf-rec') || guardando) return;
+            var it = (e.clipboardData && e.clipboardData.items) || [], fs = [];
+            for (var k = 0; k < it.length; k++) if (it[k].kind === 'file' && /^image\//.test(it[k].type)) { var f = it[k].getAsFile(); if (f) fs.push(f); }
+            if (fs.length) { e.preventDefault(); añadir(fs.map(function (f, i) { return new File([f], 'pegada' + (i ? i + 1 : '') + '.' + (f.type.split('/')[1] || 'png'), { type: f.type }); })); return; }
+            if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+            var t = (e.clipboardData && e.clipboardData.getData('text/plain') || '').trim();
+            if (/^https?:\/\/\S+$/i.test(t)) { e.preventDefault(); añadirUrl(t); }
+        }
+        document.addEventListener('paste', alPegar);
+        async function añadir(files) {
             for (var k = 0; k < files.length; k++) {
-                if (activas.length >= MAX_FOTOS) { msg.style.color = '#b45309'; msg.textContent = 'Máximo ' + MAX_FOTOS + ' fotos activas: desactiva o elimina alguna.'; break; }
-                msg.style.color = '#555'; msg.textContent = 'Preparando ' + files[k].name + '…';
+                if (activas.length >= MAX_FOTOS) { avisar('Máximo ' + MAX_FOTOS + ' fotos activas: desactiva o elimina alguna.', '#b45309'); break; }
+                avisar('Preparando ' + files[k].name + '…', '#555');
                 try {
                     var r = await recortar(files[k], files[k].name + ' (' + kb(files[k].size) + ')');
-                    if (!r) continue;
+                    if (!r) { avisar(''); continue; }
                     var u = URL.createObjectURL(r.blob); urls.push(u);
                     activas.push({ blob: r.blob, fuente: files[k], url: u, info: r.info });
                     pintar();
-                } catch (e) { msg = caja.querySelector('#sf-msg'); msg.style.color = '#b42318'; msg.textContent = e.message || String(e); return; }
+                } catch (e) { avisar(e.message || String(e)); return; }
             }
-        };
+        }
 
         async function guardar() {
             var btn = caja.querySelector('.sf-ok'), msg = caja.querySelector('#sf-msg');
