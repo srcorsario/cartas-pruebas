@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.8.0'; // 7 nov: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.8.1'; // 7 nov: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -163,14 +163,46 @@
 
     // ---------- galería de fotos escaneadas (por web, en este dispositivo) ----------
     var CLAVE_G = 'sf-galeria-' + (S.restaurante || S.modo || '');
-    function claveFoto(u) { var id = idGoogle(u); if (id) return 'g:' + id; return String(u).replace(/[?#].*$/, '').replace(/=[^\/=]*$/, '').replace(/\/photo-[a-z]\//, '/photo-?/'); }
-    function leerGaleria() { try { return JSON.parse(localStorage.getItem(CLAVE_G) || '[]') || []; } catch (e) { return []; } }
+    function claveFoto(u) { var id = idGoogle(u); if (id) return 'g:' + id; var ta = String(u).match(/tripadvisor\.com\/media\/photo-[a-z](?:\/\d{3,})?\/([^?#]+)/); if (ta) return 'ta:' + ta[1]; return String(u).replace(/[?#].*$/, '').replace(/=[^\/=]*$/, '').replace(/\/photo-[a-z]\//, '/photo-?/'); }
+    function leerGaleria() {
+        var g; try { g = JSON.parse(localStorage.getItem(CLAVE_G) || '[]') || []; } catch (e) { return []; }
+        // Juntar entradas que ahora son la misma foto (p. ej. TripAdvisor en varios tamaños): se conserva lo útil de cada una.
+        var v = {}, out = [];
+        g.forEach(function (x) {
+            var c = claveFoto(x.u), y = v[c];
+            if (!y) { v[c] = x; out.push(x); return; }
+            ['t', 'usada', 'w', 'h', 'kb', 'tipo'].forEach(function (k) { if (!y[k] && x[k]) y[k] = x[k]; });
+        });
+        if (out.length !== g.length) guardarGaleria(out);
+        return out;
+    }
     function guardarGaleria(g) { try { localStorage.setItem(CLAVE_G, JSON.stringify(g.slice(-400))); } catch (e) { } }
     var CLAVE_D = 'sf-descartadas-' + (S.restaurante || S.modo || '');
     function leerDesc() { try { return JSON.parse(localStorage.getItem(CLAVE_D) || '{}') || {}; } catch (e) { return {}; } }
     function descartar(c) { var d = leerDesc(); d[c] = 1; try { localStorage.setItem(CLAVE_D, JSON.stringify(d)); } catch (e) { } }
     function vaciarTodo() { guardarGaleria([]); try { localStorage.removeItem(CLAVE_D); } catch (e) { } try { window.postMessage({ tipo: 'FOTOS-CARTA-VACIAR' }, location.origin); } catch (e) { } }
-    function miniatura(u) { var id = idGoogle(u); return id ? 'https://lh3.googleusercontent.com/' + id + '=w400' : u; }
+    function miniatura(u) {
+        var id = idGoogle(u);
+        if (id) return 'https://lh3.googleusercontent.com/' + id + '=w400';
+        if (/dynamic-media-cdn\.tripadvisor\.com\//.test(u)) return u.replace(/\?.*$/, '') + '?w=500&h=-1&s=1';
+        var m = String(u).match(/^(https:\/\/[^\/]+\/media\/)photo-[a-z](?:\/\d{3,})?\/([^?#]+)/);
+        return m ? m[1] + 'photo-s/' + m[2] : u;
+    }
+    // Si la vista previa grande no existe, se usa la dirección escaneada; si tampoco, se oculta la tarjeta.
+    function imgPrevia(u, ocultar) {
+        return '<img loading="lazy" referrerpolicy="no-referrer" src="' + esc(miniatura(u)) + '" data-o="' + esc(u) + '" alt="" ' +
+            'onerror="if(!this.dataset.r&&this.src!==this.dataset.o){this.dataset.r=1;this.src=this.dataset.o}else{' + ocultar + '}">';
+    }
+    // Misma foto con distinta dirección (TripAdvisor): mismas medidas y peso de la original = repetida. Se queda la asignada o con nombre.
+    function repetidas(g) {
+        var vistos = {}, dup = {};
+        g.slice().sort(function (a, b) { return (b.usada ? 2 : b.t ? 1 : 0) - (a.usada ? 2 : a.t ? 1 : 0); }).forEach(function (x) {
+            if (!x.w || !x.kb) return;
+            var f = x.w + 'x' + x.h + '-' + x.kb;
+            if (vistos[f]) dup[claveFoto(x.u)] = 1; else vistos[f] = 1;
+        });
+        return dup;
+    }
     var alRecibir = null;
     function indiceDe(g, k) { for (var i = 0; i < g.length; i++) if (claveFoto(g[i].u) === k) return i; return -1; }   // ventana abierta que se repinta cuando llegan fotos de la extensión
     function sumarEscaneo(lista) {
@@ -204,7 +236,7 @@
         function enviar() { clearTimeout(ui.te); ui.te = setTimeout(function () { try { window.postMessage({ tipo: 'FOTOS-CARTA-ESC', fotos: L.slice() }, '*'); } catch (x) { } }, 800); }
         var RX = /https:\/\/[a-z0-9.-]*(?:googleusercontent|ggpht)\.com\/[^"'\s\\)<>,\]}|!]+|https:\/\/(?:dynamic-media-cdn|media-cdn)\.tripadvisor\.com\/media\/[^"'\s\\)<>,\]}|!]+/g;
         function idG(u) { var m = u.match(/googleusercontent\.com\/([^=!?&#\s"')]+)/); return m ? m[1] : ''; }
-        function k(u) { var id = idG(u); if (id) return 'g:' + id; return u.replace(/[?#].*$/, '').replace(/=[^\/=]*$/, '').replace(/\/photo-[a-z]\//, '/photo-?/'); }
+        function k(u) { var id = idG(u); if (id) return 'g:' + id; var ta = String(u).match(/tripadvisor\.com\/media\/photo-[a-z](?:\/\d{3,})?\/([^?#]+)/); if (ta) return 'ta:' + ta[1]; return u.replace(/[?#].*$/, '').replace(/=[^\/=]*$/, '').replace(/\/photo-[a-z]\//, '/photo-?/'); }
         function nombreDe(e) {
             for (var n = e, k2 = 0; n && n !== document.body && k2 < 6; n = n.parentElement, k2++) {
                 var alt = k2 === 0 && n.getAttribute && n.getAttribute('alt');
@@ -572,9 +604,10 @@
             var g = leerGaleria();
             if (!g.length) return '';
             var usadas = g.filter(function (x) { return x.usada; }).length;
+            var dupG = repetidas(g);
             var np = nombrePlato() + ' ' + String((document.getElementById('edit-en') || {}).value || p.en || '');
             var vis = g.map(function (x, i) { return { x: x, i: i, p: x.t ? parecido(np, x.t) : 0 }; })
-                .filter(function (o) { return (verUsadas || !o.x.usada || enEstePlato(o.x.u)) && !esPequena(o.x); })
+                .filter(function (o) { return (verUsadas || !o.x.usada || enEstePlato(o.x.u)) && !esPequena(o.x) && !dupG[claveFoto(o.x.u)]; })
                 .sort(function (a, b) { return (b.p - a.p) || (a.i - b.i); });
             var nPar = vis.filter(function (o) { return o.p > 0; }).length;
             return '<div class="sf-gal-cab"><b>Fotos escaneadas: ' + (g.length - usadas) + ' sin usar' + (usadas ? ' · ' + usadas + ' usadas' : '') + '</b>' +
@@ -583,7 +616,7 @@
                 (vis.length ? '<div class="sf-gal">' + vis.map(function (o) {
                     var aqui = enEstePlato(o.x.u);
                     return '<div class="sf-g' + (aqui ? ' aqui' : o.x.usada ? ' usada' : o.p ? ' parece' : '') + '" data-k="' + esc(claveFoto(o.x.u)) + '" title="' + esc((o.x.t ? o.x.t + ' · ' : '') + (o.x.usada ? 'Usada en: ' + o.x.usada : 'Poner en este plato')) + '">' +
-                        '<img loading="lazy" referrerpolicy="no-referrer" src="' + esc(miniatura(o.x.u)) + '" alt="" onerror="this.parentNode.style.display=\'none\'">' +
+                        imgPrevia(o.x.u, "this.parentNode.style.display='none'") +
                         (aqui ? '<span>· en este plato</span>' : o.x.usada ? '<span>✔ ' + esc(o.x.usada) + '</span>' : o.x.t ? '<span>' + (o.p ? '★ ' : '') + esc(o.x.t) + '</span>' : '') +
                         '<button type="button" data-x="1" title="Quitar de la lista">✕</button></div>';
                 }).join('') + '</div>' : '<div class="sf-vacio">Todas usadas.</div>');
@@ -904,7 +937,8 @@
         enCurso--; siguienteInfo();
     }
     async function guardarTodas(lista, avisar, boton) {
-        lista = lista.filter(function (x) { return !esPequena(x); });
+        var dupI = repetidas(lista), huellas = {};
+        lista = lista.filter(function (x) { return !esPequena(x) && !dupI[claveFoto(x.u)]; });
         if (!lista.length) { avisar('No hay fotos en la lista.'); return; }
         var carpeta = null, nomRest = String((window.MARCA && window.MARCA.nombre) || S.titulo || S.restaurante || 'Restaurante').replace(/\s+(menu|carta)$/i, '')
             .replace(/[<>:"\/\\|?*]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Restaurante';
@@ -920,8 +954,10 @@
                 var n = sig++, x = lista[n];
                 var b = await bajarMaxima(x.u);
                 if (!b) { fallos++; guardarInfo(claveFoto(x.u), { err: 1 }); }
-                else if (esPequena(guardarInfo(claveFoto(x.u), await medir(b)))) { peq++; }
+                else if (esPequena(x = guardarInfo(claveFoto(x.u), await medir(b)) || x)) { peq++; }
+                else if (x.w && huellas[x.w + 'x' + x.h + '-' + x.kb]) { peq++; }
                 else {
+                    if (x.w) huellas[x.w + 'x' + x.h + '-' + x.kb] = 1;
                     var nom = nombreArchivo(x, n + 1, b.type);
                     try {
                         if (carpeta) { var fh = await carpeta.getFileHandle(nom, { create: true }); var w = await fh.createWritable(); await w.write(b); await w.close(); }
@@ -934,13 +970,13 @@
                         hechas++;
                     } catch (e) { fallos++; }
                 }
-                avisar('💾 ' + (hechas + fallos + peq) + ' / ' + lista.length + ' · guardadas ' + hechas + (peq ? ' · pequeñas (no se guardan) ' + peq : '') + (fallos ? ' · fallidas ' + fallos : ''), '#555');
+                avisar('💾 ' + (hechas + fallos + peq) + ' / ' + lista.length + ' · guardadas ' + hechas + (peq ? ' · pequeñas o repetidas (no se guardan) ' + peq : '') + (fallos ? ' · fallidas ' + fallos : ''), '#555');
             }
         }
         await Promise.all(carpeta ? [trabajador(), trabajador(), trabajador(), trabajador()] : [trabajador()]);
         boton.textContent = texto0; boton.onclick = null;
         avisar((parar ? 'Parado. ' : '✔ ') + hechas + ' fotos guardadas a máxima calidad' + (carpeta ? ' en la carpeta "' + nomRest + '"' : ' en Descargas') +
-            (peq ? '. ' + peq + ' descartadas por pequeñas (menos de ' + minLado() + ' px)' : '') + (fallos ? '. ' + fallos + ' no se pudieron descargar (esa web no lo permite o ya no existen).' : '.'), fallos && !hechas ? '#b42318' : '#15803d');
+            (peq ? '. ' + peq + ' descartadas por pequeñas (menos de ' + minLado() + ' px) o repetidas' : '') + (fallos ? '. ' + fallos + ' no se pudieron descargar (esa web no lo permite o ya no existen).' : '.'), fallos && !hechas ? '#b42318' : '#15803d');
         return true;
     }
     function contarBoton() {
@@ -983,10 +1019,11 @@
         document.addEventListener('paste', alPegar);
         function pintarG() {
             var g = leerGaleria(), platos = listaPlatos(), usadas = g.filter(function (x) { return x.usada; }).length;
-            var nPeq = g.filter(esPequena).length;
+            var nPeq = g.filter(esPequena).length, dup = repetidas(g);
             var vis = g.map(function (x, i) { return { x: x, i: i }; }).filter(function (o) {
                 if (o.x.usada && !verUsadas) return false;
                 if (!verPeq && esPequena(o.x)) return false;
+                if (dup[claveFoto(o.x.u)]) return false;
                 return !filtro || palabras(o.x.t).join(' ').indexOf(palabras(filtro).join(' ')) >= 0 || String(o.x.t || '').toLowerCase().indexOf(filtro.toLowerCase()) >= 0;
             });
             var sugerido = function (t) {
@@ -1019,7 +1056,7 @@
                 (vis.length ? '<div class="sfg-rejilla">' + vis.map(function (o) {
                     var x = o.x, sug = x.usada ? '' : sugerido(x.t);
                     return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-k="' + esc(claveFoto(x.u)) + '">' +
-                        '<a href="' + esc(mejorarUrl(x.u)) + '" target="_blank" rel="noopener noreferrer" title="Ver en grande"><img loading="lazy" referrerpolicy="no-referrer" src="' + esc(miniatura(x.u)) + '" alt="" onerror="this.closest(\'.sfg-card\').style.display=\'none\'"></a>' +
+                        '<a href="' + esc(urlsMaxima(x.u)[0]) + '" target="_blank" rel="noopener noreferrer" title="Ver en grande (original)">' + imgPrevia(x.u, "this.closest('.sfg-card').style.display='none'") + '</a>' +
                         '<div class="sfg-t" title="' + esc(x.t || '') + '">' + (x.t ? esc(x.t) : '<i>sin nombre</i>') + '</div>' +
                         '<div class="sfg-i' + (esPequena(x) ? ' peq' : '') + '">' + esc(infoTxt(x)) + (esPequena(x) ? ' · pequeña' : '') + '</div>' +
                         (x.usada ? '<div class="sfg-u">✔ ' + esc(x.usada) + '</div>' : '') +
@@ -1062,6 +1099,7 @@
                         var pq = esPequena(x), inf = c.querySelector('.sfg-i');
                         inf.textContent = infoTxt(x) + (pq ? ' · pequeña' : '');
                         inf.classList.toggle('peq', pq);
+                        if (repetidas(leerGaleria())[el.dataset.k]) { c.remove(); return; }
                         if (pq) {
                             var np = caja.querySelector('#sfg-npeq'); if (np) np.textContent = leerGaleria().filter(esPequena).length;
                             if (!verPeq) c.remove();
