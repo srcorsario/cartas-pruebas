@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.4.0'; // 7 nov: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.5.0'; // 7 nov: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -169,13 +169,21 @@
     function sumarEscaneo(lista) {
         var g = leerGaleria(), v = {}, n = 0;
         g.forEach(function (x) { v[claveFoto(x.u)] = 1; });
-        (Array.isArray(lista) ? lista : []).forEach(function (u) {
-            if (typeof u !== 'string' || !/^https:\/\//.test(u) || v[claveFoto(u)]) return;
-            v[claveFoto(u)] = 1; g.push({ u: u }); n++;
+        var porClave = {};
+        g.forEach(function (x) { porClave[claveFoto(x.u)] = x; });
+        (Array.isArray(lista) ? lista : []).forEach(function (o) {
+            var u = typeof o === 'string' ? o : o && o.u, t = o && typeof o === 'object' ? String(o.t || '').slice(0, 80) : '';
+            if (typeof u !== 'string' || !/^https:\/\//.test(u)) return;
+            var c = claveFoto(u);
+            if (v[c]) { if (t && porClave[c] && !porClave[c].t) porClave[c].t = t; return; }
+            v[c] = 1; var x = { u: u }; if (t) x.t = t; g.push(x); porClave[c] = x; n++;
         });
         guardarGaleria(g);
         return n;
     }
+    // Parecido entre el nombre del plato y el de la foto (palabras de 4+ letras, por sus 4 primeras).
+    function palabras(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().split(/[^a-z0-9]+/).filter(function (w) { return w.length >= 4; }).map(function (w) { return w.slice(0, 4); }); }
+    function parecido(a, b) { var pa = palabras(a), pb = palabras(b); return pa.filter(function (w, i) { return pa.indexOf(w) === i && pb.indexOf(w) >= 0; }).length; }
     // Marcador (bookmarklet) a fondo: se ejecuta en Google Maps / TripAdvisor y se QUEDA ESCUCHANDO:
     // lee lo que hay en la página (imágenes, fondos y los datos internos del HTML), cada respuesta que
     // la web carga después (fetch/XHR) y lo que va apareciendo. Panel: contador, "Bajar solo" (desplaza
@@ -186,7 +194,18 @@
         var RX = /https:\/\/[a-z0-9.-]*(?:googleusercontent|ggpht)\.com\/[^"'\s\\)<>,\]}|!]+|https:\/\/(?:dynamic-media-cdn|media-cdn)\.tripadvisor\.com\/media\/[^"'\s\\)<>,\]}|!]+/g;
         function idG(u) { var m = u.match(/googleusercontent\.com\/([^=!?&#\s"')]+)/); return m ? m[1] : ''; }
         function k(u) { var id = idG(u); if (id) return 'g:' + id; return u.replace(/[?#].*$/, '').replace(/=[^\/=]*$/, '').replace(/\/photo-[a-z]\//, '/photo-?/'); }
-        function add(u) {
+        function nombreDe(e) {
+            for (var n = e, k2 = 0; n && n !== document.body && k2 < 6; n = n.parentElement, k2++) {
+                var al = n.getAttribute && n.getAttribute('aria-label');
+                if (al && al.length > 2 && al.length < 90 && !/^(foto|photo|imagen|image|v[ií]deo)\b/i.test(al)) return al.trim();
+                if (n.querySelectorAll && n.querySelectorAll('img').length > 2) break;
+                var tx = (n.innerText || '').split('\n').map(function (x) { return x.trim(); })
+                    .filter(function (x) { return x.length > 2 && x.length < 70 && !/^(popular|foto|photo|v[ií]deo|\d+(\s|$))/i.test(x); });
+                if (tx.length) return tx[0];
+            }
+            return '';
+        }
+        function add(u, tit) {
             if (!u) return;
             u = String(u).replace(/&amp;/g, '&').trim();
             if (u.indexOf('//') === 0) u = 'https:' + u;
@@ -197,24 +216,27 @@
             if (t && (/avatar/i.test(u) || /\/photo-[a-z]\/[^?]*\.(png|gif|svg)/i.test(u))) return;
             if (t && /[?&]w=(\d+)/.test(u) && +RegExp.$1 < 100) return;
             var c = k(u);
-            if (V[c]) return;
-            V[c] = 1; L.push(u); pintar();
+            if (V[c]) { if (tit && !V[c].t) V[c].t = tit; return; }
+            V[c] = { u: u }; if (tit) V[c].t = tit;
+            L.push(V[c]); pintar();
         }
         function texto(t) {
             if (!t || typeof t !== 'string') return;
             if (t.length > 8e6) t = t.slice(0, 8e6);
             t = t.replace(/\\u003d/gi, '=').replace(/\\u0026/gi, '&').replace(/\\u002f/gi, '/').replace(/\\\//g, '/').replace(/%2F/gi, '/').replace(/%3D/gi, '=').replace(/%3A/gi, ':');
-            (t.match(RX) || []).forEach(add);
+            (t.match(RX) || []).forEach(function (u) { add(u); });
         }
-        function fondos(bg) { (String(bg || '').match(/url\(["']?[^"')]+/g) || []).forEach(function (m) { add(m.replace(/^url\(["']?/, '')); }); }
+        function fondos(bg, tit) { (String(bg || '').match(/url\(["']?[^"')]+/g) || []).forEach(function (m) { add(m.replace(/^url\(["']?/, ''), tit); }); }
         function barrer() {
             texto(location.href);
             var els = document.querySelectorAll('img,[style*="url("],[role="img"],button,a');
             for (var i = 0; i < els.length; i++) {
                 var e = els[i];
-                if (e.tagName === 'IMG') { add(e.currentSrc || e.src); (e.getAttribute('srcset') || '').split(',').forEach(function (s) { add(s.trim().split(' ')[0]); }); }
-                if (e.style && e.style.backgroundImage) fondos(e.style.backgroundImage);
-                else if (e.tagName !== 'IMG' && els.length < 5000) { var cs = getComputedStyle(e).backgroundImage; if (cs && cs !== 'none') fondos(cs); }
+                var nom = '';
+                var tom = function () { if (!nom) nom = nombreDe(e) || ' '; return nom.trim(); };
+                if (e.tagName === 'IMG') { var su = e.currentSrc || e.src; if (/googleusercontent|tripadvisor/.test(su)) add(su, tom()); (e.getAttribute('srcset') || '').split(',').forEach(function (s) { add(s.trim().split(' ')[0]); }); }
+                if (e.style && e.style.backgroundImage) fondos(e.style.backgroundImage, e.style.backgroundImage.indexOf('http') >= 0 ? tom() : '');
+                else if (e.tagName !== 'IMG' && els.length < 5000) { var cs = getComputedStyle(e).backgroundImage; if (cs && cs !== 'none') fondos(cs, /googleusercontent|tripadvisor/.test(cs) ? tom() : ''); }
             }
         }
         var f0 = window.fetch;
@@ -265,7 +287,8 @@
         }
         function copiar() {
             var txt = 'FOTOS-CARTA:' + JSON.stringify(L);
-            var ok = function () { ui.msg.textContent = '✔ ' + L.length + ' copiadas. En el editor (📷 Fotos del plato) pulsa Ctrl+V.'; };
+            var conNombre = L.filter(function (x) { return x.t; }).length;
+            var ok = function () { ui.msg.textContent = '✔ ' + L.length + ' copiadas (' + conNombre + ' con nombre). En el editor (📷 Fotos del plato) pulsa Ctrl+V.'; };
             var aMano = function () {
                 var ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;opacity:0';
                 document.body.appendChild(ta); ta.select(); var r = false;
@@ -275,18 +298,23 @@
             };
             if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, aMano); else aMano();
         }
-        var d = document.createElement('div');
-        d.style.cssText = 'position:fixed;top:12px;right:12px;z-index:2147483647;background:#1f2328;color:#fff;padding:10px 12px;border-radius:10px;font:13px/1.35 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4);width:290px';
-        d.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><b>📥 Escáner de fotos</b><span data-c style="cursor:pointer;padding:0 4px">✕</span></div>' +
-            '<div data-n style="font-size:22px;font-weight:700;margin:4px 0">0</div>' +
-            '<div style="font-size:11px;opacity:.8;margin-bottom:8px">Sigue escuchando: abre Fotos, cambia de pestaña (Comida, Menú, Todas…), pasa fotos. Todo lo que cargue se suma.</div>' +
-            '<div style="display:flex;gap:6px"><button data-b style="flex:1;padding:6px;border:0;border-radius:6px;cursor:pointer">⇣ Bajar solo</button>' +
-            '<button data-k style="flex:1;padding:6px;border:0;border-radius:6px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer">Copiar</button></div>' +
-            '<div data-m style="font-size:11px;margin-top:6px;min-height:14px"></div>';
-        ui.n = d.querySelector('[data-n]'); ui.msg = d.querySelector('[data-m]'); ui.b = d.querySelector('[data-b]');
-        d.querySelector('[data-b]').onclick = bajar;
-        d.querySelector('[data-k]').onclick = copiar;
-        d.querySelector('[data-c]').onclick = function () { d.remove(); };
+        function el(tag, css, txt, padre) { var x = document.createElement(tag); if (css) x.style.cssText = css; if (txt) x.textContent = txt; if (padre) padre.appendChild(x); return x; }
+        var d = el('div', 'position:fixed;top:12px;right:12px;z-index:2147483647;background:#1f2328;color:#fff;padding:10px 12px;border-radius:10px;font:13px/1.35 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4);width:290px');
+        var cab = el('div', 'display:flex;justify-content:space-between;align-items:center', '', d);
+        el('b', '', '\uD83D\uDCE5 Escáner de fotos', cab);
+        var cerrarX = el('span', 'cursor:pointer;padding:0 4px', '\u2715', cab);
+        ui.n = el('div', 'font-size:22px;font-weight:700;margin:4px 0', '0', d);
+        var editorAqui = !!window.EDITOR_SITIO || /github\.io$/.test(location.hostname);
+        el('div', 'font-size:11px;opacity:.8;margin-bottom:8px', editorAqui
+            ? 'Esto es el editor: pulsa el marcador en la página de Google Maps o TripAdvisor del restaurante.'
+            : 'Sigue escuchando: en Maps abre la pestaña Carta (o Fotos), cambia de sección y usa "Bajar solo". Todo lo que cargue se suma.', d);
+        var fila = el('div', 'display:flex;gap:6px', '', d);
+        ui.b = el('button', 'flex:1;padding:6px;border:0;border-radius:6px;cursor:pointer;background:#fff;color:#1f2328', '\u21E3 Bajar solo', fila);
+        var bk = el('button', 'flex:1;padding:6px;border:0;border-radius:6px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer', 'Copiar', fila);
+        ui.msg = el('div', 'font-size:11px;margin-top:6px;min-height:14px', '', d);
+        ui.b.onclick = bajar;
+        bk.onclick = copiar;
+        cerrarX.onclick = function () { d.remove(); };
         function pintar() { if (!ui.n) return; ui.n.textContent = L.length + ' fotos'; ui.b.textContent = bajando ? '■ Parar' : '⇣ Bajar solo'; }
         document.body.appendChild(d);
         pintar();
@@ -434,7 +462,7 @@
         '.sf-gal-cab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.82rem}.sf-gal-cab button{padding:3px 8px;border:1px solid #d6d2c6;border-radius:6px;background:#fff;cursor:pointer;font-size:.75rem}' +
         '.sf-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;max-height:330px;overflow:auto}' +
         '.sf-g{position:relative;aspect-ratio:1;border-radius:7px;overflow:hidden;cursor:pointer;background:#e5e7eb}.sf-g img{width:100%;height:100%;object-fit:cover;display:block}' +
-        '.sf-g:hover{outline:3px solid #16a34a;outline-offset:-3px}.sf-g.usada{opacity:.45}.sf-g.aqui{outline:3px solid #2563eb;outline-offset:-3px}' +
+        '.sf-g.parece{outline:3px solid #f59e0b;outline-offset:-3px}.sf-g:hover{outline:3px solid #16a34a;outline-offset:-3px}.sf-g.usada{opacity:.45}.sf-g.aqui{outline:3px solid #2563eb;outline-offset:-3px}' +
         '.sf-g span{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);color:#fff;font-size:.68rem;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
         '.sf-g button{position:absolute;top:3px;right:3px;border:0;border-radius:50%;width:20px;height:20px;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;font-size:.7rem;line-height:20px;padding:0}' +
         '.sf-btn{margin-top:6px;padding:5px 9px;border-radius:7px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;font-size:.78rem;white-space:nowrap}';
@@ -509,15 +537,19 @@
             var g = leerGaleria();
             if (!g.length) return '';
             var usadas = g.filter(function (x) { return x.usada; }).length;
-            var vis = g.map(function (x, i) { return { x: x, i: i }; }).filter(function (o) { return verUsadas || !o.x.usada || enEstePlato(o.x.u); });
+            var np = nombrePlato() + ' ' + String((document.getElementById('edit-en') || {}).value || p.en || '');
+            var vis = g.map(function (x, i) { return { x: x, i: i, p: x.t ? parecido(np, x.t) : 0 }; })
+                .filter(function (o) { return verUsadas || !o.x.usada || enEstePlato(o.x.u); })
+                .sort(function (a, b) { return (b.p - a.p) || (a.i - b.i); });
+            var nPar = vis.filter(function (o) { return o.p > 0; }).length;
             return '<div class="sf-gal-cab"><b>Fotos escaneadas: ' + (g.length - usadas) + ' sin usar' + (usadas ? ' · ' + usadas + ' usadas' : '') + '</b>' +
                 (usadas ? '<label><input type="checkbox" id="sf-ver-usadas"' + (verUsadas ? ' checked' : '') + '> ver usadas</label>' : '') +
-                '<button type="button" id="sf-gal-vaciar">Vaciar lista</button><small>Pulsa una para ponerla en este plato.</small></div>' +
+                '<button type="button" id="sf-gal-vaciar">Vaciar lista</button><small>' + (nPar ? '★ ' + nPar + ' parecen este plato (salen primero). ' : '') + 'Pulsa una para ponerla en este plato.</small></div>' +
                 (vis.length ? '<div class="sf-gal">' + vis.map(function (o) {
                     var aqui = enEstePlato(o.x.u);
-                    return '<div class="sf-g' + (aqui ? ' aqui' : o.x.usada ? ' usada' : '') + '" data-g="' + o.i + '" title="' + esc(o.x.usada ? 'Usada en: ' + o.x.usada : 'Poner en este plato') + '">' +
+                    return '<div class="sf-g' + (aqui ? ' aqui' : o.x.usada ? ' usada' : o.p ? ' parece' : '') + '" data-g="' + o.i + '" title="' + esc((o.x.t ? o.x.t + ' · ' : '') + (o.x.usada ? 'Usada en: ' + o.x.usada : 'Poner en este plato')) + '">' +
                         '<img loading="lazy" referrerpolicy="no-referrer" src="' + esc(o.x.u) + '" alt="" onerror="this.parentNode.style.display=\'none\'">' +
-                        (aqui ? '<span>· en este plato</span>' : o.x.usada ? '<span>✔ ' + esc(o.x.usada) + '</span>' : '') +
+                        (aqui ? '<span>· en este plato</span>' : o.x.usada ? '<span>✔ ' + esc(o.x.usada) + '</span>' : o.x.t ? '<span>' + (o.p ? '★ ' : '') + esc(o.x.t) + '</span>' : '') +
                         '<button type="button" data-x="1" title="Quitar de la lista">✕</button></div>';
                 }).join('') + '</div>' : '<div class="sf-vacio">Todas usadas.</div>');
         }
