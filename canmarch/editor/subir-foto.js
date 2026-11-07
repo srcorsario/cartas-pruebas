@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.3.0'; // 7 nov: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.4.0'; // 7 nov: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -176,50 +176,121 @@
         guardarGaleria(g);
         return n;
     }
-    // Marcador (bookmarklet): se ejecuta en la página de Google Maps / TripAdvisor, recoge las fotos
-    // que hay cargadas y las copia al portapapeles como "FOTOS-CARTA:[...]". Sin comentarios // dentro.
+    // Marcador (bookmarklet) a fondo: se ejecuta en Google Maps / TripAdvisor y se QUEDA ESCUCHANDO:
+    // lee lo que hay en la página (imágenes, fondos y los datos internos del HTML), cada respuesta que
+    // la web carga después (fetch/XHR) y lo que va apareciendo. Panel: contador, "Bajar solo" (desplaza
+    // la galería hasta el final) y "Copiar". Copia "FOTOS-CARTA:[...]". Sin comentarios // dentro.
     function escaner() {
-        var L = [], V = {};
-        function k(u) { var m = u.match(/googleusercontent\.com\/([^=!?&#\s"')]+)/); if (m) return 'g:' + m[1]; return u.replace(/[?#].*$/, '').replace(/=[^\/=]*$/, '').replace(/\/photo-[a-z]\//, '/photo-?/'); }
+        if (window.__fotosCarta) { window.__fotosCarta.mostrar(); return; }
+        var L = [], V = {}, ui = {};
+        var RX = /https:\/\/[a-z0-9.-]*(?:googleusercontent|ggpht)\.com\/[^"'\s\\)<>,\]}|!]+|https:\/\/(?:dynamic-media-cdn|media-cdn)\.tripadvisor\.com\/media\/[^"'\s\\)<>,\]}|!]+/g;
+        function idG(u) { var m = u.match(/googleusercontent\.com\/([^=!?&#\s"')]+)/); return m ? m[1] : ''; }
+        function k(u) { var id = idG(u); if (id) return 'g:' + id; return u.replace(/[?#].*$/, '').replace(/=[^\/=]*$/, '').replace(/\/photo-[a-z]\//, '/photo-?/'); }
         function add(u) {
             if (!u) return;
             u = String(u).replace(/&amp;/g, '&').trim();
             if (u.indexOf('//') === 0) u = 'https:' + u;
             if (!/^https:/.test(u)) return;
-            var g = /(googleusercontent|ggpht)\.com\//.test(u), t = /tripadvisor\.com\/media\//.test(u);
-            if (!g && !t) return;
-            if (g && /\.com\/(a|a-)\//.test(u)) return;
-            if (t && /avatar/i.test(u)) return;
+            var id = idG(u), t = /tripadvisor\.com\/media\//.test(u);
+            if (!id && !t) return;
+            if (id && !/^(p|gps-cs-s|grass-cs|geougc-cs|geougc|gps-proxy|proxy)\//.test(id)) return;
+            if (t && (/avatar/i.test(u) || /\/photo-[a-z]\/[^?]*\.(png|gif|svg)/i.test(u))) return;
+            if (t && /[?&]w=(\d+)/.test(u) && +RegExp.$1 < 100) return;
             var c = k(u);
             if (V[c]) return;
-            V[c] = 1; L.push(u);
+            V[c] = 1; L.push(u); pintar();
+        }
+        function texto(t) {
+            if (!t || typeof t !== 'string') return;
+            if (t.length > 8e6) t = t.slice(0, 8e6);
+            t = t.replace(/\\u003d/gi, '=').replace(/\\u0026/gi, '&').replace(/\\u002f/gi, '/').replace(/\\\//g, '/').replace(/%2F/gi, '/').replace(/%3D/gi, '=').replace(/%3A/gi, ':');
+            (t.match(RX) || []).forEach(add);
         }
         function fondos(bg) { (String(bg || '').match(/url\(["']?[^"')]+/g) || []).forEach(function (m) { add(m.replace(/^url\(["']?/, '')); }); }
-        try { var dl = decodeURIComponent(location.href), ml = dl.match(/https:\/\/[a-z0-9]+\.googleusercontent\.com\/[^!?&#\s"')]+/); if (ml) add(ml[0]); } catch (x) { }
-        var els = document.querySelectorAll('*');
-        for (var i = 0; i < els.length; i++) {
-            var e = els[i];
-            if (e.tagName === 'IMG') { add(e.currentSrc || e.src); (e.getAttribute('srcset') || '').split(',').forEach(function (s) { add(s.trim().split(' ')[0]); }); }
-            if (e.style && e.style.backgroundImage) fondos(e.style.backgroundImage);
-            else if (els.length < 6000 && (e.tagName === 'DIV' || e.tagName === 'BUTTON' || e.tagName === 'A')) { var cs = getComputedStyle(e).backgroundImage; if (cs && cs !== 'none') fondos(cs); }
+        function barrer() {
+            texto(location.href);
+            var els = document.querySelectorAll('img,[style*="url("],[role="img"],button,a');
+            for (var i = 0; i < els.length; i++) {
+                var e = els[i];
+                if (e.tagName === 'IMG') { add(e.currentSrc || e.src); (e.getAttribute('srcset') || '').split(',').forEach(function (s) { add(s.trim().split(' ')[0]); }); }
+                if (e.style && e.style.backgroundImage) fondos(e.style.backgroundImage);
+                else if (e.tagName !== 'IMG' && els.length < 5000) { var cs = getComputedStyle(e).backgroundImage; if (cs && cs !== 'none') fondos(cs); }
+            }
         }
-        var txt = 'FOTOS-CARTA:' + JSON.stringify(L);
+        var f0 = window.fetch;
+        if (f0) window.fetch = function () {
+            var pr = f0.apply(this, arguments);
+            pr.then(function (r) { try { var ct = r.headers.get('content-type') || ''; if (!/image|video|font|octet/.test(ct)) r.clone().text().then(texto, function () { }); } catch (x) { } }, function () { });
+            return pr;
+        };
+        var s0 = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.send = function () {
+            this.addEventListener('load', function () { try { if (!this.responseType || this.responseType === 'text') texto(this.responseText); } catch (x) { } });
+            return s0.apply(this, arguments);
+        };
+        texto(document.documentElement.innerHTML);
+        document.querySelectorAll('script').forEach(function (sc) { texto(sc.textContent); });
+        barrer();
+        var reloj = setInterval(barrer, 1500);
+
+        function caja() {
+            var m = 0, best = null;
+            document.querySelectorAll('div,section,ul').forEach(function (e) {
+                if (e.scrollHeight - e.clientHeight < 200 || e.clientHeight < 150) return;
+                var oy = getComputedStyle(e).overflowY;
+                if (oy !== 'auto' && oy !== 'scroll') return;
+                var n = e.querySelectorAll('img,[style*="url("]').length;
+                if (n > m) { m = n; best = e; }
+            });
+            return best || document.scrollingElement;
+        }
+        var bajando = false;
+        function bajar() {
+            if (bajando) { bajando = false; return; }
+            var c = caja(), quieto = 0, alto = -1;
+            bajando = true; pintar();
+            (function paso() {
+                if (!bajando) { pintar(); return; }
+                c.scrollTop = c.scrollTop + c.clientHeight * 0.9;
+                c.dispatchEvent(new Event('scroll'));
+                setTimeout(function () {
+                    barrer();
+                    var fin = c.scrollTop + c.clientHeight >= c.scrollHeight - 5;
+                    if (fin && c.scrollHeight === alto) quieto++; else quieto = 0;
+                    alto = c.scrollHeight;
+                    if (quieto >= 4) { bajando = false; pintar(); return; }
+                    paso();
+                }, 900);
+            })();
+        }
+        function copiar() {
+            var txt = 'FOTOS-CARTA:' + JSON.stringify(L);
+            var ok = function () { ui.msg.textContent = '✔ ' + L.length + ' copiadas. En el editor (📷 Fotos del plato) pulsa Ctrl+V.'; };
+            var aMano = function () {
+                var ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;opacity:0';
+                document.body.appendChild(ta); ta.select(); var r = false;
+                try { r = document.execCommand('copy'); } catch (x) { }
+                ta.remove();
+                if (r) ok(); else ui.msg.textContent = 'No se pudo copiar. Vuelve a pulsar Copiar.';
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, aMano); else aMano();
+        }
         var d = document.createElement('div');
-        d.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:2147483647;background:#1f2328;color:#fff;padding:12px 16px;border-radius:10px;font:14px system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4);max-width:90vw';
-        function hecho(ok) {
-            d.textContent = L.length ? ('📥 ' + L.length + ' fotos ' + (ok ? 'copiadas' : 'encontradas, pero no se pudieron copiar') + '. Vuelve al editor (📷 Fotos del plato) y pulsa Ctrl+V.')
-                : 'No he encontrado fotos: abre las Fotos del restaurante y baja para que carguen.';
-            document.body.appendChild(d);
-            setTimeout(function () { d.remove(); }, 7000);
-        }
-        if (!L.length) { hecho(false); return; }
-        function aMano() {
-            var ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;opacity:0';
-            document.body.appendChild(ta); ta.select(); var ok = false;
-            try { ok = document.execCommand('copy'); } catch (x) { }
-            ta.remove(); hecho(ok);
-        }
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { hecho(true); }, aMano); else aMano();
+        d.style.cssText = 'position:fixed;top:12px;right:12px;z-index:2147483647;background:#1f2328;color:#fff;padding:10px 12px;border-radius:10px;font:13px/1.35 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4);width:290px';
+        d.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><b>📥 Escáner de fotos</b><span data-c style="cursor:pointer;padding:0 4px">✕</span></div>' +
+            '<div data-n style="font-size:22px;font-weight:700;margin:4px 0">0</div>' +
+            '<div style="font-size:11px;opacity:.8;margin-bottom:8px">Sigue escuchando: abre Fotos, cambia de pestaña (Comida, Menú, Todas…), pasa fotos. Todo lo que cargue se suma.</div>' +
+            '<div style="display:flex;gap:6px"><button data-b style="flex:1;padding:6px;border:0;border-radius:6px;cursor:pointer">⇣ Bajar solo</button>' +
+            '<button data-k style="flex:1;padding:6px;border:0;border-radius:6px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer">Copiar</button></div>' +
+            '<div data-m style="font-size:11px;margin-top:6px;min-height:14px"></div>';
+        ui.n = d.querySelector('[data-n]'); ui.msg = d.querySelector('[data-m]'); ui.b = d.querySelector('[data-b]');
+        d.querySelector('[data-b]').onclick = bajar;
+        d.querySelector('[data-k]').onclick = copiar;
+        d.querySelector('[data-c]').onclick = function () { d.remove(); };
+        function pintar() { if (!ui.n) return; ui.n.textContent = L.length + ' fotos'; ui.b.textContent = bajando ? '■ Parar' : '⇣ Bajar solo'; }
+        document.body.appendChild(d);
+        pintar();
+        window.__fotosCarta = { mostrar: function () { if (!document.body.contains(d)) document.body.appendChild(d); barrer(); pintar(); } };
     }
     var MARCADOR = 'javascript:' + encodeURIComponent('(' + escaner.toString() + ')();void 0');
 
@@ -484,7 +555,7 @@
                 (activas.length >= MAX_FOTOS ? 'Ya hay ' + MAX_FOTOS + ' fotos activas: desactiva o elimina alguna.'
                     : 'En la foto: clic derecho → <b>Copiar imagen</b>, y aquí <b>Ctrl+V</b><br>· o arrastra la foto aquí · o pega su dirección') + '</div>' +
                 '<div class="sf-ext-fila"><a class="sf-marcador" href="' + esc(MARCADOR) + '" title="Arrástralo a la barra de marcadores (Ctrl+Mayús+B la muestra)">📥 Escanear fotos</a>' +
-                '<small>← arrástralo una vez a la barra de marcadores. En Maps/TripAdvisor abre las Fotos del restaurante, baja para que carguen todas, pulsa el marcador y vuelve aquí: Ctrl+V.</small></div>' +
+                '<small>← arrástralo una vez a la barra de marcadores. En Maps/TripAdvisor: pulsa el marcador, abre las Fotos del restaurante, usa "Bajar solo" y cambia de pestaña (Comida, Menú…); al terminar, Copiar y aquí Ctrl+V.</small></div>' +
                 galeriaHtml() +
                 '<small>En Maps: ficha del restaurante → Fotos → "Menú" / "Comida". Usa solo fotos del propio restaurante o con permiso de quien la hizo.</small></div>' +
                 '<p id="sf-msg"></p>' +
