@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.7.0'; // 7 nov: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.8.0'; // 7 nov: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -490,6 +490,7 @@
         '.sfg-rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:10px}' +
         '.sfg-card{border:1px solid #e3e0d8;border-radius:10px;padding:6px;background:#faf9f6;display:flex;flex-direction:column;gap:5px}.sfg-card.usada{opacity:.55}' +
         '.sfg-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px;display:block;background:#e5e7eb}' +
+        '.sfg-i{font-size:.72rem;color:#6b6f76}.sfg-i.peq{color:#b42318;font-weight:600}' +
         '.sfg-t{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sfg-u{font-size:.74rem;color:#15803d}' +
         '.sfg-a{display:flex;gap:4px}.sfg-a input{flex:1;min-width:0;padding:5px 6px;border:1px solid #ccc;border-radius:6px;font-size:.78rem}.sfg-a button[data-x]{border:1px solid #d6d2c6;background:#fff;border-radius:6px;cursor:pointer;padding:0 7px}' +
         '.sf-gal-cab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.82rem}.sf-gal-cab button{padding:3px 8px;border:1px solid #d6d2c6;border-radius:6px;background:#fff;cursor:pointer;font-size:.75rem}' +
@@ -573,7 +574,7 @@
             var usadas = g.filter(function (x) { return x.usada; }).length;
             var np = nombrePlato() + ' ' + String((document.getElementById('edit-en') || {}).value || p.en || '');
             var vis = g.map(function (x, i) { return { x: x, i: i, p: x.t ? parecido(np, x.t) : 0 }; })
-                .filter(function (o) { return verUsadas || !o.x.usada || enEstePlato(o.x.u); })
+                .filter(function (o) { return (verUsadas || !o.x.usada || enEstePlato(o.x.u)) && !esPequena(o.x); })
                 .sort(function (a, b) { return (b.p - a.p) || (a.i - b.i); });
             var nPar = vis.filter(function (o) { return o.p > 0; }).length;
             return '<div class="sf-gal-cab"><b>Fotos escaneadas: ' + (g.length - usadas) + ' sin usar' + (usadas ? ' · ' + usadas + ' usadas' : '') + '</b>' +
@@ -862,7 +863,48 @@
         return ('00' + n).slice(-3) + ' - ' + t + (/tripadvisor/.test(x.u) ? ' (tripadvisor)' : '') + '.' + ext;
     }
     // Guarda todas las fotos de la lista, sueltas: en una carpeta elegida (Chrome/Opera) o, si no, una a una en Descargas.
+    // ---------- medidas reales (original) y mínimo de resolución ----------
+    var CLAVE_MIN = 'sf-minlado';
+    function minLado() { try { var v = parseInt(localStorage.getItem(CLAVE_MIN), 10); return isNaN(v) ? 800 : v; } catch (e) { return 800; } }
+    function esPequena(x) { return !!(x && x.w && Math.max(x.w, x.h) < minLado()); }
+    async function medir(b) {
+        var r = { kb: Math.round(b.size / 1024), tipo: (String(b.type).split('/')[1] || '').toUpperCase().replace('JPEG', 'JPG') };
+        try { var bm = await createImageBitmap(b); r.w = bm.width; r.h = bm.height; if (bm.close) bm.close(); } catch (e) { }
+        return r;
+    }
+    function guardarInfo(k, info) {
+        var g = leerGaleria(), ix = indiceDe(g, k);
+        if (ix < 0) return null;
+        Object.keys(info).forEach(function (c) { g[ix][c] = info[c]; });
+        guardarGaleria(g);
+        return g[ix];
+    }
+    function infoTxt(x) {
+        var f = /tripadvisor/.test(x.u) ? 'TripAdvisor' : 'Google';
+        if (x.err) return '⚠ no se deja descargar · ' + f;
+        if (!x.w) return 'midiendo… · ' + f;
+        return x.w + '×' + x.h + ' px · ' + (x.kb > 1024 ? (x.kb / 1024).toFixed(1) + ' MB' : x.kb + ' KB') + (x.tipo ? ' · ' + x.tipo : '') + ' · ' + f;
+    }
+    var colaInfo = [], enCurso = 0, pedidas = {};
+    function pedirInfo(k, alListo) {
+        if (pedidas[k]) return;
+        pedidas[k] = 1; colaInfo.push({ k: k, f: alListo }); siguienteInfo();
+    }
+    async function siguienteInfo() {
+        if (enCurso >= 3 || !colaInfo.length) return;
+        var t = colaInfo.shift(); enCurso++;
+        try {
+            var g = leerGaleria(), x = g[indiceDe(g, t.k)];
+            if (x) {
+                var b = await bajarMaxima(x.u);
+                var nx = guardarInfo(t.k, b ? await medir(b) : { err: 1 });
+                if (nx && t.f) t.f(nx);
+            }
+        } catch (e) { }
+        enCurso--; siguienteInfo();
+    }
     async function guardarTodas(lista, avisar, boton) {
+        lista = lista.filter(function (x) { return !esPequena(x); });
         if (!lista.length) { avisar('No hay fotos en la lista.'); return; }
         var carpeta = null, nomRest = String((window.MARCA && window.MARCA.nombre) || S.titulo || S.restaurante || 'Restaurante').replace(/\s+(menu|carta)$/i, '')
             .replace(/[<>:"\/\\|?*]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Restaurante';
@@ -871,13 +913,14 @@
             catch (e) { if (e && e.name === 'AbortError') return; carpeta = null; }
             if (carpeta) { try { carpeta = await carpeta.getDirectoryHandle(nomRest, { create: true }); } catch (e) { avisar('No se pudo crear la carpeta "' + nomRest + '": ' + (e.message || e)); return; } }
         }
-        var parar = false, hechas = 0, fallos = 0, sig = 0, texto0 = boton.textContent;
+        var parar = false, hechas = 0, fallos = 0, peq = 0, sig = 0, texto0 = boton.textContent;
         boton.textContent = '■ Parar'; boton.onclick = function () { parar = true; };
         async function trabajador() {
             while (!parar && sig < lista.length) {
                 var n = sig++, x = lista[n];
                 var b = await bajarMaxima(x.u);
-                if (!b) { fallos++; }
+                if (!b) { fallos++; guardarInfo(claveFoto(x.u), { err: 1 }); }
+                else if (esPequena(guardarInfo(claveFoto(x.u), await medir(b)))) { peq++; }
                 else {
                     var nom = nombreArchivo(x, n + 1, b.type);
                     try {
@@ -891,13 +934,13 @@
                         hechas++;
                     } catch (e) { fallos++; }
                 }
-                avisar('💾 ' + (hechas + fallos) + ' / ' + lista.length + ' · guardadas ' + hechas + (fallos ? ' · fallidas ' + fallos : ''), '#555');
+                avisar('💾 ' + (hechas + fallos + peq) + ' / ' + lista.length + ' · guardadas ' + hechas + (peq ? ' · pequeñas (no se guardan) ' + peq : '') + (fallos ? ' · fallidas ' + fallos : ''), '#555');
             }
         }
         await Promise.all(carpeta ? [trabajador(), trabajador(), trabajador(), trabajador()] : [trabajador()]);
         boton.textContent = texto0; boton.onclick = null;
         avisar((parar ? 'Parado. ' : '✔ ') + hechas + ' fotos guardadas a máxima calidad' + (carpeta ? ' en la carpeta "' + nomRest + '"' : ' en Descargas') +
-            (fallos ? '. ' + fallos + ' no se pudieron descargar (esa web no lo permite o ya no existen).' : '.'), fallos && !hechas ? '#b42318' : '#15803d');
+            (peq ? '. ' + peq + ' descartadas por pequeñas (menos de ' + minLado() + ' px)' : '') + (fallos ? '. ' + fallos + ' no se pudieron descargar (esa web no lo permite o ya no existen).' : '.'), fallos && !hechas ? '#b42318' : '#15803d');
         return true;
     }
     function contarBoton() {
@@ -914,11 +957,11 @@
         fondo.style.padding = '0';
         fondo.innerHTML = '<div id="sf-caja" style="max-width:none;width:100vw;height:100vh;max-height:100vh;border-radius:0;box-sizing:border-box"></div>';
         document.body.appendChild(fondo);
-        var caja = fondo.querySelector('#sf-caja'), verUsadas = false, filtro = '';
+        var caja = fondo.querySelector('#sf-caja'), verUsadas = false, filtro = '', verPeq = false, obs = null;
         var conExt = document.documentElement.dataset.escanerFotos === '1';
         var q = busquedaLocal(), l = enlacesExternos(q, ''), en = leerEnlaces();
         var avisar = function (t, color) { var m = caja.querySelector('#sf-msg'); if (m) { m.style.color = color || '#b42318'; m.textContent = t; } };
-        var cerrar = function () { fondo.remove(); document.removeEventListener('paste', alPegar); alRecibir = null; contarBoton(); };
+        var cerrar = function () { fondo.remove(); document.removeEventListener('paste', alPegar); alRecibir = null; if (obs) obs.disconnect(); colaInfo.length = 0; pedidas = {}; contarBoton(); };
         function meter(lista, origen) {
             var n = sumarEscaneo(lista);
             pintarG();
@@ -940,8 +983,10 @@
         document.addEventListener('paste', alPegar);
         function pintarG() {
             var g = leerGaleria(), platos = listaPlatos(), usadas = g.filter(function (x) { return x.usada; }).length;
+            var nPeq = g.filter(esPequena).length;
             var vis = g.map(function (x, i) { return { x: x, i: i }; }).filter(function (o) {
                 if (o.x.usada && !verUsadas) return false;
+                if (!verPeq && esPequena(o.x)) return false;
                 return !filtro || palabras(o.x.t).join(' ').indexOf(palabras(filtro).join(' ')) >= 0 || String(o.x.t || '').toLowerCase().indexOf(filtro.toLowerCase()) >= 0;
             });
             var sugerido = function (t) {
@@ -967,6 +1012,8 @@
                 '<div class="sf-ext-fila" style="margin-top:10px"><input type="text" id="sfg-url" placeholder="Pega aquí enlaces de fotos (uno o varios)…"><button type="button" id="sfg-add" class="sfg-b">＋ Añadir</button></div>' +
                 '<div class="sf-gal-cab" style="margin-top:12px"><b>' + (g.length - usadas) + ' sin asignar' + (usadas ? ' · ' + usadas + ' asignadas' : '') + '</b>' +
                 (usadas ? '<label><input type="checkbox" id="sfg-usadas"' + (verUsadas ? ' checked' : '') + '> ver asignadas</label>' : '') +
+                '<label title="Lado largo mínimo para que una foto sirva: las más pequeñas se ocultan y no se guardan">Mínimo <input type="number" id="sfg-min" min="0" step="100" value="' + minLado() + '" style="width:72px"> px</label>' +
+                '<label><input type="checkbox" id="sfg-peq"' + (verPeq ? ' checked' : '') + '> ver pequeñas' + (nPeq ? ' (<span id="sfg-npeq">' + nPeq + '</span>)' : ' (<span id="sfg-npeq">0</span>)') + '</label>' +
                 '<input type="text" id="sfg-filtro" placeholder="Buscar por nombre…" value="' + esc(filtro) + '" style="width:170px">' +
                 (g.length ? '<button type="button" id="sfg-guardar" title="Descarga todas las fotos de la lista a su tamaño original">💾 Guardar todas en el PC</button><button type="button" id="sfg-vaciar">Vaciar lista</button>' : '') + '</div>' +
                 (vis.length ? '<div class="sfg-rejilla">' + vis.map(function (o) {
@@ -974,6 +1021,7 @@
                     return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-k="' + esc(claveFoto(x.u)) + '">' +
                         '<a href="' + esc(mejorarUrl(x.u)) + '" target="_blank" rel="noopener noreferrer" title="Ver en grande"><img loading="lazy" referrerpolicy="no-referrer" src="' + esc(miniatura(x.u)) + '" alt="" onerror="this.closest(\'.sfg-card\').style.display=\'none\'"></a>' +
                         '<div class="sfg-t" title="' + esc(x.t || '') + '">' + (x.t ? esc(x.t) : '<i>sin nombre</i>') + '</div>' +
+                        '<div class="sfg-i' + (esPequena(x) ? ' peq' : '') + '">' + esc(infoTxt(x)) + (esPequena(x) ? ' · pequeña' : '') + '</div>' +
                         (x.usada ? '<div class="sfg-u">✔ ' + esc(x.usada) + '</div>' : '') +
                         '<div class="sfg-a"><input list="sfg-platos" placeholder="Plato…" value="' + esc(sug) + '"' + (sug ? ' title="Sugerido por el nombre de la foto"' : '') + '>' +
                         '<button type="button" data-a="1" class="sfg-b">Asignar</button><button type="button" data-x="1" title="Quitar de la lista">✕</button></div></div>';
@@ -999,6 +1047,32 @@
             });
             var gt = caja.querySelector('#sfg-guardar');
             if (gt) gt.onclick = function () { guardarTodas(leerGaleria(), avisar, gt); };
+            var mn = caja.querySelector('#sfg-min');
+            mn.onchange = function () { var v = Math.max(0, parseInt(mn.value, 10) || 0); try { localStorage.setItem(CLAVE_MIN, String(v)); } catch (e) { } pintarG(); };
+            caja.querySelector('#sfg-peq').onchange = function () { verPeq = this.checked; pintarG(); };
+            // Medir las fotos que se ven (solo las que aún no tienen medidas)
+            if (obs) obs.disconnect();
+            obs = new IntersectionObserver(function (ents) {
+                ents.forEach(function (en) {
+                    if (!en.isIntersecting) return;
+                    var el = en.target; obs.unobserve(el);
+                    pedirInfo(el.dataset.k, function (x) {
+                        var c = caja.querySelector('.sfg-card[data-k="' + (window.CSS && CSS.escape ? CSS.escape(el.dataset.k) : el.dataset.k) + '"]');
+                        if (!c) return;
+                        var pq = esPequena(x), inf = c.querySelector('.sfg-i');
+                        inf.textContent = infoTxt(x) + (pq ? ' · pequeña' : '');
+                        inf.classList.toggle('peq', pq);
+                        if (pq) {
+                            var np = caja.querySelector('#sfg-npeq'); if (np) np.textContent = leerGaleria().filter(esPequena).length;
+                            if (!verPeq) c.remove();
+                        }
+                    });
+                });
+            }, { root: caja, rootMargin: '200px' });
+            caja.querySelectorAll('.sfg-card').forEach(function (el) {
+                var gg = leerGaleria(), x = gg[indiceDe(gg, el.dataset.k)];
+                if (x && !x.w && !x.err) obs.observe(el);
+            });
             var va = caja.querySelector('#sfg-vaciar');
             if (va) va.onclick = function () {
                 (window.confirmarEditor ? window.confirmarEditor('¿Vaciar la lista de fotos de internet? (no toca las fotos ya puestas en platos)') : Promise.resolve(confirm('¿Vaciar la lista?')))
