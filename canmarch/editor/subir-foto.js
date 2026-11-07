@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.6.0'; // 7 nov: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.6.1'; // 7 nov: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -171,7 +171,8 @@
     function descartar(c) { var d = leerDesc(); d[c] = 1; try { localStorage.setItem(CLAVE_D, JSON.stringify(d)); } catch (e) { } }
     function vaciarTodo() { guardarGaleria([]); try { localStorage.removeItem(CLAVE_D); } catch (e) { } try { window.postMessage({ tipo: 'FOTOS-CARTA-VACIAR' }, location.origin); } catch (e) { } }
     function miniatura(u) { var id = idGoogle(u); return id ? 'https://lh3.googleusercontent.com/' + id + '=w400' : u; }
-    var alRecibir = null;   // ventana abierta que se repinta cuando llegan fotos de la extensión
+    var alRecibir = null;
+    function indiceDe(g, k) { for (var i = 0; i < g.length; i++) if (claveFoto(g[i].u) === k) return i; return -1; }   // ventana abierta que se repinta cuando llegan fotos de la extensión
     function sumarEscaneo(lista) {
         var g = leerGaleria(), v = leerDesc(), n = 0;
         g.forEach(function (x) { v[claveFoto(x.u)] = 1; });
@@ -484,13 +485,13 @@
         '.sfg-pasos{background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:8px 12px;font-size:.86rem}.sfg-pasos summary{cursor:pointer}.sfg-pasos ol{margin:8px 0 0;padding-left:20px}.sfg-pasos li{margin:4px 0}.sfg-pasos code{background:#eef2f7;padding:1px 4px;border-radius:4px;font-size:.8rem}' +
         '#sf-caja .sf-gal-cab input[type=text]{padding:4px 8px}#sf-caja .sf-ext-fila input{flex:1 1 200px}' +
         '.sfg-b{padding:6px 10px;border-radius:7px;border:0;background:#1f2328;color:#fff;cursor:pointer;font-size:.8rem;white-space:nowrap}' +
-        '.sfg-rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}' +
+        '.sfg-rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:10px}' +
         '.sfg-card{border:1px solid #e3e0d8;border-radius:10px;padding:6px;background:#faf9f6;display:flex;flex-direction:column;gap:5px}.sfg-card.usada{opacity:.55}' +
         '.sfg-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px;display:block;background:#e5e7eb}' +
         '.sfg-t{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sfg-u{font-size:.74rem;color:#15803d}' +
         '.sfg-a{display:flex;gap:4px}.sfg-a input{flex:1;min-width:0;padding:5px 6px;border:1px solid #ccc;border-radius:6px;font-size:.78rem}.sfg-a button[data-x]{border:1px solid #d6d2c6;background:#fff;border-radius:6px;cursor:pointer;padding:0 7px}' +
         '.sf-gal-cab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.82rem}.sf-gal-cab button{padding:3px 8px;border:1px solid #d6d2c6;border-radius:6px;background:#fff;cursor:pointer;font-size:.75rem}' +
-        '.sf-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;max-height:330px;overflow:auto}' +
+        '.sf-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;max-height:62vh;overflow:auto}' +
         '.sf-g{position:relative;aspect-ratio:1;border-radius:7px;overflow:hidden;cursor:pointer;background:#e5e7eb}.sf-g img{width:100%;height:100%;object-fit:cover;display:block}' +
         '.sf-g.parece{outline:3px solid #f59e0b;outline-offset:-3px}.sf-g:hover{outline:3px solid #16a34a;outline-offset:-3px}.sf-g.usada{opacity:.45}.sf-g.aqui{outline:3px solid #2563eb;outline-offset:-3px}' +
         '.sf-g span{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);color:#fff;font-size:.68rem;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
@@ -512,7 +513,7 @@
 
         var fondo = document.createElement('div');
         fondo.id = 'sf-fondo';
-        fondo.innerHTML = '<div id="sf-caja"><h3>📷 Fotos del plato</h3><p class="sf-sub">Cargando…</p></div>';
+        fondo.innerHTML = '<div id="sf-caja" style="max-width:1150px"><h3>📷 Fotos del plato</h3><p class="sf-sub">Cargando…</p></div>';
         document.body.appendChild(fondo);
         var caja = fondo.querySelector('#sf-caja');
         var urls = [];
@@ -578,7 +579,7 @@
                 '<button type="button" id="sf-gal-vaciar">Vaciar lista</button><small>' + (nPar ? '★ ' + nPar + ' parecen este plato (salen primero). ' : '') + 'Pulsa una para ponerla en este plato.</small></div>' +
                 (vis.length ? '<div class="sf-gal">' + vis.map(function (o) {
                     var aqui = enEstePlato(o.x.u);
-                    return '<div class="sf-g' + (aqui ? ' aqui' : o.x.usada ? ' usada' : o.p ? ' parece' : '') + '" data-g="' + o.i + '" title="' + esc((o.x.t ? o.x.t + ' · ' : '') + (o.x.usada ? 'Usada en: ' + o.x.usada : 'Poner en este plato')) + '">' +
+                    return '<div class="sf-g' + (aqui ? ' aqui' : o.x.usada ? ' usada' : o.p ? ' parece' : '') + '" data-k="' + esc(claveFoto(o.x.u)) + '" title="' + esc((o.x.t ? o.x.t + ' · ' : '') + (o.x.usada ? 'Usada en: ' + o.x.usada : 'Poner en este plato')) + '">' +
                         '<img loading="lazy" referrerpolicy="no-referrer" src="' + esc(miniatura(o.x.u)) + '" alt="" onerror="this.parentNode.style.display=\'none\'">' +
                         (aqui ? '<span>· en este plato</span>' : o.x.usada ? '<span>✔ ' + esc(o.x.usada) + '</span>' : o.x.t ? '<span>' + (o.p ? '★ ' : '') + esc(o.x.t) + '</span>' : '') +
                         '<button type="button" data-x="1" title="Quitar de la lista">✕</button></div>';
@@ -594,15 +595,22 @@
             };
             caja.querySelectorAll('.sf-g').forEach(function (el) {
                 el.onclick = async function (e) {
-                    var g = leerGaleria(), x = g[+el.dataset.g];
+                    var g = leerGaleria(), ix = indiceDe(g, el.dataset.k), x = g[ix];
                     if (!x) return;
-                    if (e.target.dataset.x) { descartar(claveFoto(x.u)); g.splice(+el.dataset.g, 1); guardarGaleria(g); pintar(); return; }
+                    if (e.target.dataset.x) {
+                        e.stopPropagation();
+                        descartar(el.dataset.k); g.splice(ix, 1); guardarGaleria(g); el.remove();
+                        var cb = caja.querySelector('.sf-gal-cab b'); if (cb) cb.textContent = 'Fotos escaneadas: ' + g.filter(function (q) { return !q.usada; }).length + ' sin usar';
+                        return;
+                    }
                     if (enEstePlato(x.u)) { avisar('Esa foto ya está en este plato.', '#b45309'); return; }
                     await añadirUrl(x.u, claveFoto(x.u));
                 };
             });
         }
         function pintar() {
+            var sg0 = caja.querySelector('.sf-gal'), stG = sg0 ? sg0.scrollTop : 0, stC = caja.scrollTop;
+            setTimeout(function () { var sg = caja.querySelector('.sf-gal'); if (sg) sg.scrollTop = stG; caja.scrollTop = stC; }, 0);
             caja.innerHTML = '<h3>📷 Fotos del plato</h3>' +
                 '<p class="sf-sub">imagenes/' + esc(carpeta) + '/ · la web enseña la 01 y luego 02, 03, 04 seguidas. Al guardar se renumeran sin huecos.' +
                 (huecosAviso ? ' <b style="color:#b45309">Había huecos en la numeración: se corrigen al guardar.</b>' : '') + '</p>' +
@@ -839,7 +847,8 @@
         if (document.getElementById('sf-fondo')) return;
         var fondo = document.createElement('div');
         fondo.id = 'sf-fondo';
-        fondo.innerHTML = '<div id="sf-caja" style="max-width:1000px"></div>';
+        fondo.style.padding = '0';
+        fondo.innerHTML = '<div id="sf-caja" style="max-width:none;width:100vw;height:100vh;max-height:100vh;border-radius:0;box-sizing:border-box"></div>';
         document.body.appendChild(fondo);
         var caja = fondo.querySelector('#sf-caja'), verUsadas = false, filtro = '';
         var conExt = document.documentElement.dataset.escanerFotos === '1';
@@ -877,6 +886,8 @@
                 platos.forEach(function (pl) { var v = parecido(pl.n, t); if (v > pm) { pm = v; mejor = pl; } });
                 return mejor ? mejor.id + ' · ' + mejor.n : '';
             };
+            var stC = caja.scrollTop;
+            setTimeout(function () { caja.scrollTop = stC; }, 0);
             caja.innerHTML = '<h3>🖼️ Fotos de internet</h3>' +
                 '<p class="sf-sub">Fotos de Google Maps y TripAdvisor para repartirlas entre los platos. Usa solo fotos del propio restaurante o con permiso de quien la hizo.</p>' +
                 '<details class="sfg-pasos"' + (g.length && conExt ? '' : ' open') + '><summary><b>Cómo traerlas</b>' + (conExt ? ' <small style="color:#15803d">· extensión instalada ✔</small>' : '') + '</summary><ol>' +
@@ -891,7 +902,7 @@
                 (g.length ? '<button type="button" id="sfg-vaciar">Vaciar lista</button>' : '') + '</div>' +
                 (vis.length ? '<div class="sfg-rejilla">' + vis.map(function (o) {
                     var x = o.x, sug = x.usada ? '' : sugerido(x.t);
-                    return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-g="' + o.i + '">' +
+                    return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-k="' + esc(claveFoto(x.u)) + '">' +
                         '<a href="' + esc(mejorarUrl(x.u)) + '" target="_blank" rel="noopener noreferrer" title="Ver en grande"><img loading="lazy" referrerpolicy="no-referrer" src="' + esc(miniatura(x.u)) + '" alt="" onerror="this.closest(\'.sfg-card\').style.display=\'none\'"></a>' +
                         '<div class="sfg-t" title="' + esc(x.t || '') + '">' + (x.t ? esc(x.t) : '<i>sin nombre</i>') + '</div>' +
                         (x.usada ? '<div class="sfg-u">✔ ' + esc(x.usada) + '</div>' : '') +
@@ -915,11 +926,13 @@
             caja.querySelectorAll('.sfg-card').forEach(function (el) {
                 var g2 = function () { return leerGaleria(); };
                 el.querySelector('[data-x]').onclick = function () {
-                    var g = g2(), x = g[+el.dataset.g]; if (!x) return;
-                    descartar(claveFoto(x.u)); g.splice(+el.dataset.g, 1); guardarGaleria(g); pintarG(); contarBoton();
+                    var g = g2(), ix = indiceDe(g, el.dataset.k); if (ix < 0) return;
+                    descartar(el.dataset.k); g.splice(ix, 1); guardarGaleria(g); el.remove(); contarBoton();
+                    var cb = caja.querySelector('.sf-gal-cab b'), us = g.filter(function (q) { return q.usada; }).length;
+                    if (cb) cb.textContent = (g.length - us) + ' sin asignar' + (us ? ' · ' + us + ' asignadas' : '');
                 };
                 el.querySelector('[data-a]').onclick = function () {
-                    var x = g2()[+el.dataset.g]; if (!x) return;
+                    var gg = g2(), x = gg[indiceDe(gg, el.dataset.k)]; if (!x) return;
                     var v = el.querySelector('input').value, id = parseInt(v, 10);
                     var pl = platos.filter(function (q2) { return String(q2.id) === String(id); })[0];
                     if (!pl) { avisar('Elige un plato de la lista (escribe parte del nombre o el ID).'); el.querySelector('input').focus(); return; }
