@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.11.0'; // 7 nov: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.11.1'; // 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -1114,8 +1114,8 @@
                 var lista = platos.map(function (pl) { return { id: pl.id, n: pl.n, p: x.t ? parecido(pl.n, x.t) : 0, c: cat(pl.id) }; });
                 var sug = lista.filter(function (q) { return q.p > 0; }).sort(function (a, b) { return b.p - a.p || a.id - b.id; });
                 var marcados = {}, ed = editadas[kf];
-                var fila = function (q, estrella) {
-                    return '<label class="sfg-pf" data-id="' + q.id + '" data-txt="' + esc((q.id + ' ' + q.n + ' ' + q.c).toLowerCase()) + '"><input type="checkbox" value="' + q.id + '"> <b>' + q.id + '</b> ' + (estrella ? '★ ' : '') + esc(q.n) + '</label>';
+                var fila = function (q, estrella, enSug) {
+                    return '<label class="sfg-pf' + (enSug ? ' sug' : '') + '" data-id="' + q.id + '" data-txt="' + esc((q.id + ' ' + q.n + ' ' + q.c).toLowerCase()) + '"><input type="checkbox" value="' + q.id + '"> <b>' + q.id + '</b> ' + (estrella ? '★ ' : '') + esc(q.n) + '</label>';
                 };
                 var html = '', ultima = null;
                 lista.forEach(function (q) {
@@ -1128,7 +1128,7 @@
                     '<div class="sfg-pop-cab"><img src="' + esc(ed ? ed.url : miniatura(x.u)) + '" referrerpolicy="no-referrer" alt=""><div><b>¿En qué platos va esta foto?</b><br><small>' + esc(x.t || 'sin nombre') + (ed ? ' · ✂ editada' : '') + '</small><br><small style="color:#6b6f76">Marca uno o varios. Se sube una vez (WebP 1080 px) y se pone en todos.</small></div></div>' +
                     '<input type="text" class="sfg-pop-q" placeholder="Buscar por nombre, ID o categoría…">' +
                     '<div class="sfg-pop-lista">' +
-                    (sug.length ? '<div class="sfg-pc">★ Parecen esta foto (por el nombre)</div>' + sug.map(function (q) { return fila(q, true); }).join('') : '') +
+                    (sug.length ? '<div class="sfg-pc">★ Parecen esta foto (por el nombre)</div>' + sug.map(function (q) { return fila(q, true, true); }).join('') : '') +
                     html + '</div>' +
                     '<div class="sf-bot"><span class="sfg-pop-sel" style="margin-right:auto;align-self:center;color:#6b6f76"></span><button type="button" class="sf-no">Cancelar</button><button type="button" class="sf-ok" disabled>Asignar</button></div></div>';
                 document.body.appendChild(pop);
@@ -1149,7 +1149,8 @@
                 });
                 q.oninput = function () {
                     var t = q.value.trim().toLowerCase();
-                    pop.querySelectorAll('.sfg-pf').forEach(function (f) { f.style.display = !t || f.dataset.txt.indexOf(t) >= 0 ? '' : 'none'; });
+                    // Buscando, el bloque "★ Parecen" se oculta (sus platos ya salen en su categoría): sin repetidos.
+                    pop.querySelectorAll('.sfg-pf').forEach(function (f) { f.style.display = !t ? '' : (!f.classList.contains('sug') && f.dataset.txt.indexOf(t) >= 0 ? '' : 'none'); });
                     pop.querySelectorAll('.sfg-pc').forEach(function (h) { h.style.display = t ? 'none' : ''; });
                 };
                 q.onkeydown = function (e) {
