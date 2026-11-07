@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.9.0'; // 7 nov: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.10.0'; // 7 nov: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -567,6 +567,8 @@
         '.sfg-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px;display:block;background:#e5e7eb}' +
         '.sfg-i{font-size:.72rem;color:#6b6f76}.sfg-i.peq{color:#b42318;font-weight:600}' +
         '.sfg-t{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sfg-u{font-size:.74rem;color:#15803d}' +
+        '.sfg-chips{display:flex;flex-wrap:wrap;gap:4px}.sfg-chip{background:#e0f2fe;color:#075985;border-radius:12px;padding:2px 8px;font-size:.72rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sfg-chip b{cursor:pointer;margin-left:3px;color:#b42318}' +
+        '.sfg-a2{display:flex;gap:4px}.sfg-a2 button{flex:1;padding:4px 6px;border:1px solid #d6d2c6;border-radius:6px;background:#fff;cursor:pointer;font-size:.75rem}' +
         '.sfg-a{display:flex;gap:4px}.sfg-a input{flex:1;min-width:0;padding:5px 6px;border:1px solid #ccc;border-radius:6px;font-size:.78rem}.sfg-a button[data-x]{border:1px solid #d6d2c6;background:#fff;border-radius:6px;cursor:pointer;padding:0 7px}' +
         '.sf-gal-cab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.82rem}.sf-gal-cab button{padding:3px 8px;border:1px solid #d6d2c6;border-radius:6px;background:#fff;cursor:pointer;font-size:.75rem}' +
         '.sf-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;max-height:62vh;overflow:auto}' +
@@ -905,6 +907,40 @@
             .map(function (x) { return { id: x.id, n: String(x.es).split(/\n|\|/)[0].trim() }; })
             .sort(function (a, b) { return a.id - b.id; });
     }
+    // Pone una foto (blob WebP ya reducido) en varios platos: detrás de las fotos que ya tengan, en UN commit.
+    // Si un plato no tenía "Nombre Imagen", se le pone <base>01.webp (queda pendiente "GUARDAR CAMBIOS EN WEB").
+    async function asignarVarios(blob, ids) {
+        var lista = (typeof datosLocales !== 'undefined' && Array.isArray(datosLocales)) ? datosLocales : (window.datosLocales || []);   // eslint-disable-line no-undef
+        var sha = await subirBlob(blob), cambios = [], res = [], cacheDir = {}, planeadas = {}, cambiaCampo = false;
+        for (var k = 0; k < ids.length; k++) {
+            var p = lista.find(function (x) { return String(x.id) === String(ids[k]); });
+            if (!p) continue;
+            var nombre = String(p.es || '').split(/\n|\||\/\//)[0].trim() || ('plato ' + p.id);
+            var carpeta = String(p.carpeta || '').trim();
+            if (!carpeta) { res.push({ p: p, n: nombre, err: 'no tiene carpeta de fotos' }); continue; }
+            var mm = String(p.imagen || '').match(/^(.*)0\d\.webp$/i);
+            var base = mm ? mm[1] : (slug(nombre) || ('plato_' + p.id));
+            var dir = dirWeb + 'imagenes/' + carpeta;
+            if (!cacheDir[dir]) cacheDir[dir] = await listar(dir);
+            var patron = new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '0(\\d)\\.webp$', 'i'), usados = {};
+            cacheDir[dir].forEach(function (f) { var m = f.name.match(patron); if (m) usados[+m[1]] = 1; });
+            (planeadas[dir + '/' + base] || []).forEach(function (n) { usados[n] = 1; });
+            var n = 1; while (usados[n]) n++;
+            if (n > MAX_FOTOS) { res.push({ p: p, n: nombre, err: 'ya tiene ' + MAX_FOTOS + ' fotos' }); continue; }
+            (planeadas[dir + '/' + base] = planeadas[dir + '/' + base] || []).push(n);
+            cambios.push({ path: dir + '/' + base + '0' + n + '.webp', sha: sha });
+            if (!mm) {
+                p.imagen = base + '01.webp'; cambiaCampo = true;
+                if (String(window.platoEditandoId || (typeof platoEditandoId !== 'undefined' ? platoEditandoId : '')) === String(p.id)) {   // eslint-disable-line no-undef
+                    var ci = document.getElementById('edit-imagen'); if (ci) ci.value = p.imagen;
+                }
+            }
+            res.push({ p: p, n: nombre, num: n });
+        }
+        if (cambios.length) await commit(cambios, 'Fotos de internet -> platos ' + res.filter(function (r) { return !r.err; }).map(function (r) { return r.p.id; }).join(', '));
+        if (cambiaCampo) { window.hayCambiosSinGuardar = true; try { if (typeof renderizar === 'function') renderizar(); } catch (e) { } }   // eslint-disable-line no-undef
+        return { res: res, cambiaCampo: cambiaCampo };
+    }
     async function abrirCon(id, u, gal) {
         if (typeof window.abrirEditor !== 'function') { alert('Este editor no puede abrir el plato desde aquí: ábrelo a mano y usa 📷 Fotos del plato.'); return; }
         window.abrirEditor(id);
@@ -1037,10 +1073,11 @@
         fondo.innerHTML = '<div id="sf-caja" style="max-width:none;width:100vw;height:100vh;max-height:100vh;border-radius:0;box-sizing:border-box"></div>';
         document.body.appendChild(fondo);
         var caja = fondo.querySelector('#sf-caja'), verUsadas = false, filtro = '', verPeq = false, obs = null;
+        var elegidos = {}, editadas = {};   // por clave de foto: ids de plato elegidos · recorte hecho aquí { blob, url, fuente, info }
         var conExt = document.documentElement.dataset.escanerFotos === '1';
         var q = busquedaLocal(), l = enlacesExternos(q, ''), en = leerEnlaces();
         var avisar = function (t, color) { var m = caja.querySelector('#sf-msg'); if (m) { m.style.color = color || '#b42318'; m.textContent = t; } };
-        var cerrar = function () { fondo.remove(); document.removeEventListener('paste', alPegar); alRecibir = null; if (obs) obs.disconnect(); colaInfo.length = 0; pedidas = {}; contarBoton(); };
+        var cerrar = function () { fondo.remove(); document.removeEventListener('paste', alPegar); alRecibir = null; if (obs) obs.disconnect(); colaInfo.length = 0; pedidas = {}; Object.keys(editadas).forEach(function (k) { URL.revokeObjectURL(editadas[k].url); }); contarBoton(); };
         function meter(lista, origen) {
             var n = sumarEscaneo(lista);
             pintarG();
@@ -1060,6 +1097,13 @@
             if (lista.length) { e.preventDefault(); meter(lista, 'pegadas'); }
         }
         document.addEventListener('paste', alPegar);
+        function chipsHtml(kf) {
+            var platos = listaPlatos();
+            return (elegidos[kf] || []).map(function (id) {
+                var pl = platos.filter(function (q) { return String(q.id) === String(id); })[0];
+                return pl ? '<span class="sfg-chip" data-id="' + pl.id + '" title="' + esc(pl.n) + '">' + pl.id + ' · ' + esc(pl.n) + ' <b data-q="1">✕</b></span>' : '';
+            }).join('');
+        }
         function pintarG() {
             var g = leerGaleria(), platos = listaPlatos(), usadas = g.filter(function (x) { return x.usada; }).length;
             var nPeq = g.filter(esPequena).length, dup = repetidas(g);
@@ -1106,14 +1150,20 @@
                 '<input type="text" id="sfg-filtro" placeholder="Buscar por nombre…" value="' + esc(filtro) + '" style="width:170px">' +
                 (g.length ? '<button type="button" id="sfg-guardar" title="Descarga todas las fotos de la lista a su tamaño original">💾 Guardar todas en el PC</button><button type="button" id="sfg-vaciar">Vaciar lista</button>' : '') + '</div>' +
                 (vis.length ? '<div class="sfg-rejilla">' + vis.map(function (o) {
-                    var x = o.x, sug = x.usada ? '' : sugerido(x.t);
-                    return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-k="' + esc(claveFoto(x.u)) + '">' +
-                        '<a href="' + esc(urlsMaxima(x.u)[0]) + '" target="_blank" rel="noopener noreferrer" title="Ver en grande (original)">' + imgPrevia(x.u, "this.closest('.sfg-card').style.display='none'") + '</a>' +
+                    var x = o.x, kf = claveFoto(x.u), sug = x.usada ? '' : sugerido(x.t);
+                    if (!elegidos[kf]) elegidos[kf] = sug ? [parseInt(sug, 10)] : [];
+                    var ed = editadas[kf];
+                    return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-k="' + esc(kf) + '">' +
+                        '<a href="' + esc(ed ? ed.url : urlsMaxima(x.u)[0]) + '" target="_blank" rel="noopener noreferrer" title="Ver en grande">' +
+                        (ed ? '<img src="' + esc(ed.url) + '" alt="">' : imgPrevia(x.u, "this.closest('.sfg-card').style.display='none'")) + '</a>' +
                         '<div class="sfg-t" title="' + esc(x.t || '') + '">' + (x.t ? esc(x.t) : '<i>sin nombre</i>') + '</div>' +
                         '<div class="sfg-i' + (esPequena(x) ? ' peq' : '') + '">' + esc(infoTxt(x)) + (esPequena(x) ? ' · pequeña' : '') + '</div>' +
+                        (ed ? '<div class="sfg-i" style="color:#2563eb">✂ editada: ' + esc(ed.info) + '</div>' : '') +
                         (x.usada ? '<div class="sfg-u">✔ ' + esc(x.usada) + '</div>' : '') +
-                        '<div class="sfg-a"><input list="sfg-platos" placeholder="Plato…" value="' + esc(sug) + '"' + (sug ? ' title="Sugerido por el nombre de la foto"' : '') + '>' +
-                        '<button type="button" data-a="1" class="sfg-b">Asignar</button><button type="button" data-x="1" title="Quitar de la lista">✕</button></div></div>';
+                        '<div class="sfg-chips">' + chipsHtml(kf) + '</div>' +
+                        '<div class="sfg-a"><input list="sfg-platos" placeholder="＋ plato (nombre o ID)…" title="Elige uno o varios platos: cada uno se añade arriba">' +
+                        '<button type="button" data-a="1" class="sfg-b">Asignar</button></div>' +
+                        '<div class="sfg-a2"><button type="button" data-ed="1" title="Recortar o girar antes de asignar">✂ Editar</button><button type="button" data-x="1" title="Quitar de la lista">✕ Quitar</button></div></div>';
                 }).join('') + '</div>' : '<div class="sf-vacio">' + (g.length ? 'Ninguna con ese filtro.' : 'Todavía no hay fotos: sigue los pasos de arriba.') + '</div>') +
                 '<datalist id="sfg-platos">' + platos.map(function (pl) { return '<option value="' + esc(pl.id + ' · ' + pl.n) + '">'; }).join('') + '</datalist>' +
                 '<p id="sf-msg"></p><div class="sf-bot"><button type="button" class="sf-no">Cerrar</button></div>';
@@ -1187,13 +1237,69 @@
                     var cb = caja.querySelector('.sf-gal-cab b'), us = g.filter(function (q) { return q.usada; }).length;
                     if (cb) cb.textContent = (g.length - us) + ' sin asignar' + (us ? ' · ' + us + ' asignadas' : '');
                 };
-                el.querySelector('[data-a]').onclick = function () {
-                    var gg = g2(), x = gg[indiceDe(gg, el.dataset.k)]; if (!x) return;
-                    var v = el.querySelector('input').value, id = parseInt(v, 10);
-                    var pl = platos.filter(function (q2) { return String(q2.id) === String(id); })[0];
-                    if (!pl) { avisar('Elige un plato de la lista (escribe parte del nombre o el ID).'); el.querySelector('input').focus(); return; }
-                    cerrar();
-                    abrirCon(pl.id, x.u, claveFoto(x.u));
+                var kf = el.dataset.k, inp = el.querySelector('.sfg-a input'), chips = el.querySelector('.sfg-chips');
+                var idsDe = function (v) {
+                    return (String(v || '').match(/\d{3,}/g) || []).map(Number).filter(function (id) { return platos.some(function (q2) { return String(q2.id) === String(id); }); });
+                };
+                var meterChips = function (v) {
+                    var nuevos = idsDe(v); if (!nuevos.length) return false;
+                    elegidos[kf] = elegidos[kf] || [];
+                    nuevos.forEach(function (id) { if (!elegidos[kf].some(function (q2) { return String(q2) === String(id); })) elegidos[kf].push(id); });
+                    chips.innerHTML = chipsHtml(kf); inp.value = ''; return true;
+                };
+                // Al elegir de la lista se añade solo; con Enter o coma, lo escrito (IDs).
+                inp.oninput = function () { if (/ · /.test(inp.value) && platos.some(function (q2) { return inp.value === q2.id + ' · ' + q2.n; })) meterChips(inp.value); };
+                inp.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); if (!meterChips(inp.value)) avisar('No encuentro ese plato: escribe parte del nombre y elígelo de la lista, o su ID.'); } };
+                chips.onclick = function (e) {
+                    if (!e.target.dataset.q) return;
+                    var id = +e.target.closest('.sfg-chip').dataset.id;
+                    elegidos[kf] = (elegidos[kf] || []).filter(function (q2) { return String(q2) !== String(id); }); chips.innerHTML = chipsHtml(kf);
+                };
+                el.querySelector('[data-ed]').onclick = async function () {
+                    var bt = this, gg = g2(), x = gg[indiceDe(gg, kf)]; if (!x) return;
+                    bt.disabled = true; bt.textContent = '⏳ Bajando…';
+                    try {
+                        var fuente = (editadas[kf] && editadas[kf].fuente) || await bajarMaxima(x.u);
+                        if (!fuente) throw new Error('No se pudo descargar la foto original.');
+                        var r = await recortar(fuente, x.t || 'foto');
+                        if (r) {
+                            if (editadas[kf]) URL.revokeObjectURL(editadas[kf].url);
+                            editadas[kf] = { blob: r.blob, url: URL.createObjectURL(r.blob), fuente: fuente, info: r.info };
+                            pintarG();
+                            return;
+                        }
+                    } catch (e) { avisar(e.message || String(e)); }
+                    bt.disabled = false; bt.textContent = '✂ Editar';
+                };
+                el.querySelector('[data-a]').onclick = async function () {
+                    var bt = this, gg = g2(), x = gg[indiceDe(gg, kf)]; if (!x) return;
+                    meterChips(inp.value);
+                    var ids = (elegidos[kf] || []).slice();
+                    if (!ids.length) { avisar('Elige al menos un plato de la lista (escribe parte del nombre o el ID).'); inp.focus(); return; }
+                    bt.disabled = true; bt.textContent = '⏳';
+                    try {
+                        var blob = editadas[kf] && editadas[kf].blob;
+                        if (!blob) {
+                            avisar('Descargando la foto original…', '#555');
+                            var orig = await bajarMaxima(x.u);
+                            if (!orig) throw new Error('No se pudo descargar la foto (esa web no lo permite). Ábrela en grande, clic derecho → "Copiar imagen", y pégala con Ctrl+V en 📷 Fotos del plato.');
+                            blob = (await aWebp(orig)).blob;
+                        }
+                        avisar('Subiendo a ' + ids.length + ' plato' + (ids.length > 1 ? 's' : '') + '…', '#555');
+                        var r = await asignarVarios(blob, ids);
+                        var ok = r.res.filter(function (q2) { return !q2.err; }), mal = r.res.filter(function (q2) { return q2.err; });
+                        if (ok.length) {
+                            var g3 = leerGaleria(), i3 = indiceDe(g3, kf);
+                            if (i3 >= 0) { g3[i3].usada = ok.map(function (q2) { return q2.n; }).join(' + '); guardarGaleria(g3); }
+                            elegidos[kf] = [];
+                        }
+                        pintarG(); contarBoton();
+                        avisar((ok.length ? '✔ Puesta en ' + ok.map(function (q2) { return q2.p.id + ' ' + q2.n + ' (foto 0' + q2.num + ')'; }).join(', ') + '. En la web en 1-2 min.' : '') +
+                            (mal.length ? ' ⚠ No: ' + mal.map(function (q2) { return q2.p.id + ' ' + q2.n + ' (' + q2.err + ')'; }).join(', ') + '.' : '') +
+                            (r.cambiaCampo ? ' Algún plato no tenía foto: pulsa "GUARDAR CAMBIOS EN WEB" para que la enseñe.' : ''), ok.length ? '#15803d' : '#b42318');
+                    } catch (e) {
+                        avisar('No se pudo asignar: ' + (e.message || e)); bt.disabled = false; bt.textContent = 'Asignar';
+                    }
                 };
             });
         }
