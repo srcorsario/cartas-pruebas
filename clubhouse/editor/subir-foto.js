@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.5.0'; // 7 nov: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.5.1'; // 7 nov: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -196,6 +196,8 @@
         function k(u) { var id = idG(u); if (id) return 'g:' + id; return u.replace(/[?#].*$/, '').replace(/=[^\/=]*$/, '').replace(/\/photo-[a-z]\//, '/photo-?/'); }
         function nombreDe(e) {
             for (var n = e, k2 = 0; n && n !== document.body && k2 < 6; n = n.parentElement, k2++) {
+                var alt = k2 === 0 && n.getAttribute && n.getAttribute('alt');
+                if (alt && alt.length > 2 && alt.length < 90 && !/^(foto|photo|imagen|image|picture)\b|\b(foto|photo) (de|of)\b/i.test(alt)) return alt.trim();
                 var al = n.getAttribute && n.getAttribute('aria-label');
                 if (al && al.length > 2 && al.length < 90 && !/^(foto|photo|imagen|image|v[ií]deo)\b/i.test(al)) return al.trim();
                 if (n.querySelectorAll && n.querySelectorAll('img').length > 2) break;
@@ -229,12 +231,16 @@
         function fondos(bg, tit) { (String(bg || '').match(/url\(["']?[^"')]+/g) || []).forEach(function (m) { add(m.replace(/^url\(["']?/, ''), tit); }); }
         function barrer() {
             texto(location.href);
-            var els = document.querySelectorAll('img,[style*="url("],[role="img"],button,a');
+            var els = document.querySelectorAll('img,source,[style*="url("],[role="img"],button,a,[data-src],[data-lazyurl],[data-srcset]');
             for (var i = 0; i < els.length; i++) {
                 var e = els[i];
                 var nom = '';
                 var tom = function () { if (!nom) nom = nombreDe(e) || ' '; return nom.trim(); };
-                if (e.tagName === 'IMG') { var su = e.currentSrc || e.src; if (/googleusercontent|tripadvisor/.test(su)) add(su, tom()); (e.getAttribute('srcset') || '').split(',').forEach(function (s) { add(s.trim().split(' ')[0]); }); }
+                if (e.tagName === 'IMG') { var su = e.currentSrc || e.src; if (/googleusercontent|tripadvisor/.test(su)) add(su, tom()); }
+                ['srcset', 'data-srcset', 'data-src', 'data-lazyurl'].forEach(function (at) {
+                    var v = e.getAttribute(at);
+                    if (v && /googleusercontent|tripadvisor/.test(v)) v.split(',').forEach(function (s) { add(s.trim().split(' ')[0], tom()); });
+                });
                 if (e.style && e.style.backgroundImage) fondos(e.style.backgroundImage, e.style.backgroundImage.indexOf('http') >= 0 ? tom() : '');
                 else if (e.tagName !== 'IMG' && els.length < 5000) { var cs = getComputedStyle(e).backgroundImage; if (cs && cs !== 'none') fondos(cs, /googleusercontent|tripadvisor/.test(cs) ? tom() : ''); }
             }
@@ -261,7 +267,11 @@
                 if (e.scrollHeight - e.clientHeight < 200 || e.clientHeight < 150) return;
                 var oy = getComputedStyle(e).overflowY;
                 if (oy !== 'auto' && oy !== 'scroll') return;
-                var n = e.querySelectorAll('img,[style*="url("]').length;
+                var r = e.getBoundingClientRect();
+                if (r.width < 100 || r.bottom < 0 || r.top > innerHeight) return;
+                var enc = document.elementFromPoint(Math.min(innerWidth - 1, Math.max(0, r.left + r.width / 2)), Math.min(innerHeight - 1, Math.max(0, r.top + Math.min(r.height, innerHeight) / 2)));
+                if (!enc || !(e.contains(enc) || enc.contains(e))) return;
+                var n = e.querySelectorAll('img,source,[style*="url("]').length;
                 if (n > m) { m = n; best = e; }
             });
             return best || document.scrollingElement;
