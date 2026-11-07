@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.10.0'; // 7 nov: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.11.0'; // 7 nov: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -567,6 +567,14 @@
         '.sfg-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px;display:block;background:#e5e7eb}' +
         '.sfg-i{font-size:.72rem;color:#6b6f76}.sfg-i.peq{color:#b42318;font-weight:600}' +
         '.sfg-t{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sfg-u{font-size:.74rem;color:#15803d}' +
+        '#sfg-pop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100002;display:flex;align-items:center;justify-content:center;padding:16px}' +
+        '.sfg-pop-caja{background:#fff;color:#1f2328;border-radius:12px;width:100%;max-width:760px;height:90vh;display:flex;flex-direction:column;gap:10px;padding:16px;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}' +
+        '.sfg-pop-cab{display:flex;gap:12px;align-items:center}.sfg-pop-cab img{width:110px;height:82px;object-fit:cover;border-radius:8px;flex:0 0 auto;background:#eee}' +
+        '.sfg-pop-q{padding:9px 11px;border:1px solid #ccc;border-radius:8px;font:inherit}' +
+        '.sfg-pop-lista{flex:1;overflow:auto;border:1px solid #e3e0d8;border-radius:9px;padding:4px 8px}' +
+        '.sfg-pc{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:#6b6f76;margin:10px 0 2px;font-weight:700}' +
+        '.sfg-pf{display:flex;gap:8px;align-items:center;padding:6px 6px;border-radius:7px;cursor:pointer;font-size:.88rem}.sfg-pf:hover{background:#f5f5f4}.sfg-pf.on{background:#dcfce7}.sfg-pf input{width:18px;height:18px}' +
+        '.sfg-pop-sel{font-size:.78rem;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
         '.sfg-chips{display:flex;flex-wrap:wrap;gap:4px}.sfg-chip{background:#e0f2fe;color:#075985;border-radius:12px;padding:2px 8px;font-size:.72rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sfg-chip b{cursor:pointer;margin-left:3px;color:#b42318}' +
         '.sfg-a2{display:flex;gap:4px}.sfg-a2 button{flex:1;padding:4px 6px;border:1px solid #d6d2c6;border-radius:6px;background:#fff;cursor:pointer;font-size:.75rem}' +
         '.sfg-a{display:flex;gap:4px}.sfg-a input{flex:1;min-width:0;padding:5px 6px;border:1px solid #ccc;border-radius:6px;font-size:.78rem}.sfg-a button[data-x]{border:1px solid #d6d2c6;background:#fff;border-radius:6px;cursor:pointer;padding:0 7px}' +
@@ -1097,12 +1105,67 @@
             if (lista.length) { e.preventDefault(); meter(lista, 'pegadas'); }
         }
         document.addEventListener('paste', alPegar);
-        function chipsHtml(kf) {
-            var platos = listaPlatos();
-            return (elegidos[kf] || []).map(function (id) {
-                var pl = platos.filter(function (q) { return String(q.id) === String(id); })[0];
-                return pl ? '<span class="sfg-chip" data-id="' + pl.id + '" title="' + esc(pl.n) + '">' + pl.id + ' · ' + esc(pl.n) + ' <b data-q="1">✕</b></span>' : '';
-            }).join('');
+        // Ventana grande para elegir los platos de una foto: casillas, buscador, parecidos arriba (sin marcar).
+        function elegirPlatos(x, kf, platos) {
+            return new Promise(function (resolver) {
+                var cat = function (id) {
+                    try { var c = window.Categorias && window.Categorias.categoriaDe && window.Categorias.categoriaDe(id); var n = c && (c.nombre || c.es || c.id); return typeof n === 'string' ? n : (n && typeof n.es === 'string' ? n.es : ''); } catch (e) { return ''; }
+                };
+                var lista = platos.map(function (pl) { return { id: pl.id, n: pl.n, p: x.t ? parecido(pl.n, x.t) : 0, c: cat(pl.id) }; });
+                var sug = lista.filter(function (q) { return q.p > 0; }).sort(function (a, b) { return b.p - a.p || a.id - b.id; });
+                var marcados = {}, ed = editadas[kf];
+                var fila = function (q, estrella) {
+                    return '<label class="sfg-pf" data-id="' + q.id + '" data-txt="' + esc((q.id + ' ' + q.n + ' ' + q.c).toLowerCase()) + '"><input type="checkbox" value="' + q.id + '"> <b>' + q.id + '</b> ' + (estrella ? '★ ' : '') + esc(q.n) + '</label>';
+                };
+                var html = '', ultima = null;
+                lista.forEach(function (q) {
+                    if (q.c !== ultima) { html += '<div class="sfg-pc">' + esc(q.c || 'Sin categoría') + '</div>'; ultima = q.c; }
+                    html += fila(q, q.p > 0);
+                });
+                var pop = document.createElement('div');
+                pop.id = 'sfg-pop';
+                pop.innerHTML = '<div class="sfg-pop-caja">' +
+                    '<div class="sfg-pop-cab"><img src="' + esc(ed ? ed.url : miniatura(x.u)) + '" referrerpolicy="no-referrer" alt=""><div><b>¿En qué platos va esta foto?</b><br><small>' + esc(x.t || 'sin nombre') + (ed ? ' · ✂ editada' : '') + '</small><br><small style="color:#6b6f76">Marca uno o varios. Se sube una vez (WebP 1080 px) y se pone en todos.</small></div></div>' +
+                    '<input type="text" class="sfg-pop-q" placeholder="Buscar por nombre, ID o categoría…">' +
+                    '<div class="sfg-pop-lista">' +
+                    (sug.length ? '<div class="sfg-pc">★ Parecen esta foto (por el nombre)</div>' + sug.map(function (q) { return fila(q, true); }).join('') : '') +
+                    html + '</div>' +
+                    '<div class="sf-bot"><span class="sfg-pop-sel" style="margin-right:auto;align-self:center;color:#6b6f76"></span><button type="button" class="sf-no">Cancelar</button><button type="button" class="sf-ok" disabled>Asignar</button></div></div>';
+                document.body.appendChild(pop);
+                var q = pop.querySelector('.sfg-pop-q'), ok = pop.querySelector('.sf-ok'), sel = pop.querySelector('.sfg-pop-sel');
+                var nombres = function () { return lista.filter(function (z) { return marcados[z.id]; }); };
+                var actualizar = function () {
+                    var n = nombres();
+                    ok.disabled = !n.length;
+                    ok.textContent = n.length ? 'Asignar a ' + n.length + ' plato' + (n.length > 1 ? 's' : '') : 'Asignar';
+                    sel.textContent = n.map(function (z) { return z.id + ' ' + z.n; }).join(' · ');
+                };
+                pop.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
+                    cb.onchange = function () {
+                        marcados[cb.value] = cb.checked;
+                        pop.querySelectorAll('input[type=checkbox][value="' + cb.value + '"]').forEach(function (o) { o.checked = cb.checked; o.closest('.sfg-pf').classList.toggle('on', cb.checked); });
+                        actualizar();
+                    };
+                });
+                q.oninput = function () {
+                    var t = q.value.trim().toLowerCase();
+                    pop.querySelectorAll('.sfg-pf').forEach(function (f) { f.style.display = !t || f.dataset.txt.indexOf(t) >= 0 ? '' : 'none'; });
+                    pop.querySelectorAll('.sfg-pc').forEach(function (h) { h.style.display = t ? 'none' : ''; });
+                };
+                q.onkeydown = function (e) {
+                    if (e.key !== 'Enter') return;
+                    var vis = Array.prototype.filter.call(pop.querySelectorAll('.sfg-pf'), function (f) { return f.style.display !== 'none'; });
+                    if (vis.length === 1 || (vis.length && /^\d+$/.test(q.value.trim()))) { var cb = vis[0].querySelector('input'); cb.checked = !cb.checked; cb.onchange(); q.select(); }
+                };
+                var fin = function (v) { document.removeEventListener('keydown', esc2); pop.remove(); resolver(v); };
+                var esc2 = function (e) { if (e.key === 'Escape') fin(null); };
+                document.addEventListener('keydown', esc2);
+                pop.querySelector('.sf-no').onclick = function () { fin(null); };
+                pop.onclick = function (e) { if (e.target === pop) fin(null); };
+                ok.onclick = function () { fin(nombres().map(function (z) { return z.id; })); };
+                actualizar();
+                q.focus();
+            });
         }
         function pintarG() {
             var g = leerGaleria(), platos = listaPlatos(), usadas = g.filter(function (x) { return x.usada; }).length;
@@ -1151,7 +1214,6 @@
                 (g.length ? '<button type="button" id="sfg-guardar" title="Descarga todas las fotos de la lista a su tamaño original">💾 Guardar todas en el PC</button><button type="button" id="sfg-vaciar">Vaciar lista</button>' : '') + '</div>' +
                 (vis.length ? '<div class="sfg-rejilla">' + vis.map(function (o) {
                     var x = o.x, kf = claveFoto(x.u), sug = x.usada ? '' : sugerido(x.t);
-                    if (!elegidos[kf]) elegidos[kf] = sug ? [parseInt(sug, 10)] : [];
                     var ed = editadas[kf];
                     return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-k="' + esc(kf) + '">' +
                         '<a href="' + esc(ed ? ed.url : urlsMaxima(x.u)[0]) + '" target="_blank" rel="noopener noreferrer" title="Ver en grande">' +
@@ -1160,12 +1222,9 @@
                         '<div class="sfg-i' + (esPequena(x) ? ' peq' : '') + '">' + esc(infoTxt(x)) + (esPequena(x) ? ' · pequeña' : '') + '</div>' +
                         (ed ? '<div class="sfg-i" style="color:#2563eb">✂ editada: ' + esc(ed.info) + '</div>' : '') +
                         (x.usada ? '<div class="sfg-u">✔ ' + esc(x.usada) + '</div>' : '') +
-                        '<div class="sfg-chips">' + chipsHtml(kf) + '</div>' +
-                        '<div class="sfg-a"><input list="sfg-platos" placeholder="＋ plato (nombre o ID)…" title="Elige uno o varios platos: cada uno se añade arriba">' +
-                        '<button type="button" data-a="1" class="sfg-b">Asignar</button></div>' +
+                        '<div class="sfg-a"><button type="button" data-a="1" class="sfg-b" style="flex:1">Asignar a platos…</button></div>' +
                         '<div class="sfg-a2"><button type="button" data-ed="1" title="Recortar o girar antes de asignar">✂ Editar</button><button type="button" data-x="1" title="Quitar de la lista">✕ Quitar</button></div></div>';
                 }).join('') + '</div>' : '<div class="sf-vacio">' + (g.length ? 'Ninguna con ese filtro.' : 'Todavía no hay fotos: sigue los pasos de arriba.') + '</div>') +
-                '<datalist id="sfg-platos">' + platos.map(function (pl) { return '<option value="' + esc(pl.id + ' · ' + pl.n) + '">'; }).join('') + '</datalist>' +
                 '<p id="sf-msg"></p><div class="sf-bot"><button type="button" class="sf-no">Cerrar</button></div>';
             caja.querySelector('.sf-no').onclick = cerrar;
             var url = caja.querySelector('#sfg-url');
@@ -1237,24 +1296,7 @@
                     var cb = caja.querySelector('.sf-gal-cab b'), us = g.filter(function (q) { return q.usada; }).length;
                     if (cb) cb.textContent = (g.length - us) + ' sin asignar' + (us ? ' · ' + us + ' asignadas' : '');
                 };
-                var kf = el.dataset.k, inp = el.querySelector('.sfg-a input'), chips = el.querySelector('.sfg-chips');
-                var idsDe = function (v) {
-                    return (String(v || '').match(/\d{3,}/g) || []).map(Number).filter(function (id) { return platos.some(function (q2) { return String(q2.id) === String(id); }); });
-                };
-                var meterChips = function (v) {
-                    var nuevos = idsDe(v); if (!nuevos.length) return false;
-                    elegidos[kf] = elegidos[kf] || [];
-                    nuevos.forEach(function (id) { if (!elegidos[kf].some(function (q2) { return String(q2) === String(id); })) elegidos[kf].push(id); });
-                    chips.innerHTML = chipsHtml(kf); inp.value = ''; return true;
-                };
-                // Al elegir de la lista se añade solo; con Enter o coma, lo escrito (IDs).
-                inp.oninput = function () { if (/ · /.test(inp.value) && platos.some(function (q2) { return inp.value === q2.id + ' · ' + q2.n; })) meterChips(inp.value); };
-                inp.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); if (!meterChips(inp.value)) avisar('No encuentro ese plato: escribe parte del nombre y elígelo de la lista, o su ID.'); } };
-                chips.onclick = function (e) {
-                    if (!e.target.dataset.q) return;
-                    var id = +e.target.closest('.sfg-chip').dataset.id;
-                    elegidos[kf] = (elegidos[kf] || []).filter(function (q2) { return String(q2) !== String(id); }); chips.innerHTML = chipsHtml(kf);
-                };
+                var kf = el.dataset.k;
                 el.querySelector('[data-ed]').onclick = async function () {
                     var bt = this, gg = g2(), x = gg[indiceDe(gg, kf)]; if (!x) return;
                     bt.disabled = true; bt.textContent = '⏳ Bajando…';
@@ -1273,9 +1315,8 @@
                 };
                 el.querySelector('[data-a]').onclick = async function () {
                     var bt = this, gg = g2(), x = gg[indiceDe(gg, kf)]; if (!x) return;
-                    meterChips(inp.value);
-                    var ids = (elegidos[kf] || []).slice();
-                    if (!ids.length) { avisar('Elige al menos un plato de la lista (escribe parte del nombre o el ID).'); inp.focus(); return; }
+                    var ids = await elegirPlatos(x, kf, platos);
+                    if (!ids || !ids.length) return;
                     bt.disabled = true; bt.textContent = '⏳';
                     try {
                         var blob = editadas[kf] && editadas[kf].blob;
@@ -1291,7 +1332,6 @@
                         if (ok.length) {
                             var g3 = leerGaleria(), i3 = indiceDe(g3, kf);
                             if (i3 >= 0) { g3[i3].usada = ok.map(function (q2) { return q2.n; }).join(' + '); guardarGaleria(g3); }
-                            elegidos[kf] = [];
                         }
                         pintarG(); contarBoton();
                         avisar((ok.length ? '✔ Puesta en ' + ok.map(function (q2) { return q2.p.id + ' ' + q2.n + ' (foto 0' + q2.num + ')'; }).join(', ') + '. En la web en 1-2 min.' : '') +
