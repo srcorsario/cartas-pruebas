@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.6.1'; // 7 nov: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.7.0'; // 7 nov: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -484,6 +484,8 @@
         '.sf-ext small{color:#6b6f76;font-size:.75rem}' +
         '.sfg-pasos{background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:8px 12px;font-size:.86rem}.sfg-pasos summary{cursor:pointer}.sfg-pasos ol{margin:8px 0 0;padding-left:20px}.sfg-pasos li{margin:4px 0}.sfg-pasos code{background:#eef2f7;padding:1px 4px;border-radius:4px;font-size:.8rem}' +
         '#sf-caja .sf-gal-cab input[type=text]{padding:4px 8px}#sf-caja .sf-ext-fila input{flex:1 1 200px}' +
+        '.sfg-ir{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.sfg-ir>div{display:flex;gap:6px;align-items:center}.sfg-ir a{text-decoration:none;padding:9px 12px;font-size:.88rem}.sfg-ir input{flex:1;min-width:0;padding:7px 9px;border:1px solid #ccc;border-radius:7px;font-size:.8rem}' +
+        '@media(max-width:700px){.sfg-ir{grid-template-columns:1fr}}' +
         '.sfg-b{padding:6px 10px;border-radius:7px;border:0;background:#1f2328;color:#fff;cursor:pointer;font-size:.8rem;white-space:nowrap}' +
         '.sfg-rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:10px}' +
         '.sfg-card{border:1px solid #e3e0d8;border-radius:10px;padding:6px;background:#faf9f6;display:flex;flex-direction:column;gap:5px}.sfg-card.usada{opacity:.55}' +
@@ -836,6 +838,68 @@
         }
         gestor({ url: u, gal: gal });
     }
+    var CLAVE_L = 'sf-enlaces-' + (S.restaurante || S.modo || '');
+    function leerEnlaces() { try { return JSON.parse(localStorage.getItem(CLAVE_L) || '{}') || {}; } catch (e) { return {}; } }
+    function guardarEnlace(k, v) { var o = leerEnlaces(); if (v) o[k] = v; else delete o[k]; try { localStorage.setItem(CLAVE_L, JSON.stringify(o)); } catch (e) { } }
+    // Direcciones a probar para la foto a su tamaño ORIGINAL (máxima calidad).
+    function urlsMaxima(u) {
+        var id = idGoogle(u), c = [];
+        if (id) c.push('https://lh3.googleusercontent.com/' + id + '=s0', 'https://lh3.googleusercontent.com/' + id + '=s4000', 'https://lh3.googleusercontent.com/' + id + '=s2000');
+        else if (/tripadvisor\.com\/media\/photo-[a-z]\//.test(u)) c.push(u.replace(/\?.*$/, '').replace(/\/photo-[a-z]\//, '/photo-o/'), u.replace(/\?.*$/, '').replace(/\/photo-[a-z]\//, '/photo-w/'), u);
+        else c.push(u);
+        return c.filter(function (x, i) { return c.indexOf(x) === i; });
+    }
+    async function bajarMaxima(u) {
+        var l = urlsMaxima(u);
+        for (var i = 0; i < l.length; i++) {
+            try { var r = await fetch(l[i], { mode: 'cors', referrerPolicy: 'no-referrer' }); if (!r.ok) continue; var b = await r.blob(); if (/^image\//.test(b.type)) return b; } catch (e) { }
+        }
+        return null;
+    }
+    function nombreArchivo(x, n, tipo) {
+        var t = String(x.usada || x.t || 'foto').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9 _.-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) || 'foto';
+        var ext = (String(tipo || '').split('/')[1] || 'jpg').replace('jpeg', 'jpg').replace(/[^a-z0-9]/g, '');
+        return ('00' + n).slice(-3) + ' - ' + t + (/tripadvisor/.test(x.u) ? ' (tripadvisor)' : '') + '.' + ext;
+    }
+    // Guarda todas las fotos de la lista, sueltas: en una carpeta elegida (Chrome/Opera) o, si no, una a una en Descargas.
+    async function guardarTodas(lista, avisar, boton) {
+        if (!lista.length) { avisar('No hay fotos en la lista.'); return; }
+        var carpeta = null, nomRest = String((window.MARCA && window.MARCA.nombre) || S.titulo || S.restaurante || 'Restaurante').replace(/\s+(menu|carta)$/i, '')
+            .replace(/[<>:"\/\\|?*]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Restaurante';
+        if (window.showDirectoryPicker) {
+            try { carpeta = await window.showDirectoryPicker({ id: 'fotos-internet', mode: 'readwrite' }); }
+            catch (e) { if (e && e.name === 'AbortError') return; carpeta = null; }
+            if (carpeta) { try { carpeta = await carpeta.getDirectoryHandle(nomRest, { create: true }); } catch (e) { avisar('No se pudo crear la carpeta "' + nomRest + '": ' + (e.message || e)); return; } }
+        }
+        var parar = false, hechas = 0, fallos = 0, sig = 0, texto0 = boton.textContent;
+        boton.textContent = '■ Parar'; boton.onclick = function () { parar = true; };
+        async function trabajador() {
+            while (!parar && sig < lista.length) {
+                var n = sig++, x = lista[n];
+                var b = await bajarMaxima(x.u);
+                if (!b) { fallos++; }
+                else {
+                    var nom = nombreArchivo(x, n + 1, b.type);
+                    try {
+                        if (carpeta) { var fh = await carpeta.getFileHandle(nom, { create: true }); var w = await fh.createWritable(); await w.write(b); await w.close(); }
+                        else {
+                            var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = nomRest + ' - ' + nom;
+                            document.body.appendChild(a); a.click(); a.remove();
+                            (function (h) { setTimeout(function () { URL.revokeObjectURL(h); }, 30000); })(a.href);
+                            await new Promise(function (r) { setTimeout(r, 350); });
+                        }
+                        hechas++;
+                    } catch (e) { fallos++; }
+                }
+                avisar('💾 ' + (hechas + fallos) + ' / ' + lista.length + ' · guardadas ' + hechas + (fallos ? ' · fallidas ' + fallos : ''), '#555');
+            }
+        }
+        await Promise.all(carpeta ? [trabajador(), trabajador(), trabajador(), trabajador()] : [trabajador()]);
+        boton.textContent = texto0; boton.onclick = null;
+        avisar((parar ? 'Parado. ' : '✔ ') + hechas + ' fotos guardadas a máxima calidad' + (carpeta ? ' en la carpeta "' + nomRest + '"' : ' en Descargas') +
+            (fallos ? '. ' + fallos + ' no se pudieron descargar (esa web no lo permite o ya no existen).' : '.'), fallos && !hechas ? '#b42318' : '#15803d');
+        return true;
+    }
     function contarBoton() {
         var b = document.getElementById('sfg-btn');
         if (!b) return;
@@ -852,7 +916,7 @@
         document.body.appendChild(fondo);
         var caja = fondo.querySelector('#sf-caja'), verUsadas = false, filtro = '';
         var conExt = document.documentElement.dataset.escanerFotos === '1';
-        var q = busquedaLocal(), l = enlacesExternos(q, '');
+        var q = busquedaLocal(), l = enlacesExternos(q, ''), en = leerEnlaces();
         var avisar = function (t, color) { var m = caja.querySelector('#sf-msg'); if (m) { m.style.color = color || '#b42318'; m.textContent = t; } };
         var cerrar = function () { fondo.remove(); document.removeEventListener('paste', alPegar); alRecibir = null; contarBoton(); };
         function meter(lista, origen) {
@@ -895,11 +959,16 @@
                 '<li>Abre el restaurante en <a href="' + esc(l.maps) + '" target="_blank" rel="noopener">Google Maps</a> (pestañas <b>Carta</b> y <b>Fotos</b>) o en <a href="' + esc(l.trip) + '" target="_blank" rel="noopener">TripAdvisor</a> (sus fotos). Arriba a la derecha sale un panel negro con el contador: pulsa <b>Bajar solo</b> en cada sección para que carguen todas.</li>' +
                 '<li>Vuelve a esta pestaña: las fotos aparecen solas aquí. En cada una elige el plato y pulsa <b>Asignar</b>: se abre el plato con la foto lista para recortar; luego <b>Guardar</b>.</li></ol>' +
                 '<p style="margin:4px 0 0;font-size:.82rem;color:#6b6f76">Sin extensión: pega abajo el enlace de una foto (la dirección de la barra de Maps con la foto abierta en grande, o la de la imagen) y pulsa Añadir.</p></details>' +
+                '<div class="sfg-ir">' +
+                '<div><a class="sfg-b sfg-gmaps" href="' + esc(en.maps || l.maps) + '" target="_blank" rel="noopener">🗺️ Abrir en Google Maps</a>' +
+                '<input type="text" data-en="maps" value="' + esc(en.maps || '') + '" placeholder="Enlace del restaurante en Google Maps (opcional, se recuerda)"></div>' +
+                '<div><a class="sfg-b sfg-trip" href="' + esc(en.trip || l.trip) + '" target="_blank" rel="noopener">🦉 Abrir en TripAdvisor</a>' +
+                '<input type="text" data-en="trip" value="' + esc(en.trip || '') + '" placeholder="Enlace del restaurante en TripAdvisor (opcional, se recuerda)"></div></div>' +
                 '<div class="sf-ext-fila" style="margin-top:10px"><input type="text" id="sfg-url" placeholder="Pega aquí enlaces de fotos (uno o varios)…"><button type="button" id="sfg-add" class="sfg-b">＋ Añadir</button></div>' +
                 '<div class="sf-gal-cab" style="margin-top:12px"><b>' + (g.length - usadas) + ' sin asignar' + (usadas ? ' · ' + usadas + ' asignadas' : '') + '</b>' +
                 (usadas ? '<label><input type="checkbox" id="sfg-usadas"' + (verUsadas ? ' checked' : '') + '> ver asignadas</label>' : '') +
                 '<input type="text" id="sfg-filtro" placeholder="Buscar por nombre…" value="' + esc(filtro) + '" style="width:170px">' +
-                (g.length ? '<button type="button" id="sfg-vaciar">Vaciar lista</button>' : '') + '</div>' +
+                (g.length ? '<button type="button" id="sfg-guardar" title="Descarga todas las fotos de la lista a su tamaño original">💾 Guardar todas en el PC</button><button type="button" id="sfg-vaciar">Vaciar lista</button>' : '') + '</div>' +
                 (vis.length ? '<div class="sfg-rejilla">' + vis.map(function (o) {
                     var x = o.x, sug = x.usada ? '' : sugerido(x.t);
                     return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-k="' + esc(claveFoto(x.u)) + '">' +
@@ -918,6 +987,18 @@
             var fl = caja.querySelector('#sfg-filtro');
             fl.oninput = function () { filtro = fl.value; var pos = fl.selectionStart; pintarG(); var n = caja.querySelector('#sfg-filtro'); n.focus(); n.setSelectionRange(pos, pos); };
             var vu = caja.querySelector('#sfg-usadas'); if (vu) vu.onchange = function () { verUsadas = vu.checked; pintarG(); };
+            caja.querySelectorAll('[data-en]').forEach(function (inp) {
+                inp.onchange = function () {
+                    var v = inp.value.trim();
+                    if (v && !/^https:\/\//.test(v)) { avisar('El enlace debe empezar por https://'); return; }
+                    guardarEnlace(inp.dataset.en, v);
+                    var a = caja.querySelector(inp.dataset.en === 'maps' ? '.sfg-gmaps' : '.sfg-trip');
+                    a.href = v || (inp.dataset.en === 'maps' ? l.maps : l.trip);
+                    avisar(v ? '✔ Enlace guardado.' : 'Enlace quitado: el botón vuelve a buscar el restaurante.', '#15803d');
+                };
+            });
+            var gt = caja.querySelector('#sfg-guardar');
+            if (gt) gt.onclick = function () { guardarTodas(leerGaleria(), avisar, gt); };
             var va = caja.querySelector('#sfg-vaciar');
             if (va) va.onclick = function () {
                 (window.confirmarEditor ? window.confirmarEditor('¿Vaciar la lista de fotos de internet? (no toca las fotos ya puestas en platos)') : Promise.resolve(confirm('¿Vaciar la lista?')))
