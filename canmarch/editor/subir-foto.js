@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.11.1'; // 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.12.0'; // 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -567,6 +567,12 @@
         '.sfg-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px;display:block;background:#e5e7eb}' +
         '.sfg-i{font-size:.72rem;color:#6b6f76}.sfg-i.peq{color:#b42318;font-weight:600}' +
         '.sfg-t{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sfg-u{font-size:.74rem;color:#15803d}' +
+        '#sfg-inst{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100003;display:flex;align-items:center;justify-content:center;padding:16px}' +
+        '.sfg-in-caja{background:#fff;color:#1f2328;border-radius:12px;width:100%;max-width:720px;max-height:92vh;overflow:auto;padding:18px 20px;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}' +
+        '.sfg-in-estado{margin:10px 0;padding:8px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0}' +
+        '.sfg-in-pasos{list-style:none;padding:0;margin:10px 0;display:flex;flex-direction:column;gap:12px}.sfg-in-pasos li{display:flex;gap:12px;align-items:flex-start}' +
+        '.sfg-in-n{flex:0 0 28px;height:28px;border-radius:50%;background:#1f2328;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}' +
+        '.sfg-in-pasos a.sfg-b{display:inline-block;margin-top:4px;text-decoration:none;padding:8px 12px}.sfg-in-pasos code,.sfg-in-caja code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:.84rem}' +
         '#sfg-pop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100002;display:flex;align-items:center;justify-content:center;padding:16px}' +
         '.sfg-pop-caja{background:#fff;color:#1f2328;border-radius:12px;width:100%;max-width:760px;height:90vh;display:flex;flex-direction:column;gap:10px;padding:16px;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}' +
         '.sfg-pop-cab{display:flex;gap:12px;align-items:center}.sfg-pop-cab img{width:110px;height:82px;object-fit:cover;border-radius:8px;flex:0 0 auto;background:#eee}' +
@@ -1066,6 +1072,65 @@
             (peq ? '. ' + peq + ' descartadas por pequeñas (menos de ' + minLado() + ' px) o repetidas' : '') + (fallos ? '. ' + fallos + ' no se pudieron descargar (esa web no lo permite o ya no existen).' : '.'), fallos && !hechas ? '#b42318' : '#15803d');
         return true;
     }
+    // ---------- extensión "Escáner de fotos": estado e instalación guiada ----------
+    function extInstalada() { return document.documentElement.dataset.escanerFotos === '1'; }
+    function extVersion() { return document.documentElement.dataset.escanerFotosVersion || ''; }   // la pone puente-editor.js (desde 1.1.1)
+    function verMenor(a, b) {
+        var x = String(a || '0').split('.').map(Number), y = String(b || '0').split('.').map(Number);
+        for (var i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0); }
+        return false;
+    }
+    function extAntigua() { return !!(S.extension && extInstalada() && verMenor(extVersion() || '1.1.0', S.extension)); }
+    function navegador() {
+        var ua = navigator.userAgent;
+        if (/OPR\/|Opera/.test(ua)) return { id: 'opera', nombre: 'Opera', url: 'opera://extensions', dev: 'Modo de desarrollador (arriba a la derecha)', cargar: 'Cargar extensión desempaquetada', recargar: 'el botón de recargar ↻ de la extensión' };
+        if (/Edg\//.test(ua)) return { id: 'edge', nombre: 'Edge', url: 'edge://extensions', dev: 'Modo de desarrollador (abajo a la izquierda)', cargar: 'Cargar desempaquetada', recargar: 'el botón Recargar de la extensión' };
+        return { id: 'chrome', nombre: 'Chrome', url: 'chrome://extensions', dev: 'Modo de desarrollador (arriba a la derecha)', cargar: 'Cargar descomprimida', recargar: 'el botón de recargar ↻ de la extensión' };
+    }
+    function instalarExtension() {
+        ponerEstilos();
+        if (document.getElementById('sfg-inst')) return;
+        var nv = navegador(), hay = !!S.extension, inst = extInstalada(), vieja = extAntigua();
+        var estado = !inst ? '<span style="color:#b42318">✖ No está instalada en este navegador.</span>'
+            : vieja ? '<span style="color:#b45309">⚠ Instalada, pero es una versión antigua (' + esc(extVersion() || 'anterior a 1.1.1') + '). Hay una nueva: ' + esc(S.extension) + '. Mira "Actualizar" abajo.</span>'
+                : '<span style="color:#15803d">✔ Instalada' + (extVersion() ? ' (versión ' + esc(extVersion()) + ')' : '') + '. No hace falta hacer nada más.</span>';
+        var paso = function (n, titulo, cuerpo) { return '<li><div class="sfg-in-n">' + n + '</div><div><b>' + titulo + '</b><div>' + cuerpo + '</div></div></li>'; };
+        var copiar = '<button type="button" class="sfg-b sfg-in-copiar">📋 Copiar ' + esc(nv.url) + '</button>';
+        var pop = document.createElement('div');
+        pop.id = 'sfg-inst';
+        pop.innerHTML = '<div class="sfg-in-caja">' +
+            '<h3 style="margin:0">🧩 Extensión "Escáner de fotos" para ' + esc(nv.nombre) + '</h3>' +
+            '<p style="margin:4px 0 0;color:#555">Recoge las fotos de Google Maps y TripAdvisor y las pasa a 🖼️ Fotos de internet. Se instala <b>una vez en cada ordenador</b> (en el móvil no se puede). Unos 2 minutos.</p>' +
+            '<p class="sfg-in-estado">' + estado + '</p>' +
+            '<ol class="sfg-in-pasos">' +
+            paso(1, 'Descarga la extensión', hay
+                ? '<a class="sfg-b" href="escaner-fotos.zip?v=' + encodeURIComponent(S.extension) + '" download="escaner-fotos.zip">⬇ Descargar escaner-fotos.zip (versión ' + esc(S.extension) + ')</a>'
+                : '<span style="color:#b42318">Esta web aún no tiene el archivo: hay que volver a CONSTRUIR y publicar.</span>') +
+            paso(2, 'Descomprímela en una carpeta fija', 'En <b>Descargas</b>, clic derecho en <code>escaner-fotos.zip</code> → <b>Extraer todo…</b> → elige una carpeta que no vayas a borrar, por ejemplo <b>Documentos</b> → <b>Extraer</b>. Queda una carpeta <code>extension-fotos</code>.<br><small>⚠ No la borres ni la muevas después: ' + esc(nv.nombre) + ' la usa desde ahí.</small>') +
+            paso(3, 'Abre la página de extensiones', copiar + ' y pégalo en una pestaña nueva: <b>Ctrl+T</b>, <b>Ctrl+V</b> y <b>Enter</b>.<br><small>(Una web no puede abrir esa página por ti: hay que pegar la dirección.)</small>') +
+            paso(4, 'Activa el ' + esc(nv.dev), 'Es un interruptor. Al activarlo salen unos botones nuevos.') +
+            paso(5, 'Pulsa "' + esc(nv.cargar) + '"', 'Elige la carpeta <code>extension-fotos</code> del paso 2 (la que tiene dentro <code>manifest.json</code>) → <b>Seleccionar carpeta</b>. Aparece "Cartas · Escáner de fotos".') +
+            paso(6, 'Vuelve aquí y recarga (F5)', 'En 🖼️ Fotos de internet saldrá <b>"extensión instalada ✔"</b>. Si ' + esc(nv.nombre) + ' avisa al abrirse de "extensiones en modo desarrollador", es normal: pulsa cerrar / mantener.') +
+            '</ol>' +
+            '<details class="sfg-pasos"' + (vieja ? ' open' : '') + '><summary><b>Actualizar</b> (cuando aquí avise de una versión nueva)</summary><ol>' +
+            '<li>Descarga el .zip nuevo (paso 1) y extráelo <b>en la misma carpeta de antes</b>, aceptando <b>reemplazar</b> los archivos.</li>' +
+            '<li>En <code>' + esc(nv.url) + '</code> pulsa ' + esc(nv.recargar) + ' "Cartas · Escáner de fotos".</li>' +
+            '<li>Recarga esta página (F5).</li></ol></details>' +
+            '<p id="sfg-in-msg" style="min-height:1.2em;margin:6px 0 0"></p>' +
+            '<div class="sf-bot"><button type="button" class="sf-no">Cerrar</button></div></div>';
+        document.body.appendChild(pop);
+        var msg = pop.querySelector('#sfg-in-msg');
+        pop.querySelector('.sfg-in-copiar').onclick = function () {
+            var ok = function () { msg.style.color = '#15803d'; msg.textContent = '✔ Copiado: ' + nv.url + ' — ahora Ctrl+T, Ctrl+V y Enter.'; };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(nv.url).then(ok, function () { msg.style.color = '#b42318'; msg.textContent = 'No se pudo copiar: escribe ' + nv.url + ' en una pestaña nueva.'; });
+            else { msg.textContent = 'Escribe ' + nv.url + ' en una pestaña nueva.'; }
+        };
+        var fin = function () { document.removeEventListener('keydown', esc3); pop.remove(); };
+        var esc3 = function (e) { if (e.key === 'Escape') fin(); };
+        document.addEventListener('keydown', esc3);
+        pop.querySelector('.sf-no').onclick = fin;
+        pop.onclick = function (e) { if (e.target === pop) fin(); };
+    }
     function contarBoton() {
         var b = document.getElementById('sfg-btn');
         if (!b) return;
@@ -1082,7 +1147,7 @@
         document.body.appendChild(fondo);
         var caja = fondo.querySelector('#sf-caja'), verUsadas = false, filtro = '', verPeq = false, obs = null;
         var elegidos = {}, editadas = {};   // por clave de foto: ids de plato elegidos · recorte hecho aquí { blob, url, fuente, info }
-        var conExt = document.documentElement.dataset.escanerFotos === '1';
+        var conExt = extInstalada();
         var q = busquedaLocal(), l = enlacesExternos(q, ''), en = leerEnlaces();
         var avisar = function (t, color) { var m = caja.querySelector('#sf-msg'); if (m) { m.style.color = color || '#b42318'; m.textContent = t; } };
         var cerrar = function () { fondo.remove(); document.removeEventListener('paste', alPegar); alRecibir = null; if (obs) obs.disconnect(); colaInfo.length = 0; pedidas = {}; Object.keys(editadas).forEach(function (k) { URL.revokeObjectURL(editadas[k].url); }); contarBoton(); };
@@ -1187,11 +1252,11 @@
             setTimeout(function () { caja.scrollTop = stC; }, 0);
             caja.innerHTML = '<h3>🖼️ Fotos de internet</h3>' +
                 '<p class="sf-sub">Fotos de Google Maps y TripAdvisor para repartirlas entre los platos. Usa solo fotos del propio restaurante o con permiso de quien la hizo.</p>' +
-                '<details class="sfg-pasos"' + (g.length && conExt ? '' : ' open') + '><summary><b>Cómo traerlas</b>' + (conExt ? ' <small style="color:#15803d">· extensión instalada ✔</small>' : '') + '</summary><ol>' +
-                (conExt ? '' : '<li><b>Una sola vez, en este ordenador:</b> instala la extensión <b>Escáner de fotos</b>. En Chrome abre <code>chrome://extensions</code> (en Opera, <code>opera://extensions</code>), activa <b>Modo de desarrollador</b>, pulsa <b>Cargar descomprimida</b> y elige la carpeta <code>C:\\Taller\\taller\\cartas\\herramientas\\extension-fotos</code>. Luego recarga esta página.</li>') +
+                '<details class="sfg-pasos"' + (g.length && conExt ? '' : ' open') + '><summary><b>Cómo traerlas</b>' + (conExt ? (extAntigua() ? ' <small style="color:#b45309">· ⚠ hay una versión nueva de la extensión</small>' : ' <small style="color:#15803d">· extensión instalada ✔</small>') : ' <small style="color:#b42318">· falta instalar la extensión</small>') + '</summary><ol>' +
+                (conExt ? '' : '<li><b>Una sola vez, en este ordenador:</b> instala la extensión <b>Escáner de fotos</b>: <button type="button" class="sfg-b sfg-inst-btn">🧩 Instalar la extensión (paso a paso)</button></li>') +
                 '<li>Abre el restaurante en <a href="' + esc(l.maps) + '" target="_blank" rel="noopener">Google Maps</a> (pestañas <b>Carta</b> y <b>Fotos</b>) o en <a href="' + esc(l.trip) + '" target="_blank" rel="noopener">TripAdvisor</a> (sus fotos). Arriba a la derecha sale un panel negro con el contador: pulsa <b>Bajar solo</b> en cada sección para que carguen todas.</li>' +
                 '<li>Vuelve a esta pestaña: las fotos aparecen solas aquí. En cada una elige el plato y pulsa <b>Asignar</b>: se abre el plato con la foto lista para recortar; luego <b>Guardar</b>.</li></ol>' +
-                '<p style="margin:4px 0 0;font-size:.82rem;color:#6b6f76">Sin extensión: pega abajo el enlace de una foto (la dirección de la barra de Maps con la foto abierta en grande, o la de la imagen) y pulsa Añadir.</p></details>' +
+                '<p style="margin:4px 0 0;font-size:.82rem;color:#6b6f76"><a href="#" class="sfg-ext-link">🧩 Instalar o actualizar la extensión</a> · Sin extensión: pega abajo el enlace de una foto (la dirección de la barra de Maps con la foto abierta en grande, o la de la imagen) y pulsa Añadir.</p></details>' +
                 Object.keys(pendientes).map(function (d) {
                     return '<div class="sfg-org" data-d="' + esc(d) + '">📍 <b>' + esc(d) + '</b>: ' + pendientes[d].length + ' fotos. ¿Son de esta web (' + esc(String(S.titulo || S.restaurante || '')) + ')? ' +
                         '<button type="button" data-si="1" class="sfg-b">Sí, añadirlas</button> <button type="button" data-si="0">No, son de otra web</button></div>';
@@ -1201,6 +1266,7 @@
                     return (mios.length || no.length) ? '<div class="sfg-orgs">' + (mios.length ? 'Restaurantes de esta web: ' + mios.map(function (d) { return '<span>' + esc(d) + ' <a href="#" data-olv="' + esc(d) + '" title="Olvidar: volverá a preguntar">✕</a></span>'; }).join(' · ') : '') +
                         (no.length ? (mios.length ? ' &nbsp;|&nbsp; ' : '') + 'Ignorados: ' + no.map(function (d) { return '<span>' + esc(d) + ' <a href="#" data-olv="' + esc(d) + '" title="Olvidar: volverá a preguntar">✕</a></span>'; }).join(' · ') : '') + '</div>' : '';
                 })() +
+                (extAntigua() ? '<div class="sfg-org">🧩 Hay una versión nueva de la extensión Escáner de fotos (' + esc(S.extension) + '; tienes ' + esc(extVersion() || 'una anterior') + '). <button type="button" class="sfg-b sfg-inst-btn">Actualizar (paso a paso)</button></div>' : '') +
                 '<div class="sfg-ir">' +
                 '<div><a class="sfg-b sfg-gmaps" href="' + esc(en.maps || l.maps) + '" target="_blank" rel="noopener">🗺️ Abrir en Google Maps</a>' +
                 '<input type="text" data-en="maps" value="' + esc(en.maps || '') + '" placeholder="Enlace del restaurante en Google Maps (opcional, se recuerda)"></div>' +
@@ -1234,7 +1300,9 @@
             var fl = caja.querySelector('#sfg-filtro');
             fl.oninput = function () { filtro = fl.value; var pos = fl.selectionStart; pintarG(); var n = caja.querySelector('#sfg-filtro'); n.focus(); n.setSelectionRange(pos, pos); };
             var vu = caja.querySelector('#sfg-usadas'); if (vu) vu.onchange = function () { verUsadas = vu.checked; pintarG(); };
-            caja.querySelectorAll('.sfg-org button').forEach(function (bt) {
+            caja.querySelectorAll('.sfg-inst-btn').forEach(function (bt) { bt.onclick = function (e) { e.preventDefault(); instalarExtension(); }; });
+            var ie = caja.querySelector('.sfg-ext-link'); if (ie) ie.onclick = function (e) { e.preventDefault(); instalarExtension(); };
+            caja.querySelectorAll('.sfg-org[data-d] button').forEach(function (bt) {
                 bt.onclick = function () {
                     var d = bt.closest('.sfg-org').dataset.d, si = bt.dataset.si === '1';
                     var n = decidirOrigen(d, si);
