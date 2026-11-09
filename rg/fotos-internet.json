@@ -1,5 +1,5 @@
 {
- "nota": "Fotos de internet de esta web (🖼️ Fotos de internet). claves/hashes: descartadas con ✕ (no vuelven a la lista). asignadas: huella de la foto ORIGINAL -> platos donde se puso (aunque se subiera recortada).",
+ "nota": "Fotos de internet de esta web (🖼️ Fotos de internet). claves/hashes: descartadas con ✕ (no vuelven a la lista). asignadas: huella de la foto ORIGINAL -> platos donde se puso (aunque se subiera recortada). grupos: nombre -> claves de sus fotos (👥 Agrupar como…).",
  "claves": {
   "g:grass-cs/AABkmLeH31tCO1whaFv5ReMbviKbqr3ofRioHBlv_IOD8o4LY2lP8sd9IAGN577-KyGQZtOlSG8FmFIWOVZKUrkHn5CAMf34nD6cCR8KcQvmweToUhWf9tN_UlrWJCTeNQ65_GVLH0FV": 1,
   "g:grass-cs/AABkmLcl6yaxbZWls0c5lq4ClFBimg_b8qtFp_tbd9xnYmrIq4ot-UR3yOOwD9KeNrk0rpfvZohisIoNNVPWsLYX36U8TaikFo4-E__Zs3QSIeqObbX6cEAepyd_7d9S2JDoNzGQmIyh": 1,
@@ -299,5 +299,8 @@
   "2806aeda9d864d736e4624cbb8e0d684": 1,
   "191cded8d113dad90a0f627a7d5132d9": 1
  },
- "asignadas": {}
+ "asignadas": {
+  "ca825d4f634b691dad401dd552d42a84": "8001 TENNIS BALL RNA + 12901 TENNIS BALL RNA - Chocolate blanco, vainilla, almendra, limón y yuzu + 16000 TENNIS BALL RNA"
+ },
+ "grupos": {}
 }
