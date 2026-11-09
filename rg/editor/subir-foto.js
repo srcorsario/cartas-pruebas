@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.21.0'; // 9 nov: 📷 Fotos del plato avisa si la foto que añades ya está en el plato (huella exacta de la original ya asignada a este plato, o parecido visual con alguna de sus fotos aunque esté recortada) y pregunta si añadirla igualmente; las fotos añadidas a mano también quedan anotadas como asignadas. 1.20.0, 9 nov: fotos de la CARPETA DEL PC solo en memoria (ya no van a localStorage: lo llenaban en Opera; las que quedaron guardadas se quitan y liberan sitio) y sus miniaturas se hacen pequeñas (300 px), de 2 en 2 y solo las que se ven (antes cargaba 145 fotos enteras: Chrome iba lento y Firefox salía en blanco). 1.19.3, 9 nov: fotos escaneadas de 📷 Fotos del plato: filas de alto fijo (140 px), ya no se amontonan (Chrome/Firefox/Opera). 1.19.1, 9 nov: si el navegador está lleno (localStorage, compartido por todas las webs de srcorsario.github.io) la lista de fotos no se guardaba y no salía nada: ahora libera las cachés de carta de las webs (se rehacen solas) y, si aun así no cabe, avisa. 1.19.0, 9 nov: 📷 Fotos del plato: botón "📂 Carpeta del PC" (y "Volver a abrir") para elegir fotos de una carpeta, como en 🖼️ Fotos de internet. 1.18.3, 9 nov: 📷 Fotos del plato usa todo el alto (las fotos en la web crecen) y en cada tarjeta los textos y botones van siempre en el mismo sitio. 1.18.2, 9 nov: repetidas solo por huella (mismo archivo); "mismas medidas y KB" solo si no hay huella (ocultaba fotos distintas). 1.18.1, 9 nov: "📷 Fotos del plato" a pantalla completa; al volver a recortar una foto se abre con el último recuadro, giro y formato puestos (sobre la original). 1.18.0, 9 nov: recorte de fotos de plato en VERTICAL 3:4 de serie (la web se ve sobre todo en el móvil; se recuerda el último formato en cada dispositivo; logos/QR siguen libres), nuevo 4:5; al girar la foto se vuelve a encajar entera en la ventana y el recuadro se rehace (antes se salía por un lado). 1.17.1, 9 nov: buscador de platos por palabras sueltas en cualquier orden ("arroz vaca"), sin tildes ni mayúsculas. 1.17.0, 9 nov: 🖼️ Fotos de internet: "🍽 Asignar por plato" (eliges el plato o platos y luego marcas las fotos; todas van en UN commit: las 4 primeras activas si hay hueco, el resto de repuesto) y "☑ Seleccionar varias" -> "👥 Agrupar como…" (grupos con nombre, compartidos en fotos-internet.json, salen como una tarjeta; "Asignar grupo" cuando el plato exista). 1.16.0, 9 nov: fotos quitadas (✕) = descartadas para siempre en esa web, por dirección y por huella, guardadas en GitHub (fotos-internet.json, vale en todos los navegadores); también qué foto original (huella) está asignada a qué platos; Vaciar ya no borra descartes; ♻ Restaurar descartadas. 1.15.1: tarjetas de 🖼️ Fotos de internet todas iguales (botones siempre abajo, medidas en 2 líneas fijas). 1.15.0: 📂 cargar fotos de una carpeta del PC en 🖼️ Fotos de internet (se recuerda la carpeta por web; editar/asignar igual). 1.14.0: repuestos ILIMITADOS (desactivadas 01..99+; con 4 activas lo nuevo va a repuesto) + hash SHA-256 de cada foto de internet (repetidas por contenido). 1.13.2: Opera: hay que MARCAR "resultados de la página de búsqueda" (si no, no corre en Google Maps). 1.13.1: "Buscar como" de serie desde sitio.json (buscarFotos), p. ej. RG = Roland Garros Manacor. 1.13.0: "Buscar como" en 🖼️ Fotos de internet (p. ej. Roland Garros Manacor) + Instalar la extensión: opciones de Opera con captura y "cada navegador por separado". 1.12.0: 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.22.0'; // 9 nov: 📷 Fotos del plato: "🔍 Buscar repetidas" (marca en rojo las fotos iguales a otra del plato) + "🗑 Quitar repetidas (N)"; VISOR a pantalla completa al pulsar una foto: ← → o clic a los lados para pasar, Supr = eliminar (Intro = sí, Esc = no), Esc cierra. 1.21.0, 9 nov: 📷 Fotos del plato avisa si la foto que añades ya está en el plato (huella exacta de la original ya asignada a este plato, o parecido visual con alguna de sus fotos aunque esté recortada) y pregunta si añadirla igualmente; las fotos añadidas a mano también quedan anotadas como asignadas. 1.20.0, 9 nov: fotos de la CARPETA DEL PC solo en memoria (ya no van a localStorage: lo llenaban en Opera; las que quedaron guardadas se quitan y liberan sitio) y sus miniaturas se hacen pequeñas (300 px), de 2 en 2 y solo las que se ven (antes cargaba 145 fotos enteras: Chrome iba lento y Firefox salía en blanco). 1.19.3, 9 nov: fotos escaneadas de 📷 Fotos del plato: filas de alto fijo (140 px), ya no se amontonan (Chrome/Firefox/Opera). 1.19.1, 9 nov: si el navegador está lleno (localStorage, compartido por todas las webs de srcorsario.github.io) la lista de fotos no se guardaba y no salía nada: ahora libera las cachés de carta de las webs (se rehacen solas) y, si aun así no cabe, avisa. 1.19.0, 9 nov: 📷 Fotos del plato: botón "📂 Carpeta del PC" (y "Volver a abrir") para elegir fotos de una carpeta, como en 🖼️ Fotos de internet. 1.18.3, 9 nov: 📷 Fotos del plato usa todo el alto (las fotos en la web crecen) y en cada tarjeta los textos y botones van siempre en el mismo sitio. 1.18.2, 9 nov: repetidas solo por huella (mismo archivo); "mismas medidas y KB" solo si no hay huella (ocultaba fotos distintas). 1.18.1, 9 nov: "📷 Fotos del plato" a pantalla completa; al volver a recortar una foto se abre con el último recuadro, giro y formato puestos (sobre la original). 1.18.0, 9 nov: recorte de fotos de plato en VERTICAL 3:4 de serie (la web se ve sobre todo en el móvil; se recuerda el último formato en cada dispositivo; logos/QR siguen libres), nuevo 4:5; al girar la foto se vuelve a encajar entera en la ventana y el recuadro se rehace (antes se salía por un lado). 1.17.1, 9 nov: buscador de platos por palabras sueltas en cualquier orden ("arroz vaca"), sin tildes ni mayúsculas. 1.17.0, 9 nov: 🖼️ Fotos de internet: "🍽 Asignar por plato" (eliges el plato o platos y luego marcas las fotos; todas van en UN commit: las 4 primeras activas si hay hueco, el resto de repuesto) y "☑ Seleccionar varias" -> "👥 Agrupar como…" (grupos con nombre, compartidos en fotos-internet.json, salen como una tarjeta; "Asignar grupo" cuando el plato exista). 1.16.0, 9 nov: fotos quitadas (✕) = descartadas para siempre en esa web, por dirección y por huella, guardadas en GitHub (fotos-internet.json, vale en todos los navegadores); también qué foto original (huella) está asignada a qué platos; Vaciar ya no borra descartes; ♻ Restaurar descartadas. 1.15.1: tarjetas de 🖼️ Fotos de internet todas iguales (botones siempre abajo, medidas en 2 líneas fijas). 1.15.0: 📂 cargar fotos de una carpeta del PC en 🖼️ Fotos de internet (se recuerda la carpeta por web; editar/asignar igual). 1.14.0: repuestos ILIMITADOS (desactivadas 01..99+; con 4 activas lo nuevo va a repuesto) + hash SHA-256 de cada foto de internet (repetidas por contenido). 1.13.2: Opera: hay que MARCAR "resultados de la página de búsqueda" (si no, no corre en Google Maps). 1.13.1: "Buscar como" de serie desde sitio.json (buscarFotos), p. ej. RG = Roland Garros Manacor. 1.13.0: "Buscar como" en 🖼️ Fotos de internet (p. ej. Roland Garros Manacor) + Instalar la extensión: opciones de Opera con captura y "cada navegador por separado". 1.12.0: 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -842,6 +842,13 @@
         '.sf-plato .sf-foto .sf-img{aspect-ratio:auto;height:100%;background-size:contain;background-color:#ece9e2}' +
         '.sf-plato .sf-foto .sf-info{min-height:1.3em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
         '.sf-plato .sf-acc{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.sf-plato .sf-acc button{min-width:0;white-space:nowrap}' +
+        '.sf-plato .sf-foto .sf-img{cursor:zoom-in}.sf-plato .sf-foto.rep{border-color:#dc2626;background:#fef2f2}.sf-rep-fila{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:.82rem}.sf-rep-fila button{padding:5px 10px;border:1px solid #d6d2c6;border-radius:7px;background:#fff;cursor:pointer;font-size:.8rem}.sf-rep-fila .peligro{border-color:#dc2626;color:#b42318}' +
+        '#sf-ver{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100002;display:flex;flex-direction:column;color:#fff;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;user-select:none}' +
+        '#sf-ver .v-cab{display:flex;gap:12px;align-items:center;padding:10px 16px}#sf-ver .v-cab b{font-size:1rem}#sf-ver .v-cab small{color:#cbd5e1}#sf-ver .v-cab .v-x{margin-left:auto}' +
+        '#sf-ver button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit}#sf-ver button:hover{background:rgba(255,255,255,.25)}' +
+        '#sf-ver .v-zona{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:0 60px 16px}#sf-ver .v-zona img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}' +
+        '#sf-ver .v-izq,#sf-ver .v-der{position:absolute;top:0;bottom:0;width:35%;cursor:pointer;display:flex;align-items:center;font-size:2.4rem;color:rgba(255,255,255,.5)}#sf-ver .v-izq{left:0;padding-left:14px}#sf-ver .v-der{right:0;justify-content:flex-end;padding-right:14px}#sf-ver .v-izq:hover,#sf-ver .v-der:hover{color:#fff}' +
+        '#sf-ver .v-conf{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}#sf-ver .v-conf div{background:#fff;color:#1f2328;border-radius:12px;padding:18px 22px;display:flex;flex-direction:column;gap:12px;align-items:center}#sf-ver .v-conf button{color:#1f2328;background:#e5e7eb;border:0}#sf-ver .v-conf .si{background:#dc2626;color:#fff}' +
         '.sf-plato .sf-acc .c2{grid-column:span 2}.sf-plato .sf-acc .c3{grid-column:span 3}.sf-plato .sf-acc .c6{grid-column:span 6}.sf-plato .sf-acc .oculto{visibility:hidden}' +
         '.sf-vacio{color:#6b6f76;font-size:.85rem;padding:6px 0}' +
         '#sf-msg{min-height:1.2em;margin-top:12px;font-size:.85rem}' +
@@ -968,10 +975,11 @@
                   '<button data-a="del" class="c3 peligro">Eliminar</button>'
                 : '<button data-a="on" class="c3" ' + (activas.length >= MAX_FOTOS ? 'disabled title="Ya hay 4 activas"' : '') + '>Activar</button>' +
                   '<button data-a="del" class="c3 peligro">Eliminar</button>';
-            return '<div class="sf-foto' + (x.blob ? ' nueva' : '') + '" data-l="' + (esActiva ? 'a' : 'd') + '" data-i="' + i + '">' +
+            return '<div class="sf-foto' + (x.blob ? ' nueva' : '') + (x.rep ? ' rep' : '') + '" data-l="' + (esActiva ? 'a' : 'd') + '" data-i="' + i + '">' +
                 '<div class="sf-img" style="background-image:url(' + (x.url || '') + ')"></div>' +
                 '<div class="sf-num">' + nombre + (x.blob ? ' <small>· nueva</small>' : '') + '</div>' +
-                '<div class="sf-num sf-info"' + (x.info ? ' title="' + esc(x.info) + '"' : '') + '><small>' + (x.info ? esc(x.info) : '&nbsp;') + '</small></div>' +
+                (x.rep ? '<div class="sf-num sf-info" style="color:#b42318">⚠ repetida de ' + esc(x.rep) + '</div>' :
+                '<div class="sf-num sf-info"' + (x.info ? ' title="' + esc(x.info) + '"' : '') + '><small>' + (x.info ? esc(x.info) : '&nbsp;') + '</small></div>') +
                 '<div class="sf-acc">' + acc + '</div></div>';
         }
         function enEstePlato(u) { var c = claveFoto(u); return activas.concat(desact).some(function (x) { return x.gal === c; }); }
@@ -1027,6 +1035,9 @@
                 '<p class="sf-sub">imagenes/' + esc(carpeta) + '/ · la web enseña la 01 y luego 02, 03, 04 seguidas. Al guardar se renumeran sin huecos.' +
                 (huecosAviso ? ' <b style="color:#b45309">Había huecos en la numeración: se corrigen al guardar.</b>' : '') + '</p>' +
                 '<div><label style="font-size:.82rem;color:#555">Nombre de las fotos: </label><input type="text" id="sf-base" value="' + esc(base) + '"> <small style="color:#6b6f76">→ ' + esc(base) + '01.webp…</small></div>' +
+                (activas.length + desact.length > 1 ? '<div class="sf-rep-fila"><button type="button" id="sf-rep-buscar">🔍 Buscar repetidas</button>' +
+                    (nRep() ? '<button type="button" id="sf-rep-quitar" class="peligro">🗑 Quitar repetidas (' + nRep() + ')</button>' : '') +
+                    '<small style="color:#6b6f76">Pulsa una foto para verla en grande (← → pasar · Supr eliminar).</small></div>' : '') +
                 '<h4>En la web (' + activas.length + '/' + MAX_FOTOS + ')</h4>' +
                 (activas.length ? '<div class="sf-rejilla sf-crece">' + activas.map(function (x, i) { return tarjeta(x, i, true); }).join('') + '</div>' : '<div class="sf-vacio">Ninguna: el plato sale sin 📸 en la web.</div>') +
                 (desact.length ? '<h4>Desactivadas · de repuesto (' + desact.length + ')</h4><div class="sf-rejilla">' + desact.map(function (x, i) { return tarjeta(x, i, false); }).join('') + '</div>' : '') +
@@ -1079,6 +1090,19 @@
                 var u = (m && m[1].replace(/&amp;/g, '&')) || (dt.getData('text/uri-list') || dt.getData('text/plain') || '').split('\n')[0].trim();
                 if (u) añadirUrl(u);
             };
+            caja.querySelectorAll('.sf-foto .sf-img').forEach(function (el) {
+                el.onclick = function () { var t = el.closest('.sf-foto'); verFotos((t.dataset.l === 'a' ? 0 : activas.length) + (+t.dataset.i)); };
+            });
+            var rb1 = caja.querySelector('#sf-rep-buscar'); if (rb1) rb1.onclick = function () { buscarRepetidas(rb1); };
+            var rb2 = caja.querySelector('#sf-rep-quitar'); if (rb2) rb2.onclick = function () {
+                var n = nRep();
+                (window.confirmarEditor ? window.confirmarEditor('¿Quitar las ' + n + ' fotos repetidas? (se borran al pulsar Guardar)') : Promise.resolve(confirm('¿Quitar ' + n + ' repetidas?')))
+                    .then(function (ok) {
+                        if (!ok) return;
+                        [activas, desact].forEach(function (l) { for (var i = l.length - 1; i >= 0; i--) if (l[i].rep) l.splice(i, 1); });
+                        pintar(); avisar('Quitadas ' + n + ' repetidas. Pulsa Guardar para borrarlas de GitHub.', '#15803d');
+                    });
+            };
             caja.querySelectorAll('.sf-foto button').forEach(function (b) {
                 b.onclick = function () {
                     var t = b.closest('.sf-foto'), lista = t.dataset.l === 'a' ? activas : desact, i = +t.dataset.i, x = lista[i];
@@ -1099,7 +1123,7 @@
                                 if (!x.fuente) x.fuente = x.blob;
                                 x.recorte = r.datos;   // para reabrir con el mismo recuadro/giro
                                 x.blob = r.blob;   // x.fuente sigue siendo la original: se puede volver a recortar desde ella
-                                x.url = u; x.info = r.info; x.sha = null;
+                                x.url = u; x.info = r.info; x.sha = null; x.hv = null; x.rep = null;
                                 pintar();
                             }).catch(function (e) { alert(e.message || e); });
                             return;
@@ -1166,6 +1190,75 @@
                 } catch (e) { }
             }
             return '';
+        }
+        function nRep() { return activas.concat(desact).filter(function (x) { return x.rep; }).length; }
+        function etiquetaFoto(x) {
+            var i = activas.indexOf(x);
+            if (i >= 0) return '0' + (i + 1) + (i ? ' · galería' : ' · principal');
+            return 'desactivada ' + (desact.indexOf(x) + 1);
+        }
+        // Repetidas dentro del plato: misma imagen (huella visual) que otra anterior (activas primero).
+        async function buscarRepetidas(btn) {
+            var todas = activas.concat(desact);
+            btn.disabled = true; btn.textContent = '🔍 Buscando…';
+            for (var w = 0; w < 30 && todas.some(function (x) { return !(x.blob || x.fuente); }); w++) await new Promise(function (ok) { setTimeout(ok, 500); });
+            for (var i = 0; i < todas.length; i++) {
+                var x = todas[i]; x.rep = null;
+                if (!x.hv && (x.blob || x.fuente)) { try { x.hv = await huellaVisual(x.blob || x.fuente); } catch (e) { } }
+            }
+            var n = 0;
+            for (var j = 1; j < todas.length; j++) {
+                var b = todas[j]; if (!b.hv) continue;
+                for (var k = 0; k < j; k++) {
+                    var a = todas[k];
+                    if (!a.hv || a.rep || Math.abs(a.hv.aspecto - b.hv.aspecto) > 0.03) continue;
+                    if (distanciaVisual(a.hv.bits, b.hv.bits) <= 40) { b.rep = etiquetaFoto(a).replace(' · galería', '').replace(' · principal', ''); n++; break; }
+                }
+            }
+            pintar();
+            avisar(n ? n + ' foto(s) repetida(s), marcadas en rojo. "🗑 Quitar repetidas" las quita (y Guardar las borra).' : 'No hay fotos repetidas en este plato.', n ? '#b45309' : '#15803d');
+        }
+        // Visor a pantalla completa: todas las fotos del plato (activas y desactivadas).
+        function verFotos(ix) {
+            var v = document.createElement('div'); v.id = 'sf-ver'; document.body.appendChild(v);
+            var conf = false;
+            var lista = function () { return activas.concat(desact); };
+            var cerrarV = function () { document.removeEventListener('keydown', tecla, true); v.remove(); };
+            var mover = function (d) { var l = lista(); if (!l.length) return cerrarV(); ix = (ix + d + l.length) % l.length; pintarV(); };
+            var borrar = function () {
+                var x = lista()[ix]; if (!x) return;
+                var l = activas.indexOf(x) >= 0 ? activas : desact; l.splice(l.indexOf(x), 1);
+                conf = false; pintar();
+                if (!lista().length) return cerrarV();
+                if (ix >= lista().length) ix = lista().length - 1;
+                pintarV(); avisar('Foto eliminada. Pulsa Guardar para borrarla de GitHub.', '#15803d');
+            };
+            function pintarV() {
+                var l = lista(), x = l[ix];
+                if (!x) return cerrarV();
+                v.innerHTML = '<div class="v-cab"><b>' + esc(etiquetaFoto(x)) + '</b><small>' + (ix + 1) + ' / ' + l.length + (x.rep ? ' · ⚠ repetida de ' + esc(x.rep) : '') + (x.info ? ' · ' + esc(x.info) : '') + '</small>' +
+                    '<small>← → pasar · Supr eliminar · Esc cerrar</small><button type="button" class="v-del">🗑 Eliminar</button><button type="button" class="v-x">✕ Cerrar</button></div>' +
+                    '<div class="v-zona">' + (x.url ? '<img src="' + x.url + '" alt="">' : '<span>Cargando…</span>') +
+                    (l.length > 1 ? '<div class="v-izq">‹</div><div class="v-der">›</div>' : '') +
+                    (conf ? '<div class="v-conf"><div><b>¿Eliminar esta foto?</b><span><button type="button" class="si">Sí (Intro)</button> <button type="button" class="no">No (Esc)</button></span></div></div>' : '') + '</div>';
+                v.querySelector('.v-x').onclick = cerrarV;
+                v.querySelector('.v-del').onclick = function () { conf = true; pintarV(); };
+                var iz = v.querySelector('.v-izq'), de = v.querySelector('.v-der');
+                if (iz) iz.onclick = function () { mover(-1); }; if (de) de.onclick = function () { mover(1); };
+                if (conf) { v.querySelector('.v-conf .si').onclick = borrar; v.querySelector('.v-conf .no').onclick = function () { conf = false; pintarV(); }; }
+            }
+            function tecla(e) {
+                var k = e.key, hecho = true;
+                if (conf) { if (k === 'Enter') borrar(); else if (k === 'Escape') { conf = false; pintarV(); } else hecho = false; }
+                else if (k === 'ArrowLeft') mover(-1);
+                else if (k === 'ArrowRight' || k === ' ') mover(1);
+                else if (k === 'Delete' || k === 'Supr') { conf = true; pintarV(); }
+                else if (k === 'Escape') cerrarV();
+                else hecho = false;
+                if (hecho) { e.preventDefault(); e.stopPropagation(); }
+            }
+            document.addEventListener('keydown', tecla, true);
+            pintarV();
         }
         async function añadir(files, gal) {
             for (var k = 0; k < files.length; k++) {
