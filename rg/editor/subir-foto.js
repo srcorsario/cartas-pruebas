@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.18.0'; // 9 nov: recorte de fotos de plato en VERTICAL 3:4 de serie (la web se ve sobre todo en el móvil; se recuerda el último formato en cada dispositivo; logos/QR siguen libres), nuevo 4:5; al girar la foto se vuelve a encajar entera en la ventana y el recuadro se rehace (antes se salía por un lado). 1.17.1, 9 nov: buscador de platos por palabras sueltas en cualquier orden ("arroz vaca"), sin tildes ni mayúsculas. 1.17.0, 9 nov: 🖼️ Fotos de internet: "🍽 Asignar por plato" (eliges el plato o platos y luego marcas las fotos; todas van en UN commit: las 4 primeras activas si hay hueco, el resto de repuesto) y "☑ Seleccionar varias" -> "👥 Agrupar como…" (grupos con nombre, compartidos en fotos-internet.json, salen como una tarjeta; "Asignar grupo" cuando el plato exista). 1.16.0, 9 nov: fotos quitadas (✕) = descartadas para siempre en esa web, por dirección y por huella, guardadas en GitHub (fotos-internet.json, vale en todos los navegadores); también qué foto original (huella) está asignada a qué platos; Vaciar ya no borra descartes; ♻ Restaurar descartadas. 1.15.1: tarjetas de 🖼️ Fotos de internet todas iguales (botones siempre abajo, medidas en 2 líneas fijas). 1.15.0: 📂 cargar fotos de una carpeta del PC en 🖼️ Fotos de internet (se recuerda la carpeta por web; editar/asignar igual). 1.14.0: repuestos ILIMITADOS (desactivadas 01..99+; con 4 activas lo nuevo va a repuesto) + hash SHA-256 de cada foto de internet (repetidas por contenido). 1.13.2: Opera: hay que MARCAR "resultados de la página de búsqueda" (si no, no corre en Google Maps). 1.13.1: "Buscar como" de serie desde sitio.json (buscarFotos), p. ej. RG = Roland Garros Manacor. 1.13.0: "Buscar como" en 🖼️ Fotos de internet (p. ej. Roland Garros Manacor) + Instalar la extensión: opciones de Opera con captura y "cada navegador por separado". 1.12.0: 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.18.1'; // 9 nov: "📷 Fotos del plato" a pantalla completa; al volver a recortar una foto se abre con el último recuadro, giro y formato puestos (sobre la original). 1.18.0, 9 nov: recorte de fotos de plato en VERTICAL 3:4 de serie (la web se ve sobre todo en el móvil; se recuerda el último formato en cada dispositivo; logos/QR siguen libres), nuevo 4:5; al girar la foto se vuelve a encajar entera en la ventana y el recuadro se rehace (antes se salía por un lado). 1.17.1, 9 nov: buscador de platos por palabras sueltas en cualquier orden ("arroz vaca"), sin tildes ni mayúsculas. 1.17.0, 9 nov: 🖼️ Fotos de internet: "🍽 Asignar por plato" (eliges el plato o platos y luego marcas las fotos; todas van en UN commit: las 4 primeras activas si hay hueco, el resto de repuesto) y "☑ Seleccionar varias" -> "👥 Agrupar como…" (grupos con nombre, compartidos en fotos-internet.json, salen como una tarjeta; "Asignar grupo" cuando el plato exista). 1.16.0, 9 nov: fotos quitadas (✕) = descartadas para siempre en esa web, por dirección y por huella, guardadas en GitHub (fotos-internet.json, vale en todos los navegadores); también qué foto original (huella) está asignada a qué platos; Vaciar ya no borra descartes; ♻ Restaurar descartadas. 1.15.1: tarjetas de 🖼️ Fotos de internet todas iguales (botones siempre abajo, medidas en 2 líneas fijas). 1.15.0: 📂 cargar fotos de una carpeta del PC en 🖼️ Fotos de internet (se recuerda la carpeta por web; editar/asignar igual). 1.14.0: repuestos ILIMITADOS (desactivadas 01..99+; con 4 activas lo nuevo va a repuesto) + hash SHA-256 de cada foto de internet (repetidas por contenido). 1.13.2: Opera: hay que MARCAR "resultados de la página de búsqueda" (si no, no corre en Google Maps). 1.13.1: "Buscar como" de serie desde sitio.json (buscarFotos), p. ej. RG = Roland Garros Manacor. 1.13.0: "Buscar como" en 🖼️ Fotos de internet (p. ej. Roland Garros Manacor) + Instalar la extensión: opciones de Opera con captura y "cada navegador por separado". 1.12.0: 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -669,7 +669,8 @@
             var capa = document.createElement('div');
             capa.id = 'sf-rec';
             var formatos = [['📱 3:4', 3 / 4, 'Vertical, el recomendado: llena la pantalla del móvil (810×1080)'], ['4:5', 4 / 5, 'Vertical algo más ancho'], ['1:1', 1, 'Cuadrada'], ['4:3', 4 / 3, 'Horizontal'], ['16:9', 16 / 9, 'Horizontal panorámica'], ['Libre', NaN, 'Sin proporción fija']];
-            var fmt = op.libre ? NaN : formatoRec;
+            var prev = op.datos || null;   // último recorte de esta foto (x, y, width, height, rotate, fmt): se reabre igual
+            var fmt = prev && 'fmt' in prev ? prev.fmt : op.libre ? NaN : formatoRec;
             capa.innerHTML = '<div class="sf-rec-caja"><div class="sf-rec-cab"><b>✂ Recortar</b> <small>' + esc(titulo || '') + '</small></div>' +
                 '<div class="sf-rec-zona"><img alt=""></div>' +
                 '<div class="sf-rec-barra">' + formatos.map(function (f, i) { return '<button data-f="' + i + '" title="' + f[2] + '">' + f[0] + '</button>'; }).join('') +
@@ -683,6 +684,11 @@
             var cr = new window.Cropper(img, {
                 viewMode: 1, autoCropArea: 1, aspectRatio: fmt, background: false, responsive: true,
                 checkOrientation: true, movable: true, zoomable: true, toggleDragModeOnDblclick: false,
+                ready: function () {
+                    if (!prev) return;
+                    if (prev.rotate) { cr.rotate(prev.rotate); encajar(); }
+                    cr.setData({ x: prev.x, y: prev.y, width: prev.width, height: prev.height });
+                },
                 crop: function (e) {
                     var w = Math.round(e.detail.width), h = Math.round(e.detail.height), f = Math.min(1, lado / Math.max(w, h));
                     info.textContent = w + '×' + h + ' → se guarda a ' + Math.round(w * f) + '×' + Math.round(h * f) + ' px';
@@ -705,11 +711,12 @@
             // Girar: Cropper deja la foto girada más grande que la ventana (se sale por un lado). Se vuelve a encajar
             // entera y centrada, y el recuadro se rehace al máximo con el formato elegido.
             var encajar = function () {
+                cr.clear();   // sin recuadro: si no, Cropper no deja la foto más pequeña que el recuadro
                 var c = cr.getContainerData(), cv = cr.getCanvasData();
-                if (!c.width || !cv.width) return;
+                if (!c.width || !cv.width) { cr.crop(); return; }
                 var k = Math.min(c.width / cv.width, c.height / cv.height), w = cv.width * k, h = cv.height * k;
                 cr.setCanvasData({ left: (c.width - w) / 2, top: (c.height - h) / 2, width: w, height: h });
-                cr.setAspectRatio(fmt);
+                cr.crop(); cr.setAspectRatio(fmt);
             };
             capa.querySelectorAll('[data-g]').forEach(function (b) { b.onclick = function () { cr.rotate(+b.dataset.g); encajar(); }; });
             capa.querySelector('[data-r]').onclick = function () { cr.reset(); };
@@ -721,7 +728,7 @@
                 var f = Math.min(1, lado / Math.max(d.width, d.height));
                 var c = cr.getCroppedCanvas({ width: Math.round(d.width * f), height: Math.round(d.height * f), imageSmoothingEnabled: true, imageSmoothingQuality: 'high', fillColor: op.transparente ? 'transparent' : '#fff' });
                 var blob = await canvasAWebp(c, op.calidad);
-                fin({ blob: blob, info: d.width + '×' + d.height + ' → ' + c.width + '×' + c.height + ', ' + kb(blob.size) });
+                fin({ blob: blob, info: d.width + '×' + d.height + ' → ' + c.width + '×' + c.height + ', ' + kb(blob.size), datos: { x: d.x, y: d.y, width: d.width, height: d.height, rotate: d.rotate || 0, fmt: fmt } });
             };
         });
     }
@@ -815,7 +822,7 @@
 
         var fondo = document.createElement('div');
         fondo.id = 'sf-fondo';
-        fondo.innerHTML = '<div id="sf-caja" style="max-width:1150px"><h3>📷 Fotos del plato</h3><p class="sf-sub">Cargando…</p></div>';
+        fondo.innerHTML = '<div id="sf-caja" style="max-width:none;width:100%;max-height:calc(100vh - 32px);box-sizing:border-box"><h3>📷 Fotos del plato</h3><p class="sf-sub">Cargando…</p></div>';
         document.body.appendChild(fondo);
         var caja = fondo.querySelector('#sf-caja');
         var urls = [];
@@ -975,9 +982,11 @@
                                 .then(function (ok) { if (ok) { lista.splice(i, 1); pintar(); } });
                             return;
                         case 'rec':
-                            recortar(x.fuente || x.blob, 'foto 0' + (i + 1)).then(function (r) {
+                            recortar(x.fuente || x.blob, 'foto 0' + (i + 1), { datos: x.fuente ? x.recorte : null }).then(function (r) {
                                 if (!r) return;
                                 var u = URL.createObjectURL(r.blob); urls.push(u);
+                                if (!x.fuente) x.fuente = x.blob;
+                                x.recorte = r.datos;   // para reabrir con el mismo recuadro/giro
                                 x.blob = r.blob;   // x.fuente sigue siendo la original: se puede volver a recortar desde ella
                                 x.url = u; x.info = r.info; x.sha = null;
                                 pintar();
@@ -1031,7 +1040,7 @@
                     var r = await recortar(files[k], files[k].name + ' (' + kb(files[k].size) + ')');
                     if (!r) { avisar(''); continue; }
                     var u = URL.createObjectURL(r.blob); urls.push(u);
-                    var nueva = { blob: r.blob, fuente: files[k], url: u, info: r.info, gal: gal || null };
+                    var nueva = { blob: r.blob, fuente: files[k], url: u, info: r.info, gal: gal || null, recorte: r.datos };
                     if (activas.length < MAX_FOTOS) activas.push(nueva); else desact.push(nueva);
                     pintar();
                     if (desact.indexOf(nueva) >= 0) avisar('Ya hay ' + MAX_FOTOS + ' activas: la nueva queda de repuesto (Desactivadas). Actívala cuando quieras.', '#b45309');
@@ -1895,10 +1904,10 @@
                     try {
                         var fuente = (editadas[kf] && editadas[kf].fuente) || await obtenerOriginal(x);
                         if (!fuente) throw new Error('No se pudo descargar la foto original.');
-                        var r = await recortar(fuente, x.t || 'foto');
+                        var r = await recortar(fuente, x.t || 'foto', { datos: editadas[kf] && editadas[kf].datos });
                         if (r) {
                             if (editadas[kf]) URL.revokeObjectURL(editadas[kf].url);
-                            editadas[kf] = { blob: r.blob, url: URL.createObjectURL(r.blob), fuente: fuente, info: r.info };
+                            editadas[kf] = { blob: r.blob, url: URL.createObjectURL(r.blob), fuente: fuente, info: r.info, datos: r.datos };
                             pintarG();
                             return;
                         }
