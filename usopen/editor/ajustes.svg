@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -4 200 254"><path d="M164.0,100.0 L163.3,109.2 L176.7,114.1 L170.4,133.7 L156.7,129.8 L151.8,137.6 L145.8,144.7 L153.8,156.5 L137.1,168.6 L128.3,157.4 L119.8,160.9 L110.8,163.1 L110.3,177.3 L89.7,177.3 L89.2,163.1 L80.2,160.9 L71.7,157.4 L62.9,168.6 L46.2,156.5 L54.2,144.7 L48.2,137.6 L43.3,129.8 L29.6,133.7 L23.3,114.1 L36.7,109.2 L36.0,100.0 L36.7,90.8 L23.3,85.9 L29.6,66.3 L43.3,70.2 L48.2,62.4 L54.2,55.3 L46.2,43.5 L62.9,31.4 L71.7,42.6 L80.2,39.1 L89.2,36.9 L89.7,22.7 L110.3,22.7 L110.8,36.9 L119.8,39.1 L128.3,42.6 L137.1,31.4 L153.8,43.5 L145.8,55.3 L151.8,62.4 L156.7,70.2 L170.4,66.3 L176.7,85.9 L163.3,90.8Z" fill="#e67e22" fill-opacity=".9"/><circle cx="100" cy="100" r="28" fill="#fff"/>
+<g transform="translate(100 100) rotate(-45)" stroke="#fff" stroke-width="6" paint-order="stroke" stroke-linejoin="round">
+  <path d="M-4.5,-80 L4.5,-80 L4.5,12 L-4.5,12 Z" fill="#95a5a6"/>
+  <path d="M-4.5,-80 L4.5,-80 L2,-88 L-2,-88 Z" fill="#95a5a6"/>
+  <rect x="-12" y="10" width="24" height="72" rx="10" fill="#e67e22"/>
+  <rect x="-12" y="10" width="24" height="14" rx="4" fill="#2c3e50" stroke="none"/>
+</g>
+<g transform="translate(100 100) rotate(45)" stroke="#fff" stroke-width="6" paint-order="stroke" stroke-linejoin="round">
+  <rect x="-8" y="-40" width="16" height="122" rx="7" fill="#2c3e50"/>
+  <path d="M-40,-70 H28 a6,6 0 0 1 6,6 V-46 a6,6 0 0 1 -6,6 H-40 L-48,-46 V-64 Z" fill="#2c3e50"/>
+</g><text x="100" y="240" text-anchor="middle" font-family="Montserrat,Segoe UI,Arial,sans-serif" font-size="30" font-weight="600" fill="#2c3e50">Ajustes</text></svg>

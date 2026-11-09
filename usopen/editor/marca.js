@@ -19,7 +19,7 @@
     window.MARCA = null;
     if (!S || !S.marca) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.marca = '1.1.1'; // 4 nov: al subir/quitar, se repintan las hojas de Sugerencias/Postres abiertas. 1.1.0: 4 nov: favicon (icono de la pestaña)
+    window.APP_VERSIONS.marca = '1.1.2'; // 9 nov: la imagen de ajustes (derecha de la cabecera del editor) ya no se oculta. 1.1.1, 4 nov: al subir/quitar, se repintan las hojas de Sugerencias/Postres abiertas. 1.1.0: 4 nov: favicon (icono de la pestaña)
 
     var CLAVES = [
         { k: 'logo', t: 'Logo del restaurante', d: 'Cabecera de la web, del editor y de las hojas de Sugerencias y Postres.', lado: 800, transparente: true },
@@ -49,7 +49,7 @@
     // ---------- cabecera del editor ----------
     function pintar() {
         var izq = $('header-logo-rg'), der = $('header-logo-usopen');
-        if (der) der.style.display = 'none';
+        // 9 nov: la imagen de la derecha (ajustes.svg) se queda también en las webs neutras.
         if (izq) {
             izq.alt = M.nombre;
             izq.title = '✏️ Logos y QR';

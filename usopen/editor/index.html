@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow">
-    <script src="sitio-editor.js?v=a301cfc4"></script>
-    <script src="marca.js?v=a301cfc4"></script>
-    <script src="categorias.js?v=a301cfc4"></script>
-    <script src="acceso.js?v=a301cfc4"></script>
-    <script src="subir-foto.js?v=a301cfc4"></script>
-    <script src="editor-web.js?v=a301cfc4"></script>
-    <script src="mapa-ids.js?v=a301cfc4"></script>
-    <script src="organizador.js?v=a301cfc4"></script>
-    <script src="contacto.js?v=a301cfc4"></script>
+    <script src="sitio-editor.js?v=ab4334ed"></script>
+    <script src="marca.js?v=ab4334ed"></script>
+    <script src="categorias.js?v=ab4334ed"></script>
+    <script src="acceso.js?v=ab4334ed"></script>
+    <script src="subir-foto.js?v=ab4334ed"></script>
+    <script src="editor-web.js?v=ab4334ed"></script>
+    <script src="mapa-ids.js?v=ab4334ed"></script>
+    <script src="organizador.js?v=ab4334ed"></script>
+    <script src="contacto.js?v=ab4334ed"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Editor Pro</title>
     <link rel="icon" href="setting.png" type="image/png">
@@ -28,7 +28,7 @@
         // todo el JS/CSS de golpe en cada visita.
         // OJO: esto NO afecta a los datos del menu (platos/precios) — esos se piden
         // siempre en fresco con cache:"no-store" en app.js, y eso no cambia.
-        window.__CACHE_BUST__ = '2026.11.03.3-a301cfc4';
+        window.__CACHE_BUST__ = '2026.11.03.3-ab4334ed';
     </script>
     <script>document.write('<link rel="stylesheet" href="styles.css?v=' + window.__CACHE_BUST__ + '">');</script>
 </head>
@@ -59,7 +59,7 @@
                     <button onclick="cancelarModoOptimista()" style="margin-left: 10px; background: transparent; border: 1px solid #c0392b; color: #c0392b; padding: 1px 5px; border-radius: 3px; cursor: pointer; font-size: 0.6rem; font-weight: bold;">✕ CANCELAR</button>
                 </div>
             </div>
-            <img id="header-logo-usopen" src="data:image/gif;base64,R0lGODlhAQABAAD/ACWAAAAAAQABAAACADs=" class="header-logo header-logo-right" alt="Logo USOPEN">
+            <img id="header-logo-usopen" src="ajustes.svg" class="header-logo header-logo-right" alt="Ajustes" title="Web Editor Pro · pantalla de configuración">
         </div>
 
         <div class="tabs-container" id="tabs-container">
@@ -395,7 +395,7 @@
         const logoRGEl = document.getElementById('header-logo-rg');
         const logoUSOPENEl = document.getElementById('header-logo-usopen');
         if (typeof LOGO_RESTAURANTE001 !== 'undefined' && logoRGEl) logoRGEl.src = LOGO_RESTAURANTE001;
-        if (typeof LOGO_RESTAURANTE002 !== 'undefined' && logoUSOPENEl) logoUSOPENEl.src = LOGO_RESTAURANTE002;
+        // 9 nov: a la derecha ya no va el logo de US Open, sino ajustes.svg (engranaje + herramientas, editores\acceso).
 
         if (typeof getModoAlias === 'function') {
             const tabRG = document.getElementById('tab-btn-rg');
