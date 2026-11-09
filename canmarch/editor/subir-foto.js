@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.16.0'; // 9 nov: fotos quitadas (✕) = descartadas para siempre en esa web, por dirección y por huella, guardadas en GitHub (fotos-internet.json, vale en todos los navegadores); también qué foto original (huella) está asignada a qué platos; Vaciar ya no borra descartes; ♻ Restaurar descartadas. 1.15.1: tarjetas de 🖼️ Fotos de internet todas iguales (botones siempre abajo, medidas en 2 líneas fijas). 1.15.0: 📂 cargar fotos de una carpeta del PC en 🖼️ Fotos de internet (se recuerda la carpeta por web; editar/asignar igual). 1.14.0: repuestos ILIMITADOS (desactivadas 01..99+; con 4 activas lo nuevo va a repuesto) + hash SHA-256 de cada foto de internet (repetidas por contenido). 1.13.2: Opera: hay que MARCAR "resultados de la página de búsqueda" (si no, no corre en Google Maps). 1.13.1: "Buscar como" de serie desde sitio.json (buscarFotos), p. ej. RG = Roland Garros Manacor. 1.13.0: "Buscar como" en 🖼️ Fotos de internet (p. ej. Roland Garros Manacor) + Instalar la extensión: opciones de Opera con captura y "cada navegador por separado". 1.12.0: 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.17.0'; // 9 nov: 🖼️ Fotos de internet: "🍽 Asignar por plato" (eliges el plato o platos y luego marcas las fotos; todas van en UN commit: las 4 primeras activas si hay hueco, el resto de repuesto) y "☑ Seleccionar varias" -> "👥 Agrupar como…" (grupos con nombre, compartidos en fotos-internet.json, salen como una tarjeta; "Asignar grupo" cuando el plato exista). 1.16.0, 9 nov: fotos quitadas (✕) = descartadas para siempre en esa web, por dirección y por huella, guardadas en GitHub (fotos-internet.json, vale en todos los navegadores); también qué foto original (huella) está asignada a qué platos; Vaciar ya no borra descartes; ♻ Restaurar descartadas. 1.15.1: tarjetas de 🖼️ Fotos de internet todas iguales (botones siempre abajo, medidas en 2 líneas fijas). 1.15.0: 📂 cargar fotos de una carpeta del PC en 🖼️ Fotos de internet (se recuerda la carpeta por web; editar/asignar igual). 1.14.0: repuestos ILIMITADOS (desactivadas 01..99+; con 4 activas lo nuevo va a repuesto) + hash SHA-256 de cada foto de internet (repetidas por contenido). 1.13.2: Opera: hay que MARCAR "resultados de la página de búsqueda" (si no, no corre en Google Maps). 1.13.1: "Buscar como" de serie desde sitio.json (buscarFotos), p. ej. RG = Roland Garros Manacor. 1.13.0: "Buscar como" en 🖼️ Fotos de internet (p. ej. Roland Garros Manacor) + Instalar la extensión: opciones de Opera con captura y "cada navegador por separado". 1.12.0: 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -186,7 +186,7 @@
     // por web, en GitHub: <web>/fotos-internet.json (se guarda unos segundos después del último ✕, en un commit).
     var ARCH_DESC = dirWeb + 'fotos-internet.json';
     // + asignadas: { huella de la ORIGINAL: "8004 Ferrochino + 16003 Ferrochino" } (aunque se suba recortada)
-    var descRemoto = { claves: {}, hashes: {}, asignadas: {} }, descPend = { claves: {}, hashes: {}, asignadas: {} }, descReloj = null, descCargado = null;
+    var descRemoto = { claves: {}, hashes: {}, asignadas: {}, grupos: {} }, descPend = { claves: {}, hashes: {}, asignadas: {}, grupos: {} }, descReloj = null, descCargado = null;
     function leerDescLocal() { try { return JSON.parse(localStorage.getItem(CLAVE_D) || '{}') || {}; } catch (e) { return {}; } }
     function leerDesc() {
         var d = leerDescLocal();
@@ -206,7 +206,7 @@
         descCargado = (async function () {
             try {
                 var r = await api('/contents/' + codRuta(ARCH_DESC), {}, true);
-                if (r.ok) { var o = JSON.parse(await r.text()); descRemoto = { claves: o.claves || {}, hashes: o.hashes || {}, asignadas: o.asignadas || {} }; }
+                if (r.ok) { var o = JSON.parse(await r.text()); descRemoto = { claves: o.claves || {}, hashes: o.hashes || {}, asignadas: o.asignadas || {}, grupos: o.grupos || {} }; }
             } catch (e) { }
             // Quitar de la lista las que otro navegador ya descartó, y marcar las ya asignadas (por la huella de la original)
             var g = leerGaleria(), g2 = g.filter(function (x) { return !esDescartada(x); }), marcadas = 0;
@@ -219,32 +219,58 @@
     function programarDescartes(ms) { clearTimeout(descReloj); descReloj = setTimeout(guardarDescartes, ms || 4000); }
     async function guardarDescartes() {
         descReloj = null;
-        var p = descPend; descPend = { claves: {}, hashes: {}, asignadas: {} };
-        if (!Object.keys(p.claves).length && !Object.keys(p.hashes).length && !Object.keys(p.asignadas).length && !p.restaurar) return;
+        var p = descPend; descPend = { claves: {}, hashes: {}, asignadas: {}, grupos: {} };
+        if (!Object.keys(p.claves).length && !Object.keys(p.hashes).length && !Object.keys(p.asignadas).length && !Object.keys(p.grupos).length && !p.restaurar) return;
         try {
             descCargado = null; await cargarDescartes();   // juntar con lo que haya guardado otro navegador
             if (p.restaurar) { descRemoto.claves = {}; descRemoto.hashes = {}; }
             Object.keys(p.claves).forEach(function (k) { descRemoto.claves[k] = 1; });
             Object.keys(p.hashes).forEach(function (k) { descRemoto.hashes[k] = 1; });
             Object.keys(p.asignadas).forEach(function (k) { descRemoto.asignadas[k] = p.asignadas[k]; });
+            Object.keys(p.grupos).forEach(function (k) { if (p.grupos[k]) descRemoto.grupos[k] = p.grupos[k]; else delete descRemoto.grupos[k]; });
             var txt = JSON.stringify({
-                nota: 'Fotos de internet de esta web (🖼️ Fotos de internet). claves/hashes: descartadas con ✕ (no vuelven a la lista). asignadas: huella de la foto ORIGINAL -> platos donde se puso (aunque se subiera recortada).',
-                claves: descRemoto.claves, hashes: descRemoto.hashes, asignadas: descRemoto.asignadas
+                nota: 'Fotos de internet de esta web (🖼️ Fotos de internet). claves/hashes: descartadas con ✕ (no vuelven a la lista). asignadas: huella de la foto ORIGINAL -> platos donde se puso (aunque se subiera recortada). grupos: nombre -> claves de sus fotos (👥 Agrupar como…).',
+                claves: descRemoto.claves, hashes: descRemoto.hashes, asignadas: descRemoto.asignadas, grupos: descRemoto.grupos
             }, null, 1);
             var sha = await subirBlob(new Blob([txt], { type: 'application/json' }));
-            await commit([{ path: ARCH_DESC, sha: sha }], 'Fotos de internet: ' + Object.keys(descRemoto.claves).length + ' descartadas, ' + Object.keys(descRemoto.asignadas).length + ' asignadas');
+            await commit([{ path: ARCH_DESC, sha: sha }], 'Fotos de internet: ' + Object.keys(descRemoto.claves).length + ' descartadas, ' + Object.keys(descRemoto.asignadas).length + ' asignadas, ' + Object.keys(descRemoto.grupos).length + ' grupos');
         } catch (e) {
             Object.keys(p.claves).forEach(function (k) { descPend.claves[k] = 1; });
             Object.keys(p.hashes).forEach(function (k) { descPend.hashes[k] = 1; });
             Object.keys(p.asignadas).forEach(function (k) { if (!descPend.asignadas[k]) descPend.asignadas[k] = p.asignadas[k]; });
+            Object.keys(p.grupos).forEach(function (k) { if (!(k in descPend.grupos)) descPend.grupos[k] = p.grupos[k]; });
             if (p.restaurar) descPend.restaurar = true;
             programarDescartes(15000);   // reintentar
         }
     }
     function restaurarDescartes() {
         try { localStorage.removeItem(CLAVE_D); } catch (e) { }
-        descRemoto.claves = {}; descRemoto.hashes = {}; descPend = { claves: {}, hashes: {}, asignadas: {}, restaurar: true };
+        descRemoto.claves = {}; descRemoto.hashes = {}; descPend = { claves: {}, hashes: {}, asignadas: descPend.asignadas, grupos: descPend.grupos, restaurar: true };
         programarDescartes(300);
+    }
+    // Grupos de fotos con nombre (👥 Agrupar como…): { nombre: [claves] }. Lo guardado en GitHub + lo pendiente (null = borrado).
+    function leerGrupos() {
+        var g = {};
+        Object.keys(descRemoto.grupos).forEach(function (k) { if (Array.isArray(descRemoto.grupos[k])) g[k] = descRemoto.grupos[k].slice(); });
+        Object.keys(descPend.grupos).forEach(function (k) { if (descPend.grupos[k]) g[k] = descPend.grupos[k].slice(); else delete g[k]; });
+        return g;
+    }
+    function ponerGrupo(nombre, claves) { descPend.grupos[nombre] = claves && claves.length ? claves.slice() : null; programarDescartes(); }
+    // Mete fotos en un grupo (las saca de cualquier otro). Devuelve cuántas tiene ahora.
+    function agrupar(nombre, claves) {
+        var gr = leerGrupos(), dest = gr[nombre] || [];
+        Object.keys(gr).forEach(function (n) {
+            if (n === nombre) return;
+            var r = gr[n].filter(function (c) { return claves.indexOf(c) < 0; });
+            if (r.length !== gr[n].length) ponerGrupo(n, r);
+        });
+        claves.forEach(function (c) { if (dest.indexOf(c) < 0) dest.push(c); });
+        ponerGrupo(nombre, dest);
+        return dest.length;
+    }
+    function sacarDeGrupo(clave) {
+        var gr = leerGrupos();
+        Object.keys(gr).forEach(function (n) { var i = gr[n].indexOf(clave); if (i >= 0) { gr[n].splice(i, 1); ponerGrupo(n, gr[n]); } });
     }
     // Si se cierra con descartes sin guardar, el navegador pregunta (y se intenta guardar).
     window.addEventListener('beforeunload', function (e) { if (descReloj) { guardarDescartes(); e.preventDefault(); e.returnValue = ''; } });
@@ -718,6 +744,14 @@
         '.sfg-b{padding:6px 10px;border-radius:7px;border:0;background:#1f2328;color:#fff;cursor:pointer;font-size:.8rem;white-space:nowrap}' +
         '.sfg-rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:10px}' +
         '.sfg-card{border:1px solid #e3e0d8;border-radius:10px;padding:6px;background:#faf9f6;display:flex;flex-direction:column;gap:5px}.sfg-card.usada{opacity:.55}' +
+        '.sfg-card{position:relative}.sfg-card.sel{outline:3px solid #15803d;outline-offset:-1px;background:#ecfdf3}.sfg-selmodo .sfg-card[data-k],.sfg-selmodo .sfg-grupo{cursor:pointer}' +
+        '.sfg-nsel{position:absolute;top:10px;left:10px;min-width:26px;height:26px;border-radius:13px;background:rgba(255,255,255,.9);border:2px solid #1f2328;color:#1f2328;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.85rem;z-index:1;padding:0 4px;box-sizing:border-box}.sfg-card.sel .sfg-nsel{background:#15803d;border-color:#15803d;color:#fff}' +
+        '.sfg-grupo{background:#eef6ff;border-color:#93c5fd;box-shadow:5px 5px 0 -1px #dbeafe,5px 5px 0 0 #93c5fd}.sfg-grupo .sfg-t{color:#1e40af}' +
+        '.sfg-hint{font-size:.75rem;color:#6b6f76;text-align:center;padding:5px 0}' +
+        '.sfg-ops{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.sfg-ops button{font-size:.85rem;padding:8px 12px}' +
+        '#sfg-barra{position:fixed;left:0;right:0;bottom:0;z-index:100001;background:#1f2328;color:#fff;padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 -4px 16px rgba(0,0,0,.25);font:14px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif}' +
+        '#sfg-barra .sfg-barra-t{flex:1 1 300px;min-width:0}#sfg-barra small{color:#cbd5e1}#sfg-barra button{padding:7px 11px;border-radius:7px;border:1px solid #475569;background:#334155;color:#fff;cursor:pointer;font-size:.82rem;white-space:nowrap}#sfg-barra button.ok{background:#15803d;border-color:#15803d;font-weight:700}#sfg-barra button:disabled{opacity:.45;cursor:default}' +
+        '#sfg-toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100004;max-width:min(900px,92vw);background:#fff;border:1px solid #d6d2c6;border-radius:9px;padding:9px 14px;box-shadow:0 6px 20px rgba(0,0,0,.2);font:14px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;display:none}' +
         '.sfg-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px;display:block;background:#e5e7eb}' +
         '.sfg-i{font-size:.72rem;color:#6b6f76;line-height:1.25em;min-height:2.5em;overflow:hidden}.sfg-i.peq{color:#b42318;font-weight:600}' +
         '.sfg-t{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sfg-u{font-size:.74rem;color:#15803d}' +
@@ -1087,8 +1121,18 @@
     // Pone una foto (blob WebP ya reducido) en varios platos: detrás de las fotos que ya tengan, en UN commit.
     // Si un plato no tenía "Nombre Imagen", se le pone <base>01.webp (queda pendiente "GUARDAR CAMBIOS EN WEB").
     async function asignarVarios(blob, ids) {
+        var r = await asignarLote([{ blob: blob, ids: ids }]);
+        return { res: r.res[0], cambiaCampo: r.cambiaCampo };
+    }
+    // Varias fotos [{ blob, ids }] en UN commit, en ese orden: llenan los huecos de activas (máx. 4) y el resto va de repuesto.
+    // res[i] = resultados de la foto i (uno por plato).
+    async function asignarLote(lote, alSubir) {
         var lista = (typeof datosLocales !== 'undefined' && Array.isArray(datosLocales)) ? datosLocales : (window.datosLocales || []);   // eslint-disable-line no-undef
-        var sha = await subirBlob(blob), cambios = [], res = [], cacheDir = {}, planeadas = {}, cambiaCampo = false;
+        var cambios = [], todos = [], cacheDir = {}, planeadas = {}, cambiaCampo = false;
+        for (var li = 0; li < lote.length; li++) {
+        if (alSubir) alSubir(li + 1, lote.length);
+        var sha = await subirBlob(lote[li].blob), ids = lote[li].ids, res = [];
+        todos.push(res);
         for (var k = 0; k < ids.length; k++) {
             var p = lista.find(function (x) { return String(x.id) === String(ids[k]); });
             if (!p) continue;
@@ -1126,9 +1170,12 @@
             }
             res.push({ p: p, n: nombre, num: n });
         }
-        if (cambios.length) await commit(cambios, 'Fotos de internet -> platos ' + res.filter(function (r) { return !r.err; }).map(function (r) { return r.p.id; }).join(', '));
+        }
+        var idsOk = {};
+        todos.forEach(function (rs) { rs.forEach(function (r) { if (!r.err) idsOk[r.p.id] = 1; }); });
+        if (cambios.length) await commit(cambios, 'Fotos de internet -> ' + (lote.length > 1 ? lote.length + ' fotos a ' : '') + 'platos ' + Object.keys(idsOk).join(', '));
         if (cambiaCampo) { window.hayCambiosSinGuardar = true; try { if (typeof renderizar === 'function') renderizar(); } catch (e) { } }   // eslint-disable-line no-undef
-        return { res: res, cambiaCampo: cambiaCampo };
+        return { res: todos, cambiaCampo: cambiaCampo };
     }
     async function abrirCon(id, u, gal) {
         if (typeof window.abrirEditor !== 'function') { alert('Este editor no puede abrir el plato desde aquí: ábrelo a mano y usa 📷 Fotos del plato.'); return; }
@@ -1338,10 +1385,18 @@
         document.body.appendChild(fondo);
         var caja = fondo.querySelector('#sf-caja'), verUsadas = false, filtro = '', verPeq = false, obs = null;
         var elegidos = {}, editadas = {}, hayCarpeta = null;
+        var modoSel = null, verGrupo = null, toastReloj = null;   // modoSel: { ids: platos destino (puede estar vacío), orden: claves elegidas en orden } · verGrupo: nombre del grupo abierto
         idbGet(CLAVE_CARPETA).then(function (h) { if (h && !carpetaLocal) { hayCarpeta = h; pintarG(); } });   // por clave de foto: ids de plato elegidos · recorte hecho aquí { blob, url, fuente, info }
         var conExt = extInstalada();
         var q = busquedaLocal(), l = enlacesExternos(q, ''), en = leerEnlaces();
-        var avisar = function (t, color) { var m = caja.querySelector('#sf-msg'); if (m) { m.style.color = color || '#b42318'; m.textContent = t; } };
+        var avisar = function (t, color) {
+            var m = caja.querySelector('#sf-msg'); if (m) { m.style.color = color || '#b42318'; m.textContent = t; }
+            var ts = fondo.querySelector('#sfg-toast');
+            if (!ts) { ts = document.createElement('div'); ts.id = 'sfg-toast'; ts.onclick = function () { ts.style.display = 'none'; }; fondo.appendChild(ts); }
+            ts.style.color = color || '#b42318'; ts.textContent = t; ts.style.display = t ? 'block' : 'none';
+            clearTimeout(toastReloj);
+            if (color !== '#555') toastReloj = setTimeout(function () { ts.style.display = 'none'; }, /✔/.test(t) ? 9000 : 15000);
+        };
         var cerrar = function () { fondo.remove(); document.removeEventListener('paste', alPegar); alRecibir = null; if (obs) obs.disconnect(); colaInfo.length = 0; pedidas = {}; Object.keys(editadas).forEach(function (k) { URL.revokeObjectURL(editadas[k].url); }); contarBoton(); };
         function meter(lista, origen) {
             var n = sumarEscaneo(lista);
@@ -1363,14 +1418,16 @@
         }
         document.addEventListener('paste', alPegar);
         // Ventana grande para elegir los platos de una foto: casillas, buscador, parecidos arriba (sin marcar).
-        function elegirPlatos(x, kf, platos) {
+        function elegirPlatos(x, kf, platos, o) {
+            o = o || {};
             return new Promise(function (resolver) {
                 var cat = function (id) {
                     try { var c = window.Categorias && window.Categorias.categoriaDe && window.Categorias.categoriaDe(id); var n = c && (c.nombre || c.es || c.id); return typeof n === 'string' ? n : (n && typeof n.es === 'string' ? n.es : ''); } catch (e) { return ''; }
                 };
-                var lista = platos.map(function (pl) { return { id: pl.id, n: pl.n, p: x.t ? parecido(pl.n, x.t) : 0, c: cat(pl.id) }; });
+                var tx = (x && x.t) || '';
+                var lista = platos.map(function (pl) { return { id: pl.id, n: pl.n, p: tx ? parecido(pl.n, tx) : 0, c: cat(pl.id) }; });
                 var sug = lista.filter(function (q) { return q.p > 0; }).sort(function (a, b) { return b.p - a.p || a.id - b.id; });
-                var marcados = {}, ed = editadas[kf];
+                var marcados = {}, ed = kf ? editadas[kf] : null;
                 var fila = function (q, estrella, enSug) {
                     return '<label class="sfg-pf' + (enSug ? ' sug' : '') + '" data-id="' + q.id + '" data-txt="' + esc((q.id + ' ' + q.n + ' ' + q.c).toLowerCase()) + '"><input type="checkbox" value="' + q.id + '"> <b>' + q.id + '</b> ' + (estrella ? '★ ' : '') + esc(q.n) + '</label>';
                 };
@@ -1382,10 +1439,10 @@
                 var pop = document.createElement('div');
                 pop.id = 'sfg-pop';
                 pop.innerHTML = '<div class="sfg-pop-caja">' +
-                    '<div class="sfg-pop-cab"><img src="' + esc(ed ? ed.url : esLocal(x.u) ? (urlsLocales[String(x.u).slice(6)] || '') : miniatura(x.u)) + '" referrerpolicy="no-referrer" alt=""><div><b>¿En qué platos va esta foto?</b><br><small>' + esc(x.t || 'sin nombre') + (ed ? ' · ✂ editada' : '') + '</small><br><small style="color:#6b6f76">Marca uno o varios. Se sube una vez (WebP 1080 px) y se pone en todos.</small></div></div>' +
+                    '<div class="sfg-pop-cab">' + (x && x.u ? '<img src="' + esc(ed ? ed.url : esLocal(x.u) ? (urlsLocales[String(x.u).slice(6)] || '') : miniatura(x.u)) + '" referrerpolicy="no-referrer" alt="">' : '') + '<div><b>' + esc(o.titulo || '¿En qué platos va esta foto?') + '</b>' + (o.nombre === '' ? '' : '<br><small>' + esc(o.nombre || tx || 'sin nombre') + (ed ? ' · ✂ editada' : '') + '</small>') + '<br><small style="color:#6b6f76">' + esc(o.sub || 'Marca uno o varios. Se sube una vez (WebP 1080 px) y se pone en todos.') + '</small></div></div>' +
                     '<input type="text" class="sfg-pop-q" placeholder="Buscar por nombre, ID o categoría…">' +
                     '<div class="sfg-pop-lista">' +
-                    (sug.length ? '<div class="sfg-pc">★ Parecen esta foto (por el nombre)</div>' + sug.map(function (q) { return fila(q, true, true); }).join('') : '') +
+                    (sug.length ? '<div class="sfg-pc">★ ' + esc(o.sugTxt || 'Parecen esta foto (por el nombre)') + '</div>' + sug.map(function (q) { return fila(q, true, true); }).join('') : '') +
                     html + '</div>' +
                     '<div class="sf-bot"><span class="sfg-pop-sel" style="margin-right:auto;align-self:center;color:#6b6f76"></span><button type="button" class="sf-no">Cancelar</button><button type="button" class="sf-ok" disabled>Asignar</button></div></div>';
                 document.body.appendChild(pop);
@@ -1394,7 +1451,7 @@
                 var actualizar = function () {
                     var n = nombres();
                     ok.disabled = !n.length;
-                    ok.textContent = n.length ? 'Asignar a ' + n.length + ' plato' + (n.length > 1 ? 's' : '') : 'Asignar';
+                    ok.textContent = n.length ? (o.boton || 'Asignar a') + ' ' + n.length + ' plato' + (n.length > 1 ? 's' : '') : (o.boton0 || 'Asignar');
                     sel.textContent = n.map(function (z) { return z.id + ' ' + z.n; }).join(' · ');
                 };
                 pop.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
@@ -1421,20 +1478,169 @@
                 pop.querySelector('.sf-no').onclick = function () { fin(null); };
                 pop.onclick = function (e) { if (e.target === pop) fin(null); };
                 ok.onclick = function () { fin(nombres().map(function (z) { return z.id; })); };
+                (o.marcados || []).forEach(function (id) { var cb = pop.querySelector('input[type=checkbox][value="' + id + '"]'); if (cb) { cb.checked = true; cb.onchange(); } });
                 actualizar();
                 q.focus();
             });
         }
+        // Ventanita para poner nombre a un grupo (con los que ya existen para elegir).
+        function pedirNombre(titulo, def, existentes, nota) {
+            return new Promise(function (resolver) {
+                var pop = document.createElement('div');
+                pop.id = 'sfg-pop';
+                pop.innerHTML = '<div class="sfg-pop-caja" style="height:auto;max-width:520px"><b>' + esc(titulo) + '</b>' +
+                    '<input type="text" class="sfg-pop-q" list="sfg-dl-grupos" value="' + esc(def || '') + '" placeholder="Nombre del plato o del grupo">' +
+                    '<datalist id="sfg-dl-grupos">' + existentes.map(function (n) { return '<option value="' + esc(n) + '">'; }).join('') + '</datalist>' +
+                    '<small style="color:#6b6f76">' + esc(nota || 'Si ya hay un grupo con ese nombre, se añaden a él.') + (existentes.length ? ' Grupos: ' + existentes.map(esc).join(' · ') : '') + '</small>' +
+                    '<div class="sf-bot"><button type="button" class="sf-no">Cancelar</button><button type="button" class="sf-ok">Aceptar</button></div></div>';
+                document.body.appendChild(pop);
+                var inp = pop.querySelector('input');
+                var fin = function (v) { document.removeEventListener('keydown', tecla); pop.remove(); resolver(v); };
+                var aceptar = function () { var v = inp.value.trim().replace(/\s+/g, ' ').slice(0, 80); if (v) fin(v); else inp.focus(); };
+                var tecla = function (e) { if (e.key === 'Escape') fin(null); };
+                document.addEventListener('keydown', tecla);
+                inp.onkeydown = function (e) { if (e.key === 'Enter') aceptar(); };
+                pop.querySelector('.sf-no').onclick = function () { fin(null); };
+                pop.querySelector('.sf-ok').onclick = aceptar;
+                pop.onclick = function (e) { if (e.target === pop) fin(null); };
+                inp.focus(); inp.select();
+            });
+        }
+        var nombrePlatos = function (ids) {
+            var pl = listaPlatos();
+            return ids.map(function (id) { var q = pl.find(function (z) { return String(z.id) === String(id); }); return id + (q ? ' ' + q.n : ''); });
+        };
+        // Sube varias fotos de la lista (en ese orden) a los platos ids en UN commit y las marca como asignadas.
+        async function asignarFotos(claves, ids) {
+            var lote = [], fallos = [], gg = leerGaleria();
+            for (var i = 0; i < claves.length; i++) {
+                var k = claves[i], x = gg[indiceDe(gg, k)];
+                if (!x) continue;
+                avisar('Preparando foto ' + (i + 1) + ' de ' + claves.length + '…', '#555');
+                try {
+                    var ed = editadas[k], blob = ed && ed.blob, orig = null;
+                    if (!blob) {
+                        orig = await obtenerOriginal(x);
+                        if (!orig) throw new Error('no se pudo descargar');
+                        blob = (await aWebp(orig)).blob;
+                    }
+                    if (!x.hash) { var src = (ed && ed.fuente) || orig; if (src) guardarInfo(k, await medir(src)); }
+                    lote.push({ k: k, blob: blob, ids: ids });
+                } catch (e) { fallos.push((x.t || 'foto ' + (i + 1)) + ' (' + (e.message || e) + ')'); }
+            }
+            if (!lote.length) throw new Error('No se pudo preparar ninguna foto: ' + fallos.join(' · '));
+            var r = await asignarLote(lote, function (n, t) { avisar('Subiendo foto ' + n + ' de ' + t + '…', '#555'); });
+            var g3 = leerGaleria(), porPlato = {}, mal = {}, nOk = 0, okClaves = [];
+            r.res.forEach(function (rs, i) {
+                var ok = rs.filter(function (q) { return !q.err; });
+                rs.filter(function (q) { return q.err; }).forEach(function (q) { mal[q.p.id + ' ' + q.n + ' (' + q.err + ')'] = 1; });
+                if (!ok.length) return;
+                nOk++; okClaves.push(lote[i].k);
+                ok.forEach(function (q) { var c = q.p.id + ' ' + q.n, z = porPlato[c] = porPlato[c] || { a: 0, r: 0 }; if (q.repuesto) z.r++; else z.a++; });
+                var i3 = indiceDe(g3, lote[i].k); if (i3 < 0) return;
+                var antes = g3[i3].usada ? descRemoto.asignadas[g3[i3].hash] || g3[i3].usada : '';
+                g3[i3].usada = (antes ? antes + ' + ' : '') + ok.map(function (q) { return q.p.id + ' ' + q.n; }).join(' + ');
+                if (g3[i3].hash) descPend.asignadas[g3[i3].hash] = g3[i3].usada;
+            });
+            guardarGaleria(g3); programarDescartes();
+            return { nOk: nOk, okClaves: okClaves, porPlato: porPlato, mal: Object.keys(mal), fallos: fallos, cambiaCampo: r.cambiaCampo };
+        }
+        function textoLote(r) {
+            return (r.nOk ? '✔ ' + r.nOk + ' foto' + (r.nOk > 1 ? 's' : '') + ' puesta' + (r.nOk > 1 ? 's' : '') + ': ' + Object.keys(r.porPlato).map(function (c) {
+                var z = r.porPlato[c]; return c + ' (' + [z.a ? z.a + ' activa' + (z.a > 1 ? 's' : '') : '', z.r ? z.r + ' de repuesto' : ''].filter(Boolean).join(', ') + ')';
+            }).join(', ') + '. En la web en 1-2 min.' : '') +
+                (r.mal.length ? ' ⚠ No: ' + r.mal.join(', ') + '.' : '') +
+                (r.fallos.length ? ' ⚠ Sin descargar: ' + r.fallos.join(' · ') + '.' : '') +
+                (r.cambiaCampo ? ' Algún plato no tenía foto: pulsa "GUARDAR CAMBIOS EN WEB" para que la enseñe.' : '');
+        }
+        // Marca en pantalla las elegidas (borde verde + número de orden) y repinta la barra.
+        function marcarSel() {
+            if (!modoSel) return;
+            caja.querySelectorAll('.sfg-card[data-k]').forEach(function (c) {
+                var i = modoSel.orden.indexOf(c.dataset.k), b = c.querySelector('.sfg-nsel');
+                c.classList.toggle('sel', i >= 0); if (b) b.textContent = i >= 0 ? i + 1 : '';
+            });
+            caja.querySelectorAll('.sfg-grupo').forEach(function (c) {
+                var m = (c.dataset.m || '').split('\n').filter(Boolean), n = m.filter(function (k) { return modoSel.orden.indexOf(k) >= 0; }).length, b = c.querySelector('.sfg-nsel');
+                c.classList.toggle('sel', !!m.length && n === m.length); if (b) b.textContent = n ? n + '/' + m.length : '';
+            });
+            pintarBarra();
+        }
+        function pintarBarra() {
+            var b = fondo.querySelector('#sfg-barra');
+            if (!modoSel) { if (b) b.remove(); return; }
+            if (!b) { b = document.createElement('div'); b.id = 'sfg-barra'; fondo.appendChild(b); }
+            var n = modoSel.orden.length, ids = modoSel.ids, hay = ids.length;
+            b.innerHTML = '<div class="sfg-barra-t"><b>' + n + ' foto' + (n === 1 ? '' : 's') + ' elegida' + (n === 1 ? '' : 's') + '</b>' +
+                (hay ? ' → ' + esc(nombrePlatos(ids).join(' + ')) : '') + (verGrupo ? ' <small>(grupo «' + esc(verGrupo) + '»)</small>' : '') +
+                '<br><small>' + (hay ? 'Pulsa las fotos en orden: las primeras llenan los huecos de activas (máx. 4 por plato) y el resto va de repuesto. Todo en un solo guardado.' : 'Pulsa las fotos para elegirlas; luego agrúpalas o asígnalas a platos.') + '</small></div>' +
+                '<button type="button" data-bt="todas">Todas las visibles</button><button type="button" data-bt="ninguna"' + (n ? '' : ' disabled') + '>Ninguna</button>' +
+                '<button type="button" data-bt="agrupar"' + (n ? '' : ' disabled') + '>👥 Agrupar como…</button>' +
+                (hay ? '<button type="button" data-bt="platos">🍽 Cambiar platos</button><button type="button" data-bt="asignar" class="ok"' + (n ? '' : ' disabled') + '>Asignar ' + n + ' foto' + (n === 1 ? '' : 's') + '</button>'
+                    : '<button type="button" data-bt="platos" class="ok"' + (n ? '' : ' disabled') + '>Asignar a platos…</button>') +
+                '<button type="button" data-bt="cancelar">Cancelar</button>';
+            b.querySelectorAll('[data-bt]').forEach(function (bt) { bt.onclick = function () { accionBarra(bt.dataset.bt, bt); }; });
+        }
+        async function accionBarra(a, bt) {
+            if (a === 'cancelar') { modoSel = null; pintarG(); return; }
+            if (a === 'ninguna') { modoSel.orden = []; marcarSel(); return; }
+            if (a === 'todas') {
+                caja.querySelectorAll('.sfg-card[data-k]').forEach(function (c) { if (modoSel.orden.indexOf(c.dataset.k) < 0) modoSel.orden.push(c.dataset.k); });
+                marcarSel(); return;
+            }
+            if (a === 'agrupar') {
+                var gr = leerGrupos(), def = verGrupo || (modoSel.ids.length ? nombrePlatos([modoSel.ids[0]])[0].replace(/^\d+\s*/, '') : '');
+                var nom = await pedirNombre('👥 Agrupar ' + modoSel.orden.length + ' fotos como…', def, Object.keys(gr).sort(), 'Para juntar las fotos de un plato (aunque todavía no esté en la carta) y asignarlas luego de una vez. Si ya hay un grupo con ese nombre, se añaden a él.');
+                if (!nom) return;
+                var total = agrupar(nom, modoSel.orden.slice()), n0 = modoSel.orden.length;
+                modoSel = null; if (verGrupo && verGrupo !== nom && !leerGrupos()[verGrupo]) verGrupo = null;
+                pintarG();
+                avisar('👥 ' + n0 + ' foto' + (n0 > 1 ? 's' : '') + ' en el grupo «' + nom + '» (' + total + ' en total). Se guarda en GitHub en unos segundos.', '#15803d');
+                return;
+            }
+            if (a === 'platos') {
+                var antes = modoSel.ids.length;
+                var ids = await elegirPlatos(null, null, listaPlatos(), { titulo: '¿Para qué plato o platos son las fotos elegidas?', nombre: '', sub: 'Marca uno o varios (p. ej. el mismo plato en varias secciones). Cada foto se sube una vez y se pone en todos.', boton: antes ? 'Usar' : 'Asignar a', boton0: antes ? 'Usar' : 'Asignar', marcados: modoSel.ids });
+                if (!ids || !ids.length) return;
+                modoSel.ids = ids;
+                if (antes || !modoSel.orden.length) { pintarBarra(); return; }
+                a = 'asignar';
+            }
+            if (a === 'asignar') {
+                if (!modoSel.orden.length || !modoSel.ids.length) return;
+                fondo.querySelectorAll('#sfg-barra button').forEach(function (x) { x.disabled = true; });
+                try {
+                    var r = await asignarFotos(modoSel.orden.slice(), modoSel.ids);
+                    modoSel = null; pintarG(); contarBoton();
+                    avisar(textoLote(r), r.nOk ? '#15803d' : '#b42318');
+                } catch (e) { avisar('No se pudo asignar: ' + (e.message || e)); pintarBarra(); }
+            }
+        }
         function pintarG() {
             var g = leerGaleria(), platos = listaPlatos(), usadas = g.filter(function (x) { return x.usada; }).length;
             var nPeq = g.filter(esPequena).length, dup = repetidas(g);
+            var grupos = leerGrupos(), enGrupo = {};
+            Object.keys(grupos).forEach(function (n) { grupos[n].forEach(function (c) { enGrupo[c] = n; }); });
+            if (verGrupo && !grupos[verGrupo]) verGrupo = null;
             var vis = g.map(function (x, i) { return { x: x, i: i }; }).filter(function (o) {
+                var kc = claveFoto(o.x.u);
+                if (verGrupo) { if (enGrupo[kc] !== verGrupo) return false; } else if (enGrupo[kc]) return false;
                 if (o.x.usada && !verUsadas) return false;
                 if (!verPeq && esPequena(o.x)) return false;
                 if (hashDescartado(o.x.hash)) return false;
                 if (dup[claveFoto(o.x.u)]) return false;
                 return !filtro || palabras(o.x.t).join(' ').indexOf(palabras(filtro).join(' ')) >= 0 || String(o.x.t || '').toLowerCase().indexOf(filtro.toLowerCase()) >= 0;
             });
+            // Asignando por plato: arriba las que se parecen (por el nombre) a los platos elegidos
+            var nomDest = modoSel && modoSel.ids.length ? nombrePlatos(modoSel.ids).join(' ') : '';
+            if (nomDest) {
+                vis.forEach(function (o) { o.p = o.x.t ? parecido(nomDest, o.x.t) : 0; });
+                vis.sort(function (a, b) { return b.p - a.p || a.i - b.i; });
+            }
+            var gruposVis = verGrupo ? [] : Object.keys(grupos).sort(function (a, b) { return a.localeCompare(b, 'es'); }).map(function (n) {
+                var m = grupos[n].map(function (c) { var ix = indiceDe(g, c); return ix >= 0 ? g[ix] : null; }).filter(function (x) { return x && !esDescartada(x); });
+                return { n: n, m: m, total: grupos[n].length };
+            }).filter(function (o) { return !filtro || o.n.toLowerCase().indexOf(filtro.toLowerCase()) >= 0; });
             var sugerido = function (t) {
                 if (!t) return '';
                 var mejor = null, pm = 0;
@@ -1478,20 +1684,32 @@
                 '<input type="text" id="sfg-filtro" placeholder="Buscar por nombre…" value="' + esc(filtro) + '" style="width:170px">' +
                 (g.length ? '<button type="button" id="sfg-guardar" title="Descarga todas las fotos de la lista a su tamaño original">💾 Guardar todas en el PC</button><button type="button" id="sfg-vaciar" title="Quita todas de la lista (las descartadas siguen descartadas)">Vaciar lista</button>' : '') +
                 (function () { var nd = Object.keys(leerDesc()).length; return nd ? '<button type="button" id="sfg-restaurar" title="Las fotos quitadas con ✕ no vuelven a esta web. Esto deshace TODOS los descartes de esta web (en todos los navegadores).">♻ Restaurar descartadas (' + nd + ')</button>' : ''; })() + '</div>' +
-                (vis.length ? '<div class="sfg-rejilla">' + vis.map(function (o) {
+                (g.length && !modoSel ? '<div class="sfg-ops"><button type="button" id="sfg-porplato" class="sfg-b" title="Eliges primero el plato (o el mismo plato en varias secciones) y luego marcas todas sus fotos">🍽 Asignar por plato</button>' +
+                    '<button type="button" id="sfg-selvarias" class="sfg-b" style="background:#2563eb" title="Marcar varias fotos para juntarlas en un grupo con nombre o asignarlas de una vez">☑ Seleccionar varias</button></div>' : '') +
+                (verGrupo ? '<div class="sfg-org" style="background:#eef6ff;border-color:#93c5fd;margin-top:10px">👥 Grupo <b>' + esc(verGrupo) + '</b>: ' + vis.length + ' foto' + (vis.length === 1 ? '' : 's') + (grupos[verGrupo].length > vis.length ? ' (' + (grupos[verGrupo].length - vis.length) + ' ocultas: asignadas, pequeñas o no están en este navegador)' : '') + '. ' +
+                    '<button type="button" id="sfg-gvolver">← Volver a todas</button> <button type="button" id="sfg-gasig" class="sfg-b">Asignar grupo a platos…</button> <button type="button" id="sfg-gren">✎ Renombrar</button></div>' : '') +
+                (vis.length || gruposVis.length ? '<div class="sfg-rejilla' + (modoSel ? ' sfg-selmodo' : '') + '">' + gruposVis.map(function (o) {
+                    var x0 = o.m[0];
+                    return '<div class="sfg-card sfg-grupo" data-g="' + esc(o.n) + '" data-m="' + esc(o.m.map(function (x) { return claveFoto(x.u); }).join('\n')) + '">' + (modoSel ? '<span class="sfg-nsel"></span>' : '') +
+                        (x0 ? imgPrevia(x0.u, "this.style.visibility='hidden'") : '<div style="aspect-ratio:4/3;background:#e5e7eb;border-radius:7px"></div>') +
+                        '<div class="sfg-t" title="' + esc(o.n) + '">👥 ' + esc(o.n) + '</div>' +
+                        '<div class="sfg-i">' + o.m.length + ' foto' + (o.m.length === 1 ? '' : 's') + (o.total > o.m.length ? ' · ' + (o.total - o.m.length) + ' no están en este navegador' : '') + '</div>' +
+                        (modoSel ? '<div class="sfg-hint">Pulsa para elegir todas sus fotos</div>' : '<div class="sfg-a"><button type="button" data-ga="1" class="sfg-b" style="flex:1"' + (o.m.length ? '' : ' disabled') + '>Asignar grupo a platos…</button></div>') +
+                        '<div class="sfg-a2"><button type="button" data-gv="1">👁 Abrir</button><button type="button" data-gx="1" title="Deshace el grupo: sus fotos vuelven sueltas a la lista">✕ Deshacer grupo</button></div></div>';
+                }).join('') + vis.map(function (o) {
                     var x = o.x, kf = claveFoto(x.u), sug = x.usada ? '' : sugerido(x.t);
                     var ed = editadas[kf];
-                    return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-k="' + esc(kf) + '">' +
+                    return '<div class="sfg-card' + (x.usada ? ' usada' : '') + '" data-k="' + esc(kf) + '">' + (modoSel ? '<span class="sfg-nsel"></span>' : '') +
                         '<a href="' + esc(ed ? ed.url : esLocal(x.u) ? (urlsLocales[String(x.u).slice(6)] || '#') : urlsMaxima(x.u)[0]) + '" target="_blank" rel="noopener noreferrer" title="Ver en grande">' +
                         (ed ? '<img src="' + esc(ed.url) + '" alt="">' : imgPrevia(x.u, "this.closest('.sfg-card').style.display='none'")) + '</a>' +
-                        '<div class="sfg-t" title="' + esc(x.t || '') + '">' + (x.t ? esc(x.t) : '<i>sin nombre</i>') + '</div>' +
+                        '<div class="sfg-t" title="' + esc(x.t || '') + '">' + (o.p ? '★ ' : '') + (x.t ? esc(x.t) : '<i>sin nombre</i>') + '</div>' +
                         '<div class="sfg-i' + (esPequena(x) ? ' peq' : '') + '">' + esc(infoTxt(x)) + (esPequena(x) ? ' · pequeña' : '') + '</div>' +
                         (ed ? '<div class="sfg-i" style="color:#2563eb">✂ editada: ' + esc(ed.info) + '</div>' : '') +
                         (x.usada ? '<div class="sfg-u">✔ ' + esc(x.usada) + '</div>' : '') +
-                        '<div class="sfg-a"><button type="button" data-a="1" class="sfg-b" style="flex:1">Asignar a platos…</button></div>' +
-                        '<div class="sfg-a2"><button type="button" data-ed="1" title="Recortar o girar antes de asignar">✂ Editar</button><button type="button" data-x="1" title="Quitar de la lista">✕ Quitar</button></div></div>';
+                        (modoSel ? '<div class="sfg-hint">Pulsa la foto para elegirla</div>' : '<div class="sfg-a"><button type="button" data-a="1" class="sfg-b" style="flex:1">Asignar a platos…</button></div>') +
+                        '<div class="sfg-a2"><button type="button" data-ed="1" title="Recortar o girar antes de asignar">✂ Editar</button>' + (verGrupo ? '<button type="button" data-gs="1" title="Sacar del grupo: vuelve suelta a la lista">⤴ Sacar</button>' : '') + '<button type="button" data-x="1" title="Quitar de la lista">✕ Quitar</button></div></div>';
                 }).join('') + '</div>' : '<div class="sf-vacio">' + (g.length ? 'Ninguna con ese filtro.' : 'Todavía no hay fotos: sigue los pasos de arriba.') + '</div>') +
-                '<p id="sf-msg"></p><div class="sf-bot"><button type="button" class="sf-no">Cerrar</button></div>';
+                '<p id="sf-msg"></p><div class="sf-bot"><button type="button" class="sf-no">Cerrar</button></div>' + (modoSel ? '<div style="height:110px"></div>' : '');
             caja.querySelector('.sf-no').onclick = cerrar;
             var url = caja.querySelector('#sfg-url');
             caja.querySelector('#sfg-add').onclick = function () { var lista = deTexto(url.value); if (!lista.length) { avisar('Pega primero un enlace (empieza por https://).'); return; } meter(lista, 'añadidas'); };
@@ -1564,7 +1782,7 @@
                     });
                 });
             }, { root: caja, rootMargin: '200px' });
-            caja.querySelectorAll('.sfg-card').forEach(function (el) {
+            caja.querySelectorAll('.sfg-card[data-k]').forEach(function (el) {
                 var gg = leerGaleria(), x = gg[indiceDe(gg, el.dataset.k)];
                 if (x && (!x.w || !x.hash) && !x.err) obs.observe(el);   // sin medidas o sin huella (fotos medidas antes de 1.14)
             });
@@ -1578,10 +1796,74 @@
                 (window.confirmarEditor ? window.confirmarEditor('¿Vaciar la lista de fotos de internet? (no toca las fotos ya puestas en platos)') : Promise.resolve(confirm('¿Vaciar la lista?')))
                     .then(function (ok) { if (ok) { vaciarTodo(); pintarG(); contarBoton(); } });
             };
-            caja.querySelectorAll('.sfg-card').forEach(function (el) {
+            // Botones nuevos: asignar por plato, seleccionar varias, grupos
+            var bpp = caja.querySelector('#sfg-porplato');
+            if (bpp) bpp.onclick = async function () {
+                var ids = await elegirPlatos(null, null, platos, { titulo: '¿Para qué plato o platos vas a elegir fotos?', nombre: '', sub: 'Marca uno o varios (p. ej. el mismo plato en varias secciones: 8001 + 12901 + 16000). Luego marcas sus fotos en la lista y pulsas Asignar.', boton: 'Elegir fotos para', boton0: 'Elegir fotos' });
+                if (!ids || !ids.length) return;
+                modoSel = { ids: ids, orden: [] }; pintarG();
+            };
+            var bsv = caja.querySelector('#sfg-selvarias');
+            if (bsv) bsv.onclick = function () { modoSel = { ids: [], orden: [] }; pintarG(); };
+            var asignarGrupo = async function (nom) {
+                var gr = leerGrupos(), gg = leerGaleria();
+                var m = (gr[nom] || []).filter(function (c) { var ix = indiceDe(gg, c); return ix >= 0 && !esDescartada(gg[ix]); });
+                if (!m.length) { avisar('Ese grupo no tiene fotos en este navegador.'); return; }
+                var x0 = gg[indiceDe(gg, m[0])];
+                var ids = await elegirPlatos({ t: nom, u: x0.u }, null, platos, { titulo: '¿A qué platos va el grupo «' + nom + '»?', nombre: m.length + ' foto' + (m.length > 1 ? 's' : ''), sub: 'Todas en un solo guardado: las primeras llenan los huecos de activas (máx. 4) y el resto va de repuesto. Si sale bien, el grupo se deshace y las fotos quedan como asignadas.', sugTxt: 'Parecen este grupo (por el nombre)' });
+                if (!ids || !ids.length) return;
+                try {
+                    var r = await asignarFotos(m, ids);
+                    if (r.okClaves.length === m.length && !r.mal.length) { ponerGrupo(nom, null); if (verGrupo === nom) verGrupo = null; }
+                    else if (r.okClaves.length) ponerGrupo(nom, (leerGrupos()[nom] || []).filter(function (c) { return r.okClaves.indexOf(c) < 0; }));
+                    pintarG(); contarBoton();
+                    avisar(textoLote(r), r.nOk ? '#15803d' : '#b42318');
+                } catch (e) { avisar('No se pudo asignar: ' + (e.message || e)); }
+            };
+            var renombrar = async function (nom) {
+                var gr = leerGrupos();
+                var nuevo = await pedirNombre('✎ Nuevo nombre para el grupo «' + nom + '»', nom, Object.keys(gr).filter(function (n) { return n !== nom; }).sort(), 'Si pones el de otro grupo, se juntan.');
+                if (!nuevo || nuevo === nom) return;
+                var m = gr[nom] || []; ponerGrupo(nom, null); agrupar(nuevo, m);
+                if (verGrupo === nom) verGrupo = nuevo;
+                pintarG(); avisar('✔ Grupo renombrado a «' + nuevo + '».', '#15803d');
+            };
+            var bgv = caja.querySelector('#sfg-gvolver'); if (bgv) bgv.onclick = function () { verGrupo = null; modoSel = null; pintarG(); };
+            var bga = caja.querySelector('#sfg-gasig'); if (bga) bga.onclick = function () { asignarGrupo(verGrupo); };
+            var bgr = caja.querySelector('#sfg-gren'); if (bgr) bgr.onclick = function () { renombrar(verGrupo); };
+            caja.querySelectorAll('.sfg-grupo').forEach(function (el) {
+                var nom = el.dataset.g;
+                var ga = el.querySelector('[data-ga]'); if (ga) ga.onclick = function () { asignarGrupo(nom); };
+                el.querySelector('[data-gv]').onclick = function () { verGrupo = nom; caja.scrollTop = 0; pintarG(); };
+                el.querySelector('[data-gx]').onclick = function () {
+                    (window.confirmarEditor ? window.confirmarEditor('¿Deshacer el grupo «' + nom + '»? Sus fotos vuelven sueltas a la lista (no se borra ninguna).') : Promise.resolve(confirm('¿Deshacer el grupo?')))
+                        .then(function (ok) { if (ok) { ponerGrupo(nom, null); pintarG(); avisar('Grupo «' + nom + '» deshecho: sus fotos vuelven a la lista.', '#15803d'); } });
+                };
+                el.addEventListener('click', function (e) {
+                    if (!modoSel || e.target.closest('button')) return;
+                    e.preventDefault(); e.stopPropagation();
+                    var m = (el.dataset.m || '').split('\n').filter(Boolean);
+                    var todas = m.length && m.every(function (k) { return modoSel.orden.indexOf(k) >= 0; });
+                    if (todas) modoSel.orden = modoSel.orden.filter(function (k) { return m.indexOf(k) < 0; });
+                    else m.forEach(function (k) { if (modoSel.orden.indexOf(k) < 0) modoSel.orden.push(k); });
+                    marcarSel();
+                }, true);
+            });
+            caja.querySelectorAll('.sfg-card[data-k]').forEach(function (el) {
                 var g2 = function () { return leerGaleria(); };
+                el.addEventListener('click', function (e) {
+                    if (!modoSel || e.target.closest('button')) return;
+                    e.preventDefault(); e.stopPropagation();
+                    var k = el.dataset.k, i = modoSel.orden.indexOf(k);
+                    if (i >= 0) modoSel.orden.splice(i, 1); else modoSel.orden.push(k);
+                    marcarSel();
+                }, true);
+                var gs = el.querySelector('[data-gs]');
+                if (gs) gs.onclick = function () { sacarDeGrupo(el.dataset.k); if (modoSel) { var j = modoSel.orden.indexOf(el.dataset.k); if (j >= 0) modoSel.orden.splice(j, 1); } pintarG(); };
                 el.querySelector('[data-x]').onclick = function () {
                     var g = g2(), ix = indiceDe(g, el.dataset.k); if (ix < 0) return;
+                    sacarDeGrupo(el.dataset.k);
+                    if (modoSel) { var j = modoSel.orden.indexOf(el.dataset.k); if (j >= 0) { modoSel.orden.splice(j, 1); pintarBarra(); } }
                     descartar(el.dataset.k, g[ix].hash); g.splice(ix, 1); guardarGaleria(g); el.remove(); contarBoton();
                     var cb = caja.querySelector('.sf-gal-cab b'), us = g.filter(function (q) { return q.usada; }).length;
                     if (cb) cb.textContent = (g.length - us) + ' sin asignar' + (us ? ' · ' + us + ' asignadas' : '');
@@ -1603,7 +1885,8 @@
                     } catch (e) { avisar(e.message || String(e)); }
                     bt.disabled = false; bt.textContent = '✂ Editar';
                 };
-                el.querySelector('[data-a]').onclick = async function () {
+                var ba = el.querySelector('[data-a]');
+                if (ba) ba.onclick = async function () {
                     var bt = this, gg = g2(), x = gg[indiceDe(gg, kf)]; if (!x) return;
                     var ids = await elegirPlatos(x, kf, platos);
                     if (!ids || !ids.length) return;
@@ -1639,6 +1922,8 @@
                     }
                 };
             });
+            marcarSel();
+            pintarBarra();
         }
         alRecibir = pintarG;
         pintarG();
