@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.12.0'; // 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.13.0'; // 9 nov: "Buscar como" en 🖼️ Fotos de internet (p. ej. Roland Garros Manacor) + Instalar la extensión: opciones de Opera con captura y "cada navegador por separado". 1.12.0: 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -559,6 +559,7 @@
         '#sf-caja .sf-gal-cab input[type=text]{padding:4px 8px}#sf-caja .sf-ext-fila input{flex:1 1 200px}' +
         '.sfg-org{margin-top:10px;padding:10px 12px;border:2px solid #f59e0b;background:#fffbeb;border-radius:9px;font-size:.88rem;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.sfg-org button{padding:6px 10px;border-radius:7px;cursor:pointer;font-size:.8rem}.sfg-org button:not(.sfg-b){border:1px solid #d6d2c6;background:#fff}' +
         '.sfg-orgs{margin-top:8px;font-size:.78rem;color:#6b6f76}.sfg-orgs a{color:#b42318;text-decoration:none}' +
+        '.sfg-buscar{margin-top:10px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font-size:.86rem}.sfg-buscar label{display:flex;gap:6px;align-items:center;font-weight:600}.sfg-buscar input{width:280px;padding:7px 9px;border:1px solid #ccc;border-radius:7px;font-weight:400}.sfg-buscar small{color:#6b6f76;flex:1 1 300px}' +
         '.sfg-ir{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.sfg-ir>div{display:flex;gap:6px;align-items:center}.sfg-ir a{text-decoration:none;padding:9px 12px;font-size:.88rem}.sfg-ir input{flex:1;min-width:0;padding:7px 9px;border:1px solid #ccc;border-radius:7px;font-size:.8rem}' +
         '@media(max-width:700px){.sfg-ir{grid-template-columns:1fr}}' +
         '.sfg-b{padding:6px 10px;border-radius:7px;border:0;background:#1f2328;color:#fff;cursor:pointer;font-size:.8rem;white-space:nowrap}' +
@@ -570,7 +571,7 @@
         '#sfg-inst{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100003;display:flex;align-items:center;justify-content:center;padding:16px}' +
         '.sfg-in-caja{background:#fff;color:#1f2328;border-radius:12px;width:100%;max-width:720px;max-height:92vh;overflow:auto;padding:18px 20px;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}' +
         '.sfg-in-estado{margin:10px 0;padding:8px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0}' +
-        '.sfg-in-pasos{list-style:none;padding:0;margin:10px 0;display:flex;flex-direction:column;gap:12px}.sfg-in-pasos li{display:flex;gap:12px;align-items:flex-start}' +
+        '.sfg-in-pasos{list-style:none;padding:0;margin:10px 0;display:flex;flex-direction:column;gap:12px}.sfg-in-pasos>li{display:flex;gap:12px;align-items:flex-start}.sfg-in-pasos ul li{margin:2px 0}' +
         '.sfg-in-n{flex:0 0 28px;height:28px;border-radius:50%;background:#1f2328;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}' +
         '.sfg-in-pasos a.sfg-b{display:inline-block;margin-top:4px;text-decoration:none;padding:8px 12px}.sfg-in-pasos code,.sfg-in-caja code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:.84rem}' +
         '#sfg-pop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100002;display:flex;align-items:center;justify-content:center;padding:16px}' +
@@ -1111,10 +1112,17 @@
             paso(4, 'Activa el ' + esc(nv.dev), 'Es un interruptor. Al activarlo salen unos botones nuevos.') +
             paso(5, 'Pulsa "' + esc(nv.cargar) + '"', 'Elige la carpeta <code>extension-fotos</code> del paso 2 (la que tiene dentro <code>manifest.json</code>) → <b>Seleccionar carpeta</b>. Aparece "Cartas · Escáner de fotos".') +
             paso(6, 'Vuelve aquí y recarga (F5)', 'En 🖼️ Fotos de internet saldrá <b>"extensión instalada ✔"</b>. Si ' + esc(nv.nombre) + ' avisa al abrirse de "extensiones en modo desarrollador", es normal: pulsa cerrar / mantener.') +
+            (nv.id === 'opera'
+                ? paso(7, 'Opciones de la extensión en Opera', 'Debajo de la extensión salen dos casillas. Puedes dejar <b>las dos sin marcar</b>:' +
+                    '<ul style="margin:4px 0;padding-left:18px"><li><b>Permitir en ventanas privadas</b>: no hace falta.</li>' +
+                    '<li><b>Permitir el acceso a los resultados de la página de búsqueda</b> (solo Opera): márcala <b>solo si</b> al abrir el restaurante en Google Maps <b>no sale el panel negro</b> con el contador; luego recarga Maps.</li></ul>' +
+                    '<img src="extension-doc/opera-extension-opciones.png" alt="Opciones de la extensión en Opera" style="max-width:100%;border:1px solid #e3e0d8;border-radius:8px" onerror="this.remove()">')
+                : '') +
             '</ol>' +
+            '<p class="sfg-in-estado" style="font-size:.85rem">ℹ️ Es la <b>misma extensión</b> para Chrome, Opera y Edge, pero <b>se instala en cada navegador</b> (la misma carpeta vale para todos) y <b>cada navegador guarda sus fotos</b>: lo que escaneas en uno llega al editor abierto en ese mismo navegador. Escanea y asigna en el mismo.</p>' +
             '<details class="sfg-pasos"' + (vieja ? ' open' : '') + '><summary><b>Actualizar</b> (cuando aquí avise de una versión nueva)</summary><ol>' +
             '<li>Descarga el .zip nuevo (paso 1) y extráelo <b>en la misma carpeta de antes</b>, aceptando <b>reemplazar</b> los archivos.</li>' +
-            '<li>En <code>' + esc(nv.url) + '</code> pulsa ' + esc(nv.recargar) + ' "Cartas · Escáner de fotos".</li>' +
+            '<li>En <code>' + esc(nv.url) + '</code> pulsa ' + esc(nv.recargar) + ' "Cartas · Escáner de fotos" (si la tienes en varios navegadores, en cada uno).</li>' +
             '<li>Recarga esta página (F5).</li></ol></details>' +
             '<p id="sfg-in-msg" style="min-height:1.2em;margin:6px 0 0"></p>' +
             '<div class="sf-bot"><button type="button" class="sf-no">Cerrar</button></div></div>';
@@ -1267,6 +1275,8 @@
                         (no.length ? (mios.length ? ' &nbsp;|&nbsp; ' : '') + 'Ignorados: ' + no.map(function (d) { return '<span>' + esc(d) + ' <a href="#" data-olv="' + esc(d) + '" title="Olvidar: volverá a preguntar">✕</a></span>'; }).join(' · ') : '') + '</div>' : '';
                 })() +
                 (extAntigua() ? '<div class="sfg-org">🧩 Hay una versión nueva de la extensión Escáner de fotos (' + esc(S.extension) + '; tienes ' + esc(extVersion() || 'una anterior') + '). <button type="button" class="sfg-b sfg-inst-btn">Actualizar (paso a paso)</button></div>' : '') +
+                '<div class="sfg-buscar"><label>Buscar como <input type="text" id="sfg-q" value="' + esc(q) + '" placeholder="Nombre del restaurante y pueblo"></label>' +
+                '<small>Lo que buscan los botones si no hay enlace exacto. Si no encuentran el restaurante, pon su nombre completo (p. ej. "Roland Garros Manacor") o pega al lado el enlace exacto de su ficha (lo más fiable).</small></div>' +
                 '<div class="sfg-ir">' +
                 '<div><a class="sfg-b sfg-gmaps" href="' + esc(en.maps || l.maps) + '" target="_blank" rel="noopener">🗺️ Abrir en Google Maps</a>' +
                 '<input type="text" data-en="maps" value="' + esc(en.maps || '') + '" placeholder="Enlace del restaurante en Google Maps (opcional, se recuerda)"></div>' +
@@ -1313,6 +1323,15 @@
             caja.querySelectorAll('[data-olv]').forEach(function (a) {
                 a.onclick = function (e) { e.preventDefault(); ponerOrigen(a.dataset.olv, null); pintarG(); avisar('Olvidado: la próxima vez que lleguen fotos de "' + a.dataset.olv + '" volverá a preguntar (recarga el editor).', '#15803d'); };
             });
+            var qb = caja.querySelector('#sfg-q');
+            qb.onchange = function () {
+                q = qb.value.trim() || busquedaLocal(); l = enlacesExternos(q, '');
+                try { if (qb.value.trim()) localStorage.setItem(CLAVE_Q, qb.value.trim()); else localStorage.removeItem(CLAVE_Q); } catch (e) { }
+                var e2 = leerEnlaces();
+                if (!e2.maps) caja.querySelector('.sfg-gmaps').href = l.maps;
+                if (!e2.trip) caja.querySelector('.sfg-trip').href = l.trip;
+                avisar('✔ Búsqueda guardada: "' + q + '".' + (e2.maps || e2.trip ? ' (Los botones con enlace exacto siguen yendo a ese enlace.)' : ''), '#15803d');
+            };
             caja.querySelectorAll('[data-en]').forEach(function (inp) {
                 inp.onchange = function () {
                     var v = inp.value.trim();
