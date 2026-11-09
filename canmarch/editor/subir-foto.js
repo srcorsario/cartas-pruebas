@@ -16,7 +16,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.subirFoto = '1.20.0'; // 9 nov: fotos de la CARPETA DEL PC solo en memoria (ya no van a localStorage: lo llenaban en Opera; las que quedaron guardadas se quitan y liberan sitio) y sus miniaturas se hacen pequeñas (300 px), de 2 en 2 y solo las que se ven (antes cargaba 145 fotos enteras: Chrome iba lento y Firefox salía en blanco). 1.19.3, 9 nov: fotos escaneadas de 📷 Fotos del plato: filas de alto fijo (140 px), ya no se amontonan (Chrome/Firefox/Opera). 1.19.1, 9 nov: si el navegador está lleno (localStorage, compartido por todas las webs de srcorsario.github.io) la lista de fotos no se guardaba y no salía nada: ahora libera las cachés de carta de las webs (se rehacen solas) y, si aun así no cabe, avisa. 1.19.0, 9 nov: 📷 Fotos del plato: botón "📂 Carpeta del PC" (y "Volver a abrir") para elegir fotos de una carpeta, como en 🖼️ Fotos de internet. 1.18.3, 9 nov: 📷 Fotos del plato usa todo el alto (las fotos en la web crecen) y en cada tarjeta los textos y botones van siempre en el mismo sitio. 1.18.2, 9 nov: repetidas solo por huella (mismo archivo); "mismas medidas y KB" solo si no hay huella (ocultaba fotos distintas). 1.18.1, 9 nov: "📷 Fotos del plato" a pantalla completa; al volver a recortar una foto se abre con el último recuadro, giro y formato puestos (sobre la original). 1.18.0, 9 nov: recorte de fotos de plato en VERTICAL 3:4 de serie (la web se ve sobre todo en el móvil; se recuerda el último formato en cada dispositivo; logos/QR siguen libres), nuevo 4:5; al girar la foto se vuelve a encajar entera en la ventana y el recuadro se rehace (antes se salía por un lado). 1.17.1, 9 nov: buscador de platos por palabras sueltas en cualquier orden ("arroz vaca"), sin tildes ni mayúsculas. 1.17.0, 9 nov: 🖼️ Fotos de internet: "🍽 Asignar por plato" (eliges el plato o platos y luego marcas las fotos; todas van en UN commit: las 4 primeras activas si hay hueco, el resto de repuesto) y "☑ Seleccionar varias" -> "👥 Agrupar como…" (grupos con nombre, compartidos en fotos-internet.json, salen como una tarjeta; "Asignar grupo" cuando el plato exista). 1.16.0, 9 nov: fotos quitadas (✕) = descartadas para siempre en esa web, por dirección y por huella, guardadas en GitHub (fotos-internet.json, vale en todos los navegadores); también qué foto original (huella) está asignada a qué platos; Vaciar ya no borra descartes; ♻ Restaurar descartadas. 1.15.1: tarjetas de 🖼️ Fotos de internet todas iguales (botones siempre abajo, medidas en 2 líneas fijas). 1.15.0: 📂 cargar fotos de una carpeta del PC en 🖼️ Fotos de internet (se recuerda la carpeta por web; editar/asignar igual). 1.14.0: repuestos ILIMITADOS (desactivadas 01..99+; con 4 activas lo nuevo va a repuesto) + hash SHA-256 de cada foto de internet (repetidas por contenido). 1.13.2: Opera: hay que MARCAR "resultados de la página de búsqueda" (si no, no corre en Google Maps). 1.13.1: "Buscar como" de serie desde sitio.json (buscarFotos), p. ej. RG = Roland Garros Manacor. 1.13.0: "Buscar como" en 🖼️ Fotos de internet (p. ej. Roland Garros Manacor) + Instalar la extensión: opciones de Opera con captura y "cada navegador por separado". 1.12.0: 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
+    window.APP_VERSIONS.subirFoto = '1.21.0'; // 9 nov: 📷 Fotos del plato avisa si la foto que añades ya está en el plato (huella exacta de la original ya asignada a este plato, o parecido visual con alguna de sus fotos aunque esté recortada) y pregunta si añadirla igualmente; las fotos añadidas a mano también quedan anotadas como asignadas. 1.20.0, 9 nov: fotos de la CARPETA DEL PC solo en memoria (ya no van a localStorage: lo llenaban en Opera; las que quedaron guardadas se quitan y liberan sitio) y sus miniaturas se hacen pequeñas (300 px), de 2 en 2 y solo las que se ven (antes cargaba 145 fotos enteras: Chrome iba lento y Firefox salía en blanco). 1.19.3, 9 nov: fotos escaneadas de 📷 Fotos del plato: filas de alto fijo (140 px), ya no se amontonan (Chrome/Firefox/Opera). 1.19.1, 9 nov: si el navegador está lleno (localStorage, compartido por todas las webs de srcorsario.github.io) la lista de fotos no se guardaba y no salía nada: ahora libera las cachés de carta de las webs (se rehacen solas) y, si aun así no cabe, avisa. 1.19.0, 9 nov: 📷 Fotos del plato: botón "📂 Carpeta del PC" (y "Volver a abrir") para elegir fotos de una carpeta, como en 🖼️ Fotos de internet. 1.18.3, 9 nov: 📷 Fotos del plato usa todo el alto (las fotos en la web crecen) y en cada tarjeta los textos y botones van siempre en el mismo sitio. 1.18.2, 9 nov: repetidas solo por huella (mismo archivo); "mismas medidas y KB" solo si no hay huella (ocultaba fotos distintas). 1.18.1, 9 nov: "📷 Fotos del plato" a pantalla completa; al volver a recortar una foto se abre con el último recuadro, giro y formato puestos (sobre la original). 1.18.0, 9 nov: recorte de fotos de plato en VERTICAL 3:4 de serie (la web se ve sobre todo en el móvil; se recuerda el último formato en cada dispositivo; logos/QR siguen libres), nuevo 4:5; al girar la foto se vuelve a encajar entera en la ventana y el recuadro se rehace (antes se salía por un lado). 1.17.1, 9 nov: buscador de platos por palabras sueltas en cualquier orden ("arroz vaca"), sin tildes ni mayúsculas. 1.17.0, 9 nov: 🖼️ Fotos de internet: "🍽 Asignar por plato" (eliges el plato o platos y luego marcas las fotos; todas van en UN commit: las 4 primeras activas si hay hueco, el resto de repuesto) y "☑ Seleccionar varias" -> "👥 Agrupar como…" (grupos con nombre, compartidos en fotos-internet.json, salen como una tarjeta; "Asignar grupo" cuando el plato exista). 1.16.0, 9 nov: fotos quitadas (✕) = descartadas para siempre en esa web, por dirección y por huella, guardadas en GitHub (fotos-internet.json, vale en todos los navegadores); también qué foto original (huella) está asignada a qué platos; Vaciar ya no borra descartes; ♻ Restaurar descartadas. 1.15.1: tarjetas de 🖼️ Fotos de internet todas iguales (botones siempre abajo, medidas en 2 líneas fijas). 1.15.0: 📂 cargar fotos de una carpeta del PC en 🖼️ Fotos de internet (se recuerda la carpeta por web; editar/asignar igual). 1.14.0: repuestos ILIMITADOS (desactivadas 01..99+; con 4 activas lo nuevo va a repuesto) + hash SHA-256 de cada foto de internet (repetidas por contenido). 1.13.2: Opera: hay que MARCAR "resultados de la página de búsqueda" (si no, no corre en Google Maps). 1.13.1: "Buscar como" de serie desde sitio.json (buscarFotos), p. ej. RG = Roland Garros Manacor. 1.13.0: "Buscar como" en 🖼️ Fotos de internet (p. ej. Roland Garros Manacor) + Instalar la extensión: opciones de Opera con captura y "cada navegador por separado". 1.12.0: 8 nov: 🧩 Instalar la extensión: descarga escaner-fotos.zip (lo genera construir) + tutorial paso a paso según el navegador; aviso de versión nueva. 1.11.1: 7 nov: buscando en "Asignar a platos" ya no salen repetidos los ★. 1.11.0: "Asignar a platos…" = ventana grande con casillas (nada marcado de serie; parecidos arriba con ★). 1.10.0: en 🖼️ Fotos de internet: ✂ Editar (recortar) y Asignar a VARIOS platos a la vez (sube 1 vez, WebP 1080, un commit). 1.9.0: cada foto lleva su restaurante de origen; cada web solo acepta los suyos (pregunta Sí/No la 1ª vez). 1.8.1: TripAdvisor: una foto en varios tamaños = una sola (clave por ruta y por medidas+peso), vista previa más nítida. 1.8.0: medidas/peso/formato bajo cada foto (se miden al verlas) + mínimo de resolución (oculta y no guarda las pequeñas). 1.7.0: botones Maps/TripAdvisor con enlace guardado + 💾 guardar todas en el PC a máxima calidad (sueltas, sin zip). 1.6.1: ✕ sin repintar (no vuelve arriba), se conserva la posición al repintar, 🖼️ Fotos de internet a pantalla completa. 1.6.0: sección "🖼️ Fotos de internet" en la cabecera (galería + asignar a plato) y extensión Escáner de fotos (herramientas\\extension-fotos): Google bloquea los marcadores. 1.5.1: escáner: <picture><source>, data-src, alt, galería por encima (TripAdvisor). 1.5.0: escáner sin innerHTML (Google lo bloquea: Trusted Types) + nombre del plato de cada foto + sugerencias por nombre. 1.4.0: escáner a fondo (escucha fetch/XHR, datos internos, bajar solo). 1.3.0: escáner de fotos (marcador) + galería para asignar a cada plato. 1.2.0: traer fotos de Google Maps / TripAdvisor (enlaces + pegar Ctrl+V, arrastrar o URL). 1.1.0: subirImagen() para logos y QR (marca.js)
 
     var MAX_LADO = 1080, CALIDAD = 0.8, MAX_FOTOS = 4;   // 1080 px: nítida en móvil, ~100-200 KB
     var JSQUASH = 'https://cdn.jsdelivr.net/npm/@jsquash/webp@1.5.0/encode.js';
@@ -408,6 +408,36 @@
     // Original de una foto de la lista: de internet (máxima calidad) o de la carpeta del PC.
     async function obtenerOriginal(x) { return esLocal(x.u) ? archivoLocal(x.u) : bajarMaxima(x.u); }
     // Pone las miniaturas de las fotos locales (se leen del disco) en lo que se acaba de pintar.
+    // ---------- ¿misma foto? ----------
+    async function huellaArchivo(b) {
+        try { var dg = await crypto.subtle.digest('SHA-256', await b.arrayBuffer()); return Array.prototype.map.call(new Uint8Array(dg).slice(0, 16), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+        catch (e) { return ''; }
+    }
+    // Huella visual (dHash 16x16 = 256 bits) de la imagen; con "aspecto" (ancho/alto), del trozo con esa proporción en la
+    // posición pos (0 = arriba/izquierda, 0.5 = centro, 1 = abajo/derecha). bm: ImageBitmap ya abierto (opcional).
+    async function huellaVisual(b, aspecto, pos, bm0) {
+        var bm = bm0 || await createImageBitmap(b), w = bm.width, h = bm.height, sx = 0, sy = 0;
+        if (pos == null) pos = 0.5;
+        if (aspecto) { if (w / h > aspecto) { sx = (w - h * aspecto) * pos; w = h * aspecto; } else { sy = (h - w / aspecto) * pos; h = w / aspecto; } }
+        var c = document.createElement('canvas'); c.width = 17; c.height = 16;
+        var cx = c.getContext('2d'); cx.drawImage(bm, sx, sy, w, h, 0, 0, 17, 16);
+        var asp = bm.width / bm.height; if (!bm0 && bm.close) bm.close();
+        var d = cx.getImageData(0, 0, 17, 16).data, bits = [];
+        for (var y = 0; y < 16; y++) for (var x = 0; x < 16; x++) {
+            var i = (y * 17 + x) * 4, j = i + 4;
+            bits.push((d[i] * 3 + d[i + 1] * 6 + d[i + 2]) < (d[j] * 3 + d[j + 1] * 6 + d[j + 2]) ? 1 : 0);
+        }
+        return { bits: bits, aspecto: asp };
+    }
+    function distanciaVisual(a, b) { var n = 0; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) n++; return n; }
+    // Huellas del trozo con esa proporción en 11 posiciones (el recorte puede no estar centrado).
+    async function huellasPosiciones(b, aspecto) {
+        var bm = await createImageBitmap(b), out = [];
+        try { for (var i = 0; i <= 10; i++) out.push((await huellaVisual(b, aspecto, i / 10, bm)).bits); }
+        finally { if (bm.close) bm.close(); }
+        return out;
+    }
+
     // Miniaturas pequeñas (300 px) de las fotos locales: solo las que se ven, de 2 en 2 (las fotos enteras de
     // 4000 px x 145 colgaban el navegador). urlsLocales = archivo entero (para "ver en grande"), urlsMini = miniatura.
     var colaMini = [], enCursoMini = 0, obsMini = null;
@@ -1114,14 +1144,44 @@
             if (/^https?:\/\/\S+$/i.test(t)) { e.preventDefault(); añadirUrl(t); }
         }
         document.addEventListener('paste', alPegar);
+        // ¿Ya está en este plato? Exacta: la original ya se asignó a este plato (huella SHA). Parecida: misma imagen
+        // (huella visual del centro con la proporción de cada foto del plato; aguanta recortes centrados y recompresión).
+        async function yaEnPlato(f, hashOrig) {
+            var a = hashOrig && (descRemoto.asignadas[hashOrig] || descPend.asignadas[hashOrig]);
+            if (a && String(a).split(' + ').some(function (t) { return t.split(' ')[0] === String(p.id); })) {
+                if (activas.length + desact.length) return 'la misma foto original ya se puso en este plato';
+            }
+            var todas = activas.map(function (x, i) { return { x: x, n: '0' + (i + 1) + (i ? ' (galería)' : ' (principal)') }; })
+                .concat(desact.map(function (x, i) { return { x: x, n: 'desactivada ' + (i + 1) }; }));
+            var cache = {};
+            for (var i = 0; i < todas.length; i++) {
+                var x = todas[i].x, b = x.blob || x.fuente;
+                if (!b) continue;
+                if (x.hashOrig && x.hashOrig === hashOrig) return todas[i].n;
+                try {
+                    if (!x.hv) x.hv = await huellaVisual(b);
+                    var kA = x.hv.aspecto.toFixed(2);
+                    if (!cache[kA]) cache[kA] = await huellasPosiciones(f, x.hv.aspecto);
+                    if (cache[kA].some(function (bits) { return distanciaVisual(x.hv.bits, bits) <= 55; })) return todas[i].n;
+                } catch (e) { }
+            }
+            return '';
+        }
         async function añadir(files, gal) {
             for (var k = 0; k < files.length; k++) {
                 avisar('Preparando ' + files[k].name + '…', '#555');
                 try {
+                    var hashOrig = await huellaArchivo(files[k]), igual = await yaEnPlato(files[k], hashOrig);
+                    if (igual) {
+                        var seguir = window.confirmarEditor
+                            ? await window.confirmarEditor('Esta foto ya está en el plato: ' + igual + '. ¿Añadirla igualmente?', { si: 'Añadir igualmente', no: 'No' })
+                            : confirm('Esta foto ya está en el plato: ' + igual + '. ¿Añadirla igualmente?');
+                        if (!seguir) { avisar('No se ha añadido (ya estaba: ' + igual + ').', '#b45309'); continue; }
+                    }
                     var r = await recortar(files[k], files[k].name + ' (' + kb(files[k].size) + ')');
                     if (!r) { avisar(''); continue; }
                     var u = URL.createObjectURL(r.blob); urls.push(u);
-                    var nueva = { blob: r.blob, fuente: files[k], url: u, info: r.info, gal: gal || null, recorte: r.datos };
+                    var nueva = { blob: r.blob, fuente: files[k], url: u, info: r.info, gal: gal || null, recorte: r.datos, hashOrig: hashOrig };
                     if (activas.length < MAX_FOTOS) activas.push(nueva); else desact.push(nueva);
                     pintar();
                     if (desact.indexOf(nueva) >= 0) avisar('Ya hay ' + MAX_FOTOS + ' activas: la nueva queda de repuesto (Desactivadas). Actívala cuando quieras.', '#b45309');
@@ -1148,6 +1208,8 @@
                     if (!o || o.sha !== finales[path]) cambios.push({ path: path, sha: finales[path] });
                 });
                 if (cambios.length) { msg.textContent = 'Guardando en GitHub…'; await commit(cambios, 'Fotos ' + base + ' (plato ' + p.id + ')'); }
+                var np0 = nombrePlato();
+                activas.concat(desact).forEach(function (x) { if (x.blob && x.hashOrig && !x.gal) { descPend.asignadas[x.hashOrig] = p.id + ' ' + np0; programarDescartes(); } });
                 var conGal = activas.concat(desact).filter(function (x) { return x.gal; });
                 if (conGal.length) {
                     var g = leerGaleria(), np = nombrePlato();
