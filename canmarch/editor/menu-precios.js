@@ -16,7 +16,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.menuPrecios = '1.1.0'; // 9 nov: reparto por bebida (cerveza 1/3, refresco 1/4, café 1/2) y por vino (blanco/tinto 1/4 o 1/5 si hay varios, rosado 1/6 o 1/8, cava 1/7); columnas "Según carta" y "Coste estimado" juntas. 1.0.0, 9 nov: Menú Especial: precio y coste por persona (carta + costes cifrados; compartir ÷4, a elegir = media, agua 1 cada 2, vino 1 botella cada 4), solo en el editor
+    window.APP_VERSIONS.menuPrecios = '1.1.1'; // 9 nov: secciones "A elegir": cada plato sale como "opción" y debajo una fila con el PRECIO MEDIO de las opciones (antes se veía cada precio ÷ 2 y confundía; el total ya era el mismo). 1.1.0, 9 nov: reparto por bebida (cerveza 1/3, refresco 1/4, café 1/2) y por vino (blanco/tinto 1/4 o 1/5 si hay varios, rosado 1/6 o 1/8, cava 1/7); columnas "Según carta" y "Coste estimado" juntas. 1.0.0, 9 nov: Menú Especial: precio y coste por persona (carta + costes cifrados; compartir ÷4, a elegir = media, agua 1 cada 2, vino 1 botella cada 4), solo en el editor
 
     var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
     var num = function (v) { if (v == null || v === '') return NaN; var t = String(v).replace(/[€\s]/g, ''); if (/,\d{1,2}$/.test(t)) t = t.replace(/\./g, '').replace(',', '.'); else t = t.replace(/,/g, ''); return t === '' ? NaN : parseFloat(t); };
@@ -85,7 +85,7 @@
             sec.platos.forEach(function (p) {
                 var k = clave(p), pc = p.manual || p.modo === 'manual' ? null : platoCarta(p.id), v = valor(k, pc, pc ? pc.id : null);
                 out.push({ sec: s[1], clave: k, nombre: p.es, pvp: v.pvp, coste: v.coste, aPvp: v.aPvp, aCoste: v.aCoste, sinCarta: !pc,
-                    factor: comp ? 1 / cc : eleg ? 1 / n : 1, reparto: comp ? '1 cada ' + cc + ' pax' : eleg ? 'a elegir: media de ' + n : 'entero' });
+                    factor: comp ? 1 / cc : eleg ? 1 / n : 1, reparto: comp ? '1 cada ' + cc + ' pax' : eleg ? 'opción a elegir' : 'entero', opcion: eleg, grupo: s[0], n: n });
             });
         });
         var b = menu.bebida || {};
@@ -135,7 +135,17 @@
         var pax = num(c.comensales), pm = num(c.precioMenu), b0 = menu.bebida || {}, auto0 = repartoVinoAuto(b0);
         var inp = function (campo, v, ancho, ph) { return '<input type="text" inputmode="decimal" data-c="' + campo + '" value="' + esc(v === '' || v == null ? '' : String(v).replace('.', ',')) + '"' + (ph ? ' placeholder="' + esc(ph) + '"' : '') + ' style="width:' + (ancho || 52) + 'px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:5px;text-align:right">'; };
         var ult = '', FC = '#fffaf2', FK = '#f4f7fb';
-        var filas = t.lineas.map(function (l) {
+        // "A elegir": cada plato es una opción; por persona cuenta la MEDIA de los precios de las opciones.
+        var filaMedia = function (g) {
+            var sp = 0, sc = 0, okC = true;
+            g.forEach(function (q) { sp += isFinite(q.pvp) ? q.pvp : 0; if (isFinite(q.coste)) sc += q.coste; else okC = false; });
+            var mp = sp / g.length, mc = sc / g.length;
+            return '<tr style="border-top:1px dashed #e5c9a8"><td style="padding:4px 6px;font-style:italic;color:#9a3412">→ Precio medio de las ' + g.length + ' opciones</td>' +
+                '<td style="color:#64748b;font-size:.78rem;padding:0 8px;white-space:nowrap">media (' + g.map(function (q) { return dec(q.pvp) || '?'; }).join(' + ') + ') ÷ ' + g.length + '</td>' +
+                '<td style="background:' + FC + '"></td><td style="text-align:right;white-space:nowrap;padding:0 8px;background:' + FC + ';font-weight:700">' + eur(mp) + '</td>' +
+                '<td style="background:' + FK + '"></td><td style="text-align:right;white-space:nowrap;padding:0 8px;background:' + FK + ';color:#475569;font-weight:600">' + (abierto ? (okC ? eur(mc) : '—') : '') + '</td></tr>';
+        };
+        var filas = t.lineas.map(function (l, i, todas) {
             var cab = l.sec !== ult ? '<tr><td colspan="6" style="background:#fff7ed;font-weight:700;color:#9a3412;padding:6px">' + esc(l.sec) + '</td></tr>' : '';
             ult = l.sec;
             var celdaPvp = l.extra ? inp('extraPvp', c.extraPvp, 64) : '<input type="text" inputmode="decimal" data-k="' + esc(l.clave) + '" data-t="pvp" value="' + (l.aPvp ? dec(l.pvp) : '') + '" placeholder="' + (isFinite(l.pvp) && !l.aPvp ? dec(l.pvp) : '¿precio?') + '" title="' + (l.aPvp ? 'Precio puesto a mano en este menú (vacío = el de la carta)' : 'Precio de la carta (escribe otro para este menú)') + '" style="width:64px;padding:4px 6px;border:1px solid ' + (l.aPvp ? '#2563eb' : '#cbd5e1') + ';border-radius:5px;text-align:right">';
@@ -144,9 +154,10 @@
             return cab + '<tr><td style="padding:4px 6px">' + esc(l.nombre) + (l.sinCarta && !l.extra ? ' <small style="color:#b45309">(no está en la carta)</small>' : '') + '</td>' +
                 '<td style="color:#64748b;font-size:.78rem;padding:0 8px;white-space:nowrap">' + esc(l.reparto) + '</td>' +
                 '<td style="text-align:right;background:' + FC + '">' + celdaPvp + '</td>' +
-                '<td style="text-align:right;white-space:nowrap;padding:0 8px;background:' + FC + ';font-weight:600">' + eur(l.pvp * l.factor) + '</td>' +
+                '<td style="text-align:right;white-space:nowrap;padding:0 8px;background:' + FC + ';font-weight:600">' + (l.opcion ? '<span style="color:#94a3b8;font-weight:400">opción</span>' : eur(l.pvp * l.factor)) + '</td>' +
                 '<td style="text-align:right;background:' + FK + '">' + celdaCo + '</td>' +
-                '<td style="text-align:right;white-space:nowrap;padding:0 8px;background:' + FK + ';color:#475569">' + (abierto || l.extra ? eur(l.coste * l.factor) : '') + '</td></tr>';
+                '<td style="text-align:right;white-space:nowrap;padding:0 8px;background:' + FK + ';color:#475569">' + (l.opcion ? '' : (abierto || l.extra ? eur(l.coste * l.factor) : '')) + '</td></tr>' +
+                (l.opcion && (!todas[i + 1] || todas[i + 1].grupo !== l.grupo) ? filaMedia(todas.filter(function (q) { return q.grupo === l.grupo; })) : '');
         }).join('');
         var pcCoste = t.pvp > 0 && abierto ? t.coste / t.pvp * 100 : NaN;
         var pcMenu = pm > 0 && abierto ? t.coste / pm * 100 : NaN;
