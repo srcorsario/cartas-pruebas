@@ -15,7 +15,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.prepararMesas = '1.6.0'; // 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
+    window.APP_VERSIONS.prepararMesas = '1.7.0'; // 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
 
     var ARCH = 'salas.json', LS = 'pm-salas-local';
     var SILLA = 45, HUECO = 4;                       // cm: fondo de la silla y separación con la mesa
@@ -159,17 +159,17 @@
             var p = Math.min(r, T); r -= p;
             if (conCab && r > 0 && r <= 2) { out.push({ mod: p / 4, cab: r, pax: p + r }); r = 0; }
             else if (conCab && p > 4 && p % 4 > 0 && p % 4 <= 2) out.push({ mod: Math.floor(p / 4), cab: p % 4, pax: p });
-            else out.push({ mod: Math.ceil(p / 4), cab: 0, pax: p });
+            else out.push({ mod: p <= 2 ? 0.5 : Math.ceil(p / 4), cab: 0, pax: p });
         }
         return out;
     }
     // Tamaño de una mesa para "pax" comensales: múltiplo de 4, o 1-2 en cabeceras si se permite
     function talla(m, pax, conCab) {
         pax = Math.max(1, Math.round(pax) || 1);
-        if (!(m.mod >= 1 && pax <= plazas(m) && pax > plazas(m) - 4 - (m.cab || 0))) {
+        if (!(m.mod >= 1 && pax <= plazas(m) && pax > plazas(m) - 2 - (m.cab || 0))) {
             delete m.sil;
             if (conCab && pax > 4 && pax % 4 > 0 && pax % 4 <= 2) { m.mod = Math.floor(pax / 4); m.cab = pax % 4; }
-            else { m.mod = Math.ceil(pax / 4); m.cab = 0; }
+            else { m.mod = pax <= 2 ? 0.5 : Math.ceil(pax / 4); m.cab = 0; }
         }
         m.pax = pax;
     }
@@ -271,8 +271,8 @@
         });
         t += '<rect width="' + c.w + '" height="' + c.h + '" rx="6" fill="' + (rojo ? '#fecaca' : (COL[m.col] || COL.clara)[1]) + '" stroke="' + (sel ? '#2563eb' : rojo ? '#dc2626' : '#9a3412') + '" stroke-width="' + (sel ? 8 : 4) + '"/>';
         for (var k = 1; k < m.mod * 2; k++) t += m.rot ? '<line x1="0" y1="' + k * L / 2 + '" x2="' + c.w + '" y2="' + k * L / 2 + '" stroke="#9a3412" stroke-width="2" stroke-dasharray="6 6"/>' : '<line x1="' + k * L / 2 + '" y1="0" x2="' + k * L / 2 + '" y2="' + c.h + '" stroke="#9a3412" stroke-width="2" stroke-dasharray="6 6"/>';
-        var txt = 'M' + n + ' · ' + (m.pax || 0) + (m.pax !== plazas(m) ? '/' + plazas(m) : '');
-        t += '<text x="' + c.w / 2 + '" y="' + c.h / 2 + '" text-anchor="middle" dominant-baseline="central" font-size="30" font-weight="700" fill="' + (rojo ? '#7c2d12' : (COL[m.col] || COL.clara)[2]) + '"' + (m.rot ? ' transform="rotate(-90 ' + c.w / 2 + ' ' + c.h / 2 + ')"' : '') + '>' + txt + '</text>';
+        var txt = 'M' + n + (m.mod < 1 ? '·' : ' · ') + (m.pax || 0) + (m.pax !== plazas(m) ? '/' + plazas(m) : '');
+        t += '<text x="' + c.w / 2 + '" y="' + c.h / 2 + '" text-anchor="middle" dominant-baseline="central" font-size="' + (m.mod < 1 ? 22 : 30) + '" font-weight="700" fill="' + (rojo ? '#7c2d12' : (COL[m.col] || COL.clara)[2]) + '"' + (m.rot ? ' transform="rotate(-90 ' + c.w / 2 + ' ' + c.h / 2 + ')"' : '') + '>' + txt + '</text>';
         return '<g data-mesa="' + i + '" transform="translate(' + m.x + ',' + m.y + ')" style="cursor:grab">' + t + '</g>';
     }
     function svgSala(menu, s, imprimir) {
@@ -361,7 +361,7 @@
             (ui.error ? '<div style="color:#b91c1c;font-size:.82rem;margin-bottom:6px">⚠ ' + esc(ui.error) + '</div>' : '') +
             '<div class="me-fila" style="gap:14px;font-size:.85rem">' +
             '<span>Comensales ' + I('pax', c.pax, 54, pax ? String(pax) : '—') + '</span>' +
-            '<span>Mesas de <select data-f="tam" style="padding:4px;border:1px solid #cbd5e1;border-radius:5px">' + [4, 8, 12, 16, 20, 24, 0].map(function (t) { return '<option value="' + t + '"' + (+c.tam === t ? ' selected' : '') + '>' + (t ? t + ' pax' : 'una sola mesa') + '</option>'; }).join('') + '</select></span>' +
+            '<span>Mesas de <select data-f="tam" style="padding:4px;border:1px solid #cbd5e1;border-radius:5px">' + [2, 4, 8, 12, 16, 20, 24, 0].map(function (t) { return '<option value="' + t + '"' + (+c.tam === t ? ' selected' : '') + '>' + (t ? t + ' pax' : 'una sola mesa') + '</option>'; }).join('') + '</select></span>' +
             '<label title="Excepcional: si sobran 1 o 2 comensales se sientan en las cabeceras en vez de abrir otra mesa de 4"><input type="checkbox" data-f="cab"' + (c.cab ? ' checked' : '') + '> Usar cabeceras para 1-2 sueltos</label>' +
             '<span title="Separación mínima entre sillas de mesas vecinas al colocar">Pasillo ' + I('pasillo', c.pasillo, 46) + ' cm</span>' +
             '<button type="button" class="btn btn-primary" data-a="repartir" style="font-size:.82rem;padding:6px 12px">🪄 Repartir y colocar' + (s ? ' en ' + esc(s.nombre) : '') + '</button>' +
@@ -530,8 +530,8 @@
         else if (a === 'quitarTodas' && s) { var ms = mesasDe(menu, s); c.lista = c.lista.filter(function (x) { return ms.indexOf(x) < 0; }); ui.sel = null; }
         else if (a === 'sillaSitio' && m) { if (m.sil) delete m.sil[ui.sel.silla]; }
         else if (a === 'sillasSitio' && m) { delete m.sil; }
-        else if (a === 'mas' && m) { delete m.sil; var lleno = m.pax === plazas(m); m.mod++; if (lleno) m.pax = plazas(m); }
-        else if (a === 'menos' && m && m.mod > 1) { delete m.sil; m.mod--; m.pax = Math.min(m.pax || 0, plazas(m)); }
+        else if (a === 'mas' && m) { delete m.sil; var lleno = m.pax === plazas(m); m.mod += 0.5; if (lleno) m.pax = plazas(m); }
+        else if (a === 'menos' && m && m.mod > 0.5) { delete m.sil; m.mod -= 0.5; m.pax = Math.min(m.pax || 0, plazas(m)); }
         else if (a === 'girar' && m) { delete m.sil; var k = cuerpo(m); m.rot = m.rot ? 0 : 1; var k2 = cuerpo(m); m.x = red(k.x + k.w / 2 - k2.w / 2); m.y = red(k.y + k.h / 2 - k2.h / 2); }
         else if (a === 'borrarMesa' && m) { quitarMesa(c, ui.sel.mesa); ui.sel = null; }
         else if (a === 'masSuelta' && s) { c.sueltas.push({ s: s.id, x: red(s.w / 2), y: red(s.h / 2), as: '' }); ui.sel = { suelta: c.sueltas.length - 1 }; }
