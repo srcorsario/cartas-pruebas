@@ -14,7 +14,7 @@
 // ventana emergente (window.open + document.write), para no depender de @media print peleándose
 // con el resto de la interfaz del editor.
 window.APP_VERSIONS = window.APP_VERSIONS || {};
-window.APP_VERSIONS.menuEspecial = '1.28.0'; // 9 nov: debajo de Bebida, 💶 Precio por persona y coste (menu-precios.js, solo en el editor). 1.27.0, 4 nov: plantilla neutra (window.MARCA): cabecera solo con el logo de la web (logoMenu o logo), sin Rafa Nadal. 1.26.0: 3 nov: vinos/copas/bebidas según la estructura de datos.json (categorias.js). 1.25.0: // NUEVO (27 sept): la impresión ya NO agranda la letra para "llenar" un menú corto -- ahora, si sobra hueco en la página, se reparte como espacio en blanco entre las secciones (Entrantes/Principales/Postre/Bebida), estirando el marco naranja a lo largo de toda la hoja con justify-content:space-evenly, en vez de dejarlas apelotonadas arriba con un hueco vacío abajo. La letra solo se sigue reduciendo (nunca agrandando) cuando un menú largo no cabe de otra forma. Ver repartirEspacioSobrante() en imprimir(). (1.24.0) "Mis Platos" -- los platos de comida (no vino) que se añaden escribiéndolos a mano (agregarPlatoManual) se guardan automáticamente en una biblioteca propia y permanente en el backend (Codigo_MenusEspeciales.gs, hoja "PlatosManuales", acciones listarPlatosManuales/guardarPlatoManual/eliminarPlatoManual -- deduplica por nombre normalizado, sin acentos ni mayúsculas). Esos platos guardados aparecen mezclados en el mismo buscador "🔍 Elegir platos de la carta" (popup), como una categoría más llamada "Mis Platos" (la primera de la lista), con su propia etiqueta verde y un botón 🗑️ para quitarlos de la biblioteca sin afectar a menús ya guardados que los usen. El guardado en la biblioteca es en segundo plano (no bloquea el añadido del plato al menú) y solo aplica a platos de comida, nunca a vinos. (1.23.0) CORREGIDO: la 1.22.0 añadió el aviso de posible falta de ortografía SOLO en el último paso (al pulsar "Añadir plato"/"Guardar", vía revisarOrtografiaManual()) -- pero al pulsar antes "🌐 Traducir" (traducirAIngles), que YA usa window.PROMPTS.opcionesEN() y esa función YA revisa la ortografía en la misma llamada, el resultado de esa revisión (obj.correccion) se estaba descartando sin más: el traductor entendía bien el plato pese a la falta (p.ej. "gaspaxo" se traducía correctamente) pero no avisaba hasta el paso final. Ahora traducirAIngles() también recoge obj.correccion y, si hay falta, muestra el mismo aviso "¿Quisiste decir...?" justo ahí, nada más traducir -- el aviso del paso de "Añadir/Guardar" se mantiene igual, por si el usuario no llega a pulsar "Traducir" (escribe el inglés a mano o lo deja para luego). (1.22.0) NUEVO: aviso de posible falta de ortografía al añadir un plato manualmente (agregarPlatoManual) o al editar el nombre de uno ya añadido (guardarEdicionPlato) -- mismo patrón "¿Quisiste decir...?" que ya usa el editor de carta normal (mostrarCorreccionOrtografiaEN, en app.js) y que se inspiró originalmente en la web de Cartelitos Buffet. Usa un prompt nuevo y más ligero (window.PROMPTS.revisionOrtografica, en prompts.js) que solo revisa ortografía sin pedir traducciones. Nunca se aplica a vinos (nombres propios/marca), y si falla por lo que sea no bloquea el añadido/guardado.
+window.APP_VERSIONS.menuEspecial = '1.29.0'; // 10 nov: pestañas dentro del menú: 🍽️ Menú y 🪑 Preparar mesas (preparar-mesas.js: salas, mesas y material; solo en el editor). 1.28.0, 9 nov: debajo de Bebida, 💶 Precio por persona y coste (menu-precios.js, solo en el editor). 1.27.0, 4 nov: plantilla neutra (window.MARCA): cabecera solo con el logo de la web (logoMenu o logo), sin Rafa Nadal. 1.26.0: 3 nov: vinos/copas/bebidas según la estructura de datos.json (categorias.js). 1.25.0: // NUEVO (27 sept): la impresión ya NO agranda la letra para "llenar" un menú corto -- ahora, si sobra hueco en la página, se reparte como espacio en blanco entre las secciones (Entrantes/Principales/Postre/Bebida), estirando el marco naranja a lo largo de toda la hoja con justify-content:space-evenly, en vez de dejarlas apelotonadas arriba con un hueco vacío abajo. La letra solo se sigue reduciendo (nunca agrandando) cuando un menú largo no cabe de otra forma. Ver repartirEspacioSobrante() en imprimir(). (1.24.0) "Mis Platos" -- los platos de comida (no vino) que se añaden escribiéndolos a mano (agregarPlatoManual) se guardan automáticamente en una biblioteca propia y permanente en el backend (Codigo_MenusEspeciales.gs, hoja "PlatosManuales", acciones listarPlatosManuales/guardarPlatoManual/eliminarPlatoManual -- deduplica por nombre normalizado, sin acentos ni mayúsculas). Esos platos guardados aparecen mezclados en el mismo buscador "🔍 Elegir platos de la carta" (popup), como una categoría más llamada "Mis Platos" (la primera de la lista), con su propia etiqueta verde y un botón 🗑️ para quitarlos de la biblioteca sin afectar a menús ya guardados que los usen. El guardado en la biblioteca es en segundo plano (no bloquea el añadido del plato al menú) y solo aplica a platos de comida, nunca a vinos. (1.23.0) CORREGIDO: la 1.22.0 añadió el aviso de posible falta de ortografía SOLO en el último paso (al pulsar "Añadir plato"/"Guardar", vía revisarOrtografiaManual()) -- pero al pulsar antes "🌐 Traducir" (traducirAIngles), que YA usa window.PROMPTS.opcionesEN() y esa función YA revisa la ortografía en la misma llamada, el resultado de esa revisión (obj.correccion) se estaba descartando sin más: el traductor entendía bien el plato pese a la falta (p.ej. "gaspaxo" se traducía correctamente) pero no avisaba hasta el paso final. Ahora traducirAIngles() también recoge obj.correccion y, si hay falta, muestra el mismo aviso "¿Quisiste decir...?" justo ahí, nada más traducir -- el aviso del paso de "Añadir/Guardar" se mantiene igual, por si el usuario no llega a pulsar "Traducir" (escribe el inglés a mano o lo deja para luego). (1.22.0) NUEVO: aviso de posible falta de ortografía al añadir un plato manualmente (agregarPlatoManual) o al editar el nombre de uno ya añadido (guardarEdicionPlato) -- mismo patrón "¿Quisiste decir...?" que ya usa el editor de carta normal (mostrarCorreccionOrtografiaEN, en app.js) y que se inspiró originalmente en la web de Cartelitos Buffet. Usa un prompt nuevo y más ligero (window.PROMPTS.revisionOrtografica, en prompts.js) que solo revisa ortografía sin pedir traducciones. Nunca se aplica a vinos (nombres propios/marca), y si falla por lo que sea no bloquea el añadido/guardado.
 
 (function () {
     'use strict';
@@ -38,6 +38,7 @@ window.APP_VERSIONS.menuEspecial = '1.28.0'; // 9 nov: debajo de Bebida, 💶 Pr
     let platosManuales = [];                  // [{id,es,en,tipo}] -- biblioteca "Mis Platos" (Codigo_MenusEspeciales.gs, hoja PlatosManuales): platos escritos a mano y guardados para reutilizar en futuros menús. Se funden dentro de platosParaPopup con modo:'manual' (ver cargarIndiceDePlatos/refrescarPlatosManualesEnPool); esta lista es solo la "fuente" tal cual viene del servidor.
     let menusGuardados = [];                  // última lista conocida (GET listarMenus), más recientes primero
     let menusGuardadosPromesa = null;         // 25 sept: ver precargarEnSegundoPlano/init()
+    let pestanaForm = 'menu';                 // 10 nov: pestaña visible del formulario: 'menu' | 'mesas' (preparar-mesas.js)
     let menuActual = null;                    // el menú que se está editando ahora mismo en pantalla
     let modalGrupoActual = null;              // 'comida' | 'vino' -- a qué pool pertenece el popup abierto ahora mismo
     let modalSeccionActual = null;            // clave de sección ('entrantes'/'primero'/.../'postre') o de vino ('vinoBlanco'/'vinoRosado'/'vinoTinto'/'cava') a la que añade el popup abierto
@@ -863,13 +864,36 @@ window.APP_VERSIONS.menuEspecial = '1.28.0'; // 9 nov: debajo de Bebida, 💶 Pr
             </div>
         </div>`;
 
+        // 10 nov: pestañas 🍽️ Menú / 🪑 Preparar mesas -- editores\acceso\preparar-mesas.js
+        const PM = window.PrepararMesas;
+        if (!PM) pestanaForm = 'menu';
+        if (PM) html += `<div class="me-fila" style="gap:6px;margin-bottom:14px;">
+            <button type="button" id="me-pest-menu" class="btn ${pestanaForm === 'menu' ? 'btn-primary' : 'btn-secondary'}" onclick="MenuEspecial.verPestana('menu')">🍽️ Menú</button>
+            <button type="button" id="me-pest-mesas" class="btn ${pestanaForm === 'mesas' ? 'btn-primary' : 'btn-secondary'}" onclick="MenuEspecial.verPestana('mesas')">🪑 Preparar mesas</button>
+        </div>`;
+        html += `<div id="me-tab-menu" style="${pestanaForm === 'menu' ? '' : 'display:none;'}">`;
         SECCIONES_INFO.forEach(info => { html += renderSeccionHtml(info); });
         html += renderBebidaHtml();
         // 9 nov: 💶 Precio por persona (solo editor) -- editores\acceso\menu-precios.js
         if (window.MenuPrecios) html += window.MenuPrecios.contenedor();
+        html += `</div>`;
+        if (PM) html += `<div id="me-tab-mesas" style="${pestanaForm === 'mesas' ? '' : 'display:none;'}">${PM.contenedor()}</div>`;
 
         cont.innerHTML = html;
         if (window.MenuPrecios) window.MenuPrecios.activar(cont, menuActual);
+        if (PM) PM.activar(cont, menuActual);
+    }
+
+    function verPestana(p) {
+        pestanaForm = p === 'mesas' ? 'mesas' : 'menu';
+        const a = document.getElementById('me-tab-menu'), b = document.getElementById('me-tab-mesas');
+        if (a) a.style.display = pestanaForm === 'menu' ? '' : 'none';
+        if (b) b.style.display = pestanaForm === 'mesas' ? '' : 'none';
+        [['me-pest-menu', 'menu'], ['me-pest-mesas', 'mesas']].forEach(x => {
+            const el = document.getElementById(x[0]);
+            if (el) el.className = 'btn ' + (pestanaForm === x[1] ? 'btn-primary' : 'btn-secondary');
+        });
+        if (pestanaForm === 'mesas' && window.PrepararMesas) window.PrepararMesas.mostrar();
     }
 
     function renderSeccionHtml(info) {
@@ -2044,6 +2068,7 @@ window.APP_VERSIONS.menuEspecial = '1.28.0'; // 9 nov: debajo de Bebida, 💶 Pr
 
     window.MenuEspecial = {
         init: init,
+        verPestana: verPestana,
         precargarEnSegundoPlano: precargarEnSegundoPlano,
         nuevoMenu: nuevoMenu,
         refrescarLista: refrescarLista,
