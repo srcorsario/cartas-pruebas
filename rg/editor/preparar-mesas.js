@@ -15,7 +15,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.prepararMesas = '1.7.0'; // 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
+    window.APP_VERSIONS.prepararMesas = '1.8.0'; // 10 nov: TIPO DE CADA ASIENTO (silla, butaca, en el sofá sin silla, sin asiento); contador de sillas/butacas en la sala y RESERVA según las que tenemos; las mesas se ALINEAN con las demás al moverlas (Alt = sin imán); ✂ Dividir y 🔗 Unir mesas; el sofá ya no marca en rojo las mesas pegadas a él. 1.7.0, 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
 
     var ARCH = 'salas.json', LS = 'pm-salas-local';
     var SILLA = 45, HUECO = 4;                       // cm: fondo de la silla y separación con la mesa
@@ -116,7 +116,25 @@
         p = num(menu.calculo && menu.calculo.comensales);   // el de 💶 Precio por persona
         return p > 0 ? Math.round(p) : 0;
     }
-    function plazas(m) { return m.mod * 4 + (m.cab || 0); }
+    var TASI = { silla: 'Silla', butaca: 'Butaca', sofa: 'En el sofá (sin silla)', no: 'Sin asiento' };
+    function tipoAs(m, k) { return (m.asi && m.asi[k]) || m.as || 'silla'; }
+    function plazas(m) { var n = m.mod * 4 + (m.cab || 0); if (m.asi) Object.keys(m.asi).forEach(function (k) { if (m.asi[k] === 'no' && +k < m.mod * 4 + (m.cab || 0)) n--; }); return n; }
+    function ocupadas(m) {   // [true/false] por asiento: los "pax" primeros que no son "sin asiento"
+        var n = m.mod * 4 + (m.cab || 0), out = [], q = m.pax || 0;
+        for (var k = 0; k < n; k++) { var si = tipoAs(m, k) !== 'no' && q > 0; if (si) q--; out.push(si); }
+        return out;
+    }
+    function sillasFisicas(m) {   // rectángulos (absolutos) de las sillas y butacas de verdad
+        var oc = ocupadas(m);
+        return asientos(m).map(function (r, k) { var o = (m.sil && m.sil[k]) || [0, 0]; return { x: m.x + r.x + o[0], y: m.y + r.y + o[1], w: r.w, h: r.h, t: tipoAs(m, k), oc: oc[k] }; })
+            .filter(function (r) { return r.t === 'silla' || r.t === 'butaca'; });
+    }
+    function cuentaAsientos(menu, s) {   // sillas/butacas ocupadas (las de plazas libres no se ponen) y plazas en el sofá
+        var c = cfg(menu), r = { silla: 0, butaca: 0, sofa: 0 };
+        (s ? mesasDe(menu, s) : c.lista).forEach(function (m) { ocupadas(m).forEach(function (o, k) { var t = tipoAs(m, k); if (o && r[t] != null) r[t]++; }); });
+        (s ? sueltasDe(menu, s) : c.sueltas).forEach(function (x) { r[x.as === 'butaca' ? 'butaca' : 'silla']++; });
+        return r;
+    }
     function cuerpo(m) {   // rectángulo de la mesa (sin sillas)
         var L = ML() * m.mod, A = MA();
         return m.rot ? { x: m.x, y: m.y, w: A, h: L } : { x: m.x, y: m.y, w: L, h: A };
@@ -138,17 +156,25 @@
     function quitarMesa(c, i) {
         var m = c.lista[i];
         if (!m) return;
+        var oc = ocupadas(m);
         asientos(m).forEach(function (r, k) {
-            var o = m.sil && m.sil[k];
-            if (o && k < (m.pax || 0)) c.sueltas.push({ s: m.s, x: Math.round(m.x + r.x + o[0]), y: Math.round(m.y + r.y + o[1]), as: m.as || '' });
+            var o = m.sil && m.sil[k], t = tipoAs(m, k);
+            if (o && oc[k] && (t === 'silla' || t === 'butaca')) c.sueltas.push({ s: m.s, x: Math.round(m.x + r.x + o[0]), y: Math.round(m.y + r.y + o[1]), as: t === 'butaca' ? 'butaca' : '' });
         });
         c.lista.splice(i, 1);
     }
     function mal(m, s, otras, margen) {
-        var h = huella(m, margen);
-        if (h.x < 0 || h.y < 0 || h.x + h.w > s.w || h.y + h.h > s.h) return true;
-        if (s.el.some(function (e) { return TIPOS[e.t] && TIPOS[e.t].bloquea && pisa(huella(m), e); })) return true;
-        return otras.some(function (o) { return o !== m && pisa(h, huella(o)); });
+        var h = huella(m, margen), rs = [cuerpo(m)].concat(sillasFisicas(m));
+        if (margen && (h.x < 0 || h.y < 0 || h.x + h.w > s.w || h.y + h.h > s.h)) return true;
+        if (rs.some(function (r) { return r.x < 0 || r.y < 0 || r.x + r.w > s.w || r.y + r.h > s.h; })) return true;
+        // Obstáculos: la mesa y sus sillas/butacas de verdad (las del sofá o sin asiento no cuentan)
+        if (s.el.some(function (e) { return TIPOS[e.t] && TIPOS[e.t].bloquea && rs.some(function (r) { return pisa(r, e); }); })) return true;
+        return otras.some(function (o) {
+            if (o === m) return false;
+            if (margen) return pisa(h, huella(o));
+            var ro = [cuerpo(o)].concat(sillasFisicas(o));
+            return rs.some(function (r) { return ro.some(function (q) { return pisa(r, q); }); });
+        });
     }
     // Reparto: mesas de "tam" plazas (múltiplo de 4; 0 = una sola mesa). El resto, en una mesa múltiplo de 4
     // (con plazas libres) o, si se permite, 1-2 sueltos en cabeceras.
@@ -242,9 +268,10 @@
         l.forEach(function (x) { x.total = x.pp * pax; x.conRes = Math.ceil(x.total * (1 + res / 100)); });
         var juegos = lista.length ? lista.reduce(function (t, m) { return t + Math.ceil((m.pax || 0) / 4); }, 0) : Math.ceil(pax / 4);
         l.push({ g: 'Otros', n: 'Aceite + sal + pimienta (1 juego cada 4 pax de cada mesa)', pp: '', total: juegos, conRes: juegos });
-        var but = lista.reduce(function (t, m) { return t + (m.as === 'butaca' ? (m.pax || 0) : 0); }, 0) + c.sueltas.filter(function (x) { return x.as === 'butaca'; }).length;
-        if (pax - but > 0 || !but) l.push({ g: 'Mobiliario', n: 'Sillas', pp: '', total: pax - but, conRes: pax - but });
-        if (but) l.push({ g: 'Mobiliario', n: 'Butacas', pp: '', total: but, conRes: but });
+        var ca = hayM ? cuentaAsientos(menu, null) : { silla: pax, butaca: 0, sofa: 0 };
+        if (ca.silla || !ca.butaca) l.push({ g: 'Mobiliario', n: 'Sillas', pp: '', total: ca.silla, conRes: ca.silla });
+        if (ca.butaca) l.push({ g: 'Mobiliario', n: 'Butacas', pp: '', total: ca.butaca, conRes: ca.butaca });
+        if (ca.sofa) l.push({ g: 'Mobiliario', n: 'Sentados en el sofá (sin silla)', pp: '', total: ca.sofa, conRes: '' });
         if (lista.length) l.push({ g: 'Mobiliario', n: 'Mesas cuadradas de ' + MA() + ' × ' + MA() + ' cm (2 juntas = 4 plazas)', pp: '', total: lista.reduce(function (t, m) { return t + m.mod * 2; }, 0), conRes: '' });
         return { lineas: l, pax: pax, plazas: lista.reduce(function (t, m) { return t + plazas(m); }, 0), reserva: res, nv: nv };
     }
@@ -262,12 +289,14 @@
     }
     function svgMesa(m, i, n, sel, rojo) {
         var c = cuerpo(m), L = ML(), t = '';
-        var ks = sel && ui.sel ? ui.sel.silla : null;
+        var ks = sel && ui.sel ? ui.sel.silla : null, oc = ocupadas(m);
         asientos(m).forEach(function (r, k) {
-            var o = m.sil && m.sil[k], sx = '#334155', sw = 3;
+            var ta = tipoAs(m, k), ok = oc[k], o = m.sil && m.sil[k], sx = '#334155', sw = 3;
             if (o) { r = { x: r.x + o[0], y: r.y + o[1], w: r.w, h: r.h, bx: r.x, by: r.y }; sx = '#2563eb'; }
             if (ks === k) { sx = '#2563eb'; sw = 7; }
-            t += '<rect data-silla="' + k + '" data-bx="' + (o ? r.bx : r.x) + '" data-by="' + (o ? r.by : r.y) + '" style="cursor:move" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="' + (m.as === 'butaca' ? 4 : 10) + '" fill="' + (k < (m.pax || 0) ? ASIENTO[m.as] || ASIENTO.silla : '#fff') + '" stroke="' + sx + '" stroke-width="' + sw + '"' + (k < (m.pax || 0) ? '' : ' stroke-dasharray="8 6"') + '/>';
+            t += '<rect data-silla="' + k + '" data-bx="' + (o ? r.bx : r.x) + '" data-by="' + (o ? r.by : r.y) + '" style="cursor:move" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="' + (ta === 'butaca' ? 4 : 10) + '" fill="' + (ta === 'no' ? 'rgba(255,255,255,.01)' : ta === 'sofa' ? (ok ? '#7c3aed' : '#ede9fe') : ok ? ASIENTO[ta] : '#fff') + '" stroke="' + (ta === 'no' && ks !== k ? '#cbd5e1' : sx) + '" stroke-width="' + sw + '"' + (ok && ta !== 'sofa' ? '' : ' stroke-dasharray="8 6"') + '/>' +
+                (ta === 'sofa' && ok ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2) + '" text-anchor="middle" dominant-baseline="central" font-size="20" fill="#fff" pointer-events="none">S</text>' : '') +
+                (ta === 'no' ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2) + '" text-anchor="middle" dominant-baseline="central" font-size="22" fill="#cbd5e1" pointer-events="none">✕</text>' : '');
         });
         t += '<rect width="' + c.w + '" height="' + c.h + '" rx="6" fill="' + (rojo ? '#fecaca' : (COL[m.col] || COL.clara)[1]) + '" stroke="' + (sel ? '#2563eb' : rojo ? '#dc2626' : '#9a3412') + '" stroke-width="' + (sel ? 8 : 4) + '"/>';
         for (var k = 1; k < m.mod * 2; k++) t += m.rot ? '<line x1="0" y1="' + k * L / 2 + '" x2="' + c.w + '" y2="' + k * L / 2 + '" stroke="#9a3412" stroke-width="2" stroke-dasharray="6 6"/>' : '<line x1="' + k * L / 2 + '" y1="0" x2="' + k * L / 2 + '" y2="' + c.h + '" stroke="#9a3412" stroke-width="2" stroke-dasharray="6 6"/>';
@@ -300,6 +329,7 @@
             var i = c.sueltas.indexOf(x), sel = !imprimir && ui.modo === 'mesas' && ui.sel && ui.sel.suelta === i, b = x.as === 'butaca';
             t += '<g data-suelta="' + i + '" transform="translate(' + x.x + ',' + x.y + ')" style="cursor:move"><rect width="' + (b ? 56 : 46) + '" height="' + (b ? 56 : 46) + '" rx="' + (b ? 4 : 10) + '" fill="' + (b ? ASIENTO.butaca : ASIENTO.silla) + '" stroke="' + (sel ? '#2563eb' : '#0f172a') + '" stroke-width="' + (sel ? 8 : 3) + '"/></g>';
         });
+        if (!imprimir) t += '<g id="pm-guias" pointer-events="none"></g>';
         return '<svg id="pm-svg" xmlns="http://www.w3.org/2000/svg" viewBox="-40 -60 ' + (s.w + 80) + ' ' + (s.h + 100) + '" style="width:100%;max-height:' + (imprimir ? '150mm' : '72vh') + ';background:#f1f5f9;border-radius:8px;touch-action:none;user-select:none;' + (editSala ? 'outline:3px dashed #2563eb;' : '') + '">' + t + '</svg>';
     }
 
@@ -392,6 +422,15 @@
         }
         var corte = h.length;
         if (s) h += svgSala(menu, s, false);
+        if (s && !enSala) {
+            var cs = cuentaAsientos(menu, s), ct = cuentaAsientos(menu, null), inv = datos.inv || {}, varias = datos.salas.length > 1;
+            var resto = function (tot, us) { var n = num(tot); if (!(n >= 0)) return '<span style="color:#94a3b8">—</span>'; var r = n - us; return '<b style="color:' + (r < 0 ? '#b91c1c' : '#15803d') + '">' + (r < 0 ? 'faltan ' + (-r) : r) + '</b>'; };
+            h += '<div class="me-fila" style="gap:14px;font-size:.82rem;margin-top:8px;padding:8px 10px;background:#f8fafc;border-radius:8px">' +
+                '<span>En <b>' + esc(s.nombre) + '</b>: <b>' + cs.silla + '</b> sillas · <b>' + cs.butaca + '</b> butacas' + (cs.sofa ? ' · ' + cs.sofa + ' en el sofá' : '') + '</span>' +
+                (varias ? '<span style="color:#64748b">Todas las salas: ' + ct.silla + ' sillas · ' + ct.butaca + ' butacas</span>' : '') +
+                '<span title="Las que tiene el restaurante en total (vale para todos los menús; se guarda con la plantilla)">Tenemos ' + I('inv.sillas', inv.sillas, 44, '?') + ' sillas · ' + I('inv.butacas', inv.butacas, 44, '?') + ' butacas</span>' +
+                '<span>Reserva: ' + resto(inv.sillas, ct.silla) + ' sillas · ' + resto(inv.butacas, ct.butaca) + ' butacas</span></div>';
+        }
         // Barra del elemento elegido
         if (s && enSala && ui.sel && s.el[ui.sel.el]) {
             var e = s.el[ui.sel.el];
@@ -409,9 +448,12 @@
                 '<span>' + B('menos', '−') + ' <b>' + m.mod * 4 + '</b> plazas ' + B('mas', '+') + '</span>' +
                 '<span title="Excepcional">Cabeceras <select data-f="m.cab" style="padding:4px;border:1px solid #cbd5e1;border-radius:5px"><option value="0">ninguna</option><option value="1"' + (m.cab === 1 ? ' selected' : '') + '>1</option><option value="2"' + (m.cab === 2 ? ' selected' : '') + '>2</option></select></span>' +
                 '<span>Comensales ' + I('m.pax', m.pax, 44) + ' de ' + plazas(m) + '</span>' + '<span>Color <select data-f="m.col" style="padding:4px;border:1px solid #cbd5e1;border-radius:5px">' + Object.keys(COL).map(function (k) { return '<option value="' + k + '"' + ((m.col || 'clara') === k ? ' selected' : '') + '>' + COL[k][0] + '</option>'; }).join('') + '</select></span>' +
-                '<span>Asientos <select data-f="m.as" style="padding:4px;border:1px solid #cbd5e1;border-radius:5px"><option value="">Sillas</option><option value="butaca"' + (m.as === 'butaca' ? ' selected' : '') + '>Butacas</option></select></span>' +
+                '<span title="De toda la mesa; cada asiento se cambia pulsándolo">Asientos <select data-f="m.as" style="padding:4px;border:1px solid #cbd5e1;border-radius:5px"><option value="">Sillas</option><option value="butaca"' + (m.as === 'butaca' ? ' selected' : '') + '>Butacas</option></select></span>' +
                 B('girar', '⟳ Girar') + B('borrarMesa', '🗑 Quitar mesa', 'color:#b91c1c', 'Sus sillas movidas a mano se quedan como sillas sueltas') +
-                (ui.sel.silla != null ? '<span style="background:#dbeafe;padding:3px 8px;border-radius:6px">Silla elegida: arrástrala o usa las flechas' + (m.sil && m.sil[ui.sel.silla] ? ' ' + B('sillaSitio', '↩ A su sitio') : '') + '</span>' : '') +
+                (m.mod >= 1 ? B('dividir', '✂ Dividir', '', 'Parte la mesa en dos (8 → 4 + 4, 4 → 2 + 2, 6 → 4 + 2)') : '') +
+                B('unir', ui.unir === ui.sel.mesa ? '🔗 Pulsa la otra mesa… (Esc = cancelar)' : '🔗 Unir con…', ui.unir === ui.sel.mesa ? 'background:#fef3c7' : '', 'Pulsa luego la mesa que se junta a esta') +
+                (ui.sel.silla != null ? '<span style="background:#dbeafe;padding:3px 8px;border-radius:6px">Asiento elegido: <select data-f="m.asi" style="padding:3px;border:1px solid #cbd5e1;border-radius:5px">' +
+                    Object.keys(TASI).map(function (k) { return '<option value="' + k + '"' + (tipoAs(m, ui.sel.silla) === k ? ' selected' : '') + '>' + TASI[k] + '</option>'; }).join('') + '</select> · arrástralo o flechas' + (m.sil && m.sil[ui.sel.silla] ? ' ' + B('sillaSitio', '↩ A su sitio') : '') + '</span>' : '') +
                 (m.sil && Object.keys(m.sil).length ? B('sillasSitio', '↩ Recolocar todas las sillas') : '') +
                 '<span style="color:#94a3b8">Flechas = mover (Mayús = 1 cm). Las sillas se mueven sueltas arrastrándolas (sofá, otra cabecera…).</span></div>';
         } else if (s) h += '<div class="me-fila" style="gap:10px;font-size:.8rem;margin-top:6px;color:#64748b">' + B('masMesa', '➕ Añadir mesa') + B('masSuelta', '➕ Silla suelta', '', 'Un comensal sin mesa propia: en el sofá, en la cabecera de otra mesa…') + (c.lista.length ? B('quitarTodas', '🗑 Quitar todas', 'color:#b91c1c') : '') +
@@ -452,7 +494,14 @@
             g = gs || e.target.closest('[data-mesa]');
             if (!g) { if (ui.sel) { ui.sel = null; pintar(); } return; }
             if (gs) { obj = c.sueltas[+gs.dataset.suelta]; ui.sel = { suelta: +gs.dataset.suelta }; }
-            else { obj = c.lista[+g.dataset.mesa]; ui.sel = { mesa: +g.dataset.mesa }; }
+            else if (ui.unir != null && ui.unir !== +g.dataset.mesa && c.lista[ui.unir]) {
+                var A = c.lista[ui.unir], Bm = c.lista[+g.dataset.mesa];
+                A.mod += Bm.mod; A.cab = Math.min(2, (A.cab || 0) + (Bm.cab || 0)); A.pax = (A.pax || 0) + (Bm.pax || 0);
+                delete A.sil; delete A.asi; A.pax = Math.min(A.pax, plazas(A));
+                c.lista.splice(+g.dataset.mesa, 1);
+                ui.sel = { mesa: c.lista.indexOf(A) }; ui.unir = null; e.preventDefault(); pintar(); return;
+            }
+            else { obj = c.lista[+g.dataset.mesa]; ui.sel = { mesa: +g.dataset.mesa }; ui.unir = null; }
             var sr = gs ? null : e.target.closest('[data-silla]');
             if (sr) {   // silla suelta: se mueve ella sola (sofá, otra cabecera…)
                 var ks = +sr.dataset.silla, o0 = (obj.sil && obj.sil[ks]) || [0, 0], hubo = false;
@@ -485,6 +534,21 @@
                 var r = g.querySelector('rect'); r.setAttribute('width', obj.w); r.setAttribute('height', obj.h);
             } else {
                 obj.x = red(ini.x + dx); obj.y = red(ini.y + dy);
+                var guias = svg.querySelector('#pm-guias');
+                if (guias) guias.innerHTML = '';
+                if (ui.modo === 'mesas' && ui.sel && ui.sel.mesa != null && !ev.altKey) {   // imán: alinea bordes y centros con las otras mesas
+                    obj.x = ini.x + dx; obj.y = ini.y + dy;
+                    var cb = cuerpo(obj), bx = null, by = null, IMAN = 15;
+                    mesasDe(menu, s).forEach(function (o) {
+                        if (o === obj) return;
+                        var q = cuerpo(o);
+                        [cb.x, cb.x + cb.w / 2, cb.x + cb.w].forEach(function (a1) { [q.x, q.x + q.w / 2, q.x + q.w].forEach(function (b1) { var d = b1 - a1; if (Math.abs(d) < IMAN && (!bx || Math.abs(d) < Math.abs(bx.d))) bx = { d: d, v: b1 }; }); });
+                        [cb.y, cb.y + cb.h / 2, cb.y + cb.h].forEach(function (a1) { [q.y, q.y + q.h / 2, q.y + q.h].forEach(function (b1) { var d = b1 - a1; if (Math.abs(d) < IMAN && (!by || Math.abs(d) < Math.abs(by.d))) by = { d: d, v: b1 }; }); });
+                    });
+                    obj.x = bx ? Math.round(obj.x + bx.d) : red(obj.x); obj.y = by ? Math.round(obj.y + by.d) : red(obj.y);
+                    if (guias) guias.innerHTML = (bx ? '<line x1="' + bx.v + '" y1="0" x2="' + bx.v + '" y2="' + s.h + '" stroke="#ec4899" stroke-width="3" stroke-dasharray="10 8"/>' : '') +
+                        (by ? '<line x1="0" y1="' + by.v + '" x2="' + s.w + '" y2="' + by.v + '" stroke="#ec4899" stroke-width="3" stroke-dasharray="10 8"/>' : '');
+                }
                 g.setAttribute('transform', 'translate(' + obj.x + ',' + obj.y + ')');
             }
         };
@@ -533,11 +597,24 @@
         else if (a === 'mas' && m) { delete m.sil; var lleno = m.pax === plazas(m); m.mod += 0.5; if (lleno) m.pax = plazas(m); }
         else if (a === 'menos' && m && m.mod > 0.5) { delete m.sil; m.mod -= 0.5; m.pax = Math.min(m.pax || 0, plazas(m)); }
         else if (a === 'girar' && m) { delete m.sil; var k = cuerpo(m); m.rot = m.rot ? 0 : 1; var k2 = cuerpo(m); m.x = red(k.x + k.w / 2 - k2.w / 2); m.y = red(k.y + k.h / 2 - k2.h / 2); }
+        else if (a === 'dividir' && m && m.mod >= 1) {
+            var ma = m.mod <= 1 ? 0.5 : Math.max(1, Math.ceil(m.mod / 2));
+            if (ma >= m.mod) ma = m.mod - 0.5;
+            var total = m.pax || 0, nb = JSON.parse(JSON.stringify(m));
+            delete m.sil; delete m.asi; delete nb.sil; delete nb.asi;
+            m.mod = ma; m.cab = Math.min(m.cab || 0, 1); nb.mod -= ma; nb.cab = 0;
+            m.pax = Math.min(total, plazas(m)); nb.pax = Math.min(total - m.pax, plazas(nb));
+            var paso = ML() * ma + (m.cab ? SILLA + HUECO : 0) + 2 * (SILLA + HUECO) + 40;
+            if (m.rot) nb.y = m.y + paso; else nb.x = m.x + paso;
+            c.lista.splice(ui.sel.mesa + 1, 0, nb);
+            if (total > m.pax + nb.pax) avisar('Al dividir quedan ' + (total - m.pax - nb.pax) + ' comensal(es) sin sitio: súbelos en alguna mesa.');
+        }
+        else if (a === 'unir' && m) { ui.unir = ui.unir === ui.sel.mesa ? null : ui.sel.mesa; }
         else if (a === 'borrarMesa' && m) { quitarMesa(c, ui.sel.mesa); ui.sel = null; }
         else if (a === 'masSuelta' && s) { c.sueltas.push({ s: s.id, x: red(s.w / 2), y: red(s.h / 2), as: '' }); ui.sel = { suelta: c.sueltas.length - 1 }; }
         else if (a === 'borrarSuelta' && ui.sel && c.sueltas[ui.sel.suelta]) { c.sueltas.splice(ui.sel.suelta, 1); ui.sel = null; }
         else if (a === 'guardarHab' && s) {
-            s.hab = mesasDe(menu, s).map(function (x) { return { x: x.x, y: x.y, mod: x.mod, rot: x.rot ? 1 : 0, cab: x.cab || 0, col: x.col || '', as: x.as || '' }; });
+            s.hab = mesasDe(menu, s).map(function (x) { return { x: x.x, y: x.y, mod: x.mod, rot: x.rot ? 1 : 0, cab: x.cab || 0, col: x.col || '', as: x.as || '', asi: x.asi || undefined, sil: x.sil || undefined }; });
             sucias = true; guardarSalas(); return;
         }
         else if (a === 'cargarHab' && s && s.hab) {
@@ -565,6 +642,7 @@
     function deshacer() { if (!hist.length || !ultimo) return; rehecho.push(ultimo); restaurar(hist.pop()); }
     function rehacer() { if (!rehecho.length || !ultimo) return; hist.push(ultimo); restaurar(rehecho.pop()); }
     function alTeclear(e) {
+        if (e.key === 'Escape' && ui.unir != null) { ui.unir = null; pintar(); return; }
         var enCampo = /^(INPUT|SELECT|TEXTAREA)$/.test((e.target && e.target.tagName) || '') || (e.target && e.target.isContentEditable);
         if ((e.ctrlKey || e.metaKey) && !e.altKey && !enCampo && datos && CONT && /^[zy]$/i.test(e.key)) {
             var pp = CONT.querySelector('#pm-panel');
@@ -630,12 +708,20 @@
             if (f === 'e.txt') el.txt = x.value.trim(); else if (f === 'e.x' || f === 'e.y') { if (isFinite(v)) el[f.slice(2)] = Math.round(v); } else if (v > 0) el[f.slice(2)] = Math.max(5, Math.round(v));
             sucias = true;
         }
+        else if (f === 'inv.sillas' || f === 'inv.butacas') { datos.inv = datos.inv || {}; datos.inv[f.slice(4)] = v >= 0 ? Math.round(v) : ''; sucias = true; }
         else if (f === 'su.as' && ui.sel && c.sueltas[ui.sel.suelta]) c.sueltas[ui.sel.suelta].as = x.value;
         else if (f && f.indexOf('m.') === 0 && ui.sel && c.lista[ui.sel.mesa]) {
             var m = c.lista[ui.sel.mesa];
             if (f === 'm.cab') { delete m.sil; var lleno = m.pax === plazas(m); m.cab = +x.value; m.pax = lleno ? plazas(m) : Math.min(m.pax, plazas(m)); }
             else if (f === 'm.col') m.col = x.value;
-            else if (f === 'm.as') { m.as = x.value; delete m.sil; }
+            else if (f === 'm.as') { m.as = x.value; delete m.asi; }
+            else if (f === 'm.asi' && ui.sel.silla != null) {
+                var lleno = m.pax === plazas(m);
+                m.asi = m.asi || {};
+                if (x.value === (m.as || 'silla')) delete m.asi[ui.sel.silla]; else m.asi[ui.sel.silla] = x.value;
+                if (!Object.keys(m.asi).length) delete m.asi;
+                m.pax = lleno ? plazas(m) : Math.min(m.pax || 0, plazas(m));
+            }
             else if (f === 'm.pax') m.pax = Math.max(0, Math.min(plazas(m), Math.round(v) || 0));
         }
         pintar();
