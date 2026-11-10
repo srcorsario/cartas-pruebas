@@ -15,7 +15,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.prepararMesas = '1.8.0'; // 10 nov: TIPO DE CADA ASIENTO (silla, butaca, en el sofá sin silla, sin asiento); contador de sillas/butacas en la sala y RESERVA según las que tenemos; las mesas se ALINEAN con las demás al moverlas (Alt = sin imán); ✂ Dividir y 🔗 Unir mesas; el sofá ya no marca en rojo las mesas pegadas a él. 1.7.0, 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
+    window.APP_VERSIONS.prepararMesas = '1.9.0'; // 10 nov: los asientos "sin asiento" ya NO se dibujan (solo con su mesa elegida, para recuperarlos); 🗑 Quitar asiento / Supr; IMÁN DE SILLAS: al soltar una silla/butaca (o silla suelta) cerca de un hueco libre de una mesa se coloca en él centrada como las de serie (cabeceras incluidas) y pasa a esa mesa; al Unir, la mesa resultante ocupa el sitio de las dos. 1.8.0:// 10 nov: TIPO DE CADA ASIENTO (silla, butaca, en el sofá sin silla, sin asiento); contador de sillas/butacas en la sala y RESERVA según las que tenemos; las mesas se ALINEAN con las demás al moverlas (Alt = sin imán); ✂ Dividir y 🔗 Unir mesas; el sofá ya no marca en rojo las mesas pegadas a él. 1.7.0, 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
 
     var ARCH = 'salas.json', LS = 'pm-salas-local';
     var SILLA = 45, HUECO = 4;                       // cm: fondo de la silla y separación con la mesa
@@ -163,6 +163,60 @@
         });
         c.lista.splice(i, 1);
     }
+    // ---------- Imán de sillas ----------
+    function limpia(m) {
+        var n = m.mod * 4 + (m.cab || 0);
+        ['asi', 'sil'].forEach(function (p) { if (!m[p]) return; Object.keys(m[p]).forEach(function (k) { if (+k >= n) delete m[p][k]; }); if (!Object.keys(m[p]).length) delete m[p]; });
+    }
+    function quitarAsiento(m, k) {   // la cabecera desaparece; un asiento del lado largo pasa a "sin asiento"
+        var n = m.mod * 4;
+        if (m.sil) delete m.sil[k];
+        if (k === n + 1) m.cab = m.asi && m.asi[n] === 'no' ? 0 : 1;
+        else if (k === n && m.cab === 1) m.cab = 0;
+        else { m.asi = m.asi || {}; m.asi[k] = 'no'; }
+        limpia(m);
+    }
+    function ponerAsiento(m, j, t) {   // ocupa el hueco j (asiento "sin asiento" o cabecera que no hay)
+        var n = m.mod * 4;
+        m.asi = m.asi || {};
+        if (j >= n + (m.cab || 0)) { if (j === n + 1 && !m.cab) m.asi[n] = 'no'; m.cab = j - n + 1; }
+        if (t === (m.as || 'silla')) delete m.asi[j]; else m.asi[j] = t;
+        if (m.sil) delete m.sil[j];
+        limpia(m);
+    }
+    function huecoCerca(menu, s, cx, cy) {   // hueco libre de alguna mesa a menos de 70 cm del centro (cx, cy)
+        var mejor = null;
+        mesasDe(menu, s).forEach(function (B) {
+            var n = B.mod * 4;
+            asientos({ mod: B.mod, cab: 2, rot: B.rot, as: B.as }).forEach(function (r, j) {
+                if (!(j >= n + (B.cab || 0) || tipoAs(B, j) === 'no')) return;
+                var d = Math.hypot(B.x + r.x + r.w / 2 - cx, B.y + r.y + r.h / 2 - cy);
+                if (d < 70 && (!mejor || d < mejor.d)) mejor = { m: B, k: j, d: d };
+            });
+        });
+        return mejor;
+    }
+    function imanSilla(menu, s, A, k) {   // al soltar una silla de la mesa A
+        var t = tipoAs(A, k);
+        if (t !== 'silla' && t !== 'butaca') return null;
+        var r = asientos(A)[k], o = (A.sil && A.sil[k]) || [0, 0], oc = ocupadas(A)[k];
+        var h = huecoCerca(menu, s, A.x + r.x + o[0] + r.w / 2, A.y + r.y + o[1] + r.h / 2), dp = Math.hypot(o[0], o[1]);
+        if (dp < 70 && (!h || dp <= h.d)) { if (A.sil) delete A.sil[k]; limpia(A); return A; }   // vuelve a su sitio
+        if (!h) return null;
+        quitarAsiento(A, k);
+        ponerAsiento(h.m, h.k, t);
+        if (oc) { A.pax = Math.max(0, (A.pax || 0) - 1); h.m.pax = (h.m.pax || 0) + 1; }
+        A.pax = Math.min(A.pax || 0, plazas(A)); h.m.pax = Math.min(h.m.pax || 0, plazas(h.m));
+        return h.m;
+    }
+    function imanSuelta(menu, s, c, i) {
+        var x = c.sueltas[i], w = x.as === 'butaca' ? 56 : 46, h = huecoCerca(menu, s, x.x + w / 2, x.y + w / 2);
+        if (!h) return null;
+        ponerAsiento(h.m, h.k, x.as === 'butaca' ? 'butaca' : 'silla');
+        h.m.pax = Math.min((h.m.pax || 0) + 1, plazas(h.m));
+        c.sueltas.splice(i, 1);
+        return h.m;
+    }
     function mal(m, s, otras, margen) {
         var h = huella(m, margen), rs = [cuerpo(m)].concat(sillasFisicas(m));
         if (margen && (h.x < 0 || h.y < 0 || h.x + h.w > s.w || h.y + h.h > s.h)) return true;
@@ -292,6 +346,7 @@
         var ks = sel && ui.sel ? ui.sel.silla : null, oc = ocupadas(m);
         asientos(m).forEach(function (r, k) {
             var ta = tipoAs(m, k), ok = oc[k], o = m.sil && m.sil[k], sx = '#334155', sw = 3;
+            if (ta === 'no' && !sel) return;   // sin asiento: solo se ve con la mesa elegida (para recuperarlo)
             if (o) { r = { x: r.x + o[0], y: r.y + o[1], w: r.w, h: r.h, bx: r.x, by: r.y }; sx = '#2563eb'; }
             if (ks === k) { sx = '#2563eb'; sw = 7; }
             t += '<rect data-silla="' + k + '" data-bx="' + (o ? r.bx : r.x) + '" data-by="' + (o ? r.by : r.y) + '" style="cursor:move" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="' + (ta === 'butaca' ? 4 : 10) + '" fill="' + (ta === 'no' ? 'rgba(255,255,255,.01)' : ta === 'sofa' ? (ok ? '#7c3aed' : '#ede9fe') : ok ? ASIENTO[ta] : '#fff') + '" stroke="' + (ta === 'no' && ks !== k ? '#cbd5e1' : sx) + '" stroke-width="' + sw + '"' + (ok && ta !== 'sofa' ? '' : ' stroke-dasharray="8 6"') + '/>' +
@@ -453,7 +508,7 @@
                 (m.mod >= 1 ? B('dividir', '✂ Dividir', '', 'Parte la mesa en dos (8 → 4 + 4, 4 → 2 + 2, 6 → 4 + 2)') : '') +
                 B('unir', ui.unir === ui.sel.mesa ? '🔗 Pulsa la otra mesa… (Esc = cancelar)' : '🔗 Unir con…', ui.unir === ui.sel.mesa ? 'background:#fef3c7' : '', 'Pulsa luego la mesa que se junta a esta') +
                 (ui.sel.silla != null ? '<span style="background:#dbeafe;padding:3px 8px;border-radius:6px">Asiento elegido: <select data-f="m.asi" style="padding:3px;border:1px solid #cbd5e1;border-radius:5px">' +
-                    Object.keys(TASI).map(function (k) { return '<option value="' + k + '"' + (tipoAs(m, ui.sel.silla) === k ? ' selected' : '') + '>' + TASI[k] + '</option>'; }).join('') + '</select> · arrástralo o flechas' + (m.sil && m.sil[ui.sel.silla] ? ' ' + B('sillaSitio', '↩ A su sitio') : '') + '</span>' : '') +
+                    Object.keys(TASI).map(function (k) { return '<option value="' + k + '"' + (tipoAs(m, ui.sel.silla) === k ? ' selected' : '') + '>' + TASI[k] + '</option>'; }).join('') + '</select> · arrástralo o flechas' + (m.sil && m.sil[ui.sel.silla] ? ' ' + B('sillaSitio', '↩ A su sitio') : '') + (tipoAs(m, ui.sel.silla) !== 'no' ? ' ' + B('quitarAs', '🗑 Quitar asiento', 'color:#b91c1c', 'Supr. Suelta una silla junto a otra mesa y se coloca sola en su hueco') : '') + '</span>' : '') +
                 (m.sil && Object.keys(m.sil).length ? B('sillasSitio', '↩ Recolocar todas las sillas') : '') +
                 '<span style="color:#94a3b8">Flechas = mover (Mayús = 1 cm). Las sillas se mueven sueltas arrastrándolas (sofá, otra cabecera…).</span></div>';
         } else if (s) h += '<div class="me-fila" style="gap:10px;font-size:.8rem;margin-top:6px;color:#64748b">' + B('masMesa', '➕ Añadir mesa') + B('masSuelta', '➕ Silla suelta', '', 'Un comensal sin mesa propia: en el sofá, en la cabecera de otra mesa…') + (c.lista.length ? B('quitarTodas', '🗑 Quitar todas', 'color:#b91c1c') : '') +
@@ -495,7 +550,8 @@
             if (!g) { if (ui.sel) { ui.sel = null; pintar(); } return; }
             if (gs) { obj = c.sueltas[+gs.dataset.suelta]; ui.sel = { suelta: +gs.dataset.suelta }; }
             else if (ui.unir != null && ui.unir !== +g.dataset.mesa && c.lista[ui.unir]) {
-                var A = c.lista[ui.unir], Bm = c.lista[+g.dataset.mesa];
+                var A = c.lista[ui.unir], Bm = c.lista[+g.dataset.mesa], ca = cuerpo(A), cb2 = cuerpo(Bm);
+                if (A.rot) A.y = Math.min(ca.y, cb2.y); else A.x = Math.min(ca.x, cb2.x);   // ocupa el sitio de las dos
                 A.mod += Bm.mod; A.cab = Math.min(2, (A.cab || 0) + (Bm.cab || 0)); A.pax = (A.pax || 0) + (Bm.pax || 0);
                 delete A.sil; delete A.asi; A.pax = Math.min(A.pax, plazas(A));
                 c.lista.splice(+g.dataset.mesa, 1);
@@ -517,6 +573,7 @@
                 };
                 var sueltaS = function () {
                     window.removeEventListener('pointermove', mueveS); window.removeEventListener('pointerup', sueltaS); window.removeEventListener('pointercancel', sueltaS);
+                    if (hubo) { var dest = imanSilla(menu, s, obj, ks); if (dest && dest !== obj) ui.sel = { mesa: c.lista.indexOf(dest) }; }
                     pintar();
                 };
                 window.addEventListener('pointermove', mueveS); window.addEventListener('pointerup', sueltaS); window.addEventListener('pointercancel', sueltaS);
@@ -555,6 +612,7 @@
         var soltar = function () {
             window.removeEventListener('pointermove', mover); window.removeEventListener('pointerup', soltar); window.removeEventListener('pointercancel', soltar);
             if (movido && ui.modo === 'sala') sucias = true;
+            if (movido && ui.modo === 'mesas' && ui.sel && ui.sel.suelta != null) { var dm = imanSuelta(menu, s, c, ui.sel.suelta); if (dm) ui.sel = { mesa: c.lista.indexOf(dm) }; }
             pintar();
         };
         window.addEventListener('pointermove', mover); window.addEventListener('pointerup', soltar); window.addEventListener('pointercancel', soltar);
@@ -594,6 +652,7 @@
         else if (a === 'quitarTodas' && s) { var ms = mesasDe(menu, s); c.lista = c.lista.filter(function (x) { return ms.indexOf(x) < 0; }); ui.sel = null; }
         else if (a === 'sillaSitio' && m) { if (m.sil) delete m.sil[ui.sel.silla]; }
         else if (a === 'sillasSitio' && m) { delete m.sil; }
+        else if (a === 'quitarAs' && m && ui.sel.silla != null) { var ll = m.pax === plazas(m); quitarAsiento(m, ui.sel.silla); m.pax = ll ? plazas(m) : Math.min(m.pax || 0, plazas(m)); delete ui.sel.silla; }
         else if (a === 'mas' && m) { delete m.sil; var lleno = m.pax === plazas(m); m.mod += 0.5; if (lleno) m.pax = plazas(m); }
         else if (a === 'menos' && m && m.mod > 0.5) { delete m.sil; m.mod -= 0.5; m.pax = Math.min(m.pax || 0, plazas(m)); }
         else if (a === 'girar' && m) { delete m.sil; var k = cuerpo(m); m.rot = m.rot ? 0 : 1; var k2 = cuerpo(m); m.x = red(k.x + k.w / 2 - k2.w / 2); m.y = red(k.y + k.h / 2 - k2.h / 2); }
@@ -661,9 +720,9 @@
         var lista = enSala ? (s && s.el) : esSu ? c.sueltas : c.lista, i = enSala ? ui.sel.el : esSu ? ui.sel.suelta : ui.sel.mesa, obj = lista && lista[i];
         if (!obj) return;
         e.preventDefault();
-        if (!enSala && ui.sel.silla != null) {   // silla suelta elegida: flechas la mueven, Supr la devuelve a su sitio
+        if (!enSala && ui.sel.silla != null) {   // asiento elegido: flechas lo mueven, Supr lo quita
             obj.sil = obj.sil || {};
-            if (supr) delete obj.sil[ui.sel.silla];
+            if (supr) { var ll = obj.pax === plazas(obj); quitarAsiento(obj, ui.sel.silla); obj.pax = ll ? plazas(obj) : Math.min(obj.pax || 0, plazas(obj)); delete ui.sel.silla; }
             else { var o = obj.sil[ui.sel.silla] || [0, 0], ps = e.shiftKey ? 1 : 10; obj.sil[ui.sel.silla] = [o[0] + d[0] * ps, o[1] + d[1] * ps]; }
             pintar(); return;
         }
@@ -719,6 +778,7 @@
                 var lleno = m.pax === plazas(m);
                 m.asi = m.asi || {};
                 if (x.value === (m.as || 'silla')) delete m.asi[ui.sel.silla]; else m.asi[ui.sel.silla] = x.value;
+                if (x.value === 'no' && m.sil) { delete m.sil[ui.sel.silla]; if (!Object.keys(m.sil).length) delete m.sil; }
                 if (!Object.keys(m.asi).length) delete m.asi;
                 m.pax = lleno ? plazas(m) : Math.min(m.pax || 0, plazas(m));
             }
