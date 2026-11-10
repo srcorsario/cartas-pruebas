@@ -70,7 +70,7 @@
 {"id":"8005","activa":"si","precio":"9.00","precioMedia":"","carpeta":"postres","archivo":"pasion01.webp","alergenos":["FRUTOSCASCARA","CACAHUETE","SOJA","HUEVO","SESAMO","GLUTEN","LACTOSA","VEGETARIANO"],"opcionesInactivas":[],"h":"e12461e5882f"},
 {"id":"8006","activa":"si","precio":"8.00","precioMedia":"","carpeta":"postres","archivo":"tiramisu01.webp","alergenos":["FRUTOSCASCARA","CACAHUETE","SOJA","HUEVO","SESAMO","GLUTEN","LACTOSA","VEGETARIANO"],"opcionesInactivas":[],"h":"3e6bb72b66fb"},
 {"id":"8007","activa":"si","precio":"9.00","precioMedia":"","carpeta":"postres","archivo":"","alergenos":["FRUTOSCASCARA","CACAHUETE","SOJA","HUEVO","SESAMO","GLUTEN","LACTOSA","VEGETARIANO"],"opcionesInactivas":[],"h":"5aab121e9267"},
-{"id":"8008","activa":"si","precio":"6.00","precioMedia":"","carpeta":"postres","archivo":"","alergenos":["HUEVO","LACTOSA","FRUTOSCASCARA","GLUTEN","CACAHUETE","VEGETARIANO"],"opcionesInactivas":[],"h":"eb06ccbf846f"},
+{"id":"8008","activa":"si","precio":"6.00","precioMedia":"","carpeta":"postres","archivo":"","alergenos":["HUEVO","LACTOSA","FRUTOSCASCARA","GLUTEN","CACAHUETE","VEGETARIANO"],"opcionesInactivas":[],"h":"a2db7f8901ed"},
 {"id":"9001","activa":"si","precio":"1.60","precioMedia":"","carpeta":"cafe","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"4611efbf8e7b"},
 {"id":"9002","activa":"si","precio":"1.70","precioMedia":"","carpeta":"cafe","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"0e079f1f1165"},
 {"id":"9003","activa":"si","precio":"1.70","precioMedia":"","carpeta":"cafe","archivo":"","alergenos":[],"opcionesInactivas":[],"h":"c146dee6db0b"},
