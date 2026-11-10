@@ -320,7 +320,7 @@
      "mod": 1,
      "rot": 1,
      "cab": 2,
-     "col": "",
+     "col": "blanca",
      "as": "butaca"
     },
     {
@@ -329,7 +329,7 @@
      "mod": 1,
      "rot": 1,
      "cab": 0,
-     "col": "",
+     "col": "blanca",
      "as": "butaca"
     },
     {
@@ -338,7 +338,7 @@
      "mod": 1,
      "rot": 1,
      "cab": 0,
-     "col": "",
+     "col": "blanca",
      "as": "butaca"
     },
     {
@@ -407,7 +407,7 @@
      "mod": 0.5,
      "rot": 0,
      "cab": 2,
-     "col": "",
+     "col": "blanca",
      "as": "butaca"
     }
    ]
