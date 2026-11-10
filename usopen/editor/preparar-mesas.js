@@ -15,7 +15,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.prepararMesas = '1.0.0'; // 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
+    window.APP_VERSIONS.prepararMesas = '1.2.0'; // 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
 
     var ARCH = 'salas.json', LS = 'pm-salas-local';
     var SILLA = 45, HUECO = 4;                       // cm: fondo de la silla y separación con la mesa
@@ -30,6 +30,8 @@
     var TIPOS = {
         columna: { n: 'Columna', c: '#64748b', w: 50, h: 50, bloquea: true },
         barra: { n: 'Barra / mueble', c: '#c9a37a', w: 300, h: 70, bloquea: true },
+        sofa: { n: 'Sofá', c: '#c4b5fd', w: 200, h: 90, bloquea: true, rx: 16 },
+        planta: { n: 'Planta', c: '#5fb37c', w: 60, h: 60, bloquea: true, rx: 999 },
         puerta: { n: 'Puerta (dejar libre)', c: '#86efac', w: 120, h: 100, bloquea: true },
         ventana: { n: 'Ventana', c: '#7dd3fc', w: 200, h: 15, bloquea: false },
         zona: { n: 'Zona no usable', c: '#cbd5e1', w: 200, h: 200, bloquea: true },
@@ -246,8 +248,9 @@
         s.el.forEach(function (e, i) {
             var T = TIPOS[e.t] || TIPOS.zona, sel = editSala && ui.sel && ui.sel.el === i;
             t += '<g data-el="' + i + '" transform="translate(' + e.x + ',' + e.y + ')"' + (editSala ? ' style="cursor:grab"' : '') + '>' +
-                '<rect width="' + e.w + '" height="' + e.h + '" fill="' + (e.t === 'zona' ? 'url(#pm-raya)' : e.t === 'texto' ? (editSala ? 'rgba(148,163,184,.15)' : 'none') : T.c) + '" stroke="' + (sel ? '#2563eb' : e.t === 'texto' ? 'none' : '#475569') + '" stroke-width="' + (sel ? 8 : 3) + '"/>' +
+                '<rect width="' + e.w + '" height="' + e.h + '"' + (T.rx ? ' rx="' + Math.min(T.rx, e.w / 2, e.h / 2) + '"' : '') + ' fill="' + (e.t === 'zona' ? 'url(#pm-raya)' : e.t === 'texto' ? (editSala ? 'rgba(148,163,184,.15)' : 'none') : T.c) + '" stroke="' + (sel ? '#2563eb' : e.t === 'texto' ? 'none' : '#475569') + '" stroke-width="' + (sel ? 8 : 3) + '"/>' +
                 (e.txt ? '<text x="' + e.w / 2 + '" y="' + e.h / 2 + '" text-anchor="middle" dominant-baseline="central" font-size="' + (e.t === 'texto' ? 40 : 26) + '" fill="#1e293b"' + (e.h > e.w * 1.5 ? ' transform="rotate(-90 ' + e.w / 2 + ' ' + e.h / 2 + ')"' : '') + '>' + esc(e.txt) + '</text>' : '') +
+                (sel ? '<text x="' + e.w / 2 + '" y="-10" text-anchor="middle" font-size="24" font-weight="700" fill="#2563eb">' + e.w + ' × ' + e.h + ' cm</text>' : '') +
                 (sel ? '<rect data-asa="' + i + '" x="' + (e.w - 22) + '" y="' + (e.h - 22) + '" width="44" height="44" fill="#2563eb" style="cursor:nwse-resize"/>' : '') + '</g>';
         });
         var ms = mesasDe(menu, s), n0 = 0;
@@ -333,20 +336,24 @@
             h += '<div class="me-fila" style="gap:12px;font-size:.82rem;margin-bottom:8px;background:#eff6ff;padding:8px;border-radius:8px">' +
                 '<span>Nombre ' + I('s.nombre', s.nombre, 130, '', 'txt') + '</span><span>Ancho ' + I('s.w', metros(s.w), 50) + ' m</span><span>Largo ' + I('s.h', metros(s.h), 50) + ' m</span>' +
                 '<span title="Medida de UNA mesa de 4 plazas (2 personas en cada lado largo). Vale para todas las salas.">Mesa de 4: ' + I('mesa.largo', datos.mesa.largo, 46) + ' × ' + I('mesa.ancho', datos.mesa.ancho, 46) + ' cm</span>' +
-                '<span><b>Añadir:</b> ' + Object.keys(TIPOS).map(function (k) { return B('el:' + k, TIPOS[k].n); }).join(' ') + '</span></div>';
+                '<span><b>Añadir:</b> ' + Object.keys(TIPOS).map(function (k) { return B('el:' + k, TIPOS[k].n); }).join(' ') + ' ' + B('masMesa', '🪑 Mesa', 'background:#fde7c8', 'Sale de la edición de la sala y añade una mesa') + '</span></div>';
         }
+        var corte = h.length;
         if (s) h += svgSala(menu, s, false);
         // Barra del elemento elegido
         if (s && enSala && ui.sel && s.el[ui.sel.el]) {
             var e = s.el[ui.sel.el];
-            h += '<div class="me-fila" style="gap:10px;font-size:.82rem;margin-top:8px"><b>' + TIPOS[e.t].n + '</b><span>Texto ' + I('e.txt', e.txt, 140, '', 'txt') + '</span><span>Ancho ' + I('e.w', metros(e.w), 50) + ' m</span><span>Alto ' + I('e.h', metros(e.h), 50) + ' m</span>' + B('girarEl', '⟳ Girar') + B('borrarEl', '🗑 Quitar', 'color:#b91c1c') + '<span style="color:#94a3b8">Arrastra para mover; el cuadro azul cambia el tamaño.</span></div>';
-        } else if (s && enSala) h += '<div style="color:#64748b;font-size:.8rem;margin-top:6px">Estás dibujando la sala: añade columnas, barra, puertas… y arrástralos. Al acabar, 💾 Guardar plantilla y ✔ Terminar de editar.</div>';
+            h = h.slice(0, corte) + '<div class="me-fila" style="gap:10px;font-size:.82rem;margin-bottom:8px;background:#dbeafe;padding:8px;border-radius:8px"><b>' + TIPOS[e.t].n + '</b><span>Texto ' + I('e.txt', e.txt, 120, '', 'txt') + '</span>' +
+                '<span>Ancho ' + I('e.w', e.w, 50) + ' cm</span><span>Alto ' + I('e.h', e.h, 50) + ' cm</span>' +
+                '<span title="Distancia desde la pared izquierda y desde la pared de arriba">Posición: izq. ' + I('e.x', e.x, 50) + ' · arriba ' + I('e.y', e.y, 50) + ' cm</span>' +
+                B('girarEl', '⟳ Girar') + B('borrarEl', '🗑 Quitar', 'color:#b91c1c') + '<span style="color:#64748b">Flechas = mover (Mayús = 1 cm) · cuadro azul = tamaño · Supr = quitar</span></div>' + h.slice(corte);
+        } else if (s && enSala) h += '<div style="color:#64748b;font-size:.8rem;margin-top:6px">Estás dibujando la sala: añade columnas, barra, puertas… y arrástralos (o flechas del teclado). Las mesas se colocan fuera de la edición. Al acabar, 💾 Guardar plantilla y ✔ Terminar de editar.</div>';
         else if (s && ui.sel && c.lista[ui.sel.mesa]) {
             var m = c.lista[ui.sel.mesa];
             h += '<div class="me-fila" style="gap:10px;font-size:.82rem;margin-top:8px"><b>Mesa M' + (ui.sel.mesa + 1) + '</b>' +
                 '<span>' + B('menos', '−') + ' <b>' + m.mod * 4 + '</b> plazas ' + B('mas', '+') + '</span>' +
                 '<span title="Excepcional">Cabeceras <select data-f="m.cab" style="padding:4px;border:1px solid #cbd5e1;border-radius:5px"><option value="0">ninguna</option><option value="1"' + (m.cab === 1 ? ' selected' : '') + '>1</option><option value="2"' + (m.cab === 2 ? ' selected' : '') + '>2</option></select></span>' +
-                '<span>Comensales ' + I('m.pax', m.pax, 44) + ' de ' + plazas(m) + '</span>' + B('girar', '⟳ Girar') + B('borrarMesa', '🗑 Quitar mesa', 'color:#b91c1c') + '</div>';
+                '<span>Comensales ' + I('m.pax', m.pax, 44) + ' de ' + plazas(m) + '</span>' + B('girar', '⟳ Girar') + B('borrarMesa', '🗑 Quitar mesa', 'color:#b91c1c') + '<span style="color:#94a3b8">Flechas = mover (Mayús = 1 cm)</span></div>';
         } else if (s) h += '<div class="me-fila" style="gap:10px;font-size:.8rem;margin-top:6px;color:#64748b">' + B('masMesa', '➕ Añadir mesa') + (c.lista.length ? B('quitarTodas', '🗑 Quitar todas', 'color:#b91c1c') : '') + '<span>Arrastra las mesas para colocarlas; pulsa una para cambiarla. En rojo = pisa algo o se sale. Silla oscura = ocupada, punteada = libre.</span></div>';
         h += '</div>';
         // 3. Material
@@ -433,13 +440,28 @@
         }
         else if (a === 'borrarEl' && el) { s.el.splice(ui.sel.el, 1); ui.sel = null; sucias = true; }
         else if (a === 'girarEl' && el) { var w = el.w; el.w = el.h; el.h = w; sucias = true; }
-        else if (a === 'masMesa' && s) { var n = { s: s.id, mod: 1, cab: 0, pax: 4, rot: 0, x: 0, y: 0 }; colocar(n, s, mesasDe(menu, s), Math.max(0, num(c.pasillo) || 0)); c.lista.push(n); ui.sel = { mesa: c.lista.length - 1 }; }
+        else if (a === 'masMesa' && s) { ui.modo = 'mesas'; var n = { s: s.id, mod: 1, cab: 0, pax: 4, rot: 0, x: 0, y: 0 }; colocar(n, s, mesasDe(menu, s), Math.max(0, num(c.pasillo) || 0)); c.lista.push(n); ui.sel = { mesa: c.lista.length - 1 }; }
         else if (a === 'quitarTodas' && s) { var ms = mesasDe(menu, s); c.lista = c.lista.filter(function (x) { return ms.indexOf(x) < 0; }); ui.sel = null; }
         else if (a === 'mas' && m) { var lleno = m.pax === plazas(m); m.mod++; if (lleno) m.pax = plazas(m); }
         else if (a === 'menos' && m && m.mod > 1) { m.mod--; m.pax = Math.min(m.pax || 0, plazas(m)); }
         else if (a === 'girar' && m) { var k = cuerpo(m); m.rot = m.rot ? 0 : 1; var k2 = cuerpo(m); m.x = red(k.x + k.w / 2 - k2.w / 2); m.y = red(k.y + k.h / 2 - k2.h / 2); }
         else if (a === 'borrarMesa' && m) { c.lista.splice(ui.sel.mesa, 1); ui.sel = null; }
         else if (a === 'imprimir') { imprimir(menu); return; }
+        pintar();
+    }
+    function alTeclear(e) {
+        var d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key], supr = e.key === 'Delete';
+        if ((!d && !supr) || !datos || !ui.sel || !CONT || e.ctrlKey || e.altKey || e.metaKey) return;
+        if (/^(INPUT|SELECT|TEXTAREA)$/.test((e.target && e.target.tagName) || '') || (e.target && e.target.isContentEditable)) return;
+        var panel = CONT.querySelector('#pm-panel');
+        if (!panel || !panel.offsetParent || !panel.querySelector('#pm-svg')) return;
+        var c = cfg(CONT.__pm.menu), s = sala(), enSala = ui.modo === 'sala';
+        var lista = enSala ? (s && s.el) : c.lista, i = enSala ? ui.sel.el : ui.sel.mesa, obj = lista && lista[i];
+        if (!obj) return;
+        e.preventDefault();
+        if (supr) { lista.splice(i, 1); ui.sel = null; }
+        else { var paso = e.shiftKey ? 1 : 10; obj.x += d[0] * paso; obj.y += d[1] * paso; }
+        if (enSala) sucias = true;
         pintar();
     }
     function alCambiar(e) {
@@ -459,7 +481,7 @@
         else if (f === 'mesa.largo' || f === 'mesa.ancho') { if (v >= 40 && v <= 400) { datos.mesa[f.slice(5)] = Math.round(v); sucias = true; } }
         else if (f && f.indexOf('e.') === 0 && s && ui.sel && s.el[ui.sel.el]) {
             var el = s.el[ui.sel.el];
-            if (f === 'e.txt') el.txt = x.value.trim(); else if (v > 0) el[f.slice(2)] = Math.max(10, Math.round(v * 100));
+            if (f === 'e.txt') el.txt = x.value.trim(); else if (f === 'e.x' || f === 'e.y') { if (isFinite(v)) el[f.slice(2)] = Math.round(v); } else if (v > 0) el[f.slice(2)] = Math.max(5, Math.round(v));
             sucias = true;
         }
         else if (f && f.indexOf('m.') === 0 && ui.sel && c.lista[ui.sel.mesa]) {
@@ -478,6 +500,7 @@
             cont.addEventListener('pointerdown', alPulsar);
             cont.addEventListener('click', alClic);
             cont.addEventListener('change', alCambiar);
+            document.addEventListener('keydown', alTeclear);
             window.addEventListener('beforeunload', function (e) { if (sucias) { e.preventDefault(); e.returnValue = ''; } });
         }
         if (cont.__pm.menu !== menu) ui.sel = null;
