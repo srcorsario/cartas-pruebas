@@ -227,7 +227,9 @@ img.header-logo[src*="negro.png"] {
     color: var(--grey);
     outline: none;
 }
-#more-langs option { text-transform: none; color: var(--text); }
+/* 4.11.0: letra del sistema en la lista de "Más...": sus nombres (Русский, Čeština, Türkçe...) hacían bajar 2 archivos
+   más de Jost (cirílico + latin-ext, ~27 KB) en cada primera visita aunque nadie abriera la lista. */
+#more-langs option { text-transform: none; color: var(--text); font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; }
 
 #more-langs:focus {
     background: none;
