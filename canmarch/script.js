@@ -7,7 +7,7 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.7.3'; // 11 nov: si la 1ª foto de un plato salió de /m/, la 2ª-4ª solo se buscan en /m/ (el editor tiene las copias al día): una foto que no existe ya no cuesta 2 peticiones fallidas sino 1. v4.7.2: 11 nov: precarga de fotos que no acaban en 01.webp (p. ej. refrescos/Canonita.webp): se pide esa foto tal cual, no "Canonita.webp01.webp" (2 peticiones fallidas). v4.7.1: 11 nov: la precarga de fotos de la pestaña abierta ya NO se para con 2G/3G/ahorro de datos (con poca cobertura es cuando más falta) y sigue con la 2ª, 3ª y 4ª de cada plato (antes solo 2). v4.7.0: 11 nov: fotos LIGERAS en móviles y con poca cobertura: imagenes/<carpeta>/m/<foto> (720 px, las hace el editor); si no está, la grande. Fuentes de Google sin bloquear el primer pintado (construir). v4.6.0: 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
+const APP_VERSION = 'v4.8.0'; // 11 nov: lee imagenes/fotos.json (lista de fotos que existen, la ponen el editor y publicar) y NO pide las que no están: sin peticiones fallidas (antes 1 por hueco, segundos con poca cobertura). Sin la lista, como antes. v4.7.3: 11 nov: si la 1ª foto de un plato salió de /m/, la 2ª-4ª solo se buscan en /m/ (el editor tiene las copias al día): una foto que no existe ya no cuesta 2 peticiones fallidas sino 1. v4.7.2: 11 nov: precarga de fotos que no acaban en 01.webp (p. ej. refrescos/Canonita.webp): se pide esa foto tal cual, no "Canonita.webp01.webp" (2 peticiones fallidas). v4.7.1: 11 nov: la precarga de fotos de la pestaña abierta ya NO se para con 2G/3G/ahorro de datos (con poca cobertura es cuando más falta) y sigue con la 2ª, 3ª y 4ª de cada plato (antes solo 2). v4.7.0: 11 nov: fotos LIGERAS en móviles y con poca cobertura: imagenes/<carpeta>/m/<foto> (720 px, las hace el editor); si no está, la grande. Fuentes de Google sin bloquear el primer pintado (construir). v4.6.0: 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
@@ -94,9 +94,17 @@ const FOTO_LIGERA = (() => {
         return lado > 0 && lado <= 1000;
     } catch (e) { return false; }
 })();
+// 4.8.0: lista de fotos que existen (imagenes/fotos.json). null = no se sabe (no hay lista o no llegó): se prueba.
+let FOTOS_EXISTEN = null;
+const fotosListas = Promise.race([
+    fetch('imagenes/fotos.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null)
+        .then(j => { if (j && Array.isArray(j.rutas)) FOTOS_EXISTEN = new Set(j.rutas.map(r => 'imagenes/' + r)); })
+        .catch(() => { }),
+    new Promise(r => setTimeout(r, 4000))   // con muy mala cobertura no se espera más: se prueba como antes
+]);
 function urlFotoLigera(url) { return url.replace(/^(imagenes\/[^/]+\/)([^/]+\.webp)$/, '$1m/$2'); }
 function cargarFoto(url) {
-    return new Promise(resolve => {
+    return fotosListas.then(() => new Promise(resolve => {
         const probar = (u, siguiente) => {
             const img = new Image();
             img.onload = () => resolve(u);
@@ -108,8 +116,14 @@ function cargarFoto(url) {
         // la 01 del plato salió de /m/, una 02-04 que no esté en /m/ tampoco existe en grande: no se prueba.
         const url01 = url.replace(/0[2-9]\.webp$/, '01.webp');
         const soloLigera = url01 !== url && typeof verifiedImages[url01] === 'string' && verifiedImages[url01].includes('/m/');
+        if (FOTOS_EXISTEN) {   // 4.8.0: solo se pide lo que está en la lista
+            if (ligera !== url && FOTOS_EXISTEN.has(ligera)) probar(ligera, FOTOS_EXISTEN.has(url) ? url : null);
+            else if (FOTOS_EXISTEN.has(url)) probar(url, null);
+            else resolve(false);
+            return;
+        }
         if (ligera !== url) probar(ligera, soloLigera ? null : url); else probar(url, null);
-    });
+    }));
 }
 
 let preloadQueue = [];
@@ -1523,7 +1537,7 @@ function updateModal() {
         const conocida = verifiedImages[grande];
         img.onerror = null;
         if (conocida) img.src = conocida;
-        else if (FOTO_LIGERA && urlFotoLigera(grande) !== grande) {
+        else if (FOTO_LIGERA && urlFotoLigera(grande) !== grande && !(FOTOS_EXISTEN && !FOTOS_EXISTEN.has(urlFotoLigera(grande)))) {
             img.onerror = () => { img.onerror = null; img.src = grande; };
             img.src = urlFotoLigera(grande);
         } else img.src = grande;
