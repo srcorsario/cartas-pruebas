@@ -8,7 +8,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.revisar = '1.0.0'; // 9 nov: botón 🔎 Revisar carta: buscador de platos (ID o nombre en cualquier idioma) y listas de platos activos sin foto, sin traducir, sin alérgenos y sin precio; clic = abrir el plato
+    window.APP_VERSIONS.revisar = '1.1.0'; // 11 nov: pestaña 📱 Fotos para móvil: cuántas fotos activas no tienen aún su copia ligera (imagenes/<carpeta>/m/) y botón para generarlas (o rehacerlas todas). 1.0.0, 9 nov: botón 🔎 Revisar carta: buscador de platos (ID o nombre en cualquier idioma) y listas de platos activos sin foto, sin traducir, sin alérgenos y sin precio; clic = abrir el plato
 
     var $ = function (id) { return document.getElementById(id); };
     var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -91,6 +91,7 @@
             '<button data-p="trad">Sin traducir <span class="rv-n">' + nTrad + ' idioma' + (nTrad === 1 ? '' : 's') + '</span></button>' +
             '<button data-p="alerg">Sin alérgenos <span class="rv-n">' + a.alerg.length + '</span></button>' +
             '<button data-p="precio">Sin precio <span class="rv-n">' + a.precio.length + '</span></button>' +
+            (window.SubirFoto && window.SubirFoto.estadoMovil ? '<button data-p="movil">📱 Fotos para móvil</button>' : '') +
             '</div></div><div id="rv-cuerpo"></div><div id="rv-pie"><button id="rv-cerrar">Cerrar</button></div></div>';
         document.body.appendChild(fondo);
         var cuerpo = $('rv-cuerpo');
@@ -124,6 +125,8 @@
                 cuerpo.innerHTML = '<p class="rv-nota">Platos activos sin ningún alérgeno marcado. Puede ser correcto (agua, refrescos…), pero conviene revisarlo: la Info se genera con los alérgenos y los valida el restaurante (Reglamento UE 1169/2011). Ojo: el vino lleva sulfitos.</p>' + porCategoria(a.alerg);
             } else if (pest === 'precio') {
                 cuerpo.innerHTML = '<p class="rv-nota">Platos activos sin precio o a 0 (correcto si es un aviso o va incluido, p. ej. guarniciones).</p>' + porCategoria(a.precio);
+            } else if (pest === 'movil') {
+                pintarMovil();
             } else if (pest === 'trad') {
                 var ls = Object.keys(a.trad);
                 cuerpo.innerHTML = '<p class="rv-nota">Platos activos sin nombre en cada idioma de la web (🌐 Idiomas). Ábrelo y traduce desde el plato.</p>' +
@@ -134,6 +137,30 @@
                             (n ? a.trad[l].map(function (p) { return fila(p, esc(categoria(p.id))); }).join('') : '<div class="rv-ok">✔ Todos traducidos.</div>') + '</details>';
                     }).join('') : '<div class="rv-ok">La web solo está en español.</div>');
             }
+        }
+        var movilOcupado = false;
+        function pintarMovil() {
+            cuerpo.innerHTML = '<p class="rv-nota">La web enseña a los MÓVILES (y con poca cobertura) una copia ligera de cada foto: 720 px, unas 3 veces menos peso, en <code>imagenes/&lt;carpeta&gt;/m/</code>. ' +
+                'Se hace sola al guardar fotos; aquí se generan las que falten (fotos de antes, o subidas por otro camino). Si una falta, la web enseña la grande.</p>' +
+                '<div id="rv-mv">Mirando las fotos en GitHub…</div>';
+            window.SubirFoto.estadoMovil().then(function (e) {
+                if (pest !== 'movil' || !$('rv-mv')) return;
+                $('rv-mv').innerHTML = '<p><b>' + e.total + '</b> fotos activas · <b style="color:' + (e.faltan.length ? '#c2410c' : '#15803d') + '">' + e.faltan.length + '</b> sin copia para móvil' +
+                    (e.sobran.length ? ' · ' + e.sobran.length + ' copias sobrantes (su foto ya no está; se quitan)' : '') + '</p>' +
+                    '<p><button id="rv-mv-gen" style="padding:8px 14px;border-radius:8px;border:1px solid #e67e22;background:#fff7ed;cursor:pointer"' + (e.faltan.length || e.sobran.length ? '' : ' disabled') + '>📱 Generar las que faltan (' + e.faltan.length + ')</button> ' +
+                    '<button id="rv-mv-todas" style="padding:8px 14px;border-radius:8px;border:1px solid #ddd;background:#f8f9fa;cursor:pointer">↻ Rehacer todas</button></p>' +
+                    '<p class="rv-nota">Se guardan en GitHub en tandas de 30 (un commit cada una). No cierres el editor hasta que acabe.</p><div id="rv-mv-prog"></div>';
+                var lanzar = function (rehacer) {
+                    if (movilOcupado) return;
+                    movilOcupado = true;
+                    $('rv-mv-gen').disabled = true; $('rv-mv-todas').disabled = true;
+                    window.SubirFoto.generarMovil(rehacer, function (n, t) { var g = $('rv-mv-prog'); if (g) g.textContent = '⏳ ' + n + ' de ' + t + '…'; })
+                        .then(function (r) { movilOcupado = false; alert('✔ Fotos para móvil: ' + r.hechas + ' hechas' + (r.quitadas ? ', ' + r.quitadas + ' sobrantes quitadas' : '') + '. Se verán en la web en 1-2 minutos.'); if (pest === 'movil' && $('rv-mv')) pintarMovil(); })
+                        .catch(function (err) { movilOcupado = false; alert('No se pudieron generar: ' + err.message + ' (lo hecho hasta ahora queda guardado; vuelve a pulsar para seguir).'); if (pest === 'movil' && $('rv-mv')) pintarMovil(); });
+                };
+                $('rv-mv-gen').onclick = function () { lanzar(false); };
+                $('rv-mv-todas').onclick = function () { lanzar(true); };
+            }).catch(function (err) { if ($('rv-mv')) $('rv-mv').textContent = 'No se pudo leer GitHub: ' + err.message; });
         }
         var cerrar = function () { fondo.remove(); document.removeEventListener('keydown', tecla); };
         var tecla = function (e) { if (e.key === 'Escape') cerrar(); };
