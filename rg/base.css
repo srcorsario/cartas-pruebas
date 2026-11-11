@@ -143,7 +143,7 @@ img.header-logo.logo-marca { height: 80px; max-height: 80px; max-width: 70vw; }
 @media (max-width: 480px) { img.header-logo.logo-marca { height: 64px; max-height: 64px; } }
 
 /* Tamaños de logo ajustados a mano (ver historial): no tocar sin probar visualmente */
-img.header-logo[src*="logo RG_REST.png"] {
+img.header-logo[src*="logo RG_REST."] {
     height: 90px;
     max-height: 90px;
 }
@@ -229,7 +229,9 @@ img.header-logo[src*="negro.png"] {
 }
 /* 4.11.0: letra del sistema en la lista de "Más...": sus nombres (Русский, Čeština, Türkçe...) hacían bajar 2 archivos
    más de Jost (cirílico + latin-ext, ~27 KB) en cada primera visita aunque nadie abriera la lista. */
-#more-langs option { text-transform: none; color: var(--text); font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; }
+#more-langs option { text-transform: none; color: var(--text); }
+/* 4.11.1: también el propio selector: Chrome mide su ancho con el texto de las opciones en la letra del <select>. */
+#more-langs, #more-langs option { font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; }
 
 #more-langs:focus {
     background: none;
@@ -594,7 +596,7 @@ img.header-logo[src*="negro.png"] {
    ========================================================= */
 @media (max-width: 480px) {
     header { padding: 8px 10px 6px; }
-    img.header-logo[src*="logo RG_REST.png"] { height: 77px; max-height: 77px; }
+    img.header-logo[src*="logo RG_REST."] { height: 77px; max-height: 77px; }
     img.header-logo[src*="negro.png"] { height: 48px; max-height: 48px; }
     #header-menu-title { font-size: 19px; letter-spacing: 0.14em; }
     /* Con banderas (Android/iPhone) no caben en una línea: se reparten en dos, centradas */
@@ -668,7 +670,7 @@ img.header-logo[src*="negro.png"] {
     #menu-container { max-width: min(90vw, 1400px); }
 
     header { padding: 14px 24px 10px; }
-    img.header-logo[src*="logo RG_REST.png"] { height: clamp(100px, 7vw, 130px); max-height: none; }
+    img.header-logo[src*="logo RG_REST."] { height: clamp(100px, 7vw, 130px); max-height: none; }
     img.header-logo[src*="negro.png"] { height: clamp(62px, 4.35vw, 81px); max-height: none; }
     #header-menu-title { font-size: clamp(28px, 2.1vw, 38px); }
 

@@ -25,6 +25,6 @@ window.RESTAURANTE = {
     // Miniatura fija siempre visible en la fila del plato (más adelante: columna "Miniatura").
     miniaturas: {
         12990: 'imagenes/vinos/tenista_pegado.webp',
-        12993: { src: 'imagenes/vinos/canonita.webp', clase: 'canonita-inline-thumb' }
+        12993: { src: 'imagenes/refrescos/usopen_splitz01.webp', clase: 'canonita-inline-thumb' }   // 11 nov: la misma foto que la del plato (ya precargada; antes vinos/canonita.webp, 83 KB aparte)
     }
 };
