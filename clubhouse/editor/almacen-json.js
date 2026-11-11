@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.16.0'; // 11 nov: POST ?accion=restaurar (↶ Historial, historial.js): vuelve a poner platos de una versión anterior de datos.json (o la versión entera) en un commit nuevo; base.json y los idiomas se rehacen. 1.15.0: 4 nov (4): "contacto" (dirección, teléfono, horario) en datos.json y base.json + POST ?accion=contacto. 1.14.0: 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.17.0'; // 11 nov: la Info va aparte en datos/<idioma>-info.json (la web la baja después: ~85 % menos al abrir la carta); <idioma>.json lleva [nombre, "", 1] si hay Info. 1.16.0: 11 nov: POST ?accion=restaurar (↶ Historial, historial.js): vuelve a poner platos de una versión anterior de datos.json (o la versión entera) en un commit nuevo; base.json y los idiomas se rehacen. 1.15.0: 4 nov (4): "contacto" (dirección, teléfono, horario) en datos.json y base.json + POST ?accion=contacto. 1.14.0: 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -277,7 +277,7 @@
     async function dividir(datos) {
         const S = (v) => (v === null || v === undefined) ? '' : String(v);
         const J = JSON.stringify;
-        const porIdioma = {}; IDIOMAS_WEB.forEach(l => { porIdioma[l] = []; });
+        const porIdioma = {}, porInfo = {}; IDIOMAS_WEB.forEach(l => { porIdioma[l] = []; porInfo[l] = []; });
         const filas = [];
         for (const p of (datos.platos || [])) {
             const id = S(p.id); if (!id) continue;
@@ -286,7 +286,9 @@
             IDIOMAS_WEB.forEach(l => {
                 const n = S((p.nombre || {})[l]), i = S((p.info || {})[l]);
                 partes.push(n, i);
-                if (n || i) porIdioma[l].push(J(id) + ':[' + J(n) + ',' + J(i) + ']');
+                // 1.17.0: Info aparte (<idioma>-info.json); aquí solo el nombre y un 1 si tiene Info.
+                if (n || i) porIdioma[l].push(J(id) + ':[' + J(n) + (i ? ',"",1' : '') + ']');
+                if (i) porInfo[l].push(J(id) + ':' + J(i));
             });
             const h = hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(partes.join('\u001f'))), 6);
             filas.push('{"id":' + J(id) + ',"activa":' + J(S(p.activa)) + ',"precio":' + J(S(p.precio)) + ',"precioMedia":' + J(S(p.precioMedia)) +
@@ -302,7 +304,10 @@
         const mar = (marcaDe(datos) ? ',"marca":' + J(marcaDe(datos)) : '') + (contactoDe(datos) ? ',"contacto":' + J(contactoDe(datos)) : '');
         const res = { 'datos/base.json': '{"ocultas":[' + (datos.ocultas || []).map(x => J(S(x))).join(',') + ']' +
             (idi.length ? ',"idiomas":[' + idi.join(',') + ']' : '') + mar + pes + ',"platos":[\n' + filas.join(',\n') + '\n]}\n' };
-        IDIOMAS_WEB.forEach(l => { res['datos/' + l.toLowerCase() + '.json'] = '{\n' + porIdioma[l].join(',\n') + '\n}\n'; });
+        IDIOMAS_WEB.forEach(l => {
+            res['datos/' + l.toLowerCase() + '.json'] = '{\n' + porIdioma[l].join(',\n') + '\n}\n';
+            res['datos/' + l.toLowerCase() + '-info.json'] = '{\n' + porInfo[l].join(',\n') + '\n}\n';
+        });
         return res;
     }
 
