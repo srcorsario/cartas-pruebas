@@ -7,7 +7,7 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.11.0'; // 11 nov: miniaturas fijas (p. ej. Usopen Spritz) desde /m/ en móviles y sin ?v= de la publicación (se bajaban enteras otra vez en cada publicación); la lista "Más..." con letra del sistema (~27 KB de fuentes menos la 1ª vez). v4.10.0: 11 nov: la Info (preguntas/respuestas) va aparte: datos/<idioma>-info.json; al abrir la carta solo se bajan los nombres (~85 % menos), la Info del idioma se baja tras las fotos o al pulsar ℹ️. v4.9.0: 11 nov: al acabar las fotos de la pestaña abierta sigue con las de las pestañas siguientes, en orden (los vinos solo al entrar en su pestaña); el resto de idiomas ("Más...") se baja después de las fotos o al tocar ese selector. v4.8.0: 11 nov: lee imagenes/fotos.json (lista de fotos que existen, la ponen el editor y publicar) y NO pide las que no están: sin peticiones fallidas (antes 1 por hueco, segundos con poca cobertura). Sin la lista, como antes. v4.7.3: 11 nov: si la 1ª foto de un plato salió de /m/, la 2ª-4ª solo se buscan en /m/ (el editor tiene las copias al día): una foto que no existe ya no cuesta 2 peticiones fallidas sino 1. v4.7.2: 11 nov: precarga de fotos que no acaban en 01.webp (p. ej. refrescos/Canonita.webp): se pide esa foto tal cual, no "Canonita.webp01.webp" (2 peticiones fallidas). v4.7.1: 11 nov: la precarga de fotos de la pestaña abierta ya NO se para con 2G/3G/ahorro de datos (con poca cobertura es cuando más falta) y sigue con la 2ª, 3ª y 4ª de cada plato (antes solo 2). v4.7.0: 11 nov: fotos LIGERAS en móviles y con poca cobertura: imagenes/<carpeta>/m/<foto> (720 px, las hace el editor); si no está, la grande. Fuentes de Google sin bloquear el primer pintado (construir). v4.6.0: 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
+const APP_VERSION = 'v4.12.0'; // 11 nov: precarga de fotos de 2 en 2 (con mala cobertura casi todo el tiempo es espera de red, no descarga: casi el doble de rápido). v4.11.1: 11 nov: el selector "Más..." entero con letra del sistema (con solo las opciones Chrome seguía bajando Jost cirílico + latin-ext para medir su ancho). v4.11.0: 11 nov: miniaturas fijas (p. ej. Usopen Spritz) desde /m/ en móviles y sin ?v= de la publicación (se bajaban enteras otra vez en cada publicación); la lista "Más..." con letra del sistema (~27 KB de fuentes menos la 1ª vez). v4.10.0: 11 nov: la Info (preguntas/respuestas) va aparte: datos/<idioma>-info.json; al abrir la carta solo se bajan los nombres (~85 % menos), la Info del idioma se baja tras las fotos o al pulsar ℹ️. v4.9.0: 11 nov: al acabar las fotos de la pestaña abierta sigue con las de las pestañas siguientes, en orden (los vinos solo al entrar en su pestaña); el resto de idiomas ("Más...") se baja después de las fotos o al tocar ese selector. v4.8.0: 11 nov: lee imagenes/fotos.json (lista de fotos que existen, la ponen el editor y publicar) y NO pide las que no están: sin peticiones fallidas (antes 1 por hueco, segundos con poca cobertura). Sin la lista, como antes. v4.7.3: 11 nov: si la 1ª foto de un plato salió de /m/, la 2ª-4ª solo se buscan en /m/ (el editor tiene las copias al día): una foto que no existe ya no cuesta 2 peticiones fallidas sino 1. v4.7.2: 11 nov: precarga de fotos que no acaban en 01.webp (p. ej. refrescos/Canonita.webp): se pide esa foto tal cual, no "Canonita.webp01.webp" (2 peticiones fallidas). v4.7.1: 11 nov: la precarga de fotos de la pestaña abierta ya NO se para con 2G/3G/ahorro de datos (con poca cobertura es cuando más falta) y sigue con la 2ª, 3ª y 4ª de cada plato (antes solo 2). v4.7.0: 11 nov: fotos LIGERAS en móviles y con poca cobertura: imagenes/<carpeta>/m/<foto> (720 px, las hace el editor); si no está, la grande. Fuentes de Google sin bloquear el primer pintado (construir). v4.6.0: 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
@@ -1530,24 +1530,32 @@ async function processPreloadQueue(session) {
     isPreloading = true;
 
     // 4.7.1: sin corte por 2G/3G/ahorro de datos: con poca cobertura es cuando más falta tenerlas ya.
-    while (preloadQueue.length > 0) { 
-        if (session !== currentPreloadSession) { isPreloading = false; return; }  
-        const task = preloadQueue.shift(); 
-        const url = task.url || `${task.base}0${task.n}.webp`;
+    // 4.12.0: 2 descargas a la vez (2 "trabajadores" que comparten la cola), en el mismo orden.
+    const enCurso = new Set();
+    const trabajador = async () => {
+        while (preloadQueue.length > 0) {
+            if (session !== currentPreloadSession) return;
+            const task = preloadQueue.shift();
+            const url = task.url || `${task.base}0${task.n}.webp`;
 
-        if (!task.url && task.n > 1) { 
-            const prevUrl = `${task.base}0${task.n - 1}.webp`; 
-            if (verifiedImages[prevUrl] === false) { verifiedImages[url] = false; continue; } 
+            if (!task.url && task.n > 1) {
+                const prevUrl = `${task.base}0${task.n - 1}.webp`;
+                if (verifiedImages[prevUrl] === false) { verifiedImages[url] = false; continue; }
+            }
+
+            if (verifiedImages[url] !== undefined || enCurso.has(url)) continue;
+
+            await new Promise(resolve => setTimeout(resolve, 150));
+            if (session !== currentPreloadSession) return;
+
+            enCurso.add(url);
+            verifiedImages[url] = await cargarFoto(url);
+            enCurso.delete(url);
         }
-
-        if (verifiedImages[url] !== undefined) continue;
-
-        await new Promise(resolve => setTimeout(resolve, 150));
-        if (session !== currentPreloadSession) { isPreloading = false; return; }
-
-        verifiedImages[url] = await cargarFoto(url); 
-    } 
+    };
+    await Promise.all([trabajador(), trabajador()]);
     isPreloading = false;
+    if (session !== currentPreloadSession) return;
     if (session === currentPreloadSession) avisarFotosPrecargadas();
 }
 
