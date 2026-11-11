@@ -7,7 +7,7 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.6.0'; // 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
+const APP_VERSION = 'v4.7.0'; // 11 nov: fotos LIGERAS en móviles y con poca cobertura: imagenes/<carpeta>/m/<foto> (720 px, las hace el editor); si no está, la grande. Fuentes de Google sin bloquear el primer pintado (construir). v4.6.0: 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
@@ -82,7 +82,32 @@ let allData = [];
 let idsGlobalesDesactivados = new Set();
 let currentLang = 'ES', currentCat = R.pestanaInicial || '';
 let currentGalleryPath = '', currentPhotoIndex = 1, maxPhotosFound = 1;
-let verifiedImages = {}; 
+let verifiedImages = {}; // url de la foto grande -> url que cargó (ligera o grande) | false
+
+// Fotos ligeras (v4.7.0): en móviles (pantalla <= 1000 px de lado) y con ahorro de datos / 2G / 3G se pide primero
+// la copia de imagenes/<carpeta>/m/ (720 px, la genera el editor). Si no existe, la grande de siempre.
+const FOTO_LIGERA = (() => {
+    try {
+        const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (c && (c.saveData || /2g|3g/.test(c.effectiveType || ''))) return true;
+        const lado = Math.max(window.screen.width || 0, window.screen.height || 0);
+        return lado > 0 && lado <= 1000;
+    } catch (e) { return false; }
+})();
+function urlFotoLigera(url) { return url.replace(/^(imagenes\/[^/]+\/)([^/]+\.webp)$/, '$1m/$2'); }
+function cargarFoto(url) {
+    return new Promise(resolve => {
+        const probar = (u, siguiente) => {
+            const img = new Image();
+            img.onload = () => resolve(u);
+            img.onerror = () => siguiente ? probar(siguiente, null) : resolve(false);
+            img.src = u;
+        };
+        const ligera = FOTO_LIGERA ? urlFotoLigera(url) : url;
+        if (ligera !== url) probar(ligera, url); else probar(url, null);
+    });
+}
+
 let preloadQueue = [];
 let isPreloading = false;
 let currentPreloadSession = 0;
@@ -1438,14 +1463,7 @@ async function processPreloadQueue(session) {
         await new Promise(resolve => setTimeout(resolve, 150));
         if (session !== currentPreloadSession) { isPreloading = false; return; }
 
-        const success = await new Promise(resolve => { 
-            const img = new Image(); 
-            img.onload = () => resolve(true); 
-            img.onerror = () => resolve(false); 
-            img.src = url; 
-        });
-
-        verifiedImages[url] = success; 
+        verifiedImages[url] = await cargarFoto(url); 
     } 
     isPreloading = false;
 }
@@ -1477,12 +1495,7 @@ async function openGallery(base) {
         let exists = verifiedImages[url];
 
         if (exists === undefined) { 
-            exists = await new Promise(r => {  
-                const img = new Image();  
-                img.onload = () => r(true);  
-                img.onerror = () => r(false);  
-                img.src = url;  
-            }); 
+            exists = await cargarFoto(url); 
             verifiedImages[url] = exists; 
         }
 
@@ -1501,7 +1514,17 @@ function updateModal() {
     const prev = document.getElementById('prev-btn');
     const next = document.getElementById('next-btn');
 
-    if (img) img.src = `${currentGalleryPath}0${currentPhotoIndex}.webp`; 
+    if (img) {
+        // La que ya cargó (ligera o grande); si aún no se sabe, se prueba la ligera y, si falla, la grande.
+        const grande = `${currentGalleryPath}0${currentPhotoIndex}.webp`;
+        const conocida = verifiedImages[grande];
+        img.onerror = null;
+        if (conocida) img.src = conocida;
+        else if (FOTO_LIGERA && urlFotoLigera(grande) !== grande) {
+            img.onerror = () => { img.onerror = null; img.src = grande; };
+            img.src = urlFotoLigera(grande);
+        } else img.src = grande;
+    }
     if (prev) prev.style.display = currentPhotoIndex > 1 ? 'block' : 'none'; 
     if (next) next.style.display = currentPhotoIndex < maxPhotosFound ? 'block' : 'none';
 }
