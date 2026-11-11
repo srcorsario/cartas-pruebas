@@ -7,7 +7,7 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.7.1'; // 11 nov: la precarga de fotos de la pestaña abierta ya NO se para con 2G/3G/ahorro de datos (con poca cobertura es cuando más falta) y sigue con la 2ª, 3ª y 4ª de cada plato (antes solo 2). v4.7.0: 11 nov: fotos LIGERAS en móviles y con poca cobertura: imagenes/<carpeta>/m/<foto> (720 px, las hace el editor); si no está, la grande. Fuentes de Google sin bloquear el primer pintado (construir). v4.6.0: 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
+const APP_VERSION = 'v4.7.2'; // 11 nov: precarga de fotos que no acaban en 01.webp (p. ej. refrescos/Canonita.webp): se pide esa foto tal cual, no "Canonita.webp01.webp" (2 peticiones fallidas). v4.7.1: 11 nov: la precarga de fotos de la pestaña abierta ya NO se para con 2G/3G/ahorro de datos (con poca cobertura es cuando más falta) y sigue con la 2ª, 3ª y 4ª de cada plato (antes solo 2). v4.7.0: 11 nov: fotos LIGERAS en móviles y con poca cobertura: imagenes/<carpeta>/m/<foto> (720 px, las hace el editor); si no está, la grande. Fuentes de Google sin bloquear el primer pintado (construir). v4.6.0: 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
@@ -1425,7 +1425,11 @@ function managePreload() {
     // al abrir la galería (openGallery ya prueba sobre la marcha lo que falte, sin bloquear la
     // apertura). Los vinos se quedan igual que antes, en 1 sola foto precargada por botella.
     const addCategoryByLevels = (items, maxNivel = 2) => {
-        const bases = items.map(item => `imagenes/${item.carpeta}/${item.archivo.split('01.webp')[0]}`);
+        // 4.7.2: foto suelta (no acaba en 01.webp) -> solo esa, sin buscar 02/03/04.
+        const sueltas = items.filter(item => !/01\.webp$/.test(item.archivo));
+        sueltas.forEach(item => preloadQueue.push({ url: `imagenes/${item.carpeta}/${item.archivo}` }));
+        const bases = items.filter(item => /01\.webp$/.test(item.archivo))
+            .map(item => `imagenes/${item.carpeta}/${item.archivo.slice(0, -'01.webp'.length)}`);
         for (let level = 1; level <= maxNivel; level++) {
             bases.forEach(base => { preloadQueue.push({ base, n: level }); });
         }
@@ -1446,9 +1450,9 @@ async function processPreloadQueue(session) {
     while (preloadQueue.length > 0) { 
         if (session !== currentPreloadSession) { isPreloading = false; return; }  
         const task = preloadQueue.shift(); 
-        const url = `${task.base}0${task.n}.webp`;
+        const url = task.url || `${task.base}0${task.n}.webp`;
 
-        if (task.n > 1) { 
+        if (!task.url && task.n > 1) { 
             const prevUrl = `${task.base}0${task.n - 1}.webp`; 
             if (verifiedImages[prevUrl] === false) { verifiedImages[url] = false; continue; } 
         }
