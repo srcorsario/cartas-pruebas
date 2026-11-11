@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.15.0'; // 4 nov (4): "contacto" (dirección, teléfono, horario) en datos.json y base.json + POST ?accion=contacto. 1.14.0: 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.16.0'; // 11 nov: POST ?accion=restaurar (↶ Historial, historial.js): vuelve a poner platos de una versión anterior de datos.json (o la versión entera) en un commit nuevo; base.json y los idiomas se rehacen. 1.15.0: 4 nov (4): "contacto" (dirección, teléfono, horario) en datos.json y base.json + POST ?accion=contacto. 1.14.0: 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -503,6 +503,27 @@
         return (datos) => { const c = contactoDe({ contacto: cuerpo && cuerpo.contacto }); if (c) datos.contacto = c; else delete datos.contacto; };
     }
 
+    // ↶ Historial (historial.js): { todo: <datos.json antiguo> } = volver entera a esa versión;
+    // { platos: [platos antiguos], quitar: [ids] } = solo esos platos (los que no existan se añaden).
+    function opRestaurar(cuerpo) {
+        return (datos) => {
+            if (cuerpo && cuerpo.todo && Array.isArray(cuerpo.todo.platos)) {
+                Object.keys(datos).forEach(k => { delete datos[k]; });
+                Object.assign(datos, clonar(cuerpo.todo));
+                return;
+            }
+            datos.platos = datos.platos || [];
+            const pos = {}; datos.platos.forEach((p, i) => { pos[idNum(p.id)] = i; });
+            (cuerpo && cuerpo.platos || []).forEach(p => {
+                const i = pos[idNum(p.id)];
+                if (i === undefined) datos.platos.push(clonar(p)); else datos.platos[i] = clonar(p);
+            });
+            const q = new Set((cuerpo && cuerpo.quitar || []).map(idNum));
+            if (q.size) datos.platos = datos.platos.filter(p => !q.has(idNum(p.id)));
+            datos.platos.sort((a, b) => idNum(a.id) - idNum(b.id));
+        };
+    }
+
     // Idiomas de la web: lista de códigos (ES, EN, ...). ES y EN siempre. Vacío = todos.
     function opIdiomas(cuerpo) {
         return (datos) => {
@@ -708,6 +729,12 @@
                     catch (err) { console.warn('[almacen-json] No se pudieron actualizar los Menús Especiales:', err); alert('⚠️ Se ha borrado, pero no se pudieron actualizar los Menús Especiales (' + err.message + '). Los platos siguen saliendo con su nombre.'); }
                 }
                 return respuesta('OK: estructura');
+            }
+            if (accion === 'restaurar') {
+                const n = cuerpo && cuerpo.todo ? 'versión entera de ' + (cuerpo.desde || '?') : ((cuerpo.platos || []).length + (cuerpo.quitar || []).length) + ' plato(s) de ' + (cuerpo.desde || '?');
+                await encolar(modo, opRestaurar(cuerpo), '↶ recuperar ' + n, 300);
+                if (window.Categorias) window.Categorias.cargar(estructuraDe(est(modo).vista));
+                return respuesta('OK: recuperado ' + n);
             }
             if (accion === 'infoplato') {
                 // No se espera al commit: los lotes de Info mandan muchas seguidas y se agrupan.
