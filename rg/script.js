@@ -7,7 +7,7 @@
 
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.8.0'; // 11 nov: lee imagenes/fotos.json (lista de fotos que existen, la ponen el editor y publicar) y NO pide las que no están: sin peticiones fallidas (antes 1 por hueco, segundos con poca cobertura). Sin la lista, como antes. v4.7.3: 11 nov: si la 1ª foto de un plato salió de /m/, la 2ª-4ª solo se buscan en /m/ (el editor tiene las copias al día): una foto que no existe ya no cuesta 2 peticiones fallidas sino 1. v4.7.2: 11 nov: precarga de fotos que no acaban en 01.webp (p. ej. refrescos/Canonita.webp): se pide esa foto tal cual, no "Canonita.webp01.webp" (2 peticiones fallidas). v4.7.1: 11 nov: la precarga de fotos de la pestaña abierta ya NO se para con 2G/3G/ahorro de datos (con poca cobertura es cuando más falta) y sigue con la 2ª, 3ª y 4ª de cada plato (antes solo 2). v4.7.0: 11 nov: fotos LIGERAS en móviles y con poca cobertura: imagenes/<carpeta>/m/<foto> (720 px, las hace el editor); si no está, la grande. Fuentes de Google sin bloquear el primer pintado (construir). v4.6.0: 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
+const APP_VERSION = 'v4.10.0'; // 11 nov: la Info (preguntas/respuestas) va aparte: datos/<idioma>-info.json; al abrir la carta solo se bajan los nombres (~85 % menos), la Info del idioma se baja tras las fotos o al pulsar ℹ️. v4.9.0: 11 nov: al acabar las fotos de la pestaña abierta sigue con las de las pestañas siguientes, en orden (los vinos solo al entrar en su pestaña); el resto de idiomas ("Más...") se baja después de las fotos o al tocar ese selector. v4.8.0: 11 nov: lee imagenes/fotos.json (lista de fotos que existen, la ponen el editor y publicar) y NO pide las que no están: sin peticiones fallidas (antes 1 por hueco, segundos con poca cobertura). Sin la lista, como antes. v4.7.3: 11 nov: si la 1ª foto de un plato salió de /m/, la 2ª-4ª solo se buscan en /m/ (el editor tiene las copias al día): una foto que no existe ya no cuesta 2 peticiones fallidas sino 1. v4.7.2: 11 nov: precarga de fotos que no acaban en 01.webp (p. ej. refrescos/Canonita.webp): se pide esa foto tal cual, no "Canonita.webp01.webp" (2 peticiones fallidas). v4.7.1: 11 nov: la precarga de fotos de la pestaña abierta ya NO se para con 2G/3G/ahorro de datos (con poca cobertura es cuando más falta) y sigue con la 2ª, 3ª y 4ª de cada plato (antes solo 2). v4.7.0: 11 nov: fotos LIGERAS en móviles y con poca cobertura: imagenes/<carpeta>/m/<foto> (720 px, las hace el editor); si no está, la grande. Fuentes de Google sin bloquear el primer pintado (construir). v4.6.0: 4 nov: pestaña "Contacto y horario" (dirección + Google Maps, teléfono, horario) desde base.json "contacto" (lo edita el editor: 📍 Contacto). v4.5.0: 4 nov: plantilla neutra -- logo de la web desde base.json ("marca", lo sube el editor con 🏷️ Logos y QR). v4.4.0: 3 nov (2): pestañas desde datos/base.json ("pestanas", las escribe el editor/construir desde datos.json -> estructura), con copia en este navegador. v4.3.0 (3 nov): idiomas de la web elegibles desde el editor (base.json "idiomas")
 
 const CSV_URL = (R.datos && R.datos.csv) || '';
 // Endpoint en vivo (Código.gs, ?accion=csv): carga por etapas/idioma y ?accion=categorias.
@@ -126,6 +126,14 @@ function cargarFoto(url) {
     }));
 }
 
+// 4.9.0: se resuelve cuando la precarga de fotos (todas las pestañas) termina; el resto de idiomas espera a esto
+// o a que se toque el selector "Más..." (lo que pase antes).
+let avisarFotosPrecargadas;
+const fotosPrecargadas = new Promise(r => { avisarFotosPrecargadas = r; });
+const masIdiomasTocado = new Promise(r => {
+    const ver = e => { if (e.target && e.target.closest && e.target.closest('#more-langs')) r(); };
+    ['pointerdown', 'touchstart', 'focusin', 'keydown'].forEach(t => document.addEventListener(t, ver, true));
+});
 let preloadQueue = [];
 let isPreloading = false;
 let currentPreloadSession = 0;
@@ -647,9 +655,10 @@ async function init() {
         // poco por idioma (nombres cortos, sin INFO_* salvo en ES/EN), así que en conexiones
         // normales no cuesta nada tenerlo ya listo si alguien acaba abriendo el selector
         // "Más...". Si la conexión es lenta (Save-Data / 2G / 3G), se salta esta etapa.
-        etapa2.then(() => {
-            const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            if (conn && (conn.saveData || /2g|3g/.test(conn.effectiveType || ''))) return;
+        // 4.10.0: la Info del idioma que se está viendo, cuando acaben las fotos.
+        fotosPrecargadas.then(() => cargarInfo(currentLang)).catch(e => console.warn('[Info] no se pudo bajar:', e.message));
+        // 4.9.0: ya no se salta con poca cobertura, pero espera a que acaben las fotos (o a que se toque "Más...").
+        Promise.all([etapa2, Promise.race([fotosPrecargadas, masIdiomasTocado])]).then(() => {
 
             const idiomasRestantes = Object.keys(IDIOMAS).filter(l => !idiomasEtapa1.includes(l) && !ESSENTIAL_LANGS.includes(l));
             if (idiomasRestantes.length === 0) return;
@@ -964,6 +973,38 @@ function jsonIdioma(l) {
     }
     return _jsonIdiomas[k];
 }
+// 4.10.0: Info aparte. <idioma>.json trae [nombre, "", 1] si el plato tiene Info (el 1 = "está en
+// <idioma>-info.json", que es { id: info }). Con archivos antiguos ([nombre, info]) funciona igual.
+const _jsonInfo = {};
+const _infoYa = {};   // idioma -> { id: info } ya bajado (para filas que llegan después)
+function jsonInfo(l) {
+    const k = l.toLowerCase();
+    if (!_jsonInfo[k]) {
+        _jsonInfo[k] = fetch(`${DATOS_CARPETA}${k}-info.json`, { cache: 'no-cache' })
+            .then(r => { if (r.status === 404) return {}; if (!r.ok) throw new Error('HTTP ' + r.status + ' en ' + k + '-info.json'); return r.json(); })
+            .catch(e => { delete _jsonInfo[k]; throw e; });
+    }
+    return _jsonInfo[k];
+}
+// Baja la Info de un idioma y la mete en los platos (y en la caché local). Devuelve true si cambió algo.
+async function cargarInfo(l) {
+    if (DATOS_TIPO !== 'json' || !l) return false;
+    const k = l.toLowerCase(), info = await jsonInfo(l);
+    _infoYa[k] = info;
+    let cambia = false;
+    allData.forEach(it => {
+        if (it[`tieneinfo_${k}`] && it[`info_${k}`] === undefined) { it[`info_${k}`] = info[it.id] || ''; cambia = true; }
+    });
+    if (cambia) { try { guardarCacheLocal(); } catch (e) { } }
+    return cambia;
+}
+// ℹ️ de un plato cuya Info aún no ha llegado: se baja (solo la del idioma actual) y se abre.
+async function abrirInfoPendiente(id) {
+    try { await cargarInfo(currentLang); } catch (e) { console.warn('[Info] no se pudo bajar:', e.message); return; }
+    const it = allData.find(x => String(x.id) === String(id));
+    const inf = it && it[`info_${currentLang.toLowerCase()}`];
+    if (inf) showInfoModal(utf8ToB64(inf));
+}
 function jsonFilaBase(p) {
     return {
         id: String(p.id),
@@ -984,8 +1025,16 @@ async function jsonFilas(langs, ids) {
         const it = jsonFilaBase(p);
         langs.forEach((l, i) => {
             const t = textos[i][p.id] || [];
-            it[`nombre_${l.toLowerCase()}`] = t[0] || '';
-            it[`info_${l.toLowerCase()}`] = t[1] || '';
+            const k = l.toLowerCase();
+            it[`nombre_${k}`] = t[0] || '';
+            if (t[2]) {   // 4.10.0: Info en <idioma>-info.json; si ya se bajó, se pone; si no, se deja sin tocar
+                it[`tieneinfo_${k}`] = 1;
+                const ya = _jsonInfo[k] && _infoYa[k];
+                it[`info_${k}`] = ya ? (ya[p.id] || '') : undefined;   // undefined: que no quede una Info vieja de la caché
+            } else {
+                it[`tieneinfo_${k}`] = 0;
+                it[`info_${k}`] = t[1] || '';
+            }
         });
         return it;
     });
@@ -1378,7 +1427,10 @@ function generateItemHtml(item, opts = {}) {
     let infoIconHtml = '';
     const infoKey = `info_${currentLang.toLowerCase()}`;
     const infoData = item[infoKey];
-    if (!idsGlobalesDesactivados.has('info') && infoData && infoData.trim() !== '') {
+    const infoPendiente = !infoData && item[`tieneinfo_${currentLang.toLowerCase()}`];   // 4.10.0: aún sin bajar
+    if (!idsGlobalesDesactivados.has('info') && infoPendiente) {
+        infoIconHtml = `<span class="emoji-info" onclick="event.stopPropagation(); abrirInfoPendiente('${String(item.id).replace(/[^\w-]/g, '')}')" title="Info">ℹ️</span>`;
+    } else if (!idsGlobalesDesactivados.has('info') && infoData && infoData.trim() !== '') {
         // CORREGIDO: antes se escapaban las comillas a mano (' -> \' , " -> &quot;), pero si el
         // JSON ya traía una comilla interna escapada (\"), JS se comía la barra invertida al
         // evaluar el string y dejaba una comilla suelta -> JSON.parse fallaba en silencio y el
@@ -1427,6 +1479,7 @@ function managePreload() {
     // El incremento de currentPreloadSession de arriba ya invalida cualquier precarga que
     // estuviera en curso de una llamada anterior, así que basta con no encolar nada nuevo.
     if (idsGlobalesDesactivados.has('fotos')) {
+        avisarFotosPrecargadas();
         return;
     }
 
@@ -1457,6 +1510,16 @@ function managePreload() {
     const catActual = categoriesList.find(c => c.id === currentCat);
     addCategoryByLevels(currentItems, (catActual && catActual.precargaFotos) || 4); // 4.7.1: 1ª foto de todos, luego 2ª, 3ª, 4ª
 
+    // 4.9.0: luego las pestañas siguientes, en orden (y vuelta al principio), para ir adelantando. Los vinos
+    // (pestañas solo de 13000-14999) no: se precargan al entrar en ellas. Ni las especiales (alérgenos...).
+    const esPestanaVino = c => Array.isArray(c.rangos) && c.rangos.length > 0 && c.rangos.every(r => Number(r[0]) >= 13000 && Number(r[1]) <= 14999);
+    const iActual = categoriesList.findIndex(c => c.id === currentCat);
+    for (let k = 1; k < categoriesList.length; k++) {
+        const c = categoriesList[(Math.max(iActual, 0) + k) % categoriesList.length];
+        if (!c || c.especial || c.id === currentCat || esPestanaVino(c)) continue;
+        addCategoryByLevels(sortedData.filter(i => isItemInCategory(i.id, c.id) && i.archivo && i.activa === 'SI'), c.precargaFotos || 4);
+    }
+
     processPreloadQueue(mySession);
 }
 
@@ -1483,6 +1546,7 @@ async function processPreloadQueue(session) {
         verifiedImages[url] = await cargarFoto(url); 
     } 
     isPreloading = false;
+    if (session === currentPreloadSession) avisarFotosPrecargadas();
 }
 
 // Abre en grande una miniatura fija (ver R.miniaturas) en el modal de fotos, sin flechas.
@@ -1602,6 +1666,7 @@ const MIN_LOADING_VISIBLE_MS = 200;
 // mientras dura la carga, para evitar dos peticiones solapadas si se pulsa dos veces seguidas.
 async function changeLanguage(l) {
     if (!l) return;
+    fotosPrecargadas.then(() => cargarInfo(l)).catch(() => { });   // 4.10.0: su Info, sin prisa
 
     if (!isLangLoaded(l)) {
         const select = document.getElementById('more-langs');
