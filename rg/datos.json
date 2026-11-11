@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "guardado": "2026-11-11T10:13:58.320Z",
+  "guardado": "2026-11-11T12:38:04.984Z",
   "ocultas": [],
   "idiomas": [],
   "estructura": {
@@ -9043,7 +9043,7 @@
     },
     {
         "id": "12993", "activa": "si", "precio": "7.00", "precioMedia": "",
-        "carpeta": "refrescos", "archivo": "Canonita.webp",
+        "carpeta": "refrescos", "archivo": "usopen_splitz01.webp",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
             "ES": "Usopen Splitz // Bebida refrescante con notas cítricas, matices agridulces, aroma de la naranja de Mallorca y el pomelo rosado",
