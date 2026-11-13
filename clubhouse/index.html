@@ -3,6 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    // núcleo 4.14.1: los datos se piden AQUÍ, antes de las hojas de estilo (un script detrás de un <link
+    // rel=stylesheet> no se ejecuta hasta que baja el CSS: en 3G +2,5 s). base.json + idioma del móvil + ES/EN
+    // a la vez; script.js recoge estas mismas peticiones (window.__DATOS_TEMPRANO). La config la pone construir.ps1.
+    // Con la carta ya guardada en este navegador solo base.json (los textos salen de la copia local).
+    try { (function (c) {
+        if (!c || !window.fetch) return;
+        function pide(a) { var p = fetch(c.carpeta + a, { cache: 'no-cache' }); p['catch'](function () { }); return p; }
+        var T = window.__DATOS_TEMPRANO = { carpeta: c.carpeta, base: pide('base.json'), idiomas: {} };
+        try { var g = localStorage.getItem(c.cache); if (g && g.indexOf('"appVersion":"' + c.v + '"') >= 0) return; } catch (e) { }
+        var l = ((navigator.language || navigator.userLanguage || '').split('-')[0] || '').toUpperCase();
+        var ls = c.idiomas.indexOf(l) >= 0 ? [l] : [];
+        for (var i = 0; i < c.primeros.length; i++) if (ls.indexOf(c.primeros[i]) < 0) ls.push(c.primeros[i]);
+        for (i = 0; i < ls.length; i++) T.idiomas[ls[i].toLowerCase()] = pide(ls[i].toLowerCase() + '.json');
+    })({"carpeta":"datos/","idiomas":["ES","EN","DE","FR","IT","RU","NL","PL","SV","NO","DA","FI","PT","RO","HU","CS","EL","TR","AR","ZH","JA","KO","CA","EU","GL","VA"],"primeros":["ES","EN"],"cache":"clubhouse-pruebas-menu-v1","v":"v4.14.1"}); } catch (e) { }
+    </script>
     <title>Club House Menu</title>
     <link rel="icon" type="image/png" href="favicon-32x32.png">
     <meta name="theme-color" content="#f4f7f0">
@@ -84,18 +100,8 @@
     </div>
 
     <!-- Generado por construir.ps1: no editar aquí sino en nucleo/ y restaurantes/. -->
-    <script>window.CARTA_BUILD = {"restaurante":"clubhouse","entorno":"pruebas","v":"20261113144342"};</script>
+    <script>window.CARTA_BUILD = {"restaurante":"clubhouse","entorno":"pruebas","v":"20261113161628"};</script>
     <script src="restaurante.js?v=c22e43d5"></script>
-    <script>
-    // núcleo 4.14.0: base.json se pide YA, a la vez que script.js (antes esperaba a que llegara script.js:
-    // con 3G, 3-4 s más tarde). script.js recoge esta misma petición en jsonBase().
-    try { (function () {
-        var d = (window.RESTAURANTE || {}).datos || {};
-        if (d.tipo !== 'json' || !window.fetch) return;
-        window.__BASE_TEMPRANO = fetch((d.carpeta || 'datos/') + 'base.json', { cache: 'no-cache' });
-        window.__BASE_TEMPRANO.catch(function () { });
-    })(); } catch (e) { }
-    </script>
-    <script src="script.js?v=00fe796e"></script>
+    <script src="script.js?v=925670e8"></script>
 </body>
 </html>
