@@ -1,6 +1,6 @@
 const R = window.RESTAURANTE || {};
 const BUILD = window.CARTA_BUILD || {};
-const APP_VERSION = 'v4.14.2';
+const APP_VERSION = 'v4.15.0';
 const CSV_URL = (R.datos && R.datos.csv) || '';
 const LIVE_CSV_ENDPOINT = (R.datos && R.datos.vivo) || '';
 const DATOS_TIPO = (R.datos && R.datos.tipo) || 'sheets';
@@ -83,6 +83,8 @@ if (ligera !== url) probar(ligera, soloLigera ? null : url); else probar(url, nu
 }
 let avisarFotosPrecargadas;
 const fotosPrecargadas = new Promise(r => { avisarFotosPrecargadas = r; });
+let avisarPestanaAbierta;
+const pestanaAbiertaLista = new Promise(r => { avisarPestanaAbierta = r; });
 const masIdiomasTocado = new Promise(r => {
 const ver = e => { if (e.target && e.target.closest && e.target.closest('#more-langs')) r(); };
 ['pointerdown', 'touchstart', 'focusin', 'keydown'].forEach(t => document.addEventListener(t, ver, true));
@@ -94,11 +96,10 @@ function redPrecarga() {
 try {
 const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 const t = (c && c.effectiveType) || '';
-if (c && (c.saveData || /2g$/.test(t))) return { hilos: 1, otras: 0 };
-if (t === '3g') return { hilos: 2, otras: 1 };
-if (t === '4g') return { hilos: 3, otras: 4 };
+if (c && c.saveData) return { hilos: 1 };
+if (t === '4g') return { hilos: 3 };
 } catch (e) { }
-return { hilos: 2, otras: 4 };
+return { hilos: 2 };
 }
 let pendientesPrioritarios = 0;
 function conPrioridad(p) {
@@ -505,7 +506,7 @@ const idiomasPendientesEsenciales = ESSENTIAL_LANGS.filter(l => !idiomasEtapa1.i
 const etapa2 = idiomasPendientesEsenciales.length > 0
 ? fetchAndParseCsv(idiomasPendientesEsenciales).then(items => { mergeIntoAllData(items); guardarCacheLocal(); }).catch(e => console.warn('[Carga por etapas] No se pudieron precargar los idiomas esenciales restantes:', e.message))
 : Promise.resolve();
-fotosPrecargadas.then(() => cargarInfo(currentLang)).catch(e => console.warn('[Info] no se pudo bajar:', e.message));
+pestanaAbiertaLista.then(() => cargarInfo(currentLang)).catch(e => console.warn('[Info] no se pudo bajar:', e.message));
 Promise.all([etapa2, Promise.race([fotosPrecargadas, masIdiomasTocado])]).then(() => {
 const idiomasRestantes = Object.keys(IDIOMAS).filter(l => !idiomasEtapa1.includes(l) && !ESSENTIAL_LANGS.includes(l));
 if (idiomasRestantes.length === 0) return;
@@ -1131,30 +1132,34 @@ const mySession = currentPreloadSession;
 isPreloading = false;
 preloadQueue = [];
 if (idsGlobalesDesactivados.has('fotos')) {
+avisarPestanaAbierta();
 avisarFotosPrecargadas();
 return;
 }
 const sortedData = [...allData].sort((a, b) => parseInt(a.id) - parseInt(b.id));
-const addCategoryByLevels = (items, maxNivel = 2) => {
-const sueltas = items.filter(item => !/01\.webp$/.test(item.archivo));
-sueltas.forEach(item => preloadQueue.push({ url: `imagenes/${item.carpeta}/${item.archivo}` }));
+const addCategoryByLevels = (items, desde, hasta) => {
+if (desde <= 1) items.filter(item => !/01\.webp$/.test(item.archivo))
+.forEach(item => preloadQueue.push({ url: `imagenes/${item.carpeta}/${item.archivo}` }));
 const bases = items.filter(item => /01\.webp$/.test(item.archivo))
 .map(item => `imagenes/${item.carpeta}/${item.archivo.slice(0, -'01.webp'.length)}`);
-for (let level = 1; level <= maxNivel; level++) {
+for (let level = desde; level <= hasta; level++) {
 bases.forEach(base => { preloadQueue.push({ base, n: level }); });
 }
 };
-const currentItems = sortedData.filter(i => isItemInCategory(i.id, currentCat) && i.archivo && i.activa === 'SI');
+const platosDe = id => sortedData.filter(i => isItemInCategory(i.id, id) && i.archivo && i.activa === 'SI');
+const niveles = c => (c && c.precargaFotos) || 4;
 const catActual = categoriesList.find(c => c.id === currentCat);
-addCategoryByLevels(currentItems, (catActual && catActual.precargaFotos) || 4);
-const red = redPrecarga();
+addCategoryByLevels(platosDe(currentCat), 1, niveles(catActual));
+preloadQueue.push({ hito: 'abierta' });
 const esPestanaVino = c => Array.isArray(c.rangos) && c.rangos.length > 0 && c.rangos.every(r => Number(r[0]) >= 13000 && Number(r[1]) <= 14999);
 const iActual = categoriesList.findIndex(c => c.id === currentCat);
-for (let k = 1; red.otras > 0 && k < categoriesList.length; k++) {
+const demas = [];
+for (let k = 1; k < categoriesList.length; k++) {
 const c = categoriesList[(Math.max(iActual, 0) + k) % categoriesList.length];
-if (!c || c.especial || c.id === currentCat || esPestanaVino(c)) continue;
-addCategoryByLevels(sortedData.filter(i => isItemInCategory(i.id, c.id) && i.archivo && i.activa === 'SI'), Math.min(c.precargaFotos || 4, red.otras));
+if (c && !c.especial && c.id !== currentCat && !esPestanaVino(c)) demas.push(c);
 }
+demas.forEach(c => addCategoryByLevels(platosDe(c.id), 1, 1));
+demas.forEach(c => addCategoryByLevels(platosDe(c.id), 2, niveles(c)));
 processPreloadQueue(mySession);
 }
 async function processPreloadQueue(session) {
@@ -1165,6 +1170,7 @@ const trabajador = async () => {
 while (preloadQueue.length > 0) {
 if (session !== currentPreloadSession) return;
 const task = preloadQueue.shift();
+if (task.hito === 'abierta') { avisarPestanaAbierta(); continue; }
 const url = task.url || `${task.base}0${task.n}.webp`;
 if (!task.url && task.n > 1) {
 const prevUrl = `${task.base}0${task.n - 1}.webp`;
@@ -1182,7 +1188,8 @@ enCurso.delete(url);
 await Promise.all(Array.from({ length: redPrecarga().hilos }, trabajador));
 isPreloading = false;
 if (session !== currentPreloadSession) return;
-if (session === currentPreloadSession) avisarFotosPrecargadas();
+avisarPestanaAbierta();
+avisarFotosPrecargadas();
 }
 function openMiniaturaLarge(src) {
 const img = document.getElementById('modal-img');
@@ -1269,7 +1276,7 @@ if (modal) modal.style.display = 'none';
 const MIN_LOADING_VISIBLE_MS = 200;
 async function changeLanguage(l) {
 if (!l) return;
-fotosPrecargadas.then(() => cargarInfo(l)).catch(() => { });
+pestanaAbiertaLista.then(() => cargarInfo(l)).catch(() => { });
 if (!isLangLoaded(l)) {
 const select = document.getElementById('more-langs');
 const btnEl = document.getElementById(`btn-${l}`);
