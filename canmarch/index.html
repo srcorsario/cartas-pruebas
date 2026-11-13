@@ -79,8 +79,18 @@
     </div>
 
     <!-- Generado por construir.ps1: no editar aquí sino en nucleo/ y restaurantes/. -->
-    <script>window.CARTA_BUILD = {"restaurante":"canmarch","entorno":"pruebas","v":"20261113112857","marca":true};</script>
+    <script>window.CARTA_BUILD = {"restaurante":"canmarch","entorno":"pruebas","v":"20261113144330","marca":true};</script>
     <script src="restaurante.js?v=bb1f4b5f"></script>
-    <script src="script.js?v=3c2a77bd"></script>
+    <script>
+    // núcleo 4.14.0: base.json se pide YA, a la vez que script.js (antes esperaba a que llegara script.js:
+    // con 3G, 3-4 s más tarde). script.js recoge esta misma petición en jsonBase().
+    try { (function () {
+        var d = (window.RESTAURANTE || {}).datos || {};
+        if (d.tipo !== 'json' || !window.fetch) return;
+        window.__BASE_TEMPRANO = fetch((d.carpeta || 'datos/') + 'base.json', { cache: 'no-cache' });
+        window.__BASE_TEMPRANO.catch(function () { });
+    })(); } catch (e) { }
+    </script>
+    <script src="script.js?v=00fe796e"></script>
 </body>
 </html>
