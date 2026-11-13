@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "guardado": "2026-11-11T12:38:04.984Z",
+  "guardado": "2026-11-13T17:44:00.407Z",
   "ocultas": [],
   "idiomas": [],
   "estructura": {
@@ -13548,7 +13548,7 @@
         }
     },
     {
-        "id": "16203", "activa": "si", "precio": "2.00", "precioMedia": "",
+        "id": "16203", "activa": "no", "precio": "2.00", "precioMedia": "",
         "carpeta": "vinos", "archivo": "cafe_con_leche.webp",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
