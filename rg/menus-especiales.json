@@ -1,7 +1,7 @@
 {
  "formato": 1,
  "restaurante": "rg",
- "guardado": "2026-11-17T18:43:38.264Z",
+ "guardado": "2026-11-17T18:52:33.980Z",
  "menus": [
   {
    "id": "811ac788-e0db-43ec-a540-4e63405fe521",
@@ -581,6 +581,161 @@
    },
    "fechaCreacion": "2026-11-17T18:43:35.200Z",
    "fechaModificacion": "2026-11-17T18:43:35.200Z"
+  },
+  {
+   "id": "97d231b3-b319-4f84-9a1c-989e9e2989fe",
+   "nombre": "24 Septiembre 2026",
+   "config": {
+    "id": null,
+    "nombre": "24 Septiembre 2026",
+    "logo": true,
+    "mostrarNombre": true,
+    "idiomas": {
+     "es": true,
+     "en": false
+    },
+    "secciones": {
+     "entrantes": {
+      "activo": true,
+      "compartir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1006,
+        "es": "Carpaccio de Solomillo de Ternera (con Queso Parmesano Reggiano, Rúcula y Vinagreta de Piñones)",
+        "en": "Beef Tenderloin Carpaccio (with Parmesan Reggiano Cheese, Arugula and Pine Nut Vinaigrette)",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1100,
+        "es": "Pan con Alioli, Tomate Ramallet y Aceitunas",
+        "en": "Bread with Aioli, Ramallet Tomato and Olives",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1005,
+        "es": "Tortilla de Patatas Semicuajada con Parmentier de Trufa",
+        "en": "Semi-Set Potato Omelette with Truffle Parmentier",
+        "ambos": false
+       }
+      ]
+     },
+     "primero": {
+      "activo": true,
+      "aElegir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 2001,
+        "es": "Ensalada de Burrata (Escarola, Tomate, Pera, Cebolla Morada Encurtida, Pepperoncino, Vinagreta de Modena, y Bastoncitos de Pan de Cristal)",
+        "en": "Burrata Salad (Frisée, Tomato, Pear, Pickled Red Onion, Pepperoncino, Modena Vinaigrette, and Small Crystal Bread Sticks)",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 3301,
+        "es": "Agnolotti Bianconeri Relleno de Langosta",
+        "en": "Agnolotti Bianconeri Filled with Lobster",
+        "ambos": false
+       }
+      ]
+     },
+     "principal": {
+      "activo": true,
+      "aElegir": false,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 12808,
+        "es": "Solomillo de Ternera con Foie, demi‑glace de Trufa y Miel Sobre Puré de Patata",
+        "en": "Beef Tenderloin with Foie, Truffle and Honey Demi-Glace on Potato Purée",
+        "ambos": false
+       }
+      ]
+     },
+     "postre": {
+      "activo": true,
+      "aElegir": false,
+      "platos": []
+     }
+    },
+    "bebida": {
+     "agua": true,
+     "cerveza": true,
+     "refresco": true,
+     "cafe": true,
+     "vinoBlanco": {
+      "activo": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 13140,
+        "es": "Loess Verdejo (D.O. Rueda)",
+        "en": "Loess Verdejo (D.O. Rueda)",
+        "ambos": false
+       }
+      ]
+     },
+     "vinoRosado": {
+      "activo": false,
+      "platos": []
+     },
+     "vinoTinto": {
+      "activo": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 13351,
+        "es": "Matarromera Crianza (D.O. Ribera)",
+        "en": "Matarromera (Ribera del Duero)",
+        "ambos": false
+       }
+      ]
+     },
+     "cava": {
+      "activo": false,
+      "platos": []
+     }
+    },
+    "calculo": {
+     "compartirCada": 4,
+     "aguaCada": 2,
+     "cervezaCada": 3,
+     "refrescoCada": 4,
+     "cafeCada": 2,
+     "vinoBlancoCada": "",
+     "vinoTintoCada": "",
+     "vinoRosadoCada": "",
+     "cavaCada": "",
+     "comensales": 56,
+     "precioMenu": "",
+     "extraPvp": "",
+     "extraCoste": "",
+     "ajustes": {}
+    },
+    "mesas": {
+     "pax": "",
+     "tam": 8,
+     "cab": false,
+     "pasillo": 100,
+     "lista": [],
+     "sueltas": [],
+     "cub": {},
+     "op": {}
+    }
+   },
+   "fechaCreacion": "2026-11-17T18:52:33.406Z",
+   "fechaModificacion": "2026-11-17T18:52:33.406Z"
   }
  ],
  "platosManuales": []
