@@ -1,0 +1,587 @@
+{
+ "formato": 1,
+ "restaurante": "rg",
+ "guardado": "2026-11-17T18:43:38.264Z",
+ "menus": [
+  {
+   "id": "811ac788-e0db-43ec-a540-4e63405fe521",
+   "nombre": "2026-09-23T22:00:00.000Z",
+   "config": {
+    "id": null,
+    "nombre": "24 Septiembre 2026",
+    "logo": true,
+    "mostrarNombre": false,
+    "idiomas": {
+     "es": true,
+     "en": true
+    },
+    "secciones": {
+     "entrantes": {
+      "activo": true,
+      "compartir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1002,
+        "es": "Clásico Steak Tartar de Solomillo de Ternera con Bastoncitos de Pan de Cristal",
+        "en": "Classic Beef Tenderloin Steak Tartare with Crystal Bread Sticks",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1010,
+        "es": "Flor de Alcachofas al Horno Josper con Salsa Tonnato",
+        "en": "Charcoal-Grilled Artichoke with Tonnato Sauce",
+        "ambos": false
+       }
+      ]
+     },
+     "primero": {
+      "activo": true,
+      "aElegir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 2004,
+        "es": "Ceviche de Lubina (con Boniato, Cebolla Roja, Yuka, Leche de Coco, Aji Amarillo, Aguacate y Cilantro)",
+        "en": "Sea Bass Ceviche (with Sweet Potato, Red Onion, Yucca, Coconut Milk, Aji Amarillo, Avocado and Cilantro)",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante002",
+        "id": 2005,
+        "es": "Ensalada Caprese (Tomate, Burratina, Queso Parmesano y Salsa Pesto)",
+        "en": "Caprese Salad (Tomato, Burratina, Parmesan Cheese, and Pesto Sauce)",
+        "ambos": false
+       }
+      ]
+     },
+     "principal": {
+      "activo": true,
+      "aElegir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 5102,
+        "es": "Entraña al Josper, con Patata Risoladas, Pimientos y Chimichurry",
+        "en": "Skirt Steak from the Josper Oven with Crispy Roasted Potatoes, Peppers, and Chimichurri",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 5002,
+        "es": "Filete de Gallo San Pedro Frito con Cebolla y Parmentier de Patata",
+        "en": "Fried John Dory Fillet with Onions and Potato Parmentier",
+        "ambos": false
+       }
+      ]
+     },
+     "postre": {
+      "activo": true,
+      "aElegir": false,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 8002,
+        "es": "Tarta de Queso y Pistacho",
+        "en": "Pistachio Cheesecake",
+        "ambos": true
+       }
+      ]
+     }
+    },
+    "bebida": {
+     "agua": true,
+     "cerveza": true,
+     "refresco": true,
+     "cafe": true,
+     "vinoBlanco": {
+      "activo": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 13101,
+        "es": "Llampuga Vinícola (V.T. Mallorca)",
+        "en": "Llampuga Vinícola (Mallorca - White)",
+        "ambos": true
+       }
+      ]
+     },
+     "vinoRosado": {
+      "activo": false,
+      "platos": []
+     },
+     "vinoTinto": {
+      "activo": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 13351,
+        "es": "Matarromera Crianza (D.O. Ribera)",
+        "en": "Matarromera (Ribera del Duero)",
+        "ambos": true
+       }
+      ]
+     },
+     "cava": {
+      "activo": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 13404,
+        "es": "Champagne Louis Roederer Brut",
+        "en": "Louis Roederer (Champagne)",
+        "ambos": true
+       }
+      ]
+     }
+    }
+   },
+   "fechaCreacion": "2026-09-26T14:18:29.900Z",
+   "fechaModificacion": "2026-09-26T14:18:29.900Z"
+  },
+  {
+   "id": "71f6e50d-323c-4528-8eab-919deb69e06b",
+   "nombre": "Test 1 prueba",
+   "config": {
+    "id": "71f6e50d-323c-4528-8eab-919deb69e06b",
+    "nombre": "Test 1 prueba",
+    "logo": true,
+    "mostrarNombre": true,
+    "idiomas": {
+     "es": true,
+     "en": true
+    },
+    "secciones": {
+     "entrantes": {
+      "activo": true,
+      "compartir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 12304,
+        "es": "Salteado Campestre de Setas (Shiitake, Gírgolas y Champiñones)",
+        "en": "Country-Style Mushroom Sauté (Shiitake, Oyster and Button Mushrooms)",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1002,
+        "es": "Clásico Steak Tartar de Solomillo de Ternera con Bastoncitos de Pan de Cristal",
+        "en": "Classic Beef Tenderloin Steak Tartare with Crystal Bread Sticks",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1006,
+        "es": "Carpaccio de Solomillo de Ternera (con Queso Parmesano Reggiano, Rúcula y Vinagreta de Piñones)",
+        "en": "Beef Tenderloin Carpaccio (with Parmesan Reggiano Cheese, Arugula and Pine Nut Vinaigrette)",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante002",
+        "id": 1003,
+        "es": "Calamares a la Andaluza con Alioli Verde",
+        "en": "Andalusian-Style Calamari with Marinara Sauce and Horseradish Aioli",
+        "ambos": false
+       }
+      ]
+     },
+     "primero": {
+      "activo": true,
+      "aElegir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1007,
+        "es": "Torrezno Sobre Trinxat de la Cerdenya",
+        "en": "Crispy Pork Belly on Cerdanya Trinxat",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 12112,
+        "es": "Croquetas de Alcachofa y Pulpo",
+        "en": "Artichoke and Octopus Croquettes",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 12113,
+        "es": "Croquetas de Jamón Ibérico: 4 Unidades",
+        "en": "Iberian Ham Croquettes: 4 Pieces",
+        "ambos": false
+       }
+      ]
+     },
+     "principal": {
+      "activo": true,
+      "aElegir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 12503,
+        "es": "Arroz Negro de Bacalao y Muselina de Ajo Ahumado",
+        "en": "Black Rice of Cod and Smoked Garlic Mousseline",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 12705,
+        "es": "Lomo de Salmón al Josper (con Frutos Secos Acompañado de Verdura de Temporada)",
+        "en": "Josper-Grilled Salmon Loin (with Nuts Accompanied by Seasonal Vegetables)",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 5001,
+        "es": "Lubina al Josper con Refrito y Verduras",
+        "en": "Josper Sea Bass with Refrito and Vegetables",
+        "ambos": false
+       }
+      ]
+     },
+     "postre": {
+      "activo": true,
+      "aElegir": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 12901,
+        "es": "Tennis Ball Rna - Chocolate Blanco, Vainilla, Almendra, Limón y Yuzu",
+        "en": "Tennis Ball Rna - White Chocolate, Vanilla, Almond, Lemon and Yuzu",
+        "ambos": true
+       },
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 8003,
+        "es": "Tarta de Queso",
+        "en": "Cheesecake",
+        "ambos": false
+       },
+       {
+        "manual": false,
+        "modo": "restaurante002",
+        "id": 7002,
+        "es": "Fruta del Día",
+        "en": "Fruit of the Day",
+        "ambos": false
+       }
+      ]
+     }
+    },
+    "bebida": {
+     "agua": true,
+     "cerveza": true,
+     "refresco": true,
+     "cafe": true,
+     "vinoBlanco": {
+      "activo": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 13140,
+        "es": "Loess Verdejo (D.O. Rueda)",
+        "en": "Loess Verdejo (D.O. Rueda)",
+        "ambos": true
+       }
+      ]
+     },
+     "vinoRosado": {
+      "activo": false,
+      "platos": []
+     },
+     "vinoTinto": {
+      "activo": true,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 13370,
+        "es": "El Tenista (D.O.P. Jumilla)",
+        "en": "El Tenista (D.O.P. Jumilla)",
+        "ambos": true
+       }
+      ]
+     },
+     "cava": {
+      "activo": false,
+      "platos": []
+     }
+    }
+   },
+   "fechaCreacion": "2026-09-24T19:23:33.860Z",
+   "fechaModificacion": "2026-09-24T19:27:11.813Z"
+  },
+  {
+   "id": "04e8a811-7b54-4312-b0be-b75cfbe826a4",
+   "nombre": "Evento 19-09-2026 - Grupo Pádel",
+   "config": {
+    "id": null,
+    "nombre": "Evento 19-09-2026 - Grupo Pádel",
+    "logo": true,
+    "mostrarNombre": true,
+    "idiomas": {
+     "es": true,
+     "en": false
+    },
+    "secciones": {
+     "entrantes": {
+      "activo": true,
+      "compartir": false,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1002,
+        "es": "Clásico Steak Tartar de Solomillo de Ternera con Bastoncitos de Pan de Cristal",
+        "en": "Classic Beef Tenderloin Steak Tartare with Crystal Bread Sticks",
+        "ambos": false
+       }
+      ]
+     },
+     "primero": {
+      "activo": true,
+      "aElegir": false,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante002",
+        "id": 1005,
+        "es": "Guacamole con Totopos, Pico de Gallo y Salsa Agria",
+        "en": "Guacamole with Tortilla Chips, Pico de Gallo, and Sour Cream",
+        "ambos": false
+       }
+      ]
+     },
+     "principal": {
+      "activo": true,
+      "aElegir": false,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 1010,
+        "es": "Flor de Alcachofas al Horno Josper con Salsa Tonnato",
+        "en": "Charcoal-Grilled Artichoke with Tonnato Sauce",
+        "ambos": false
+       }
+      ]
+     },
+     "postre": {
+      "activo": true,
+      "aElegir": false,
+      "platos": [
+       {
+        "manual": false,
+        "modo": "restaurante001",
+        "id": 12901,
+        "es": "Tennis Ball Rna - Chocolate Blanco, Vainilla, Almendra, Limón y Yuzu",
+        "en": "Tennis Ball Rna - White Chocolate, Vanilla, Almond, Lemon and Yuzu",
+        "ambos": true
+       }
+      ]
+     }
+    },
+    "bebida": {
+     "agua": true,
+     "cerveza": true,
+     "refresco": true,
+     "cafe": true,
+     "vinoBlanco": {
+      "activo": false,
+      "platos": []
+     },
+     "vinoRosado": {
+      "activo": false,
+      "platos": []
+     },
+     "vinoTinto": {
+      "activo": false,
+      "platos": []
+     },
+     "cava": {
+      "activo": false,
+      "platos": []
+     }
+    }
+   },
+   "fechaCreacion": "2026-09-24T19:22:17.389Z",
+   "fechaModificacion": "2026-09-24T19:22:17.389Z"
+  },
+  {
+   "id": "60579226-6128-4f3e-ad1e-2a053c3aa3f1",
+   "nombre": "Prueba menu 56 pax",
+   "config": {
+    "id": null,
+    "nombre": "Prueba menu 56 pax",
+    "logo": true,
+    "mostrarNombre": true,
+    "idiomas": {
+     "es": true,
+     "en": false
+    },
+    "secciones": {
+     "entrantes": {
+      "activo": true,
+      "compartir": false,
+      "platos": []
+     },
+     "primero": {
+      "activo": false,
+      "aElegir": false,
+      "platos": []
+     },
+     "principal": {
+      "activo": true,
+      "aElegir": false,
+      "platos": []
+     },
+     "postre": {
+      "activo": true,
+      "aElegir": false,
+      "platos": []
+     }
+    },
+    "bebida": {
+     "agua": true,
+     "cerveza": true,
+     "refresco": true,
+     "cafe": true,
+     "vinoBlanco": {
+      "activo": false,
+      "platos": []
+     },
+     "vinoRosado": {
+      "activo": false,
+      "platos": []
+     },
+     "vinoTinto": {
+      "activo": false,
+      "platos": []
+     },
+     "cava": {
+      "activo": false,
+      "platos": []
+     }
+    },
+    "calculo": {
+     "compartirCada": 4,
+     "aguaCada": 2,
+     "cervezaCada": 3,
+     "refrescoCada": 4,
+     "cafeCada": 2,
+     "vinoBlancoCada": "",
+     "vinoTintoCada": "",
+     "vinoRosadoCada": "",
+     "cavaCada": "",
+     "comensales": "",
+     "precioMenu": "",
+     "extraPvp": "",
+     "extraCoste": "",
+     "ajustes": {}
+    },
+    "mesas": {
+     "pax": 56,
+     "tam": 8,
+     "cab": false,
+     "pasillo": 100,
+     "lista": [
+      {
+       "mod": 2,
+       "cab": 0,
+       "pax": 8,
+       "s": "smwaolxg3",
+       "rot": 1,
+       "x": 180,
+       "y": 80
+      },
+      {
+       "mod": 2,
+       "cab": 0,
+       "pax": 8,
+       "s": "smwaolxg3",
+       "rot": 1,
+       "x": 670,
+       "y": 80
+      },
+      {
+       "mod": 2,
+       "cab": 0,
+       "pax": 8,
+       "s": "smwaolxg3",
+       "rot": 1,
+       "x": 1170,
+       "y": 80
+      },
+      {
+       "mod": 2,
+       "cab": 0,
+       "pax": 8,
+       "s": "smwaolxg3",
+       "rot": 1,
+       "x": 420,
+       "y": 80
+      },
+      {
+       "mod": 2,
+       "cab": 0,
+       "pax": 8,
+       "s": "smwaolxg3",
+       "rot": 1,
+       "x": 920,
+       "y": 80
+      },
+      {
+       "mod": 2,
+       "cab": 0,
+       "pax": 8,
+       "s": "smwaolxg3",
+       "rot": 0,
+       "x": 200,
+       "y": 720
+      },
+      {
+       "mod": 2,
+       "cab": 0,
+       "pax": 8,
+       "s": "smwaolxg3",
+       "rot": 0,
+       "x": 660,
+       "y": 720
+      }
+     ],
+     "sueltas": [],
+     "cub": {},
+     "op": {}
+    }
+   },
+   "fechaCreacion": "2026-11-17T18:43:35.200Z",
+   "fechaModificacion": "2026-11-17T18:43:35.200Z"
+  }
+ ],
+ "platosManuales": []
+}
