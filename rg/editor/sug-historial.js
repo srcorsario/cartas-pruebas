@@ -17,7 +17,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.sugHistorial = '1.0.0'; // 20 nov: hoja de Sugerencias con ◀ fecha ▶ (cada guardado en que cambian las sugerencias) y "Aplicar esta configuración y guardar en la web" (solo quedan activas esas; las que ya no existen se vuelven a crear con sus idiomas e Info)
+    window.APP_VERSIONS.sugHistorial = '1.1.0'; // 20 nov (2): al entrar en la pestaña siempre empieza en «Ahora»; barra más ancha y fina (una línea); flechas ← → del teclado para cambiar de momento (Inicio = el 1º, Fin = Ahora). 1.0.0: 20 nov: hoja de Sugerencias con ◀ fecha ▶ (cada guardado en que cambian las sugerencias) y "Aplicar esta configuración y guardar en la web" (solo quedan activas esas; las que ya no existen se vuelven a crear con sus idiomas e Info)
 
     var REPO = 'https://api.github.com/repos/' + S.repo;
     var DIR = S.ruta.indexOf('/') >= 0 ? S.ruta.slice(0, S.ruta.lastIndexOf('/') + 1) : '';
@@ -117,15 +117,16 @@
     }
 
     // ---------- barra encima de la hoja ----------
-    var CSS = '#sh-barra{background:#f1f5f9;border:1px solid #cbd5e1;border-radius:10px;padding:10px 14px;margin:0 auto 12px;max-width:820px;font-size:14px;color:#334155}' +
-        '#sh-barra .sh-fila{display:flex;align-items:center;gap:8px;flex-wrap:wrap}' +
-        '#sh-barra button{border:1px solid #94a3b8;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:14px}' +
+    var CSS = '#sh-barra{background:#f1f5f9;border:1px solid #cbd5e1;border-radius:8px;padding:3px 12px;margin:0 auto 10px;max-width:1300px;font-size:13px;color:#334155}' +
+        '#sh-barra .sh-fila{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:28px}' +
+        '#sh-barra button{border:1px solid #94a3b8;background:#fff;border-radius:5px;padding:1px 9px;cursor:pointer;font-size:13px;line-height:20px}' +
         '#sh-barra button:disabled{opacity:.4;cursor:default}' +
-        '#sh-fecha{font-weight:700;min-width:210px;text-align:center}' +
+        '#sh-fecha{font-weight:700;min-width:190px;text-align:center}' +
         '#sh-aplicar{background:#0d5c63!important;color:#fff;border-color:#0d5c63!important;font-weight:600}' +
         '#sh-barra.sh-pasado{background:#fff7ed;border-color:#fdba74}' +
-        '#sh-estado{margin-top:8px;line-height:1.5}#sh-estado li{margin-left:18px}' +
-        '#sh-estado .sh-aviso{color:#9a3412}';
+        '#sh-tecla{color:#94a3b8;font-size:12px}' +
+        '#sh-estado{line-height:1.4;font-size:12.5px}#sh-estado:not(:empty){padding:2px 0 4px;border-top:1px dashed #fdba74;margin-top:2px}' +
+        '#sh-estado ul{margin:0}#sh-estado li{margin-left:18px}#sh-estado .sh-aviso{color:#9a3412}';
     function asegurarBarra() {
         var cont = $(CONT);
         if (!cont || $('sh-barra')) return !!cont;
@@ -134,8 +135,8 @@
         b.id = 'sh-barra';
         b.innerHTML = '<div class="sh-fila">🕘 <b>Sugerencias guardadas:</b>' +
             '<button id="sh-ant" title="Momento anterior">◀</button><span id="sh-fecha">Ahora</span><button id="sh-sig" title="Momento siguiente">▶</button>' +
-            '<button id="sh-ahora" title="Volver a la carta de ahora">⏭ Ahora</button><span id="sh-cuenta" style="color:#64748b"></span>' +
-            '<span style="flex:1"></span><button id="sh-aplicar" hidden>✔ Aplicar esta configuración y guardar en la web</button></div><div id="sh-estado"></div>';
+            '<button id="sh-ahora" title="Volver a la carta de ahora (tecla Fin)">⏭ Ahora</button><span id="sh-cuenta" style="color:#64748b"></span>' +
+            '<span id="sh-tecla">· teclas ← →</span><span style="flex:1"></span><button id="sh-aplicar" hidden>✔ Aplicar esta configuración y guardar en la web</button></div><div id="sh-estado"></div>';
         cont.parentNode.insertBefore(b, cont);
         $('sh-ant').onclick = function () { mover(pos === -1 ? hist.cambios.length - 1 : pos - 1); };
         $('sh-sig').onclick = function () { mover(pos >= hist.cambios.length - 1 ? -1 : pos + 1); };
@@ -252,11 +253,11 @@
         var orig = window.renderCarta;
         if (typeof orig !== 'function' || orig.__sh) return typeof orig === 'function';
         var envuelta = function (modo) {
+            // Al entrar en la pestaña (o repintar desde el editor) se empieza siempre en «Ahora».
+            if (modo === S.modo && !pintando) { pos = -1; vista = null; }
             var res = orig.apply(this, arguments);
             if (modo === S.modo && !pintando && asegurarBarra()) {
-                cargar().then(function () {
-                    if (pos !== -1 && vista) { mover(pos); } else pintarBarra();
-                }).catch(function (e) { $('sh-cuenta').textContent = '⚠ no se pudo leer el historial (' + e.message + ')'; });
+                cargar().then(function () { pintarBarra(); }).catch(function (e) { $('sh-cuenta').textContent = '⚠ no se pudo leer el historial (' + e.message + ')'; });
             }
             return res;
         };
@@ -264,6 +265,24 @@
         window.renderCarta = envuelta;
         return true;
     }
+    // Flechas del teclado (solo con la hoja de Sugerencias a la vista y sin estar escribiendo en un campo).
+    document.addEventListener('keydown', function (e) {
+        var b = $('sh-barra');
+        if (!b || !hist || !b.offsetParent || e.ctrlKey || e.altKey || e.metaKey || ocupado) return;
+        var t = e.target, tag = t && t.tagName;
+        if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(tag))) return;
+        if (document.querySelector('#aviso-ed, [aria-modal="true"]')) return;
+        var n = hist.cambios.length;
+        if (!n) return;
+        var nuevo = null;
+        if (e.key === 'ArrowLeft') nuevo = pos === -1 ? n - 1 : Math.max(0, pos - 1);
+        else if (e.key === 'ArrowRight') nuevo = pos === -1 ? -1 : (pos >= n - 1 ? -1 : pos + 1);
+        else if (e.key === 'Home') nuevo = 0;
+        else if (e.key === 'End') nuevo = -1;
+        if (nuevo === null) return;
+        e.preventDefault();
+        if (nuevo !== pos) mover(nuevo);
+    });
     function alCargar() {
         if (!enganchar()) window.addEventListener('load', enganchar);
         var volver = false;
