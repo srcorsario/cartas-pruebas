@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "guardado": "2026-11-20T09:27:41.913Z",
+  "guardado": "2026-11-20T09:44:38.064Z",
   "ocultas": [],
   "idiomas": [],
   "estructura": {
@@ -5965,7 +5965,7 @@
         }
     },
     {
-        "id": "12300", "activa": "no", "precio": "18.50", "precioMedia": "",
+        "id": "12300", "activa": "si", "precio": "18.50", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "alcachofas01.webp",
         "alergenos": ["GLUTEN", "LACTOSA", "CACAHUETE", "APIO", "FRUTOSCASCARA", "HUEVO", "PESCADO"], "opcionesInactivas": [],
         "nombre": {
@@ -6343,7 +6343,7 @@
         }
     },
     {
-        "id": "12306", "activa": "no", "precio": "18.00", "precioMedia": "",
+        "id": "12306", "activa": "si", "precio": "18.00", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": ["LACTOSA", "MOSTAZA", "SULFITOS", "MOLUSCO"], "opcionesInactivas": [],
         "nombre": {
@@ -8665,7 +8665,7 @@
         }
     },
     {
-        "id": "12826", "activa": "no", "precio": "24.00", "precioMedia": "",
+        "id": "12826", "activa": "si", "precio": "24.00", "precioMedia": "",
         "carpeta": "carne", "archivo": "",
         "alergenos": ["GLUTEN", "HUEVO", "CACAHUETE", "SOJA", "LACTOSA", "FRUTOSCASCARA", "APIO", "MOSTAZA", "SESAMO", "SULFITOS", "ALTRAMUCES"], "opcionesInactivas": [],
         "nombre": {
@@ -8727,7 +8727,7 @@
         }
     },
     {
-        "id": "12900", "activa": "no", "precio": "8.00", "precioMedia": "",
+        "id": "12900", "activa": "si", "precio": "8.00", "precioMedia": "",
         "carpeta": "postres", "archivo": "pistacho01.webp",
         "alergenos": ["FRUTOSCASCARA", "CACAHUETE", "SOJA", "HUEVO", "SESAMO", "MOSTAZA", "GLUTEN", "LACTOSA", "VEGETARIANO"], "opcionesInactivas": [],
         "nombre": {
