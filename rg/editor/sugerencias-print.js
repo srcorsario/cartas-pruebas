@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v3.1.0-Abstract-Keys', // 3.1.0 (4 nov): plantilla neutra (window.MARCA)
+            versionStr: 'v3.2.0-Abstract-Keys', // 3.2.0 (20 nov): ◀ fecha ▶ del historial de Sugerencias (sug-historial.js). 3.1.0 (4 nov): plantilla neutra (window.MARCA)
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -23,7 +23,7 @@
             vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE001,
                     },
         restaurante002: {
-            versionStr: 'v3.0.0-Abstract-Keys',
+            versionStr: 'v3.2.0-Abstract-Keys', // 3.2.0 (20 nov): historial de Sugerencias
             versionKey: 'sugerencias_restaurante002',
             containerId: 'sugerencias-contenido-usopen',
             logoSrc: LOGO_RESTAURANTE002,
@@ -823,7 +823,8 @@
 
         let intentos = 0; const MAX_INTENTOS = 10;
         function intentarRenderizado() {
-            let fuente = window.datosLocales || [];
+            // 20 nov (v3.2.0): ◀ fecha ▶ de sug-historial.js -> la hoja de aquel momento (si no, la de ahora).
+            let fuente = (window.SugHistorial && window.SugHistorial.fuente(modo)) || window.datosLocales || [];
             const tieneDatosEnRango = fuente.some(p => p && p.activa && enSugerencias(p.id));
             if (tieneDatosEnRango) procesarYRender(fuente, contenedor, config, modo);
             else if (intentos < MAX_INTENTOS) { intentos++; setTimeout(intentarRenderizado, 500); }
@@ -857,6 +858,7 @@
     }
 
     function aplicarParcheOptimista(fuente, modo) {
+        if (fuente && fuente.__historial) return fuente;   // hoja de otro momento (sug-historial.js): tal cual
         const state = window.optimisticState ? window.optimisticState[modo] : { t: 0, s: [] };
         const timeSinceSave = Date.now() - state.t;
         if (timeSinceSave < CONSISTENCY_WINDOW_MS && state.s && state.s.length > 0) {

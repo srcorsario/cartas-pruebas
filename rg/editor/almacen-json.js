@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.17.0'; // 11 nov: la Info va aparte en datos/<idioma>-info.json (la web la baja después: ~85 % menos al abrir la carta); <idioma>.json lleva [nombre, "", 1] si hay Info. 1.16.0: 11 nov: POST ?accion=restaurar (↶ Historial, historial.js): vuelve a poner platos de una versión anterior de datos.json (o la versión entera) en un commit nuevo; base.json y los idiomas se rehacen. 1.15.0: 4 nov (4): "contacto" (dirección, teléfono, horario) en datos.json y base.json + POST ?accion=contacto. 1.14.0: 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.18.0'; // 20 nov: historial de la hoja de Sugerencias — cada guardado en que cambian las sugerencias activas apunta fecha/hora + platos (ES/EN, precio, ½, alérgenos) en <web>/sugerencias-historial.json (mismo commit; conjuntos repetidos no se copian) y POST ?accion=sugerencias deja activas solo las de un momento (sug-historial.js). 1.17.0: 11 nov: la Info va aparte en datos/<idioma>-info.json (la web la baja después: ~85 % menos al abrir la carta); <idioma>.json lleva [nombre, "", 1] si hay Info. 1.16.0: 11 nov: POST ?accion=restaurar (↶ Historial, historial.js): vuelve a poner platos de una versión anterior de datos.json (o la versión entera) en un commit nuevo; base.json y los idiomas se rehacen. 1.15.0: 4 nov (4): "contacto" (dirección, teléfono, horario) en datos.json y base.json + POST ?accion=contacto. 1.14.0: 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -329,6 +329,47 @@
         return hex(await crypto.subtle.digest('SHA-1', todo));
     }
 
+    // ---------- historial de la hoja de Sugerencias (1.18.0, sug-historial.js) ----------
+    // <carpeta de datos.json>/sugerencias-historial.json = {
+    //   formato: 1,
+    //   conjuntos: { "<huella>": [ { id, es, en, p (precio), m (½), a [alérgenos] } ] },   // sugerencias activas
+    //   cambios: [ { t: ISO fecha y hora, c: "<huella>", b: sha del blob de datos.json de ese guardado, n } ]
+    // }
+    // Se apunta en el MISMO commit que datos.json, solo si las sugerencias activas cambian. Un conjunto que ya
+    // está (mismos platos y datos) no se vuelve a copiar: el cambio solo lo nombra. Con "b" se puede sacar el
+    // plato completo (26 idiomas, Info) de aquel datos.json para volver a crearlo (GET /git/blobs/<b>).
+    const SUG_HIST = 'sugerencias-historial.json';
+    const rangoSugerencias = () => (window.Categorias && window.Categorias.rangoSugerencias && window.Categorias.rangoSugerencias()) || [12000, 12999];
+    function platosSugerencias(datos) {
+        const r = rangoSugerencias(), S = (v) => (v === null || v === undefined) ? '' : String(v);
+        return (datos.platos || []).filter(p => String(p.activa).toLowerCase() === 'si' && idNum(p.id) >= r[0] && idNum(p.id) <= r[1])
+            .map(p => ({ id: S(p.id), es: S((p.nombre || {}).ES), en: S((p.nombre || {}).EN), p: S(p.precio), m: S(p.precioMedia), a: (p.alergenos || []).map(S) }))
+            .sort((a, b) => idNum(a.id) - idNum(b.id));
+    }
+    function serializarHistSug(h) {
+        const J = JSON.stringify, cs = Object.keys(h.conjuntos || {});
+        return '{\n  "formato": 1,\n  "conjuntos": {\n' + cs.map(k => '    ' + J(k) + ': ' + J(h.conjuntos[k])).join(',\n') + '\n  },\n' +
+            '  "cambios": [\n' + (h.cambios || []).map(c => '    ' + J(c)).join(',\n') + '\n  ]\n}\n';
+    }
+    // Devuelve el texto nuevo del historial (o null si no hay que tocarlo).
+    async function historialSugerencias(cfg, datos, dir, textoDatos, e) {
+        const lista = platosSugerencias(datos);
+        const clave = hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(lista))), 6);
+        e.sugPendiente = null;
+        if (e.sugClave === clave) return null;
+        const r = await gh({ repo: cfg.repo, ruta: dir + SUG_HIST }, { method: 'GET', headers: { Accept: 'application/vnd.github.raw' } });
+        let h;
+        if (r.status === 404) h = { formato: 1, conjuntos: {}, cambios: [] };
+        else if (r.ok) { h = JSON.parse(await r.text()); h.conjuntos = h.conjuntos || {}; h.cambios = h.cambios || []; }
+        else { console.warn('[almacen-json] No se pudo leer ' + SUG_HIST + ' (HTTP ' + r.status + '): este guardado no se apunta.'); return null; }
+        const ult = h.cambios[h.cambios.length - 1];
+        if ((ult && ult.c === clave) || (!ult && !lista.length)) { e.sugClave = clave; return null; }
+        if (!h.conjuntos[clave]) h.conjuntos[clave] = lista;
+        h.cambios.push({ t: new Date().toISOString(), c: clave, b: await shaBlob(textoDatos), n: lista.length });
+        e.sugPendiente = clave;
+        return serializarHistSug(h);
+    }
+
     // Sube datos.json + los archivos de la web que cambien, en UN commit. Si datos.json cambió en
     // GitHub desde que se leyó (otro dispositivo), lanza "conflicto" para releer y reaplicar.
     async function escribirRemoto(cfg, datos, shaLeido, mensaje, e) {
@@ -338,6 +379,10 @@
         Object.keys(web).forEach(k => {
             if (!e.ultimosWeb || e.ultimosWeb[k] !== web[k]) archivos[dir + k] = web[k];
         });
+        if (SITIO) {
+            try { const hs = await historialSugerencias(cfg, datos, dir, archivos[cfg.ruta], e); if (hs) archivos[dir + SUG_HIST] = hs; }
+            catch (err) { console.warn('[almacen-json] Historial de Sugerencias:', err); }
+        }
         if (!e.rama) e.rama = (await ghApi(cfg, '', 'GET')).default_branch || 'main';
         let entradas = null;
         for (let intento = 0; intento < 4; intento++) {
@@ -362,6 +407,7 @@
                 if (err.status === 422 || err.status === 409) continue; // alguien subió algo a la vez: otra vuelta
                 throw err;
             }
+            if (e.sugPendiente) { e.sugClave = e.sugPendiente; e.sugPendiente = null; }
             const antes = e.ultimosWeb;
             e.ultimosWeb = web;
             // Para el aviso ⏳/✔ "ya visible en la web" (editor-web.js).
@@ -525,6 +571,19 @@
             });
             const q = new Set((cuerpo && cuerpo.quitar || []).map(idNum));
             if (q.size) datos.platos = datos.platos.filter(p => !q.has(idNum(p.id)));
+            datos.platos.sort((a, b) => idNum(a.id) - idNum(b.id));
+        };
+    }
+
+    // Hoja de Sugerencias (sug-historial.js): { rango: [desde, hasta], activos: [ids], nuevos: [platos completos] }
+    // -> los nuevos se añaden (solo si su ID está libre) y en el rango quedan activos SOLO los de "activos".
+    function opSugerencias(cuerpo) {
+        return (datos) => {
+            datos.platos = datos.platos || [];
+            const r = (cuerpo && cuerpo.rango) || rangoSugerencias(), act = new Set((cuerpo && cuerpo.activos || []).map(idNum));
+            const ids = new Set(datos.platos.map(p => idNum(p.id)));
+            (cuerpo && cuerpo.nuevos || []).forEach(p => { if (!ids.has(idNum(p.id))) { datos.platos.push(clonar(p)); ids.add(idNum(p.id)); } });
+            datos.platos.forEach(p => { const n = idNum(p.id); if (n >= r[0] && n <= r[1]) p.activa = act.has(n) ? 'si' : 'no'; });
             datos.platos.sort((a, b) => idNum(a.id) - idNum(b.id));
         };
     }
@@ -740,6 +799,11 @@
                 await encolar(modo, opRestaurar(cuerpo), '↶ recuperar ' + n, 300);
                 if (window.Categorias) window.Categorias.cargar(estructuraDe(est(modo).vista));
                 return respuesta('OK: recuperado ' + n);
+            }
+            if (accion === 'sugerencias') {
+                const n = (cuerpo.activos || []).length;
+                await encolar(modo, opSugerencias(cuerpo), 'sugerencias de ' + (cuerpo.desde || '?') + ' (' + n + ' activas' + ((cuerpo.nuevos || []).length ? ', ' + cuerpo.nuevos.length + ' recreadas' : '') + ')', 300);
+                return respuesta('OK: sugerencias (' + n + ' activas)');
             }
             if (accion === 'infoplato') {
                 // No se espera al commit: los lotes de Info mandan muchas seguidas y se agrupan.
