@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v3.3.0-Abstract-Keys', // 3.3.0 (21 nov): en la hoja, ✕ a la izquierda de cada plato (lo quita de la lista: se desactiva, no se borra) y ➕ en cada sección (elegir entre los platos ya creados de esa sección); se guarda solo. 3.2.0 (20 nov): ◀ fecha ▶ del historial de Sugerencias (sug-historial.js). 3.1.0 (4 nov): plantilla neutra (window.MARCA)
+            versionStr: 'v3.3.1-Abstract-Keys', // 3.3.1 (21 nov): ventana del ➕ a todo el ancho (platos en columnas) y aviso grande propio al quitar con ✕. 3.3.0 (21 nov): en la hoja, ✕ a la izquierda de cada plato (lo quita de la lista: se desactiva, no se borra) y ➕ en cada sección (elegir entre los platos ya creados de esa sección); se guarda solo. 3.2.0 (20 nov): ◀ fecha ▶ del historial de Sugerencias (sug-historial.js). 3.1.0 (4 nov): plantilla neutra (window.MARCA)
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -23,7 +23,7 @@
             vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE001,
                     },
         restaurante002: {
-            versionStr: 'v3.3.0-Abstract-Keys', // 3.3.0 (21 nov): ✕ y ➕ en la hoja. 3.2.0 (20 nov): historial de Sugerencias
+            versionStr: 'v3.3.1-Abstract-Keys', // 3.3.1 (21 nov): ventana del ➕ y aviso de ✕ grandes. 3.3.0 (21 nov): ✕ y ➕ en la hoja. 3.2.0 (20 nov): historial de Sugerencias
             versionKey: 'sugerencias_restaurante002',
             containerId: 'sugerencias-contenido-usopen',
             logoSrc: LOGO_RESTAURANTE002,
@@ -185,24 +185,37 @@
             .sug-ed:hover, .sugerencias-plato:hover > .sug-quitar { opacity: 1; }
             .sug-quitar { top: 1px !important; border: 1px solid #fca5a5 !important; background: #fef2f2 !important; color: #b91c1c !important; }
             .sug-mas { top: -2px !important; border: 1px solid #0d5c63 !important; background: #ecfeff !important; color: #0d5c63 !important; font-size: 14px !important; opacity: .8; }
-            #sug-popup { position: fixed; inset: 0; z-index: 10050; background: rgba(15,23,42,.45); display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; }
-            #sug-popup .sp-caja { background: #fff; border-radius: 12px; width: min(560px, 94vw); max-height: 86vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
-            #sug-popup .sp-cab { padding: 14px 18px 8px; font-weight: 700; color: #0d5c63; }
-            #sug-popup .sp-cab small { display: block; font-weight: 400; color: #64748b; margin-top: 2px; }
-            #sug-popup input[type=search] { margin: 0 18px 8px; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 7px; font-size: .9rem; }
-            #sug-popup .sp-lista { overflow: auto; padding: 0 10px; flex: 1; min-height: 80px; }
-            #sug-popup label.sp-pl { display: flex; gap: 10px; align-items: flex-start; padding: 7px 8px; border-radius: 7px; cursor: pointer; }
+            #sug-popup { position: fixed; inset: 0; z-index: 10050; background: rgba(15,23,42,.5); display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; }
+            #sug-popup .sp-caja { background: #fff; border-radius: 14px; width: 96vw; max-width: 1700px; min-height: 50vh; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+            #sug-popup .sp-cab { padding: 20px 28px 10px; font-weight: 700; font-size: 1.5rem; color: #0d5c63; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+            #sug-popup .sp-cab small { font-size: .9rem; font-weight: 400; color: #64748b; }
+            #sug-popup .sp-cab .sp-x { margin-left: auto; border: none; background: none; font-size: 1.6rem; color: #94a3b8; cursor: pointer; line-height: 1; }
+            #sug-popup input[type=search] { margin: 0 28px 12px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 1rem; }
+            #sug-popup .sp-lista { overflow: auto; padding: 4px 20px 12px; flex: 1; min-height: 80px; display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 8px 14px; align-content: start; }
+            #sug-popup label.sp-pl { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 9px; border: 1px solid #e2e8f0; cursor: pointer; }
             #sug-popup label.sp-pl:hover { background: #f1f5f9; }
-            #sug-popup .sp-id { color: #94a3b8; font: 12px monospace; min-width: 42px; padding-top: 2px; }
-            #sug-popup .sp-nom { flex: 1; font-size: .88rem; }
-            #sug-popup .sp-nom small { display: block; color: #7f8c8d; font-style: italic; }
-            #sug-popup .sp-pre { font-weight: 700; font-size: .85rem; }
-            #sug-popup .sp-tag { font-size: .7rem; color: #c2410c; display: block; }
-            #sug-popup .sp-vacio { color: #64748b; font-size: .85rem; padding: 16px 8px; text-align: center; }
-            #sug-popup .sp-pie { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid #e2e8f0; }
-            #sug-popup .sp-pie button { padding: 8px 14px; border-radius: 7px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer; font-weight: 600; }
+            #sug-popup label.sp-pl:has(input:checked) { background: #ecfeff; border-color: #0d5c63; box-shadow: inset 0 0 0 1px #0d5c63; }
+            #sug-popup label.sp-pl input { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; }
+            #sug-popup .sp-id { color: #94a3b8; font: 12px monospace; min-width: 42px; padding-top: 3px; }
+            #sug-popup .sp-nom { flex: 1; font-size: .98rem; font-weight: 600; color: #0f172a; }
+            #sug-popup .sp-nom small { display: block; font-weight: 400; color: #7f8c8d; font-style: italic; font-size: .82rem; margin-top: 2px; }
+            #sug-popup .sp-pre { font-weight: 700; font-size: .98rem; white-space: nowrap; }
+            #sug-popup .sp-tag { font-size: .75rem; color: #c2410c; display: block; font-weight: 400; }
+            #sug-popup .sp-vacio { color: #64748b; font-size: 1rem; padding: 30px 8px; text-align: center; grid-column: 1 / -1; }
+            #sug-popup .sp-pie { display: flex; gap: 10px; justify-content: flex-end; align-items: center; padding: 14px 28px; border-top: 1px solid #e2e8f0; }
+            #sug-popup .sp-pie .sp-cuenta { margin-right: auto; color: #64748b; font-size: .9rem; }
+            #sug-popup .sp-pie button { padding: 11px 20px; border-radius: 9px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer; font-weight: 600; font-size: 1rem; }
             #sug-popup .sp-pie button.sp-si { background: #0d5c63; border-color: #0d5c63; color: #fff; }
+            #sug-popup .sp-pie button.sp-quitar { background: #b91c1c; border-color: #b91c1c; color: #fff; }
             #sug-popup .sp-pie button:disabled { opacity: .5; cursor: default; }
+            /* aviso de ✕ (también grande) */
+            #sug-popup .sp-caja.sp-conf { min-height: 0; max-height: 90vh; width: 96vw; max-width: 1100px; }
+            #sug-popup .sp-conf .sp-cuerpo { padding: 8px 28px 22px; overflow: auto; }
+            #sug-popup .sp-conf .sp-plato { border: 1px solid #fecaca; background: #fef2f2; border-radius: 12px; padding: 18px 22px; display: flex; gap: 18px; align-items: baseline; }
+            #sug-popup .sp-conf .sp-plato .sp-nom { font-size: 1.25rem; }
+            #sug-popup .sp-conf .sp-plato .sp-nom small { font-size: .95rem; }
+            #sug-popup .sp-conf .sp-plato .sp-pre { font-size: 1.2rem; }
+            #sug-popup .sp-conf ul { margin: 18px 0 0; padding-left: 22px; color: #334155; font-size: 1rem; line-height: 1.6; }
             #sug-aviso { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 10060; padding: 9px 16px; border-radius: 8px; color: #fff; font: 600 .85rem 'Montserrat', sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
             @media print { body { -webkit-print-color-adjust: exact !important; } .sugerencias-controles-box, .sugerencias-debug-a4, .sug-ed { display: none !important; } }
         `;
@@ -310,41 +323,60 @@
         });
         return colaSug;
     }
-    window.sugQuitar = async function(modo, id) {
+    function tarjetaPlato(p, extra) {
+        const es = nombreCortoSug(p.es), en = nombreCortoSug(p.en), pre = p.precio ? parseFloat(p.precio).toFixed(2) + '€' : '';
+        return `<span class="sp-id">${parseInt(p.id, 10)}</span><span class="sp-nom">${escSug(es || '(sin nombre)')}${en && en !== es ? `<small>${escSug(en)}</small>` : ''}${extra || ''}</span><span class="sp-pre">${pre}</span>`;
+    }
+    // Ventana grande (fondo oscuro, Esc / clic fuera = cerrar). Devuelve { caja, cerrar }.
+    function abrirVentana(html, clase, alCerrar) {
+        const viejo = document.getElementById('sug-popup'); if (viejo) viejo.remove();
+        const caja = document.createElement('div');
+        caja.id = 'sug-popup'; caja.setAttribute('aria-modal', 'true');
+        caja.innerHTML = `<div class="sp-caja ${clase || ''}">${html}</div>`;
+        document.body.appendChild(caja);
+        let hecho = false;
+        const cerrar = () => { if (hecho) return; hecho = true; caja.remove(); document.removeEventListener('keydown', tecla, true); if (alCerrar) alCerrar(); };
+        function tecla(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cerrar(); } }
+        document.addEventListener('keydown', tecla, true);
+        caja.addEventListener('mousedown', e => { if (e.target === caja) cerrar(); });
+        caja.querySelectorAll('.sp-no, .sp-x').forEach(b => b.onclick = cerrar);
+        return { caja, cerrar };
+    }
+    window.sugQuitar = function(modo, id) {
         id = parseInt(id, 10);
         const p = (window.datosLocales || []).find(x => x && parseInt(x.id, 10) === id);
         if (!p) return;
-        const texto = '¿Quitar «' + nombreCortoSug(p.es) + '» de la hoja de Sugerencias?\n\n' +
-            'El plato NO se borra: queda desactivado (tampoco sale en la pestaña Sugerencias de la web) y lo puedes volver a poner con el ➕ de su sección.';
-        const ok = await (window.confirmarEditor ? window.confirmarEditor(texto, { si: 'Sí, quitar de la lista', no: 'Cancelar' }) : Promise.resolve(confirm(texto)));
-        if (ok) cambiarSugerencias(modo, [], [id]);
+        let si = false;
+        const v = abrirVentana(`<div class="sp-cab">✕ ¿Quitar este plato de la hoja de Sugerencias?<button type="button" class="sp-x" title="Cerrar (Esc)">×</button></div>
+            <div class="sp-cuerpo"><div class="sp-plato">${tarjetaPlato(p)}</div>
+            <ul><li>El plato <b>NO se borra</b>: queda <b>desactivado</b> en la carta.</li>
+            <li>Tampoco sale en la pestaña <b>Sugerencias de la web</b>.</li>
+            <li>Lo puedes volver a poner cuando quieras con el <b>➕</b> de su sección.</li></ul></div>
+            <div class="sp-pie"><button type="button" class="sp-no">Cancelar</button><button type="button" class="sp-quitar">Sí, quitar de la lista</button></div>`, 'sp-conf',
+            () => { if (si) cambiarSugerencias(modo, [], [id]); });
+        const b = v.caja.querySelector('.sp-quitar');
+        b.onclick = () => { si = true; v.cerrar(); };
+        setTimeout(() => b.focus(), 30);
     };
     window.sugAnadir = function(modo, idx) {
         const secs = vistaEdicion[modo], s = secs && secs[idx];
         if (!s) return;
-        const viejo = document.getElementById('sug-popup'); if (viejo) viejo.remove();
         const excl = platosExcluidosSugerencias[modo] || new Set();
         const titulo = s.titulo.split(' / ')[0];
-        const caja = document.createElement('div');
-        caja.id = 'sug-popup'; caja.setAttribute('aria-modal', 'true');
         const filas = s.cand.map(p => {
-            const id = parseInt(p.id, 10), en = nombreCortoSug(p.en), es = nombreCortoSug(p.es);
-            const busca = (id + ' ' + es + ' ' + en).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-            const pre = p.precio ? parseFloat(p.precio).toFixed(2) + '€' : '';
-            return `<label class="sp-pl" data-busca="${escSug(busca)}"><input type="checkbox" value="${id}"><span class="sp-id">${id}</span><span class="sp-nom">${escSug(es || '(sin nombre)')}${en && en !== es ? `<small>${escSug(en)}</small>` : ''}${p.activa && excl.has(id) ? '<span class="sp-tag">quitado solo de esta impresión</span>' : ''}</span><span class="sp-pre">${pre}</span></label>`;
+            const id = parseInt(p.id, 10);
+            const busca = (id + ' ' + nombreCortoSug(p.es) + ' ' + nombreCortoSug(p.en)).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+            return `<label class="sp-pl" data-busca="${escSug(busca)}"><input type="checkbox" value="${id}">${tarjetaPlato(p, p.activa && excl.has(id) ? '<span class="sp-tag">quitado solo de esta impresión</span>' : '')}</label>`;
         }).join('');
-        caja.innerHTML = `<div class="sp-caja"><div class="sp-cab">➕ Añadir a «${escSug(titulo)}»<small>Platos ya creados de esta sección que no están en la hoja. Para uno nuevo: ➕ Nuevo plato en el Editor.</small></div>
+        let ids = null;
+        const v = abrirVentana(`<div class="sp-cab">➕ Añadir a «${escSug(titulo)}»<small>Platos ya creados de esta sección que no están en la hoja (${s.cand.length}). Para uno nuevo: ➕ Nuevo plato en el Editor.</small><button type="button" class="sp-x" title="Cerrar (Esc)">×</button></div>
             ${s.cand.length > 6 ? '<input type="search" placeholder="Buscar por nombre o ID…">' : ''}
             <div class="sp-lista">${filas || '<div class="sp-vacio">No hay más platos creados en esta sección: todos están ya en la hoja.</div>'}</div>
-            <div class="sp-pie"><button type="button" class="sp-no">Cancelar</button>${filas ? '<button type="button" class="sp-si" disabled>Añadir a la hoja</button>' : ''}</div></div>`;
-        document.body.appendChild(caja);
-        const si = caja.querySelector('.sp-si'), cerrar = () => { caja.remove(); document.removeEventListener('keydown', tecla, true); };
+            <div class="sp-pie"><span class="sp-cuenta"></span><button type="button" class="sp-no">Cancelar</button>${filas ? '<button type="button" class="sp-si" disabled>Añadir a la hoja</button>' : ''}</div>`, '',
+            () => { if (ids && ids.length) cambiarSugerencias(modo, ids, []); });
+        const caja = v.caja, si = caja.querySelector('.sp-si'), cuenta = caja.querySelector('.sp-cuenta');
         const marcados = () => [...caja.querySelectorAll('.sp-lista input:checked')].map(i => parseInt(i.value, 10));
-        const contar = () => { if (!si) return; const n = marcados().length; si.disabled = !n; si.textContent = n > 1 ? 'Añadir ' + n + ' a la hoja' : 'Añadir a la hoja'; };
-        function tecla(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cerrar(); } }
-        document.addEventListener('keydown', tecla, true);
-        caja.addEventListener('click', e => { if (e.target === caja) cerrar(); });
-        caja.querySelector('.sp-no').onclick = cerrar;
+        const contar = () => { if (!si) return; const n = marcados().length; si.disabled = !n; si.textContent = n > 1 ? 'Añadir ' + n + ' a la hoja' : 'Añadir a la hoja'; cuenta.textContent = n ? n + ' marcado' + (n > 1 ? 's' : '') : ''; };
         caja.querySelectorAll('.sp-lista input').forEach(i => i.addEventListener('change', contar));
         const bus = caja.querySelector('input[type=search]');
         if (bus) {
@@ -359,7 +391,7 @@
             });
             setTimeout(() => bus.focus(), 30);
         }
-        if (si) si.onclick = () => { const ids = marcados(); if (!ids.length) return; cerrar(); cambiarSugerencias(modo, ids, []); };
+        if (si) si.onclick = () => { ids = marcados(); if (ids.length) v.cerrar(); };
     };
     window.SugerenciasEdicion = { _vista: (m) => vistaEdicion[m] };
 
