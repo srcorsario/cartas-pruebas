@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "guardado": "2026-11-21T19:35:31.264Z",
+  "guardado": "2026-11-21T19:35:36.834Z",
   "ocultas": [],
   "idiomas": [],
   "estructura": {
@@ -8665,7 +8665,7 @@
         }
     },
     {
-        "id": "12826", "activa": "si", "precio": "24.00", "precioMedia": "",
+        "id": "12826", "activa": "no", "precio": "24.00", "precioMedia": "",
         "carpeta": "carne", "archivo": "",
         "alergenos": ["GLUTEN", "HUEVO", "CACAHUETE", "SOJA", "LACTOSA", "FRUTOSCASCARA", "APIO", "MOSTAZA", "SESAMO", "SULFITOS", "ALTRAMUCES"], "opcionesInactivas": [],
         "nombre": {
