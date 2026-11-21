@@ -156,7 +156,7 @@
 {"id":"12826","activa":"no","precio":"24.00","precioMedia":"","carpeta":"carne","archivo":"","alergenos":["GLUTEN","HUEVO","CACAHUETE","SOJA","LACTOSA","FRUTOSCASCARA","APIO","MOSTAZA","SESAMO","SULFITOS","ALTRAMUCES"],"opcionesInactivas":[],"h":"e6ed47c1883c"},
 {"id":"12900","activa":"no","precio":"8.00","precioMedia":"","carpeta":"postres","archivo":"pistacho01.webp","alergenos":["FRUTOSCASCARA","CACAHUETE","SOJA","HUEVO","SESAMO","MOSTAZA","GLUTEN","LACTOSA","VEGETARIANO"],"opcionesInactivas":[],"h":"54d74aa41613"},
 {"id":"12901","activa":"no","precio":"8.00","precioMedia":"","carpeta":"postres","archivo":"tennisball01.webp","alergenos":["FRUTOSCASCARA","CACAHUETE","SOJA","HUEVO","SESAMO","MOSTAZA","GLUTEN","LACTOSA","VEGETARIANO"],"opcionesInactivas":[],"h":"97cf084cd041"},
-{"id":"12990","activa":"no","precio":"56.00","precioMedia":"","carpeta":"vinos","archivo":"el_tenista_01.webp","alergenos":[],"opcionesInactivas":[],"h":"56bf371496ff"},
+{"id":"12990","activa":"si","precio":"56.00","precioMedia":"","carpeta":"vinos","archivo":"el_tenista_01.webp","alergenos":[],"opcionesInactivas":[],"h":"f287e30bcf65"},
 {"id":"12991","activa":"no","precio":"32.00","precioMedia":"","carpeta":"vinos","archivo":"quibia_01.webp","alergenos":[],"opcionesInactivas":[],"h":"f6ad388cad0c"},
 {"id":"12992","activa":"si","precio":"35.00","precioMedia":"","carpeta":"vinos","archivo":"12volts_01.webp","alergenos":[],"opcionesInactivas":[],"h":"d197e777ec92"},
 {"id":"12993","activa":"si","precio":"7.00","precioMedia":"","carpeta":"refrescos","archivo":"usopen_splitz01.webp","alergenos":[],"opcionesInactivas":[],"h":"0efccdbac69e"},

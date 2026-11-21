@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "guardado": "2026-11-21T19:45:32.457Z",
+  "guardado": "2026-11-21T19:45:44.249Z",
   "ocultas": [],
   "idiomas": [],
   "estructura": {
@@ -8853,7 +8853,7 @@
         }
     },
     {
-        "id": "12990", "activa": "no", "precio": "56.00", "precioMedia": "",
+        "id": "12990", "activa": "si", "precio": "56.00", "precioMedia": "",
         "carpeta": "vinos", "archivo": "el_tenista_01.webp",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
