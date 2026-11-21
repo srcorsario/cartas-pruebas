@@ -29,7 +29,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.almacenJson = '1.18.0'; // 20 nov: historial de la hoja de Sugerencias — cada guardado en que cambian las sugerencias activas apunta fecha/hora + platos (ES/EN, precio, ½, alérgenos) en <web>/sugerencias-historial.json (mismo commit; conjuntos repetidos no se copian) y POST ?accion=sugerencias deja activas solo las de un momento (sug-historial.js). 1.17.0: 11 nov: la Info va aparte en datos/<idioma>-info.json (la web la baja después: ~85 % menos al abrir la carta); <idioma>.json lleva [nombre, "", 1] si hay Info. 1.16.0: 11 nov: POST ?accion=restaurar (↶ Historial, historial.js): vuelve a poner platos de una versión anterior de datos.json (o la versión entera) en un commit nuevo; base.json y los idiomas se rehacen. 1.15.0: 4 nov (4): "contacto" (dirección, teléfono, horario) en datos.json y base.json + POST ?accion=contacto. 1.14.0: 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
+    window.APP_VERSIONS.almacenJson = '1.19.0'; // 21 nov: POST ?accion=sugerencias con {activar, desactivar} = cambia SOLO esos platos de Sugerencias (✕ y ➕ de la hoja); el resto queda como esté en GitHub. 1.18.0: 20 nov: historial de la hoja de Sugerencias — cada guardado en que cambian las sugerencias activas apunta fecha/hora + platos (ES/EN, precio, ½, alérgenos) en <web>/sugerencias-historial.json (mismo commit; conjuntos repetidos no se copian) y POST ?accion=sugerencias deja activas solo las de un momento (sug-historial.js). 1.17.0: 11 nov: la Info va aparte en datos/<idioma>-info.json (la web la baja después: ~85 % menos al abrir la carta); <idioma>.json lleva [nombre, "", 1] si hay Info. 1.16.0: 11 nov: POST ?accion=restaurar (↶ Historial, historial.js): vuelve a poner platos de una versión anterior de datos.json (o la versión entera) en un commit nuevo; base.json y los idiomas se rehacen. 1.15.0: 4 nov (4): "contacto" (dirección, teléfono, horario) en datos.json y base.json + POST ?accion=contacto. 1.14.0: 4 nov (3): plantilla neutra — crea Sugerencias y Postres de serie si faltan (Organizador.porDefecto). 1.13.1: 4 nov: + favicon en "marca". 1.13.0: 4 nov: "marca" (plantilla neutra: logos/QR) en datos.json y base.json + POST ?accion=marca. 1.12.0: 4 nov: borrar categoría con sus platos (organizador 1.3.0); en los Menús Especiales esos platos pasan a 'manual' (conservan su nombre ES/EN, sin ID). 1.11.0: 3 nov: organizador paso 3 — renumerar platos al unir (y sus Menús Especiales), quitar de "ocultas" pestañas borradas. 1.10.0: 3 nov: POST ?accion=estructura (organizador.js: crear categoría). 1.9.1: 3 nov: Menús Especiales sin hoja (URL que no es http) = empieza vacío, no copia nada. 1.9.0: 3 nov: "estructura" (categorías + pestañas) en datos.json y "pestanas" en base.json; la lee categorias.js. 1.8.0: // 3 nov: "idiomas" de la web (datos.json + base.json, POST ?accion=idiomas) y filtro de IDIOMAS_ORDEN del editor. 1.7.0: Precio_Media en todas las cartas
 
     const BASE_RG = [
         'ID', 'Precio', 'Activa', 'Nombre_ES', 'Carpeta', 'Archivo_Foto', 'Alergenos_Cod',
@@ -580,7 +580,14 @@
     function opSugerencias(cuerpo) {
         return (datos) => {
             datos.platos = datos.platos || [];
-            const r = (cuerpo && cuerpo.rango) || rangoSugerencias(), act = new Set((cuerpo && cuerpo.activos || []).map(idNum));
+            const r = (cuerpo && cuerpo.rango) || rangoSugerencias();
+            // 21 nov: {activar, desactivar} (✕ / ➕ de la hoja) = solo esos; no toca las demás.
+            if (cuerpo && !Array.isArray(cuerpo.activos) && (cuerpo.activar || cuerpo.desactivar)) {
+                const on = new Set((cuerpo.activar || []).map(idNum)), off = new Set((cuerpo.desactivar || []).map(idNum));
+                datos.platos.forEach(p => { const n = idNum(p.id); if (n < r[0] || n > r[1]) return; if (on.has(n)) p.activa = 'si'; else if (off.has(n)) p.activa = 'no'; });
+                return;
+            }
+            const act = new Set((cuerpo && cuerpo.activos || []).map(idNum));
             const ids = new Set(datos.platos.map(p => idNum(p.id)));
             (cuerpo && cuerpo.nuevos || []).forEach(p => { if (!ids.has(idNum(p.id))) { datos.platos.push(clonar(p)); ids.add(idNum(p.id)); } });
             datos.platos.forEach(p => { const n = idNum(p.id); if (n >= r[0] && n <= r[1]) p.activa = act.has(n) ? 'si' : 'no'; });
@@ -799,6 +806,11 @@
                 await encolar(modo, opRestaurar(cuerpo), '↶ recuperar ' + n, 300);
                 if (window.Categorias) window.Categorias.cargar(estructuraDe(est(modo).vista));
                 return respuesta('OK: recuperado ' + n);
+            }
+            if (accion === 'sugerencias' && !Array.isArray(cuerpo.activos)) {
+                const on = (cuerpo.activar || []).length, off = (cuerpo.desactivar || []).length;
+                await encolar(modo, opSugerencias(cuerpo), 'hoja de Sugerencias: ' + [on ? '+' + on + ' (' + cuerpo.activar.join(', ') + ')' : '', off ? '−' + off + ' (' + cuerpo.desactivar.join(', ') + ')' : ''].filter(Boolean).join(' '), 300);
+                return respuesta('OK: sugerencias (+' + on + ' −' + off + ')');
             }
             if (accion === 'sugerencias') {
                 const n = (cuerpo.activos || []).length;
