@@ -132,7 +132,7 @@
 {"id":"12704","activa":"no","precio":"28.00","precioMedia":"","carpeta":"pescado","archivo":"","alergenos":["PESCADO"],"opcionesInactivas":[],"h":"01c3dbe5a92e"},
 {"id":"12705","activa":"no","precio":"18.50","precioMedia":"","carpeta":"pescado","archivo":"","alergenos":["CRUSTACEO","PESCADO","FRUTOSCASCARA","MOSTAZA","MOLUSCO"],"opcionesInactivas":[],"h":"7fbc4643dc8d"},
 {"id":"12706","activa":"no","precio":"18.50","precioMedia":"","carpeta":"pescado","archivo":"","alergenos":["PESCADO","LACTOSA","FRUTOSCASCARA","MOSTAZA"],"opcionesInactivas":[],"h":"88dd5324e01d"},
-{"id":"12801","activa":"si","precio":"18.50","precioMedia":"","carpeta":"carne","archivo":"","alergenos":["GLUTEN","SESAMO","SOJA","HUEVO","MOSTAZA","SULFITOS","LACTOSA"],"opcionesInactivas":[],"h":"953e4e9fbba3"},
+{"id":"12801","activa":"no","precio":"18.50","precioMedia":"","carpeta":"carne","archivo":"","alergenos":["GLUTEN","SESAMO","SOJA","HUEVO","MOSTAZA","SULFITOS","LACTOSA"],"opcionesInactivas":[],"h":"69379f17a6e2"},
 {"id":"12802","activa":"no","precio":"17.00","precioMedia":"","carpeta":"carne","archivo":"","alergenos":["GLUTEN","SESAMO","CACAHUETE","SOJA","FRUTOSCASCARA","HUEVO","MOSTAZA","SULFITOS","LACTOSA","ALTRAMUCES"],"opcionesInactivas":[],"h":"9061e6660108"},
 {"id":"12806","activa":"no","precio":"22.00","precioMedia":"","carpeta":"carne","archivo":"","alergenos":["GLUTEN","HUEVO","PESCADO","SOJA","LACTOSA","FRUTOSCASCARA","APIO","MOSTAZA","SESAMO"],"opcionesInactivas":[],"h":"0a146437464a"},
 {"id":"12807","activa":"no","precio":"19.00","precioMedia":"","carpeta":"carne","archivo":"","alergenos":["GLUTEN","SESAMO","CACAHUETE","FRUTOSCASCARA","LACTOSA"],"opcionesInactivas":[],"h":"050a057f391f"},
