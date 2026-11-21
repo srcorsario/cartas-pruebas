@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "guardado": "2026-11-21T19:35:36.834Z",
+  "guardado": "2026-11-21T19:45:21.013Z",
   "ocultas": [],
   "idiomas": [],
   "estructura": {
@@ -6028,7 +6028,7 @@
         }
     },
     {
-        "id": "12301", "activa": "no", "precio": "19.50", "precioMedia": "",
+        "id": "12301", "activa": "si", "precio": "19.50", "precioMedia": "",
         "carpeta": "entrantes", "archivo": "",
         "alergenos": ["LACTOSA", "FRUTOSCASCARA", "SULFITOS"], "opcionesInactivas": [],
         "nombre": {
