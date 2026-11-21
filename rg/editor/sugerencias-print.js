@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v3.2.0-Abstract-Keys', // 3.2.0 (20 nov): ◀ fecha ▶ del historial de Sugerencias (sug-historial.js). 3.1.0 (4 nov): plantilla neutra (window.MARCA)
+            versionStr: 'v3.3.0-Abstract-Keys', // 3.3.0 (21 nov): en la hoja, ✕ a la izquierda de cada plato (lo quita de la lista: se desactiva, no se borra) y ➕ en cada sección (elegir entre los platos ya creados de esa sección); se guarda solo. 3.2.0 (20 nov): ◀ fecha ▶ del historial de Sugerencias (sug-historial.js). 3.1.0 (4 nov): plantilla neutra (window.MARCA)
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -23,7 +23,7 @@
             vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE001,
                     },
         restaurante002: {
-            versionStr: 'v3.2.0-Abstract-Keys', // 3.2.0 (20 nov): historial de Sugerencias
+            versionStr: 'v3.3.0-Abstract-Keys', // 3.3.0 (21 nov): ✕ y ➕ en la hoja. 3.2.0 (20 nov): historial de Sugerencias
             versionKey: 'sugerencias_restaurante002',
             containerId: 'sugerencias-contenido-usopen',
             logoSrc: LOGO_RESTAURANTE002,
@@ -178,7 +178,33 @@
                 .qr-selector-wrapper { flex-wrap: wrap !important; white-space: normal !important; }
                 .vino-imagen-selector-wrapper { border-right: none !important; padding-right: 0 !important; }
             }
-            @media print { body { -webkit-print-color-adjust: exact !important; } .sugerencias-controles-box, .sugerencias-debug-a4 { display: none !important; } }
+            /* 21 nov (3.3.0): ✕ (quitar de la lista) y ➕ (añadir de la sección) — solo en pantalla, en el margen izquierdo
+               de la hoja (position:absolute: no cambian la medida del ajuste a una página ni salen al imprimir). */
+            .sugerencias-plato, .sugerencias-seccion-titulo { position: relative !important; }
+            .sug-ed { position: absolute !important; left: -21px !important; width: 17px !important; height: 17px !important; padding: 0 !important; border-radius: 50% !important; font: 700 11px/15px sans-serif !important; text-align: center !important; cursor: pointer !important; box-sizing: border-box !important; opacity: .45; }
+            .sug-ed:hover, .sugerencias-plato:hover > .sug-quitar { opacity: 1; }
+            .sug-quitar { top: 1px !important; border: 1px solid #fca5a5 !important; background: #fef2f2 !important; color: #b91c1c !important; }
+            .sug-mas { top: -2px !important; border: 1px solid #0d5c63 !important; background: #ecfeff !important; color: #0d5c63 !important; font-size: 14px !important; opacity: .8; }
+            #sug-popup { position: fixed; inset: 0; z-index: 10050; background: rgba(15,23,42,.45); display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; }
+            #sug-popup .sp-caja { background: #fff; border-radius: 12px; width: min(560px, 94vw); max-height: 86vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+            #sug-popup .sp-cab { padding: 14px 18px 8px; font-weight: 700; color: #0d5c63; }
+            #sug-popup .sp-cab small { display: block; font-weight: 400; color: #64748b; margin-top: 2px; }
+            #sug-popup input[type=search] { margin: 0 18px 8px; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 7px; font-size: .9rem; }
+            #sug-popup .sp-lista { overflow: auto; padding: 0 10px; flex: 1; min-height: 80px; }
+            #sug-popup label.sp-pl { display: flex; gap: 10px; align-items: flex-start; padding: 7px 8px; border-radius: 7px; cursor: pointer; }
+            #sug-popup label.sp-pl:hover { background: #f1f5f9; }
+            #sug-popup .sp-id { color: #94a3b8; font: 12px monospace; min-width: 42px; padding-top: 2px; }
+            #sug-popup .sp-nom { flex: 1; font-size: .88rem; }
+            #sug-popup .sp-nom small { display: block; color: #7f8c8d; font-style: italic; }
+            #sug-popup .sp-pre { font-weight: 700; font-size: .85rem; }
+            #sug-popup .sp-tag { font-size: .7rem; color: #c2410c; display: block; }
+            #sug-popup .sp-vacio { color: #64748b; font-size: .85rem; padding: 16px 8px; text-align: center; }
+            #sug-popup .sp-pie { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid #e2e8f0; }
+            #sug-popup .sp-pie button { padding: 8px 14px; border-radius: 7px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer; font-weight: 600; }
+            #sug-popup .sp-pie button.sp-si { background: #0d5c63; border-color: #0d5c63; color: #fff; }
+            #sug-popup .sp-pie button:disabled { opacity: .5; cursor: default; }
+            #sug-aviso { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 10060; padding: 9px 16px; border-radius: 8px; color: #fff; font: 600 .85rem 'Montserrat', sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+            @media print { body { -webkit-print-color-adjust: exact !important; } .sugerencias-controles-box, .sugerencias-debug-a4, .sug-ed { display: none !important; } }
         `;
         document.head.appendChild(stylePrint);
     }
@@ -214,6 +240,128 @@
         set.clear();
         if (typeof window.renderCarta === 'function') window.renderCarta(modo);
     };
+
+    // =====================================================================================
+    // 21 nov (3.3.0): EDITAR LA LISTA DESDE LA HOJA — ✕ a la izquierda de cada plato y ➕ en cada sección.
+    // La hoja enseña los platos ACTIVOS de Sugerencias, así que:
+    //   ✕ = desactivar el plato (sale de la hoja y de la pestaña Sugerencias de la web; NO se borra).
+    //   ➕ = ventana con los platos YA CREADOS de esa sección que no están en la hoja → activarlos.
+    // Se guarda solo (POST ?accion=sugerencias {activar, desactivar}: almacen-json 1.19.0 cambia solo
+    // esos platos sobre lo último de GitHub). Si el editor tiene otros cambios sin guardar, el cambio
+    // se queda en el editor y va con "GUARDAR CAMBIOS EN WEB" (ese guardado lleva "activa" de todos).
+    // =====================================================================================
+    const vistaEdicion = {};   // modo -> secciones de la última hoja pintada (con .lista y .cand)
+    const escSug = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const nombreCortoSug = (t) => { try { return window.desglosarNombre(t || '').nombre || String(t || '').trim(); } catch (e) { return String(t || '').replace(/\s*\/\/.*$/, '').trim(); } };
+    function sinBotonesEdicion(panel) {
+        const c = panel.cloneNode(true);
+        c.querySelectorAll('.sug-ed').forEach(b => b.remove());
+        return c.outerHTML;
+    }
+    function avisoSug(texto, color, ms) {
+        let a = document.getElementById('sug-aviso');
+        if (!a) { a = document.createElement('div'); a.id = 'sug-aviso'; document.body.appendChild(a); }
+        a.textContent = texto; a.style.background = color || '#0d5c63'; a.style.display = '';
+        clearTimeout(a._t);
+        if (ms !== 0) a._t = setTimeout(() => { a.style.display = 'none'; }, ms || 3500);
+    }
+    function repintarTrasCambio(modo) {
+        if (typeof window.renderCarta === 'function') window.renderCarta(modo);
+        try { if (typeof window.renderizar === 'function' && (window.currentMode || modo) === modo) window.renderizar(); } catch (e) { console.warn('[sugerencias] renderizar:', e); }
+    }
+    function ponerActiva(modo, id, valor, antes) {
+        (window.datosLocales || []).forEach(p => { if (p && parseInt(p.id, 10) === id) { if (antes && !(id in antes)) antes[id] = !!p.activa; p.activa = valor; } });
+        const st = window.optimisticState && window.optimisticState[modo];
+        if (st && st.s && st.s.length) {
+            st.s.forEach(p => { if (p && parseInt(p.id, 10) === id) p.activa = valor; });
+            try { sessionStorage.setItem('optState_' + modo, JSON.stringify(st)); } catch (e) { }
+        }
+    }
+    let colaSug = Promise.resolve();
+    function cambiarSugerencias(modo, activar, desactivar) {
+        const antes = {}, set = platosExcluidosSugerencias[modo];
+        activar.forEach(id => { ponerActiva(modo, id, true, antes); if (set) set.delete(id); });
+        desactivar.forEach(id => ponerActiva(modo, id, false, antes));
+        repintarTrasCambio(modo);
+        const on = activar.filter(id => antes[id] === false), off = desactivar.filter(id => antes[id] === true);
+        if (!on.length && !off.length) return Promise.resolve(true);
+        if (window.hayCambiosSinGuardar) {
+            avisoSug('Hecho en el editor. Hay otros cambios sin guardar: pulsa GUARDAR CAMBIOS EN WEB.', '#c2410c', 6000);
+            return Promise.resolve(true);
+        }
+        avisoSug('⏳ Guardando en la web…', '#475569', 0);
+        colaSug = colaSug.then(async () => {
+            try {
+                const url = window.getWebAppUrl(modo);
+                if (!url) throw new Error('el editor no tiene dirección de guardado');
+                const r = await fetch(url + '?accion=sugerencias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ activar: on, desactivar: off }) });
+                const tx = await r.text();
+                if (!r.ok || !/^OK/.test(tx)) throw new Error(tx || ('HTTP ' + r.status));
+                avisoSug('✔ Guardado en la web', '#15803d');
+                try { if (window.SugHistorial && window.SugHistorial.recargar) window.SugHistorial.recargar(); } catch (e) { }
+                return true;
+            } catch (err) {
+                Object.keys(antes).forEach(k => ponerActiva(modo, parseInt(k, 10), antes[k]));
+                repintarTrasCambio(modo);
+                const a = document.getElementById('sug-aviso'); if (a) a.style.display = 'none';
+                alert('❌ No se pudo guardar el cambio de la hoja de Sugerencias: ' + err.message + '\n\nSe ha dejado como estaba.');
+                return false;
+            }
+        });
+        return colaSug;
+    }
+    window.sugQuitar = async function(modo, id) {
+        id = parseInt(id, 10);
+        const p = (window.datosLocales || []).find(x => x && parseInt(x.id, 10) === id);
+        if (!p) return;
+        const texto = '¿Quitar «' + nombreCortoSug(p.es) + '» de la hoja de Sugerencias?\n\n' +
+            'El plato NO se borra: queda desactivado (tampoco sale en la pestaña Sugerencias de la web) y lo puedes volver a poner con el ➕ de su sección.';
+        const ok = await (window.confirmarEditor ? window.confirmarEditor(texto, { si: 'Sí, quitar de la lista', no: 'Cancelar' }) : Promise.resolve(confirm(texto)));
+        if (ok) cambiarSugerencias(modo, [], [id]);
+    };
+    window.sugAnadir = function(modo, idx) {
+        const secs = vistaEdicion[modo], s = secs && secs[idx];
+        if (!s) return;
+        const viejo = document.getElementById('sug-popup'); if (viejo) viejo.remove();
+        const excl = platosExcluidosSugerencias[modo] || new Set();
+        const titulo = s.titulo.split(' / ')[0];
+        const caja = document.createElement('div');
+        caja.id = 'sug-popup'; caja.setAttribute('aria-modal', 'true');
+        const filas = s.cand.map(p => {
+            const id = parseInt(p.id, 10), en = nombreCortoSug(p.en), es = nombreCortoSug(p.es);
+            const busca = (id + ' ' + es + ' ' + en).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+            const pre = p.precio ? parseFloat(p.precio).toFixed(2) + '€' : '';
+            return `<label class="sp-pl" data-busca="${escSug(busca)}"><input type="checkbox" value="${id}"><span class="sp-id">${id}</span><span class="sp-nom">${escSug(es || '(sin nombre)')}${en && en !== es ? `<small>${escSug(en)}</small>` : ''}${p.activa && excl.has(id) ? '<span class="sp-tag">quitado solo de esta impresión</span>' : ''}</span><span class="sp-pre">${pre}</span></label>`;
+        }).join('');
+        caja.innerHTML = `<div class="sp-caja"><div class="sp-cab">➕ Añadir a «${escSug(titulo)}»<small>Platos ya creados de esta sección que no están en la hoja. Para uno nuevo: ➕ Nuevo plato en el Editor.</small></div>
+            ${s.cand.length > 6 ? '<input type="search" placeholder="Buscar por nombre o ID…">' : ''}
+            <div class="sp-lista">${filas || '<div class="sp-vacio">No hay más platos creados en esta sección: todos están ya en la hoja.</div>'}</div>
+            <div class="sp-pie"><button type="button" class="sp-no">Cancelar</button>${filas ? '<button type="button" class="sp-si" disabled>Añadir a la hoja</button>' : ''}</div></div>`;
+        document.body.appendChild(caja);
+        const si = caja.querySelector('.sp-si'), cerrar = () => { caja.remove(); document.removeEventListener('keydown', tecla, true); };
+        const marcados = () => [...caja.querySelectorAll('.sp-lista input:checked')].map(i => parseInt(i.value, 10));
+        const contar = () => { if (!si) return; const n = marcados().length; si.disabled = !n; si.textContent = n > 1 ? 'Añadir ' + n + ' a la hoja' : 'Añadir a la hoja'; };
+        function tecla(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cerrar(); } }
+        document.addEventListener('keydown', tecla, true);
+        caja.addEventListener('click', e => { if (e.target === caja) cerrar(); });
+        caja.querySelector('.sp-no').onclick = cerrar;
+        caja.querySelectorAll('.sp-lista input').forEach(i => i.addEventListener('change', contar));
+        const bus = caja.querySelector('input[type=search]');
+        if (bus) {
+            bus.addEventListener('input', () => {
+                const q = bus.value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().split(/\s+/).filter(Boolean);
+                caja.querySelectorAll('label.sp-pl').forEach(l => { l.style.display = q.every(w => l.dataset.busca.includes(w)) ? '' : 'none'; });
+            });
+            bus.addEventListener('keydown', e => {
+                if (e.key !== 'Enter') return;
+                const vis = [...caja.querySelectorAll('label.sp-pl')].filter(l => l.style.display !== 'none');
+                if (vis.length === 1) { const c = vis[0].querySelector('input'); c.checked = !c.checked; contar(); }
+            });
+            setTimeout(() => bus.focus(), 30);
+        }
+        if (si) si.onclick = () => { const ids = marcados(); if (!ids.length) return; cerrar(); cambiarSugerencias(modo, ids, []); };
+    };
+    window.SugerenciasEdicion = { _vista: (m) => vistaEdicion[m] };
 
     // MODIFICADO: Ahora recibe 'restaurante001' o 'restaurante002'
     window.toggleQR = function(tipo, modo) {
@@ -825,7 +973,7 @@
         function intentarRenderizado() {
             // 20 nov (v3.2.0): ◀ fecha ▶ de sug-historial.js -> la hoja de aquel momento (si no, la de ahora).
             let fuente = (window.SugHistorial && window.SugHistorial.fuente(modo)) || window.datosLocales || [];
-            const tieneDatosEnRango = fuente.some(p => p && p.activa && enSugerencias(p.id));
+            const tieneDatosEnRango = fuente.some(p => p && enSugerencias(p.id)); // 21 nov: también sin ninguna activa (se han quitado todas con ✕: queda el ➕)
             if (tieneDatosEnRango) procesarYRender(fuente, contenedor, config, modo);
             else if (intentos < MAX_INTENTOS) { intentos++; setTimeout(intentarRenderizado, 500); }
             else contenedor.innerHTML = `<div class="p-4 text-center text-slate-500 italic">Esperando origen de datos...</div>`;
@@ -880,20 +1028,26 @@
         const esAperitivoCanonita = (p) => p && parseInt(p.id, 10) === APERITIVO_CANONITA_ID;
         // 3 nov (v3.0.0): por secciones de la estructura (seccionesSugerencias). Un plato que no cae en
         // ninguna sección va, como siempre, a Entrantes/Principales/Postres por su número (delante).
-        let secciones = seccionesSugerencias().map(s => Object.assign(s, { lista: [] }));
+        let secciones = seccionesSugerencias().map(s => Object.assign(s, { lista: [], cand: [] }));
         const secVino = secciones.find(s => s.vino);
         const fijas = [
-            { titulo: TITULOS_SUG.entrantes, rangos: [[12100, 12399]], lista: [] }, { titulo: TITULOS_SUG.principales, rangos: [[12400, 12899]], lista: [] },
-            { titulo: TITULOS_SUG.postres, rangos: [[12900, 12999]], lista: [] }];
-        platos.forEach(p => {
-            const id = parseInt(p.id, 10);
-            if (esVinoSugerencias(id)) { secVino.lista.push(p); return; }
+            { titulo: TITULOS_SUG.entrantes, rangos: [[12100, 12399]], lista: [], cand: [] }, { titulo: TITULOS_SUG.principales, rangos: [[12400, 12899]], lista: [], cand: [] },
+            { titulo: TITULOS_SUG.postres, rangos: [[12900, 12999]], lista: [], cand: [] }];
+        // 21 nov: sección de un ID (la misma regla de siempre), para los activos y para los candidatos del ➕.
+        const destino = (id) => {
+            if (esVinoSugerencias(id)) return secVino;
             const s = secciones.find(x => !x.vino && x.rangos.some(r => id >= r[0] && id <= r[1])) || secciones.find(x => x.rangos.some(r => id >= r[0] && id <= r[1]));
-            if (s) { s.lista.push(p); return; }
-            const f = secciones.find(x => x.titulo === (fijas.find(y => y.rangos.some(r => id >= r[0] && id <= r[1])) || fijas[0]).titulo);
-            (f || fijas.find(y => y.rangos.some(r => id >= r[0] && id <= r[1])) || fijas[0]).lista.push(p);
-        });
-        secciones = fijas.filter(f => f.lista.length && !secciones.includes(f)).concat(secciones);
+            if (s) return s;
+            const fx = fijas.find(y => y.rangos.some(r => id >= r[0] && id <= r[1])) || fijas[0];
+            return secciones.find(x => x.titulo === fx.titulo) || fx;
+        };
+        platos.forEach(p => destino(parseInt(p.id, 10)).lista.push(p));
+        // 21 nov (3.3.0): ✕ / ➕ solo en el editor dentro de la web, con la hoja de AHORA (no en un momento del historial).
+        const editar = !!(window.EDITOR_SITIO && !(fuente && fuente.__historial) && typeof window.getWebAppUrl === 'function');
+        if (editar) fuente.forEach(p => { if (p && enSugerencias(p.id) && (!p.activa || excluidos.has(parseInt(p.id, 10)))) destino(parseInt(p.id, 10)).cand.push(p); });
+        secciones = fijas.filter(f => (f.lista.length || (editar && f.cand.length)) && !secciones.includes(f)).concat(secciones);
+        secciones.forEach((s, i) => { s.idx = i; s.cand.sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10)); });
+        vistaEdicion[modoSeguro] = editar ? secciones : null;
         const vinos = secVino.lista;
 
         // MODIFICADO: la hoja A4 real (.sugerencias-panel) ya NO contiene el botón de imprimir ni
@@ -908,9 +1062,10 @@
                 ${config.logoSrc ? `<img src="${config.logoSrc}" class="sugerencias-logo-img" onerror="${config.logoFallback ? `this.src='${config.logoFallback}';` : `this.style.display='none';`}">` : ''}
             </div><div class="sugerencias-body">`;
 
-        const renderCat = (titulo, lista, extraHtml = '', claseExtra = '') => {
+        const renderCat = (titulo, lista, extraHtml = '', claseExtra = '', sec = null) => {
             if (lista.length === 0) return '';
-            let h = `<div class="sugerencias-seccion${claseExtra ? ' ' + claseExtra : ''}"><div class="sugerencias-seccion-titulo">${titulo}</div>`;
+            const botonMas = (editar && sec) ? `<button type="button" class="sug-ed sug-mas" onclick="window.sugAnadir('${modoSeguro}', ${sec.idx})" title="Añadir un plato de esta sección (${sec.cand.length} disponible${sec.cand.length === 1 ? '' : 's'})">+</button>` : '';
+            let h = `<div class="sugerencias-seccion${claseExtra ? ' ' + claseExtra : ''}"><div class="sugerencias-seccion-titulo">${botonMas}${titulo}</div>`;
             lista.forEach(p => {
                 let iconsHtml = '';
                 if (p.alergenos) iconsHtml = '<div class="sugerencias-alergenos">' + p.alergenos.split(',').map(a => `<img src="${PATH_ALERGENOS}${a.trim()}.webp" class="sugerencias-alergeno-icon">`).join('') + '</div>';
@@ -938,7 +1093,8 @@
                 }
                 const precioFormateado = p.precio ? parseFloat(p.precio).toFixed(2) + '€' : '0.00€';
                 // MODIFICADO: los puntitos van del final del nombre ES al precio (1ª línea); EN, descripción y alérgenos debajo.
-                h += `<div class="sugerencias-plato sugerencias-plato-col"><div class="sugerencias-linea1">${htmlNombreEs}<div class="sugerencias-puntos"></div><div class="sugerencias-precio">${precioFormateado}</div></div><div class="sugerencias-plato-resto">${htmlExtraEs}${htmlNombreEn}${iconsHtml}</div></div>`;
+                const botonQuitar = editar ? `<button type="button" class="sug-ed sug-quitar" onclick="window.sugQuitar('${modoSeguro}', ${parseInt(p.id, 10)})" title="Quitar de la hoja (el plato no se borra)">✕</button>` : '';
+                h += `<div class="sugerencias-plato sugerencias-plato-col">${botonQuitar}<div class="sugerencias-linea1">${htmlNombreEs}<div class="sugerencias-puntos"></div><div class="sugerencias-precio">${precioFormateado}</div></div><div class="sugerencias-plato-resto">${htmlExtraEs}${htmlNombreEn}${iconsHtml}</div></div>`;
             });
             if (extraHtml) h += extraHtml;
             return h + '</div>';
@@ -971,7 +1127,7 @@
             : '';
 
         secciones.forEach(s => {
-            html += s.vino ? renderCat(s.titulo, s.lista, vinoImagenHtml, 'sugerencias-seccion-bodega') : renderCat(s.titulo, s.lista);
+            html += s.vino ? renderCat(s.titulo, s.lista, vinoImagenHtml, 'sugerencias-seccion-bodega', s) : renderCat(s.titulo, s.lista, '', '', s);
         });
 
         let qrButtonsHtml = '';
@@ -1016,7 +1172,7 @@
         }).join('');
         const selectorQuitarHtml = platos.length > 0
             ? `<div class="sugerencias-selector-quitar-plato" style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:10px; padding-top:10px; border-top:1px solid #cbd5e1;">
-                    <label style="font-size:0.75rem; color:#64748b;">Quitar un plato de esta hoja:</label>
+                    <label style="font-size:0.75rem; color:#64748b;" title="Solo para imprimir ahora: no se guarda y al recargar vuelve. Para quitarlo de verdad, la ✕ de su izquierda.">Quitar solo de esta impresión (no se guarda):</label>
                     <select id="select-quitar-plato-${modoSeguro}" style="font-size:0.8rem; padding:4px 6px; border-radius:5px; border:1px solid #cbd5e1; max-width:220px;">${opcionesPlatosHtml}</select>
                     <button type="button" onclick="window.quitarPlatoSugerencia(document.getElementById('select-quitar-plato-${modoSeguro}').value, '${modoSeguro}')" style="font-size:0.75rem; padding:5px 10px; border-radius:5px; border:1px solid #dc2626; background:#fef2f2; color:#991b1b; cursor:pointer;">Quitar</button>
                </div>`
@@ -1047,6 +1203,7 @@
                 </div>
                 ${(vinoImagenButtonsHtml || vinoImagenEscalaHtml) ? `<div class="qr-selector-wrapper" style="font-size: 0.75rem; color: #64748b; text-align: center; margin-bottom: 3px; user-select:none; display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 8px; white-space: nowrap;">${vinoImagenButtonsHtml ? `<span class="vino-imagen-selector-wrapper" style="display:flex; align-items:center; gap:8px; padding-right:10px; border-right:1px solid #cbd5e1;">Imágenes: ${vinoImagenButtonsHtml}</span>` : ''}${vinoImagenEscalaHtml ? `<span class="vino-imagen-selector-wrapper" style="display:flex; align-items:center; gap:6px;">Tamaño: ${vinoImagenEscalaHtml}</span>` : ''}</div>` : ''}
                 <div class="qr-selector-wrapper" style="font-size: 0.75rem; color: #64748b; text-align: center; margin-bottom: 0; user-select:none; display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 8px; white-space: nowrap;">Tipo de QR: ${qrButtonsHtml}</div>
+                ${editar && secciones.some(s => !s.lista.length) ? `<div style="display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:10px; padding-top:10px; border-top:1px solid #cbd5e1; font-size:0.75rem; color:#64748b;">➕ Sección sin platos en la hoja:${secciones.filter(s => !s.lista.length).map(s => `<button type="button" onclick="window.sugAnadir('${modoSeguro}', ${s.idx})" style="font-size:0.75rem; padding:4px 9px; border-radius:12px; border:1px solid #0d5c63; background:#ecfeff; color:#0d5c63; cursor:pointer;">+ ${s.titulo.split(' / ')[0]} (${s.cand.length})</button>`).join('')}</div>` : ''}
                 ${selectorQuitarHtml}
                 ${listaQuitadosHtml}
             </div>`;
@@ -1176,7 +1333,7 @@
         // y se recalcula desde cero por si la fuente o el layout rinden distinto en la ventana nueva.
         const scriptAjuste = construirScriptImpresion();
 
-        pWin.document.write(`<html><head><title>Sugerencias ${getModoAlias(modo)}</title><style>${styleContent}@media print { #sugerencias-aviso-ajuste { display: none !important; } }</style></head><body>${panelReal.outerHTML}<script>${scriptAjuste}<\/script></body></html>`);
+        pWin.document.write(`<html><head><title>Sugerencias ${getModoAlias(modo)}</title><style>${styleContent}@media print { #sugerencias-aviso-ajuste { display: none !important; } }</style></head><body>${sinBotonesEdicion(panelReal)}<script>${scriptAjuste}<\/script></body></html>`);
         pWin.document.close();
     };
     // NUEVO (30 oct): motor de ajuste A4 expuesto para la hoja de Postres (postres-print.js),
