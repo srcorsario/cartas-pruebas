@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "guardado": "2026-11-21T19:45:44.249Z",
+  "guardado": "2026-11-21T19:45:59.644Z",
   "ocultas": [],
   "idiomas": [],
   "estructura": {
@@ -8916,7 +8916,7 @@
         }
     },
     {
-        "id": "12991", "activa": "no", "precio": "32.00", "precioMedia": "",
+        "id": "12991", "activa": "si", "precio": "32.00", "precioMedia": "",
         "carpeta": "vinos", "archivo": "quibia_01.webp",
         "alergenos": [], "opcionesInactivas": [],
         "nombre": {
