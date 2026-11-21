@@ -2,7 +2,7 @@
   "formato": 1,
   "restaurante": "rg",
   "generado": "2026-11-02T11:50:50",
-  "guardado": "2026-11-21T19:34:59.503Z",
+  "guardado": "2026-11-21T19:35:08.628Z",
   "ocultas": [],
   "idiomas": [],
   "estructura": {
@@ -8727,7 +8727,7 @@
         }
     },
     {
-        "id": "12900", "activa": "si", "precio": "8.00", "precioMedia": "",
+        "id": "12900", "activa": "no", "precio": "8.00", "precioMedia": "",
         "carpeta": "postres", "archivo": "pistacho01.webp",
         "alergenos": ["FRUTOSCASCARA", "CACAHUETE", "SOJA", "HUEVO", "SESAMO", "MOSTAZA", "GLUTEN", "LACTOSA", "VEGETARIANO"], "opcionesInactivas": [],
         "nombre": {
