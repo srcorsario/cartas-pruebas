@@ -15,7 +15,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.prepararMesas = '1.12.0'; // 22 nov: elemento nuevo 🚫 SIN MESAS (zonas de paso): 🪄 Repartir no pone mesas dentro; solo si no caben de otra forma deja que una mesa o sus sillas entren hasta 35 cm. Las zonas rayadas con el texto «no mesas» / «sin mesas» pasan solas a este tipo. Se ve suave (rojo punteado) y no sale en la hoja de montaje impresa. 1.11.0: 10 nov: 📄 Duplicar sala copia también las mesas y sillas sueltas del menú. 1.10.0: el asiento que cae ENCIMA DE UN SOFÁ cuenta solo como plaza «en el sofá» (comensal sin silla), aunque estuviera como sin asiento. 1.9.0: los asientos "sin asiento" ya NO se dibujan (solo con su mesa elegida, para recuperarlos); 🗑 Quitar asiento / Supr; IMÁN DE SILLAS: al soltar una silla/butaca (o silla suelta) cerca de un hueco libre de una mesa se coloca en él centrada como las de serie (cabeceras incluidas) y pasa a esa mesa; al Unir, la mesa resultante ocupa el sitio de las dos. 1.8.0:// 10 nov: TIPO DE CADA ASIENTO (silla, butaca, en el sofá sin silla, sin asiento); contador de sillas/butacas en la sala y RESERVA según las que tenemos; las mesas se ALINEAN con las demás al moverlas (Alt = sin imán); ✂ Dividir y 🔗 Unir mesas; el sofá ya no marca en rojo las mesas pegadas a él. 1.7.0, 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
+    window.APP_VERSIONS.prepararMesas = '1.13.0'; // 22 nov (2): 🪄 REPARTIR MEJOR: prueba varias formas (primero mesas en vertical y, si no caben, en horizontal; todas en horizontal; todas en vertical) con barrido de 10 cm y se queda con la que coloca más mesas; ESPACIO MÍNIMO a paredes y objetos (sofá, barra, columnas, plantas, puertas, zonas) «A paredes/objetos» (de serie 40 cm) además del Pasillo entre sillas de mesas vecinas (de serie 80 en menús nuevos). 1.12.0: 22 nov: elemento nuevo 🚫 SIN MESAS (zonas de paso): 🪄 Repartir no pone mesas dentro; solo si no caben de otra forma deja que una mesa o sus sillas entren hasta 35 cm. Las zonas rayadas con el texto «no mesas» / «sin mesas» pasan solas a este tipo. Se ve suave (rojo punteado) y no sale en la hoja de montaje impresa. 1.11.0: 10 nov: 📄 Duplicar sala copia también las mesas y sillas sueltas del menú. 1.10.0: el asiento que cae ENCIMA DE UN SOFÁ cuenta solo como plaza «en el sofá» (comensal sin silla), aunque estuviera como sin asiento. 1.9.0: los asientos "sin asiento" ya NO se dibujan (solo con su mesa elegida, para recuperarlos); 🗑 Quitar asiento / Supr; IMÁN DE SILLAS: al soltar una silla/butaca (o silla suelta) cerca de un hueco libre de una mesa se coloca en él centrada como las de serie (cabeceras incluidas) y pasa a esa mesa; al Unir, la mesa resultante ocupa el sitio de las dos. 1.8.0:// 10 nov: TIPO DE CADA ASIENTO (silla, butaca, en el sofá sin silla, sin asiento); contador de sillas/butacas en la sala y RESERVA según las que tenemos; las mesas se ALINEAN con las demás al moverlas (Alt = sin imán); ✂ Dividir y 🔗 Unir mesas; el sofá ya no marca en rojo las mesas pegadas a él. 1.7.0, 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
 
     var ARCH = 'salas.json', LS = 'pm-salas-local';
     var SILLA = 45, HUECO = 4;                       // cm: fondo de la silla y separación con la mesa
@@ -107,7 +107,7 @@
     // ---------- Mesas del menú ----------
     function cfg(menu) {
         if (menu.mesas && menu.mesas.__propio) return menu.mesas;
-        var c = JSON.parse(JSON.stringify(Object.assign({ pax: '', tam: 8, cab: false, pasillo: 100, lista: [], sueltas: [], cub: {}, op: {} }, menu.mesas || {})));
+        var c = JSON.parse(JSON.stringify(Object.assign({ pax: '', tam: 8, cab: false, pasillo: 80, sepObj: 40, lista: [], sueltas: [], cub: {}, op: {} }, menu.mesas || {})));
         if (!Array.isArray(c.lista)) c.lista = [];
         if (!Array.isArray(c.sueltas)) c.sueltas = [];
         c.cub = c.cub || {}; c.op = c.op || {};
@@ -234,8 +234,15 @@
     // primero sin entrar nada (tol 0) y solo si no cabe, con TOL_SIN_MESAS.
     var TOL_SIN_MESAS = 35;
     function encoger(e, t) { return { x: e.x + t, y: e.y + t, w: e.w - 2 * t, h: e.h - 2 * t }; }
-    function mal(m, s, otras, margen, tol) {
+    function mal(m, s, otras, margen, tol, sep) {
         var h = huella(m, margen), rs = [cuerpo(m)].concat(sillasFisicas(m));
+        // 1.13.0 (solo al colocar solo, sep != null): la mesa con TODOS sus asientos a «sep» cm o más de paredes y obstáculos
+        // (sofá incluido: al repartir no se sienta a nadie en el sofá; a mano sí se puede).
+        if (sep != null) {
+            var h0 = huella(m);
+            if (h0.x < sep || h0.y < sep || h0.x + h0.w > s.w - sep || h0.y + h0.h > s.h - sep) return true;
+            if (s.el.some(function (e) { return TIPOS[e.t] && TIPOS[e.t].bloquea && pisa(h0, { x: e.x - sep, y: e.y - sep, w: e.w + 2 * sep, h: e.h + 2 * sep }); })) return true;
+        }
         var t = tol == null ? TOL_SIN_MESAS : tol;
         if (s.el.some(function (e) { if (e.t !== 'sinmesas') return false; var z = encoger(e, t); return z.w > 0 && z.h > 0 && rs.some(function (r) { return pisa(r, z); }); })) return true;
         if (margen && (h.x < 0 || h.y < 0 || h.x + h.w > s.w || h.y + h.h > s.h)) return true;
@@ -272,15 +279,19 @@
         }
         m.pax = pax;
     }
-    function colocar(m, s, puestas, pasillo) {
-        var rots = [0, 1], pases = [0, TOL_SIN_MESAS];   // 1.12.0: primero sin entrar en 🚫 Sin mesas; si no cabe, hasta 35 cm
-        for (var p = 0; p < pases.length; p++) for (var r = 0; r < 2; r++) {
+    // Pone la mesa en el primer sitio libre (de arriba abajo y de izquierda a derecha, cada 10 cm) probando los giros
+    // en el orden de «rots» (1 = vertical). 1.12.0: primero sin entrar en 🚫 Sin mesas; si no cabe, hasta 35 cm.
+    // 1.13.0: «sep» = espacio mínimo a paredes y obstáculos (de serie 40 cm).
+    function colocar(m, s, puestas, pasillo, sep, rots) {
+        rots = rots || [0, 1]; sep = sep == null ? 40 : sep;
+        var pases = [0, TOL_SIN_MESAS];
+        for (var p = 0; p < pases.length; p++) for (var r = 0; r < rots.length; r++) {
             m.rot = rots[r];
-            for (var y = 0; y < s.h; y += 20) for (var x = 0; x < s.w; x += 20) {
+            for (var y = 0; y < s.h; y += 10) for (var x = 0; x < s.w; x += 10) {
                 m.x = x; m.y = y;
                 var h = huella(m);
-                if (h.x < 30 || h.y < 30 || h.x + h.w > s.w - 30 || h.y + h.h > s.h - 30) continue;
-                if (!mal(m, s, puestas, pasillo, pases[p])) return true;
+                if (h.x < sep || h.y < sep || h.x + h.w > s.w - sep || h.y + h.h > s.h - sep) continue;
+                if (!mal(m, s, puestas, pasillo, pases[p], sep)) return true;
             }
         }
         m.rot = 0; m.x = 60; m.y = 60;
@@ -291,14 +302,24 @@
         if (!s) { avisar('Primero crea una sala (➕ Nueva sala).'); return; }
         if (!pax) { avisar('Pon el número de comensales.'); return; }
         var resto = c.lista.filter(function (m) { return mesasDe(menu, s).indexOf(m) < 0; });
-        var nuevas = repartir(pax, num(c.tam) || 0, !!c.cab), fuera = 0;
-        nuevas.sort(function (a, b) { return b.mod - a.mod; });
-        var puestas = [];
-        nuevas.forEach(function (m) { m.s = s.id; if (!colocar(m, s, puestas, Math.max(0, num(c.pasillo) || 0))) fuera++; puestas.push(m); });
+        var base = repartir(pax, num(c.tam) || 0, !!c.cab), fuera = 0, pas = Math.max(0, num(c.pasillo) || 0), sep = sepObj(c);
+        base.sort(function (a, b) { return b.mod - a.mod; });
+        // 1.13.0: varias formas de colocar; gana la que coloca más mesas (empate: la primera de la lista)
+        var formas = [[1, 0], [0, 1], [0], [1]], mejor = null;
+        formas.forEach(function (rots) {
+            if (mejor && !mejor.fuera) return;
+            var ns = JSON.parse(JSON.stringify(base)), puestas = [], f = 0;
+            ns.forEach(function (m) { m.s = s.id; if (colocar(m, s, puestas, pas, sep, rots)) puestas.push(m); else { f++; m.fuera = true; } });
+            if (!mejor || f < mejor.fuera) mejor = { ns: ns, fuera: f };
+        });
+        var nuevas = mejor.ns, otras = [];
+        nuevas.forEach(function (m) { if (m.fuera) { delete m.fuera; m.rot = 0; m.x = 60; m.y = 60; } else otras.push(m); });
+        fuera = mejor.fuera;
         c.lista = resto.concat(nuevas);
         ui.sel = null;
-        if (fuera) avisar(fuera + ' mesa(s) no caben en "' + s.nombre + '" con ese pasillo: están en rojo arriba a la izquierda. Muévelas, reduce el pasillo o usa otra sala.');
+        if (fuera) avisar(fuera + ' mesa(s) no caben en "' + s.nombre + '" con ' + pas + ' cm de pasillo y ' + sep + ' cm a paredes/objetos: están en rojo arriba a la izquierda. Muévelas, reduce esos espacios o usa otra sala.');
     }
+    function sepObj(c) { var v = num(c.sepObj); return v >= 0 && c.sepObj !== '' && c.sepObj != null ? v : 40; }
 
     // ---------- Material ----------
     function tipoAuto(menu, k) {
@@ -469,6 +490,7 @@
             '<span>Mesas de <select data-f="tam" style="padding:4px;border:1px solid #cbd5e1;border-radius:5px">' + [2, 4, 8, 12, 16, 20, 24, 0].map(function (t) { return '<option value="' + t + '"' + (+c.tam === t ? ' selected' : '') + '>' + (t ? t + ' pax' : 'una sola mesa') + '</option>'; }).join('') + '</select></span>' +
             '<label title="Excepcional: si sobran 1 o 2 comensales se sientan en las cabeceras en vez de abrir otra mesa de 4"><input type="checkbox" data-f="cab"' + (c.cab ? ' checked' : '') + '> Usar cabeceras para 1-2 sueltos</label>' +
             '<span title="Separación mínima entre sillas de mesas vecinas al colocar">Pasillo ' + I('pasillo', c.pasillo, 46) + ' cm</span>' +
+            '<span title="Al colocar: espacio mínimo de mesas y sillas a paredes, sofá, barra, columnas, plantas, puertas y zonas">A paredes/objetos ' + I('sepObj', c.sepObj == null ? 40 : c.sepObj, 46) + ' cm</span>' +
             '<button type="button" class="btn btn-primary" data-a="repartir" style="font-size:.82rem;padding:6px 12px">🪄 Repartir y colocar' + (s ? ' en ' + esc(s.nombre) : '') + '</button>' +
             '</div>' +
             '<div class="me-fila" style="gap:8px;font-size:.85rem;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9"><b title="Reparto a mano: pon cuántas mesas quieres y los comensales de cada una">📋 Lista de mesas</b>' +
@@ -673,7 +695,7 @@
         }
         else if (a === 'borrarEl' && el) { s.el.splice(ui.sel.el, 1); ui.sel = null; sucias = true; }
         else if (a === 'girarEl' && el) { var w = el.w; el.w = el.h; el.h = w; sucias = true; }
-        else if (a === 'masMesa' && s) { ui.modo = 'mesas'; var n = { s: s.id, mod: 1, cab: 0, pax: 4, rot: 0, x: 0, y: 0 }; colocar(n, s, mesasDe(menu, s), Math.max(0, num(c.pasillo) || 0)); c.lista.push(n); ui.sel = { mesa: c.lista.length - 1 }; }
+        else if (a === 'masMesa' && s) { ui.modo = 'mesas'; var n = { s: s.id, mod: 1, cab: 0, pax: 4, rot: 0, x: 0, y: 0 }; colocar(n, s, mesasDe(menu, s), Math.max(0, num(c.pasillo) || 0), sepObj(c)); c.lista.push(n); ui.sel = { mesa: c.lista.length - 1 }; }
         else if (a === 'quitarTodas' && s) { var ms = mesasDe(menu, s); c.lista = c.lista.filter(function (x) { return ms.indexOf(x) < 0; }); ui.sel = null; }
         else if (a === 'sillaSitio' && m) { if (m.sil) delete m.sil[ui.sel.silla]; }
         else if (a === 'sillasSitio' && m) { delete m.sil; }
@@ -770,7 +792,7 @@
                 for (var k = 0; k < n - hay; k++) {
                     var nm = { s: s.id, rot: 0, x: 0, y: 0 };
                     talla(nm, !hay && tot >= n ? Math.floor(tot / n) + (k < tot % n ? 1 : 0) : 4, !!c.cab);
-                    colocar(nm, s, mesasDe(menu, s), pas);
+                    colocar(nm, s, mesasDe(menu, s), pas, sepObj(c));
                     c.lista.push(nm);
                 }
             }
@@ -781,7 +803,8 @@
         else if (f === 'pax') c.pax = v > 0 ? Math.round(v) : '';
         else if (f === 'tam') c.tam = +x.value;
         else if (f === 'cab') c.cab = x.checked;
-        else if (f === 'pasillo') c.pasillo = v >= 0 ? v : 100;
+        else if (f === 'pasillo') c.pasillo = v >= 0 ? v : 80;
+        else if (f === 'sepObj') c.sepObj = v >= 0 ? v : 40;
         else if (f === 'sala') { ui.salaId = x.value; ui.sel = null; }
         else if (f === 'op.copasVino' || f === 'op.reserva') c.op[f.slice(3)] = v >= 0 ? v : '';
         else if (f === 's.nombre' && s) { s.nombre = x.value.trim() || s.nombre; sucias = true; }
@@ -830,5 +853,5 @@
     }
 
     window.PrepararMesas = { contenedor: contenedor, activar: activar, mostrar: pintar, repartir: repartir, material: material,
-        _pruebas: { sanear: sanear, mal: mal, colocar: colocar, huella: huella, cuerpo: cuerpo, sillasFisicas: sillasFisicas, svgSala: svgSala, ponerDatos: function (d) { datos = sanear(d); } } };
+        _pruebas: { sanear: sanear, mal: mal, colocar: colocar, huella: huella, cuerpo: cuerpo, sillasFisicas: sillasFisicas, svgSala: svgSala, repartirYColocar: repartirYColocar, ponerDatos: function (d) { datos = sanear(d); } } };
 })();
