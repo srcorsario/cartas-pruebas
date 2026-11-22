@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v3.3.1-Abstract-Keys', // 3.3.1 (21 nov): ventana del ➕ a todo el ancho (platos en columnas) y aviso grande propio al quitar con ✕. 3.3.0 (21 nov): en la hoja, ✕ a la izquierda de cada plato (lo quita de la lista: se desactiva, no se borra) y ➕ en cada sección (elegir entre los platos ya creados de esa sección); se guarda solo. 3.2.0 (20 nov): ◀ fecha ▶ del historial de Sugerencias (sug-historial.js). 3.1.0 (4 nov): plantilla neutra (window.MARCA)
+            versionStr: 'v3.4.0-Abstract-Keys', // 3.4.0 (22 nov): ✕ y ➕ ya NO guardan al momento (cada uno creaba una posición en el historial): quedan pendientes en una barra sobre la hoja con «✔ Aplicar y guardar en la web» (UN guardado = UNA posición guardada) y «↶ Deshacer»; aviso al salir con cambios pendientes. 3.3.2 (21 nov): ventana del ➕ con los platos en UNA columna. 3.3.1 (21 nov): ventana del ➕ a todo el ancho (platos en columnas) y aviso grande propio al quitar con ✕. 3.3.0 (21 nov): en la hoja, ✕ a la izquierda de cada plato (lo quita de la lista: se desactiva, no se borra) y ➕ en cada sección (elegir entre los platos ya creados de esa sección); se guarda solo. 3.2.0 (20 nov): ◀ fecha ▶ del historial de Sugerencias (sug-historial.js). 3.1.0 (4 nov): plantilla neutra (window.MARCA)
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -23,7 +23,7 @@
             vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE001,
                     },
         restaurante002: {
-            versionStr: 'v3.3.1-Abstract-Keys', // 3.3.1 (21 nov): ventana del ➕ y aviso de ✕ grandes. 3.3.0 (21 nov): ✕ y ➕ en la hoja. 3.2.0 (20 nov): historial de Sugerencias
+            versionStr: 'v3.4.0-Abstract-Keys', // 3.4.0 (22 nov): ✕/➕ pendientes hasta «Aplicar y guardar». 3.3.2 (21 nov): ➕ en una columna. 3.3.1 (21 nov): ventana del ➕ y aviso de ✕ grandes. 3.3.0 (21 nov): ✕ y ➕ en la hoja. 3.2.0 (20 nov): historial de Sugerencias
             versionKey: 'sugerencias_restaurante002',
             containerId: 'sugerencias-contenido-usopen',
             logoSrc: LOGO_RESTAURANTE002,
@@ -191,7 +191,7 @@
             #sug-popup .sp-cab small { font-size: .9rem; font-weight: 400; color: #64748b; }
             #sug-popup .sp-cab .sp-x { margin-left: auto; border: none; background: none; font-size: 1.6rem; color: #94a3b8; cursor: pointer; line-height: 1; }
             #sug-popup input[type=search] { margin: 0 28px 12px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 1rem; }
-            #sug-popup .sp-lista { overflow: auto; padding: 4px 20px 12px; flex: 1; min-height: 80px; display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 8px 14px; align-content: start; }
+            #sug-popup .sp-lista { overflow: auto; padding: 4px 20px 12px; flex: 1; min-height: 80px; display: grid; grid-template-columns: 1fr; gap: 6px; align-content: start; }
             #sug-popup label.sp-pl { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 9px; border: 1px solid #e2e8f0; cursor: pointer; }
             #sug-popup label.sp-pl:hover { background: #f1f5f9; }
             #sug-popup label.sp-pl:has(input:checked) { background: #ecfeff; border-color: #0d5c63; box-shadow: inset 0 0 0 1px #0d5c63; }
@@ -290,39 +290,68 @@
             try { sessionStorage.setItem('optState_' + modo, JSON.stringify(st)); } catch (e) { }
         }
     }
-    let colaSug = Promise.resolve();
+    // 22 nov (3.4.0): los cambios de ✕ / ➕ quedan PENDIENTES (en el editor) hasta «✔ Aplicar y guardar en la web»:
+    // así varios cambios = UN guardado = UNA posición en el historial de Sugerencias.
+    const pendientesSug = {};   // modo -> { id: activa ORIGINAL (antes del primer cambio) }
+    const pendientes = (modo) => (pendientesSug[modo] = pendientesSug[modo] || {});
     function cambiarSugerencias(modo, activar, desactivar) {
-        const antes = {}, set = platosExcluidosSugerencias[modo];
+        const antes = {}, set = platosExcluidosSugerencias[modo], pend = pendientes(modo);
         activar.forEach(id => { ponerActiva(modo, id, true, antes); if (set) set.delete(id); });
         desactivar.forEach(id => ponerActiva(modo, id, false, antes));
-        repintarTrasCambio(modo);
-        const on = activar.filter(id => antes[id] === false), off = desactivar.filter(id => antes[id] === true);
-        if (!on.length && !off.length) return Promise.resolve(true);
-        if (window.hayCambiosSinGuardar) {
-            avisoSug('Hecho en el editor. Hay otros cambios sin guardar: pulsa GUARDAR CAMBIOS EN WEB.', '#c2410c', 6000);
-            return Promise.resolve(true);
-        }
-        avisoSug('⏳ Guardando en la web…', '#475569', 0);
-        colaSug = colaSug.then(async () => {
-            try {
-                const url = window.getWebAppUrl(modo);
-                if (!url) throw new Error('el editor no tiene dirección de guardado');
-                const r = await fetch(url + '?accion=sugerencias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ activar: on, desactivar: off }) });
-                const tx = await r.text();
-                if (!r.ok || !/^OK/.test(tx)) throw new Error(tx || ('HTTP ' + r.status));
-                avisoSug('✔ Guardado en la web', '#15803d');
-                try { if (window.SugHistorial && window.SugHistorial.recargar) window.SugHistorial.recargar(); } catch (e) { }
-                return true;
-            } catch (err) {
-                Object.keys(antes).forEach(k => ponerActiva(modo, parseInt(k, 10), antes[k]));
-                repintarTrasCambio(modo);
-                const a = document.getElementById('sug-aviso'); if (a) a.style.display = 'none';
-                alert('❌ No se pudo guardar el cambio de la hoja de Sugerencias: ' + err.message + '\n\nSe ha dejado como estaba.');
-                return false;
-            }
+        activar.concat(desactivar).forEach(id => {
+            if (!(id in antes)) return;
+            if (!(id in pend)) pend[id] = antes[id];
+            const ahora = activar.includes(id);
+            if (pend[id] === ahora) delete pend[id];   // vuelve a como estaba guardado: ya no es cambio
         });
-        return colaSug;
+        repintarTrasCambio(modo);
     }
+    function nombrePorId(id) { const p = (window.datosLocales || []).find(x => x && parseInt(x.id, 10) === id); return p ? nombreCortoSug(p.es) : String(id); }
+    function barraPendientesHtml(modo) {
+        const pend = pendientes(modo), ids = Object.keys(pend).map(Number);
+        if (!ids.length) return '';
+        const lista = ids.map(id => (pend[id] ? '− ' : '+ ') + escSug(nombrePorId(id))).join(' · ');
+        return `<div class="sug-pendientes" style="position:sticky; top:0; z-index:40; max-width:1100px; margin:0 auto 10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 14px; border-radius:10px; background:#fff7ed; border:1px solid #fdba74; box-shadow:0 4px 14px rgba(0,0,0,.08); font-family:'Montserrat',sans-serif;">
+            <b style="color:#c2410c; white-space:nowrap;">✏️ ${ids.length} cambio${ids.length > 1 ? 's' : ''} sin guardar en la hoja</b>
+            <span style="flex:1; min-width:200px; font-size:.8rem; color:#7c2d12;">${lista}</span>
+            <button type="button" onclick="window.sugDeshacer('${modo}')" style="padding:7px 12px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; cursor:pointer; font-weight:600;">↶ Deshacer</button>
+            <button type="button" class="sug-aplicar" onclick="window.sugAplicar('${modo}')" style="padding:7px 14px; border-radius:8px; border:1px solid #0d5c63; background:#0d5c63; color:#fff; cursor:pointer; font-weight:700;">✔ Aplicar y guardar en la web</button></div>`;
+    }
+    window.sugDeshacer = function(modo) {
+        const pend = pendientes(modo);
+        Object.keys(pend).forEach(k => ponerActiva(modo, parseInt(k, 10), pend[k]));
+        pendientesSug[modo] = {};
+        repintarTrasCambio(modo);
+    };
+    let guardandoSug = false;
+    window.sugAplicar = async function(modo) {
+        if (guardandoSug) return;
+        const pend = pendientes(modo), ids = Object.keys(pend).map(Number);
+        if (!ids.length) return;
+        const on = ids.filter(id => !pend[id]), off = ids.filter(id => pend[id]);
+        guardandoSug = true;
+        document.querySelectorAll('.sug-aplicar').forEach(b => { b.disabled = true; b.textContent = '⏳ Guardando…'; });
+        avisoSug('⏳ Guardando en la web…', '#475569', 0);
+        try {
+            const url = window.getWebAppUrl(modo);
+            if (!url) throw new Error('el editor no tiene dirección de guardado');
+            const r = await fetch(url + '?accion=sugerencias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ activar: on, desactivar: off }) });
+            const tx = await r.text();
+            if (!r.ok || !/^OK/.test(tx)) throw new Error(tx || ('HTTP ' + r.status));
+            pendientesSug[modo] = {};
+            avisoSug('✔ Guardado en la web (' + ids.length + ' cambio' + (ids.length > 1 ? 's' : '') + ')', '#15803d');
+            try { if (window.SugHistorial && window.SugHistorial.recargar) window.SugHistorial.recargar(); } catch (e) { }
+        } catch (err) {
+            const a = document.getElementById('sug-aviso'); if (a) a.style.display = 'none';
+            alert('❌ No se pudo guardar la hoja de Sugerencias: ' + err.message + '\n\nLos cambios siguen pendientes: puedes volver a intentarlo.');
+        } finally {
+            guardandoSug = false;
+            repintarTrasCambio(modo);
+        }
+    };
+    window.addEventListener('beforeunload', (e) => {
+        if (Object.keys(pendientesSug).some(m => Object.keys(pendientesSug[m]).length)) { e.preventDefault(); e.returnValue = ''; }
+    });
     function tarjetaPlato(p, extra) {
         const es = nombreCortoSug(p.es), en = nombreCortoSug(p.en), pre = p.precio ? parseFloat(p.precio).toFixed(2) + '€' : '';
         return `<span class="sp-id">${parseInt(p.id, 10)}</span><span class="sp-nom">${escSug(es || '(sin nombre)')}${en && en !== es ? `<small>${escSug(en)}</small>` : ''}${extra || ''}</span><span class="sp-pre">${pre}</span>`;
@@ -351,6 +380,7 @@
             <div class="sp-cuerpo"><div class="sp-plato">${tarjetaPlato(p)}</div>
             <ul><li>El plato <b>NO se borra</b>: queda <b>desactivado</b> en la carta.</li>
             <li>Tampoco sale en la pestaña <b>Sugerencias de la web</b>.</li>
+            <li>No se guarda hasta que pulses <b>✔ Aplicar y guardar en la web</b> (barra de arriba).</li>
             <li>Lo puedes volver a poner cuando quieras con el <b>➕</b> de su sección.</li></ul></div>
             <div class="sp-pie"><button type="button" class="sp-no">Cancelar</button><button type="button" class="sp-quitar">Sí, quitar de la lista</button></div>`, 'sp-conf',
             () => { if (si) cambiarSugerencias(modo, [], [id]); });
@@ -393,7 +423,7 @@
         }
         if (si) si.onclick = () => { ids = marcados(); if (ids.length) v.cerrar(); };
     };
-    window.SugerenciasEdicion = { _vista: (m) => vistaEdicion[m] };
+    window.SugerenciasEdicion = { _vista: (m) => vistaEdicion[m], pendientes: (m) => Object.keys(pendientes(m)).length };
 
     // MODIFICADO: Ahora recibe 'restaurante001' o 'restaurante002'
     window.toggleQR = function(tipo, modo) {
@@ -1240,7 +1270,7 @@
                 ${listaQuitadosHtml}
             </div>`;
 
-        contenedor.innerHTML = html + controlesHtml;
+        contenedor.innerHTML = (editar ? barraPendientesHtml(modoSeguro) : '') + html + controlesHtml;
         posicionarDebugA4(contenedor);
 
         // NUEVO: ajusta la vista previa a una página A4 nada más renderizarla,
