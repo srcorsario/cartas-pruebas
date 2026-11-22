@@ -15,7 +15,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.prepararMesas = '1.14.0'; // 22 nov (3): tras repartir, las mesas que quedan casi a la misma altura se ALINEAN (aunque entren un poco, hasta 35 cm, en una zona 🚫 Sin mesas) y cada fila REPARTE EL ESPACIO SOBRANTE (huecos iguales en vez de todas apretadas a la izquierda). 1.13.0: 22 nov (2): 🪄 REPARTIR MEJOR: prueba varias formas (primero mesas en vertical y, si no caben, en horizontal; todas en horizontal; todas en vertical) con barrido de 10 cm y se queda con la que coloca más mesas; ESPACIO MÍNIMO a paredes y objetos (sofá, barra, columnas, plantas, puertas, zonas) «A paredes/objetos» (de serie 40 cm) además del Pasillo entre sillas de mesas vecinas (de serie 80 en menús nuevos). 1.12.0: 22 nov: elemento nuevo 🚫 SIN MESAS (zonas de paso): 🪄 Repartir no pone mesas dentro; solo si no caben de otra forma deja que una mesa o sus sillas entren hasta 35 cm. Las zonas rayadas con el texto «no mesas» / «sin mesas» pasan solas a este tipo. Se ve suave (rojo punteado) y no sale en la hoja de montaje impresa. 1.11.0: 10 nov: 📄 Duplicar sala copia también las mesas y sillas sueltas del menú. 1.10.0: el asiento que cae ENCIMA DE UN SOFÁ cuenta solo como plaza «en el sofá» (comensal sin silla), aunque estuviera como sin asiento. 1.9.0: los asientos "sin asiento" ya NO se dibujan (solo con su mesa elegida, para recuperarlos); 🗑 Quitar asiento / Supr; IMÁN DE SILLAS: al soltar una silla/butaca (o silla suelta) cerca de un hueco libre de una mesa se coloca en él centrada como las de serie (cabeceras incluidas) y pasa a esa mesa; al Unir, la mesa resultante ocupa el sitio de las dos. 1.8.0:// 10 nov: TIPO DE CADA ASIENTO (silla, butaca, en el sofá sin silla, sin asiento); contador de sillas/butacas en la sala y RESERVA según las que tenemos; las mesas se ALINEAN con las demás al moverlas (Alt = sin imán); ✂ Dividir y 🔗 Unir mesas; el sofá ya no marca en rojo las mesas pegadas a él. 1.7.0, 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
+    window.APP_VERSIONS.prepararMesas = '1.15.0'; // 22 nov (4): al repartir el espacio de una fila, las COLUMNAS cercanas (a ≤ 1,5 m por arriba o por abajo) quedan en el hueco ENTRE dos mesas, no en la línea de una mesa (si no hay manera, como antes); el reparto usa también el sitio que queda a la izquierda. 1.14.0: 22 nov (3): tras repartir, las mesas que quedan casi a la misma altura se ALINEAN (aunque entren un poco, hasta 35 cm, en una zona 🚫 Sin mesas) y cada fila REPARTE EL ESPACIO SOBRANTE (huecos iguales en vez de todas apretadas a la izquierda). 1.13.0: 22 nov (2): 🪄 REPARTIR MEJOR: prueba varias formas (primero mesas en vertical y, si no caben, en horizontal; todas en horizontal; todas en vertical) con barrido de 10 cm y se queda con la que coloca más mesas; ESPACIO MÍNIMO a paredes y objetos (sofá, barra, columnas, plantas, puertas, zonas) «A paredes/objetos» (de serie 40 cm) además del Pasillo entre sillas de mesas vecinas (de serie 80 en menús nuevos). 1.12.0: 22 nov: elemento nuevo 🚫 SIN MESAS (zonas de paso): 🪄 Repartir no pone mesas dentro; solo si no caben de otra forma deja que una mesa o sus sillas entren hasta 35 cm. Las zonas rayadas con el texto «no mesas» / «sin mesas» pasan solas a este tipo. Se ve suave (rojo punteado) y no sale en la hoja de montaje impresa. 1.11.0: 10 nov: 📄 Duplicar sala copia también las mesas y sillas sueltas del menú. 1.10.0: el asiento que cae ENCIMA DE UN SOFÁ cuenta solo como plaza «en el sofá» (comensal sin silla), aunque estuviera como sin asiento. 1.9.0: los asientos "sin asiento" ya NO se dibujan (solo con su mesa elegida, para recuperarlos); 🗑 Quitar asiento / Supr; IMÁN DE SILLAS: al soltar una silla/butaca (o silla suelta) cerca de un hueco libre de una mesa se coloca en él centrada como las de serie (cabeceras incluidas) y pasa a esa mesa; al Unir, la mesa resultante ocupa el sitio de las dos. 1.8.0:// 10 nov: TIPO DE CADA ASIENTO (silla, butaca, en el sofá sin silla, sin asiento); contador de sillas/butacas en la sala y RESERVA según las que tenemos; las mesas se ALINEAN con las demás al moverlas (Alt = sin imán); ✂ Dividir y 🔗 Unir mesas; el sofá ya no marca en rojo las mesas pegadas a él. 1.7.0, 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
 
     var ARCH = 'salas.json', LS = 'pm-salas-local';
     var SILLA = 45, HUECO = 4;                       // cm: fondo de la silla y separación con la mesa
@@ -338,7 +338,6 @@
             if (usadas.indexOf(m) >= 0) return;
             var fila = ms.filter(function (o) { return usadas.indexOf(o) < 0 && !!o.rot === !!m.rot && Math.abs(o.y - m.y) <= 80; });
             fila.forEach(function (o) { usadas.push(o); });
-            if (fila.length < 2) return;
             fila.sort(function (a, b) { return a.x - b.x; });
             // 1) alinear
             var ys = fila.map(function (o) { return o.y; }).sort(function (a, b) { return a - b; }), media = Math.round(ys.reduce(function (a, b) { return a + b; }, 0) / ys.length / 10) * 10;
@@ -350,14 +349,49 @@
             // 2) repartir el sobrante (las que no entraban en 🚫 no deben entrar ahora; las que entraban, como mucho 35 cm)
             var tolDe = fila.map(function (o) { return dentro(o) ? TOL_SIN_MESAS : 0; });
             var tol = function (o) { return tolDe[fila.indexOf(o)]; };
-            var max = 0;
-            for (var d = 10; d < s.w; d += 10) { if (!prueba(fila, function (o) { o.x += 10; }, tol)) break; max = d; }
-            fila.forEach(function (o) { o.x -= max; });
-            if (max < 20) return;
-            var n = fila.length, x0 = fila.map(function (o) { return o.x; });
-            var paso = function (k) { return Math.round(max * (2 * k + 1) / (2 * n) / 10) * 10; };
-            if (!prueba(fila, function (o, i) { o.x = x0[i] + paso(i); }, tol))
-                prueba(fila, function (o, i) { o.x = x0[i] + Math.round(max / 2 / 10) * 10; }, tol);
+            var hasta = function (paso, tf) { var t = 0; for (var d = 10; d < s.w; d += 10) { if (!prueba(fila, function (o) { o.x += paso; }, tf)) break; t = d; } fila.forEach(function (o) { o.x -= paso * t / 10; }); return t; };
+            // para dejar las columnas entre mesas se acepta entrar hasta 35 cm en 🚫 Sin mesas (el usuario lo prefiere así)
+            var tolCol = function () { return TOL_SIN_MESAS; };
+            var maxR = hasta(10, tol), maxL = hasta(-10, tolCol), maxRc = hasta(10, tolCol);
+            var hs = fila.map(function (o) { return huella(o); }), n = fila.length;
+            var A = hs[0].x - maxL, B = hs[n - 1].x + hs[n - 1].w + maxRc;
+            var y0 = Math.min.apply(null, hs.map(function (h) { return h.y; })), y1 = Math.max.apply(null, hs.map(function (h) { return h.y + h.h; }));
+            // 1.15.0: columnas cerca de la fila (≤ 150 cm por arriba o por abajo) = franja que conviene dejar entre dos mesas
+            var franjas = s.el.filter(function (e) { return e.t === 'columna' && e.y < y1 + 150 && e.y + e.h > y0 - 150 && e.x + e.w > A && e.x < B; })
+                .map(function (e) { return [Math.max(A, e.x - 30), Math.min(B, e.x + e.w + 30)]; }).sort(function (p, q) { return p[0] - q[0]; });
+            var tramos = [], ini = A;
+            franjas.forEach(function (f) { if (f[0] > ini) tramos.push([ini, f[0]]); ini = Math.max(ini, f[1]); });
+            if (B > ini) tramos.push([ini, B]);
+            // repartos posibles: cuántas mesas (seguidas) van en cada tramo; en cada tramo, huecos iguales (mínimo el pasillo)
+            var opciones = [];
+            (function rec(t, i, acc) {
+                if (t === tramos.length - 1) { opciones.push(acc.concat([n - i])); return; }
+                for (var k = 0; k <= n - i; k++) rec(t + 1, i + k, acc.concat([k]));
+            })(0, 0, []);
+            var planes = [];
+            opciones.forEach(function (cuantas) {
+                var xs = [], i = 0, peor = Infinity, ok = true;
+                cuantas.forEach(function (k, t) {
+                    if (!ok || !k) return;
+                    var ws = hs.slice(i, i + k), libre = tramos[t][1] - tramos[t][0] - ws.reduce(function (a, h) { return a + h.w; }, 0);
+                    if (libre < (k - 1) * pas) { ok = false; return; }
+                    var hueco = libre / k, borde = hueco / 2;
+                    if (hueco < pas) { hueco = pas; borde = (libre - (k - 1) * pas) / 2; }
+                    peor = Math.min(peor, k > 1 ? hueco : libre);
+                    var x = tramos[t][0] + borde;
+                    ws.forEach(function (h) { xs.push(Math.round(x)); x += h.w + hueco; });
+                    i += k;
+                });
+                if (ok) planes.push({ xs: xs, nota: peor });
+            });
+            planes.sort(function (p, q) { return q.nota - p.nota; });
+            // sin columnas: solo vale si no entra más en 🚫 (tol); con columnas: hasta 35 cm (tolCol)
+            var puesto = planes.some(function (pl) { return prueba(fila, function (o, j) { o.x += pl.xs[j] - hs[j].x; }, franjas.length ? tolCol : tol); });
+            if (!puesto && maxR >= 20) {   // como 1.14.0: huecos iguales hacia la derecha, o centrar
+                var x0 = fila.map(function (o) { return o.x; });
+                var paso = function (k) { return Math.round(maxR * (2 * k + 1) / (2 * n) / 10) * 10; };
+                if (!prueba(fila, function (o, j) { o.x = x0[j] + paso(j); }, tol)) prueba(fila, function (o, j) { o.x = x0[j] + Math.round(maxR / 2 / 10) * 10; }, tol);
+            }
         });
     }
     function sepObj(c) { var v = num(c.sepObj); return v >= 0 && c.sepObj !== '' && c.sepObj != null ? v : 40; }
