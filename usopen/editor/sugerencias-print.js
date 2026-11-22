@@ -4,7 +4,7 @@
     // MODIFICADO: Mapa de configuración unificado usando Abstract Keys estrictas
     const SUGERENCIAS_CONFIG = {
         restaurante001: {
-            versionStr: 'v3.4.0-Abstract-Keys', // 3.4.0 (22 nov): ✕ y ➕ ya NO guardan al momento (cada uno creaba una posición en el historial): quedan pendientes en una barra sobre la hoja con «✔ Aplicar y guardar en la web» (UN guardado = UNA posición guardada) y «↶ Deshacer»; aviso al salir con cambios pendientes. 3.3.2 (21 nov): ventana del ➕ con los platos en UNA columna. 3.3.1 (21 nov): ventana del ➕ a todo el ancho (platos en columnas) y aviso grande propio al quitar con ✕. 3.3.0 (21 nov): en la hoja, ✕ a la izquierda de cada plato (lo quita de la lista: se desactiva, no se borra) y ➕ en cada sección (elegir entre los platos ya creados de esa sección); se guarda solo. 3.2.0 (20 nov): ◀ fecha ▶ del historial de Sugerencias (sug-historial.js). 3.1.0 (4 nov): plantilla neutra (window.MARCA)
+            versionStr: 'v3.5.0-Abstract-Keys', // 3.5.0 (22 nov): ✕ y ➕ también en las hojas GUARDADAS (◀ ▶): cambian esa hoja (sug-historial 1.3.0 la guarda o la aplica); el ➕ ofrece los platos de la carta de hoy que no están en ella. 3.4.0 (22 nov): ✕ y ➕ ya NO guardan al momento (cada uno creaba una posición en el historial): quedan pendientes en una barra sobre la hoja con «✔ Aplicar y guardar en la web» (UN guardado = UNA posición guardada) y «↶ Deshacer»; aviso al salir con cambios pendientes. 3.3.2 (21 nov): ventana del ➕ con los platos en UNA columna. 3.3.1 (21 nov): ventana del ➕ a todo el ancho (platos en columnas) y aviso grande propio al quitar con ✕. 3.3.0 (21 nov): en la hoja, ✕ a la izquierda de cada plato (lo quita de la lista: se desactiva, no se borra) y ➕ en cada sección (elegir entre los platos ya creados de esa sección); se guarda solo. 3.2.0 (20 nov): ◀ fecha ▶ del historial de Sugerencias (sug-historial.js). 3.1.0 (4 nov): plantilla neutra (window.MARCA)
             versionKey: 'sugerencias_restaurante001',
             containerId: 'sugerencias-contenido',
             logoSrc: LOGO_RESTAURANTE001,
@@ -23,7 +23,7 @@
             vinoImagenDefault: VINO_IMAGEN_DEFAULT_RESTAURANTE001,
                     },
         restaurante002: {
-            versionStr: 'v3.4.0-Abstract-Keys', // 3.4.0 (22 nov): ✕/➕ pendientes hasta «Aplicar y guardar». 3.3.2 (21 nov): ➕ en una columna. 3.3.1 (21 nov): ventana del ➕ y aviso de ✕ grandes. 3.3.0 (21 nov): ✕ y ➕ en la hoja. 3.2.0 (20 nov): historial de Sugerencias
+            versionStr: 'v3.5.0-Abstract-Keys', // 3.5.0 (22 nov): ✕/➕ también en hojas guardadas. 3.4.0 (22 nov): ✕/➕ pendientes hasta «Aplicar y guardar». 3.3.2 (21 nov): ➕ en una columna. 3.3.1 (21 nov): ventana del ➕ y aviso de ✕ grandes. 3.3.0 (21 nov): ✕ y ➕ en la hoja. 3.2.0 (20 nov): historial de Sugerencias
             versionKey: 'sugerencias_restaurante002',
             containerId: 'sugerencias-contenido-usopen',
             logoSrc: LOGO_RESTAURANTE002,
@@ -371,12 +371,19 @@
         caja.querySelectorAll('.sp-no, .sp-x').forEach(b => b.onclick = cerrar);
         return { caja, cerrar };
     }
+    const enGuardadaSug = (modo) => !!(window.SugHistorial && window.SugHistorial.enGuardada && window.SugHistorial.enGuardada(modo));
     window.sugQuitar = function(modo, id) {
         id = parseInt(id, 10);
-        const p = (window.datosLocales || []).find(x => x && parseInt(x.id, 10) === id);
+        const guardada = enGuardadaSug(modo);
+        const p = ((guardada ? window.SugHistorial.fuente(modo) : window.datosLocales) || []).find(x => x && parseInt(x.id, 10) === id);
         if (!p) return;
         let si = false;
-        const v = abrirVentana(`<div class="sp-cab">✕ ¿Quitar este plato de la hoja de Sugerencias?<button type="button" class="sp-x" title="Cerrar (Esc)">×</button></div>
+        const v = guardada ? abrirVentana(`<div class="sp-cab">✕ ¿Quitar este plato de esta hoja GUARDADA?<button type="button" class="sp-x" title="Cerrar (Esc)">×</button></div>
+            <div class="sp-cuerpo"><div class="sp-plato">${tarjetaPlato(p)}</div>
+            <ul><li>El plato <b>NO se borra</b> ni cambia en la carta de hoy.</li>
+            <li>Solo sale de esta hoja guardada. No se guarda hasta que pulses <b>💾 Guardar cambios en esta guardada</b> o <b>✔ Aplicar esta configuración…</b> (barra de arriba).</li></ul></div>
+            <div class="sp-pie"><button type="button" class="sp-no">Cancelar</button><button type="button" class="sp-quitar">Sí, quitar de esta hoja</button></div>`, 'sp-conf',
+            () => { if (si) window.SugHistorial.quitar(id); }) : abrirVentana(`<div class="sp-cab">✕ ¿Quitar este plato de la hoja de Sugerencias?<button type="button" class="sp-x" title="Cerrar (Esc)">×</button></div>
             <div class="sp-cuerpo"><div class="sp-plato">${tarjetaPlato(p)}</div>
             <ul><li>El plato <b>NO se borra</b>: queda <b>desactivado</b> en la carta.</li>
             <li>Tampoco sale en la pestaña <b>Sugerencias de la web</b>.</li>
@@ -399,11 +406,11 @@
             return `<label class="sp-pl" data-busca="${escSug(busca)}"><input type="checkbox" value="${id}">${tarjetaPlato(p, p.activa && excl.has(id) ? '<span class="sp-tag">quitado solo de esta impresión</span>' : '')}</label>`;
         }).join('');
         let ids = null;
-        const v = abrirVentana(`<div class="sp-cab">➕ Añadir a «${escSug(titulo)}»<small>Platos ya creados de esta sección que no están en la hoja (${s.cand.length}). Para uno nuevo: ➕ Nuevo plato en el Editor.</small><button type="button" class="sp-x" title="Cerrar (Esc)">×</button></div>
+        const v = abrirVentana(`<div class="sp-cab">➕ Añadir a «${escSug(titulo)}»<small>${enGuardadaSug(modo) ? 'Hoja guardada: platos de la carta de hoy de esta sección que no están en ella' : 'Platos ya creados de esta sección que no están en la hoja'} (${s.cand.length}). Para uno nuevo: ➕ Nuevo plato en el Editor.</small><button type="button" class="sp-x" title="Cerrar (Esc)">×</button></div>
             ${s.cand.length > 6 ? '<input type="search" placeholder="Buscar por nombre o ID…">' : ''}
             <div class="sp-lista">${filas || '<div class="sp-vacio">No hay más platos creados en esta sección: todos están ya en la hoja.</div>'}</div>
             <div class="sp-pie"><span class="sp-cuenta"></span><button type="button" class="sp-no">Cancelar</button>${filas ? '<button type="button" class="sp-si" disabled>Añadir a la hoja</button>' : ''}</div>`, '',
-            () => { if (ids && ids.length) cambiarSugerencias(modo, ids, []); });
+            () => { if (ids && ids.length) { if (enGuardadaSug(modo)) window.SugHistorial.anadir(ids); else cambiarSugerencias(modo, ids, []); } });
         const caja = v.caja, si = caja.querySelector('.sp-si'), cuenta = caja.querySelector('.sp-cuenta');
         const marcados = () => [...caja.querySelectorAll('.sp-lista input:checked')].map(i => parseInt(i.value, 10));
         const contar = () => { if (!si) return; const n = marcados().length; si.disabled = !n; si.textContent = n > 1 ? 'Añadir ' + n + ' a la hoja' : 'Añadir a la hoja'; cuenta.textContent = n ? n + ' marcado' + (n > 1 ? 's' : '') : ''; };
@@ -1104,9 +1111,14 @@
             return secciones.find(x => x.titulo === fx.titulo) || fx;
         };
         platos.forEach(p => destino(parseInt(p.id, 10)).lista.push(p));
-        // 21 nov (3.3.0): ✕ / ➕ solo en el editor dentro de la web, con la hoja de AHORA (no en un momento del historial).
-        const editar = !!(window.EDITOR_SITIO && !(fuente && fuente.__historial) && typeof window.getWebAppUrl === 'function');
-        if (editar) fuente.forEach(p => { if (p && enSugerencias(p.id) && (!p.activa || excluidos.has(parseInt(p.id, 10)))) destino(parseInt(p.id, 10)).cand.push(p); });
+        // ✕ / ➕ en el editor dentro de la web: en la hoja de AHORA (3.3.0) y, desde 3.5.0, también en las GUARDADAS (◀ ▶).
+        const editar = !!(window.EDITOR_SITIO && typeof window.getWebAppUrl === 'function');
+        const enGuardada = !!(fuente && fuente.__historial);
+        if (editar && !enGuardada) fuente.forEach(p => { if (p && enSugerencias(p.id) && (!p.activa || excluidos.has(parseInt(p.id, 10)))) destino(parseInt(p.id, 10)).cand.push(p); });
+        if (editar && enGuardada) {   // candidatos = platos de la carta de HOY (activos o no) que no están en esa hoja guardada
+            const enHoja = new Set(fuente.map(p => parseInt(p.id, 10)));
+            (window.datosLocales || []).forEach(p => { if (p && enSugerencias(p.id) && !enHoja.has(parseInt(p.id, 10))) destino(parseInt(p.id, 10)).cand.push(p); });
+        }
         secciones = fijas.filter(f => (f.lista.length || (editar && f.cand.length)) && !secciones.includes(f)).concat(secciones);
         secciones.forEach((s, i) => { s.idx = i; s.cand.sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10)); });
         vistaEdicion[modoSeguro] = editar ? secciones : null;
@@ -1270,7 +1282,7 @@
                 ${listaQuitadosHtml}
             </div>`;
 
-        contenedor.innerHTML = (editar ? barraPendientesHtml(modoSeguro) : '') + html + controlesHtml;
+        contenedor.innerHTML = (editar && !enGuardada ? barraPendientesHtml(modoSeguro) : '') + html + controlesHtml;
         posicionarDebugA4(contenedor);
 
         // NUEVO: ajusta la vista previa a una página A4 nada más renderizarla,
