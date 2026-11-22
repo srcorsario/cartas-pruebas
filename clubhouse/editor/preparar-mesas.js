@@ -15,7 +15,7 @@
 (function () {
     'use strict';
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.prepararMesas = '1.16.0'; // 22 nov (5): AURA de 30 cm alrededor de cada silla ocupada (círculo suave en el plano, rojo si choca con otra mesa, sus sillas, paredes u obstáculos): al repartir no puede chocar; y las FILAS se arriman a la pared u objeto más cercano dejando el «Paso por detrás» (de serie 50 cm) y el resto del sitio queda como pasillo del otro lado. 1.15.0: 22 nov (4): al repartir el espacio de una fila, las COLUMNAS cercanas (a ≤ 1,5 m por arriba o por abajo) quedan en el hueco ENTRE dos mesas, no en la línea de una mesa (si no hay manera, como antes); el reparto usa también el sitio que queda a la izquierda. 1.14.0: 22 nov (3): tras repartir, las mesas que quedan casi a la misma altura se ALINEAN (aunque entren un poco, hasta 35 cm, en una zona 🚫 Sin mesas) y cada fila REPARTE EL ESPACIO SOBRANTE (huecos iguales en vez de todas apretadas a la izquierda). 1.13.0: 22 nov (2): 🪄 REPARTIR MEJOR: prueba varias formas (primero mesas en vertical y, si no caben, en horizontal; todas en horizontal; todas en vertical) con barrido de 10 cm y se queda con la que coloca más mesas; ESPACIO MÍNIMO a paredes y objetos (sofá, barra, columnas, plantas, puertas, zonas) «A paredes/objetos» (de serie 40 cm) además del Pasillo entre sillas de mesas vecinas (de serie 80 en menús nuevos). 1.12.0: 22 nov: elemento nuevo 🚫 SIN MESAS (zonas de paso): 🪄 Repartir no pone mesas dentro; solo si no caben de otra forma deja que una mesa o sus sillas entren hasta 35 cm. Las zonas rayadas con el texto «no mesas» / «sin mesas» pasan solas a este tipo. Se ve suave (rojo punteado) y no sale en la hoja de montaje impresa. 1.11.0: 10 nov: 📄 Duplicar sala copia también las mesas y sillas sueltas del menú. 1.10.0: el asiento que cae ENCIMA DE UN SOFÁ cuenta solo como plaza «en el sofá» (comensal sin silla), aunque estuviera como sin asiento. 1.9.0: los asientos "sin asiento" ya NO se dibujan (solo con su mesa elegida, para recuperarlos); 🗑 Quitar asiento / Supr; IMÁN DE SILLAS: al soltar una silla/butaca (o silla suelta) cerca de un hueco libre de una mesa se coloca en él centrada como las de serie (cabeceras incluidas) y pasa a esa mesa; al Unir, la mesa resultante ocupa el sitio de las dos. 1.8.0:// 10 nov: TIPO DE CADA ASIENTO (silla, butaca, en el sofá sin silla, sin asiento); contador de sillas/butacas en la sala y RESERVA según las que tenemos; las mesas se ALINEAN con las demás al moverlas (Alt = sin imán); ✂ Dividir y 🔗 Unir mesas; el sofá ya no marca en rojo las mesas pegadas a él. 1.7.0, 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
+    window.APP_VERSIONS.prepararMesas = '1.17.0'; // 22 nov (6): 📏 MEDIR en el plano, de punto a punto (botón 📏 Medir o tecla M): pulsar y arrastrar, o un clic en cada punto; se pega a esquinas, mitades y bordes de paredes, objetos, mesas y sillas (Alt = sin imán), las casi rectas se enderezan (Mayús = siempre recta); cm totales y, en diagonal, ↔ y ↕; varias medidas a la vez (Supr quita la última, ✕ Quitar medidas). Medidas de serie para menús nuevos: Pasillo 70, A paredes/objetos 20, Paso por detrás 10 cm (editables). 1.16.0: 22 nov (5): AURA de 30 cm alrededor de cada silla ocupada (círculo suave en el plano, rojo si choca con otra mesa, sus sillas, paredes u obstáculos): al repartir no puede chocar; y las FILAS se arriman a la pared u objeto más cercano dejando el «Paso por detrás» (de serie 50 cm) y el resto del sitio queda como pasillo del otro lado. 1.15.0: 22 nov (4): al repartir el espacio de una fila, las COLUMNAS cercanas (a ≤ 1,5 m por arriba o por abajo) quedan en el hueco ENTRE dos mesas, no en la línea de una mesa (si no hay manera, como antes); el reparto usa también el sitio que queda a la izquierda. 1.14.0: 22 nov (3): tras repartir, las mesas que quedan casi a la misma altura se ALINEAN (aunque entren un poco, hasta 35 cm, en una zona 🚫 Sin mesas) y cada fila REPARTE EL ESPACIO SOBRANTE (huecos iguales en vez de todas apretadas a la izquierda). 1.13.0: 22 nov (2): 🪄 REPARTIR MEJOR: prueba varias formas (primero mesas en vertical y, si no caben, en horizontal; todas en horizontal; todas en vertical) con barrido de 10 cm y se queda con la que coloca más mesas; ESPACIO MÍNIMO a paredes y objetos (sofá, barra, columnas, plantas, puertas, zonas) «A paredes/objetos» (de serie 40 cm) además del Pasillo entre sillas de mesas vecinas (de serie 80 en menús nuevos). 1.12.0: 22 nov: elemento nuevo 🚫 SIN MESAS (zonas de paso): 🪄 Repartir no pone mesas dentro; solo si no caben de otra forma deja que una mesa o sus sillas entren hasta 35 cm. Las zonas rayadas con el texto «no mesas» / «sin mesas» pasan solas a este tipo. Se ve suave (rojo punteado) y no sale en la hoja de montaje impresa. 1.11.0: 10 nov: 📄 Duplicar sala copia también las mesas y sillas sueltas del menú. 1.10.0: el asiento que cae ENCIMA DE UN SOFÁ cuenta solo como plaza «en el sofá» (comensal sin silla), aunque estuviera como sin asiento. 1.9.0: los asientos "sin asiento" ya NO se dibujan (solo con su mesa elegida, para recuperarlos); 🗑 Quitar asiento / Supr; IMÁN DE SILLAS: al soltar una silla/butaca (o silla suelta) cerca de un hueco libre de una mesa se coloca en él centrada como las de serie (cabeceras incluidas) y pasa a esa mesa; al Unir, la mesa resultante ocupa el sitio de las dos. 1.8.0:// 10 nov: TIPO DE CADA ASIENTO (silla, butaca, en el sofá sin silla, sin asiento); contador de sillas/butacas en la sala y RESERVA según las que tenemos; las mesas se ALINEAN con las demás al moverlas (Alt = sin imán); ✂ Dividir y 🔗 Unir mesas; el sofá ya no marca en rojo las mesas pegadas a él. 1.7.0, 10 nov: mesa SIMPLE de 2 plazas (una sola mesa cuadrada): opción «Mesas de 2 pax», − / + de mesa en mesa (2 plazas) y en la lista 1-2 comensales = mesa simple. 1.6.0, 10 nov: al quitar una mesa, sus sillas movidas y ocupadas se quedan como SILLAS SUELTAS (también ➕ Silla suelta); color de cada mesa y asiento silla/butaca; DISPOSICIÓN HABITUAL de cada sala (📌 guardar las mesas colocadas en la plantilla y 📥 colocarlas en cualquier menú). 1.5.0, 10 nov: LISTA DE MESAS a mano: se pone el nº de mesas (p. ej. 8) y los comensales de cada una; cada mesa toma sola su tamaño (múltiplo de 4, o cabeceras si está marcado) y se coloca en la sala. 1.4.0, 10 nov: mesas CUADRADAS individuales (selector 60/65/70/80 cm, de serie 70; dos juntas = 4 plazas; el material cuenta mesas sueltas) y SILLAS movibles una a una (arrastrar o flechas: sofá, otra cabecera…; Supr = vuelve a su sitio). 1.3.0, 10 nov: ↶ Deshacer / ↷ Rehacer (botones y Ctrl+Z / Ctrl+Y) de todo lo hecho en la pestaña: sala, objetos, mesas, reparto y opciones de material (hasta 100 pasos por menú abierto). 1.2.0, 10 nov: medidas del objeto elegido ENCIMA del plano y en cm exactos (ancho, alto y posición desde la pared izquierda/superior), y rotuladas sobre el objeto. 1.1.0, 10 nov: flechas del teclado mueven el objeto o la mesa elegidos (10 cm; con Mayús 1 cm) y Supr lo quita; elementos nuevos Planta y Sofá; botón 🪑 Mesa también mientras se edita la sala. 1.0.0, 10 nov: Menú Especial: pestaña 🪑 Preparar mesas (plantillas de sala dibujables en salas.json, mesas rectangulares por módulos de 4 plazas con cabeceras opcionales, reparto automático, lista de cubiertos/platos/copas y hoja de montaje imprimible)
 
     var ARCH = 'salas.json', LS = 'pm-salas-local';
     var SILLA = 45, HUECO = 4;                       // cm: fondo de la silla y separación con la mesa
@@ -54,7 +54,7 @@
 
     var datos = null;          // { mesa: {largo, ancho}, salas: [...] }
     var cargando = null, sucias = false, guardando = false;
-    var ui = { modo: 'mesas', sel: null, salaId: null };
+    var ui = { modo: 'mesas', sel: null, salaId: null, medir: false, medA: null, medidas: [] };   // 1.17.0: 📏 medir
     var CONT = null;
     var hist = [], rehecho = [], ultimo = null, histMenu = null, restaurando = false, guardado = '';   // deshacer / rehacer
 
@@ -107,7 +107,7 @@
     // ---------- Mesas del menú ----------
     function cfg(menu) {
         if (menu.mesas && menu.mesas.__propio) return menu.mesas;
-        var c = JSON.parse(JSON.stringify(Object.assign({ pax: '', tam: 8, cab: false, pasillo: 80, sepObj: 40, pasoDetras: 50, lista: [], sueltas: [], cub: {}, op: {} }, menu.mesas || {})));
+        var c = JSON.parse(JSON.stringify(Object.assign({ pax: '', tam: 8, cab: false, pasillo: 70, sepObj: 20, pasoDetras: 10, lista: [], sueltas: [], cub: {}, op: {} }, menu.mesas || {})));
         if (!Array.isArray(c.lista)) c.lista = [];
         if (!Array.isArray(c.sueltas)) c.sueltas = [];
         c.cub = c.cub || {}; c.op = c.op || {};
@@ -432,8 +432,8 @@
             }
         });
     }
-    function pasoDetras(c) { var v = num(c.pasoDetras); return v >= 0 && c.pasoDetras !== '' && c.pasoDetras != null ? v : 50; }
-    function sepObj(c) { var v = num(c.sepObj); return v >= 0 && c.sepObj !== '' && c.sepObj != null ? v : 40; }
+    function pasoDetras(c) { var v = num(c.pasoDetras); return v >= 0 && c.pasoDetras !== '' && c.pasoDetras != null ? v : 10; }
+    function sepObj(c) { var v = num(c.sepObj); return v >= 0 && c.sepObj !== '' && c.sepObj != null ? v : 20; }
 
     // ---------- Material ----------
     function tipoAuto(menu, k) {
@@ -547,7 +547,9 @@
             t += '<g data-suelta="' + i + '" transform="translate(' + x.x + ',' + x.y + ')" style="cursor:move"><rect width="' + (b ? 56 : 46) + '" height="' + (b ? 56 : 46) + '" rx="' + (b ? 4 : 10) + '" fill="' + (b ? ASIENTO.butaca : ASIENTO.silla) + '" stroke="' + (sel ? '#2563eb' : '#0f172a') + '" stroke-width="' + (sel ? 8 : 3) + '"/></g>';
         });
         if (!imprimir) t += '<g id="pm-guias" pointer-events="none"></g>';
-        return '<svg id="pm-svg" xmlns="http://www.w3.org/2000/svg" viewBox="-40 -60 ' + (s.w + 80) + ' ' + (s.h + 100) + '" style="width:100%;max-height:' + (imprimir ? '150mm' : '72vh') + ';background:#f1f5f9;border-radius:8px;touch-action:none;user-select:none;' + (editSala ? 'outline:3px dashed #2563eb;' : '') + '">' + t + '</svg>';
+        if (!imprimir) t += '<g pointer-events="none">' + ui.medidas.filter(function (x) { return x.s === s.id; }).map(function (x) { return svgMedida(x.a, x.b, false); }).join('') + '</g><g id="pm-medir" pointer-events="none"></g>' +
+            (ui.medir ? '<style>#pm-svg.pm-midiendo,#pm-svg.pm-midiendo *{cursor:crosshair!important}</style>' : '');
+        return '<svg id="pm-svg"' + (ui.medir && !imprimir ? ' class="pm-midiendo"' : '') + ' xmlns="http://www.w3.org/2000/svg" viewBox="-40 -60 ' + (s.w + 80) + ' ' + (s.h + 100) + '" style="width:100%;max-height:' + (imprimir ? '150mm' : '72vh') + ';background:#f1f5f9;border-radius:8px;touch-action:none;user-select:none;' + (editSala ? 'outline:3px dashed #2563eb;' : '') + '">' + t + '</svg>';
     }
 
     // ---------- Panel ----------
@@ -611,8 +613,8 @@
             '<span>Mesas de <select data-f="tam" style="padding:4px;border:1px solid #cbd5e1;border-radius:5px">' + [2, 4, 8, 12, 16, 20, 24, 0].map(function (t) { return '<option value="' + t + '"' + (+c.tam === t ? ' selected' : '') + '>' + (t ? t + ' pax' : 'una sola mesa') + '</option>'; }).join('') + '</select></span>' +
             '<label title="Excepcional: si sobran 1 o 2 comensales se sientan en las cabeceras en vez de abrir otra mesa de 4"><input type="checkbox" data-f="cab"' + (c.cab ? ' checked' : '') + '> Usar cabeceras para 1-2 sueltos</label>' +
             '<span title="Separación mínima entre sillas de mesas vecinas al colocar">Pasillo ' + I('pasillo', c.pasillo, 46) + ' cm</span>' +
-            '<span title="Al colocar: espacio mínimo de mesas y sillas a paredes, sofá, barra, columnas, plantas, puertas y zonas">A paredes/objetos ' + I('sepObj', c.sepObj == null ? 40 : c.sepObj, 46) + ' cm</span>' +
-            '<span title="Al repartir, cada fila se arrima a la pared (u objeto largo) que tiene más cerca dejando este paso detrás de las sillas; el resto del sitio queda como pasillo del otro lado">Paso por detrás ' + I('pasoDetras', c.pasoDetras == null ? 50 : c.pasoDetras, 46) + ' cm</span>' +
+            '<span title="Al colocar: espacio mínimo de mesas y sillas a paredes, sofá, barra, columnas, plantas, puertas y zonas">A paredes/objetos ' + I('sepObj', c.sepObj == null ? 20 : c.sepObj, 46) + ' cm</span>' +
+            '<span title="Al repartir, cada fila se arrima a la pared (u objeto largo) que tiene más cerca dejando este paso detrás de las sillas; el resto del sitio queda como pasillo del otro lado">Paso por detrás ' + I('pasoDetras', c.pasoDetras == null ? 10 : c.pasoDetras, 46) + ' cm</span>' +
             '<button type="button" class="btn btn-primary" data-a="repartir" style="font-size:.82rem;padding:6px 12px">🪄 Repartir y colocar' + (s ? ' en ' + esc(s.nombre) : '') + '</button>' +
             '</div>' +
             '<div class="me-fila" style="gap:8px;font-size:.85rem;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9"><b title="Reparto a mano: pon cuántas mesas quieres y los comensales de cada una">📋 Lista de mesas</b>' +
@@ -624,7 +626,9 @@
         // 2. Sala
         h += '<div class="me-card"><div class="me-fila" style="gap:8px;margin-bottom:8px;font-size:.85rem">' +
             '<button type="button" class="btn btn-secondary" data-a="deshacer" style="font-size:.78rem;padding:5px 10px"' + (hist.length ? '' : ' disabled') + ' title="Deshacer el último cambio (Ctrl+Z)">↶ Deshacer' + (hist.length ? ' (' + hist.length + ')' : '') + '</button>' +
-            '<button type="button" class="btn btn-secondary" data-a="rehacer" style="font-size:.78rem;padding:5px 10px"' + (rehecho.length ? '' : ' disabled') + ' title="Rehacer (Ctrl+Y)">↷ Rehacer</button>';
+            '<button type="button" class="btn btn-secondary" data-a="rehacer" style="font-size:.78rem;padding:5px 10px"' + (rehecho.length ? '' : ' disabled') + ' title="Rehacer (Ctrl+Y)">↷ Rehacer</button>' +
+            (s ? B('medir', ui.medir ? '📏 Midiendo… (Esc = salir)' : '📏 Medir', ui.medir ? 'background:#db2777;color:#fff' : '', 'Medir distancias en el plano de punto a punto (tecla M)') +
+                (ui.medidas.some(function (x) { return x.s === s.id; }) ? B('quitarMedidas', '✕ Quitar medidas') : '') : '');
         if (!datos.salas.length) h += '<span style="color:#64748b">Todavía no hay ninguna sala dibujada.</span>' + B('nueva', '➕ Nueva sala');
         else {
             h += '<b>Sala</b> <select data-f="sala" style="padding:5px;border:1px solid #cbd5e1;border-radius:5px">' + datos.salas.map(function (x) { return '<option value="' + x.id + '"' + (x === s ? ' selected' : '') + '>' + esc(x.nombre) + '</option>'; }).join('') + '</select>' +
@@ -633,6 +637,7 @@
                 (sucias || guardando ? '<button type="button" class="btn btn-success" data-a="guardar" style="font-size:.78rem;padding:5px 10px"' + (guardando ? ' disabled' : '') + '>' + (guardando ? '⏳ Guardando…' : '💾 Guardar plantilla') + '</button><span style="color:#b45309;font-size:.78rem">● plantilla sin guardar</span>' : '<span style="color:#16a34a;font-size:.78rem">✔ plantilla guardada</span>');
         }
         h += '</div>';
+        if (ui.medir && s) h += '<div style="font-size:.8rem;color:#9d174d;background:#fdf2f8;padding:6px 8px;border-radius:8px;margin-bottom:8px">📏 Pulsa en un punto y arrastra hasta el otro (o un clic en cada punto). Se pega a esquinas y bordes de paredes, objetos, mesas y sillas; <b>Alt</b> = sin imán · <b>Mayús</b> = recta · <b>Supr</b> = quitar la última · <b>Esc</b> = salir.</div>';
         if (enSala) {
             h += '<div class="me-fila" style="gap:12px;font-size:.82rem;margin-bottom:8px;background:#eff6ff;padding:8px;border-radius:8px">' +
                 '<span>Nombre ' + I('s.nombre', s.nombre, 130, '', 'txt') + '</span><span>Ancho ' + I('s.w', metros(s.w), 50) + ' m</span><span>Largo ' + I('s.h', metros(s.h), 50) + ' m</span>' +
@@ -697,11 +702,114 @@
         setTimeout(function () { v.focus(); v.print(); }, 350);
     }
 
+    // ---------- 📏 Medir (1.17.0) ----------
+    // Rectángulos a los que se pega la medida: paredes, objetos de la sala (no los textos), mesas, sillas y sillas sueltas.
+    function rectsMedir(menu, s) {
+        var r = [{ x: 0, y: 0, w: s.w, h: s.h }];
+        s.el.forEach(function (e) { if (e.t !== 'texto') r.push({ x: e.x, y: e.y, w: e.w, h: e.h }); });
+        mesasDe(menu, s).forEach(function (m) { r.push(cuerpo(m)); sillasFisicas(m).forEach(function (q) { r.push(q); }); });
+        sueltasDe(menu, s).forEach(function (x) { var l = x.as === 'butaca' ? 56 : 46; r.push({ x: x.x, y: x.y, w: l, h: l }); });
+        return r;
+    }
+    // Imán: primero esquinas y mitades de los lados (a ≤ R); si no, el borde más cercano (a ≤ R); si no, el punto tal cual.
+    function imanMedir(p, rs, R) {
+        var best = null, d;
+        rs.forEach(function (q) {
+            [[q.x, q.y], [q.x + q.w, q.y], [q.x, q.y + q.h], [q.x + q.w, q.y + q.h], [q.x + q.w / 2, q.y], [q.x + q.w / 2, q.y + q.h], [q.x, q.y + q.h / 2], [q.x + q.w, q.y + q.h / 2]].forEach(function (k) {
+                d = Math.hypot(k[0] - p.x, k[1] - p.y);
+                if (d <= R && (!best || d < best.d)) best = { x: k[0], y: k[1], d: d, tipo: 'punto' };
+            });
+        });
+        if (best) return best;
+        rs.forEach(function (q) {
+            [q.x, q.x + q.w].forEach(function (x) { var y = Math.max(q.y, Math.min(q.y + q.h, p.y)); d = Math.hypot(p.x - x, p.y - y); if (d <= R && (!best || d < best.d)) best = { x: x, y: y, d: d, tipo: 'borde' }; });
+            [q.y, q.y + q.h].forEach(function (y) { var x = Math.max(q.x, Math.min(q.x + q.w, p.x)); d = Math.hypot(p.x - x, p.y - y); if (d <= R && (!best || d < best.d)) best = { x: x, y: y, d: d, tipo: 'borde' }; });
+        });
+        return best || { x: p.x, y: p.y, d: 0, tipo: '' };
+    }
+    function redP(p) { return { x: Math.round(p.x), y: Math.round(p.y), tipo: p.tipo || '' }; }
+    // Segundo punto: con imán; si queda casi recta (≤ 5 %) o con Mayús, se endereza y el imán va solo al borde que cruza esa recta.
+    function puntoB(A, p, rs, R, sinIman, recto) {
+        var q = sinIman ? p : imanMedir(p, rs, R), dx = q.x - A.x, dy = q.y - A.y;
+        var casi = !sinIman && ((Math.abs(dx) >= 1 && Math.abs(dy) <= Math.abs(dx) * 0.05) || (Math.abs(dy) >= 1 && Math.abs(dx) <= Math.abs(dy) * 0.05));
+        if (!recto && !casi) return redP(q);
+        var hor = Math.abs(p.x - A.x) >= Math.abs(p.y - A.y), v = hor ? p.x : p.y, mejor = null;
+        if (!sinIman) rs.forEach(function (r) {
+            var dentro = hor ? A.y >= r.y - 0.5 && A.y <= r.y + r.h + 0.5 : A.x >= r.x - 0.5 && A.x <= r.x + r.w + 0.5;
+            if (dentro) (hor ? [r.x, r.x + r.w] : [r.y, r.y + r.h]).forEach(function (b) { var d = Math.abs(b - v); if (d <= R && (!mejor || d < mejor.d)) mejor = { v: b, d: d }; });
+        });
+        var w = Math.round(mejor ? mejor.v : v);
+        return hor ? { x: w, y: A.y, tipo: 'recta' } : { x: A.x, y: w, tipo: 'recta' };
+    }
+    function textoMedida(A, B) {
+        var dx = Math.abs(B.x - A.x), dy = Math.abs(B.y - A.y), d = Math.round(Math.hypot(dx, dy));
+        return d + ' cm' + (dx >= 1 && dy >= 1 ? ' (↔ ' + Math.round(dx) + ' · ↕ ' + Math.round(dy) + ')' : '');
+    }
+    function svgMedida(A, B, prov) {
+        var col = prov ? '#db2777' : '#9d174d', dx = B.x - A.x, dy = B.y - A.y, t = '';
+        if (Math.hypot(dx, dy) < 1) return '<circle cx="' + A.x + '" cy="' + A.y + '" r="8" fill="' + col + '"/>';
+        var vert = Math.abs(dy) > Math.abs(dx), mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+        if (dx && dy) t += '<path d="M' + A.x + ' ' + A.y + 'H' + B.x + 'V' + B.y + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-dasharray="6 6" opacity=".55"/>';
+        t += '<line x1="' + A.x + '" y1="' + A.y + '" x2="' + B.x + '" y2="' + B.y + '" stroke="' + col + '" stroke-width="4"' + (prov ? ' stroke-dasharray="14 8"' : '') + '/>';
+        t += '<circle cx="' + A.x + '" cy="' + A.y + '" r="7" fill="#fff" stroke="' + col + '" stroke-width="4"/><circle cx="' + B.x + '" cy="' + B.y + '" r="7" fill="#fff" stroke="' + col + '" stroke-width="4"/>';
+        t += '<text class="pm-medida" x="' + (vert ? mx + 14 : mx) + '" y="' + (vert ? my : my - 14) + '" text-anchor="' + (vert ? 'start' : 'middle') + '"' + (vert ? ' dominant-baseline="central"' : '') + ' font-size="28" font-weight="700" fill="' + col + '" stroke="#fff" stroke-width="8" stroke-linejoin="round" paint-order="stroke">' + textoMedida(A, B) + '</text>';
+        return t;
+    }
+    function radioMedir(svg) { var r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal; return 12 * (vb && r.width ? vb.width / r.width : 1); }   // 12 px de pantalla
+    var medMover = null, medArriba = null;
+    function quitarMover() {
+        if (medMover) window.removeEventListener('pointermove', medMover);
+        if (medArriba) { window.removeEventListener('pointerup', medArriba); window.removeEventListener('pointercancel', medArriba); }
+        medMover = medArriba = null;
+    }
+    function terminarMedida(A, B) {
+        var s = sala();
+        quitarMover(); ui.medA = null;
+        if (s && Math.hypot(B.x - A.x, B.y - A.y) >= 1) { ui.medidas.push({ s: s.id, a: { x: A.x, y: A.y }, b: { x: B.x, y: B.y } }); if (ui.medidas.length > 30) ui.medidas.shift(); }
+        pintar();
+    }
+    function medirPulsar(svg, e) {
+        var menu = CONT.__pm.menu, s = sala();
+        if (!s) return;
+        e.preventDefault();
+        var rs = rectsMedir(menu, s), p = punto(svg, e);
+        if (ui.medA) { terminarMedida(ui.medA, puntoB(ui.medA, p, rs, radioMedir(svg), e.altKey, e.shiftKey)); return; }   // 2º clic
+        ui.medA = redP(e.altKey ? p : imanMedir(p, rs, radioMedir(svg)));
+        var c0 = { x: e.clientX, y: e.clientY }, abajo = true, arrastre = false, ultimoB = null;
+        quitarMover();
+        medMover = function (ev) {
+            var sv = CONT && CONT.querySelector('#pm-svg');
+            if (!sv || !ui.medA) return;
+            if (abajo && Math.abs(ev.clientX - c0.x) + Math.abs(ev.clientY - c0.y) > 6) arrastre = true;
+            ultimoB = puntoB(ui.medA, punto(sv, ev), rs, radioMedir(sv), ev.altKey, ev.shiftKey);
+            var g = sv.querySelector('#pm-medir');
+            if (g) g.innerHTML = svgMedida(ui.medA, ultimoB, true);
+        };
+        medArriba = function (ev) {
+            abajo = false;
+            window.removeEventListener('pointerup', medArriba); window.removeEventListener('pointercancel', medArriba); medArriba = null;
+            if (arrastre && ui.medA) { var sv = CONT.querySelector('#pm-svg'); terminarMedida(ui.medA, sv ? puntoB(ui.medA, punto(sv, ev), rs, radioMedir(sv), ev.altKey, ev.shiftKey) : (ultimoB || ui.medA)); }
+            // sin arrastrar: la línea sigue al ratón hasta el 2º clic
+        };
+        window.addEventListener('pointermove', medMover); window.addEventListener('pointerup', medArriba); window.addEventListener('pointercancel', medArriba);
+        var g = svg.querySelector('#pm-medir');
+        if (g) g.innerHTML = svgMedida(ui.medA, ui.medA, true);
+    }
+    // Antes del 1er punto: marca dónde se pegaría
+    function medirSobrevolar(e) {
+        if (!ui.medir || ui.medA || !datos || !CONT) return;
+        var svg = e.target.closest && e.target.closest('#pm-svg'), s = sala();
+        if (!svg || !s) return;
+        var q = e.altKey ? punto(svg, e) : imanMedir(punto(svg, e), rectsMedir(CONT.__pm.menu, s), radioMedir(svg)), g = svg.querySelector('#pm-medir');
+        if (g) g.innerHTML = q.tipo ? '<circle cx="' + q.x + '" cy="' + q.y + '" r="9" fill="none" stroke="#db2777" stroke-width="4"/>' : '';
+    }
+
     // ---------- Eventos ----------
     function punto(svg, e) { var p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
     function alPulsar(e) {
         var svg = e.target.closest && e.target.closest('#pm-svg');
         if (!svg || !datos) return;
+        if (ui.medir) { medirPulsar(svg, e); return; }
         var menu = CONT.__pm.menu, c = cfg(menu), s = sala(), p0 = punto(svg, e), obj = null, asa = false, g;
         if (ui.modo === 'sala') {
             var a = e.target.closest('[data-asa]'); g = e.target.closest('[data-el]');
@@ -787,6 +895,8 @@
         var menu = CONT.__pm.menu, c = cfg(menu), s = sala(), a = b.dataset.a, m = ui.sel && c.lista[ui.sel.mesa], el = ui.sel && s && s.el[ui.sel.el];
         if (a === 'deshacer') { deshacer(); return; }
         if (a === 'rehacer') { rehacer(); return; }
+        if (a === 'medir') { ui.medir = !ui.medir; ui.medA = null; quitarMover(); pintar(); return; }
+        if (a === 'quitarMedidas') { ui.medidas = ui.medidas.filter(function (x) { return !s || x.s !== s.id; }); ui.medA = null; quitarMover(); pintar(); return; }
         if (a === 'repartir') {
             var hay = s && mesasDe(menu, s).length;
             (hay ? confirmar('Se quitan las ' + hay + ' mesa(s) de "' + s.nombre + '" y se colocan de nuevo. ¿Seguir?') : Promise.resolve(true)).then(function (ok) { if (ok) { repartirYColocar(menu); pintar(); } });
@@ -872,6 +982,18 @@
     function alTeclear(e) {
         if (e.key === 'Escape' && ui.unir != null) { ui.unir = null; pintar(); return; }
         var enCampo = /^(INPUT|SELECT|TEXTAREA)$/.test((e.target && e.target.tagName) || '') || (e.target && e.target.isContentEditable);
+        // 1.17.0: 📏 medir — M entra/sale; Esc cancela el punto empezado o sale; Supr quita la última medida (no borra nada de la sala)
+        var ppm = datos && CONT && CONT.querySelector('#pm-panel'), visible = ppm && ppm.offsetParent && ppm.querySelector('#pm-svg');
+        if (visible && !enCampo && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            if (/^m$/i.test(e.key)) { e.preventDefault(); ui.medir = !ui.medir; ui.medA = null; quitarMover(); pintar(); return; }
+            if (ui.medir && e.key === 'Escape') { e.preventDefault(); if (ui.medA) ui.medA = null; else ui.medir = false; quitarMover(); pintar(); return; }
+            if (ui.medir && (e.key === 'Delete' || e.key === 'Backspace')) {
+                e.preventDefault();
+                var sm = sala();
+                for (var q = ui.medidas.length - 1; q >= 0; q--) if (sm && ui.medidas[q].s === sm.id) { ui.medidas.splice(q, 1); break; }
+                pintar(); return;
+            }
+        }
         if ((e.ctrlKey || e.metaKey) && !e.altKey && !enCampo && datos && CONT && /^[zy]$/i.test(e.key)) {
             var pp = CONT.querySelector('#pm-panel');
             if (!pp || !pp.offsetParent) return;
@@ -925,10 +1047,10 @@
         else if (f === 'pax') c.pax = v > 0 ? Math.round(v) : '';
         else if (f === 'tam') c.tam = +x.value;
         else if (f === 'cab') c.cab = x.checked;
-        else if (f === 'pasillo') c.pasillo = v >= 0 ? v : 80;
-        else if (f === 'sepObj') c.sepObj = v >= 0 ? v : 40;
-        else if (f === 'pasoDetras') c.pasoDetras = v >= 0 ? v : 50;
-        else if (f === 'sala') { ui.salaId = x.value; ui.sel = null; }
+        else if (f === 'pasillo') c.pasillo = v >= 0 ? v : 70;
+        else if (f === 'sepObj') c.sepObj = v >= 0 ? v : 20;
+        else if (f === 'pasoDetras') c.pasoDetras = v >= 0 ? v : 10;
+        else if (f === 'sala') { ui.salaId = x.value; ui.sel = null; ui.medA = null; quitarMover(); }
         else if (f === 'op.copasVino' || f === 'op.reserva') c.op[f.slice(3)] = v >= 0 ? v : '';
         else if (f === 's.nombre' && s) { s.nombre = x.value.trim() || s.nombre; sucias = true; }
         else if ((f === 's.w' || f === 's.h') && s) { if (v >= 2 && v <= 100) { s[f.slice(2)] = Math.round(v * 100); sucias = true; } }
@@ -964,6 +1086,7 @@
         if (!cont.__pm) {
             cont.__pm = {};
             cont.addEventListener('pointerdown', alPulsar);
+            cont.addEventListener('pointermove', medirSobrevolar);
             cont.addEventListener('click', alClic);
             cont.addEventListener('change', alCambiar);
             document.addEventListener('keydown', alTeclear);
@@ -976,5 +1099,5 @@
     }
 
     window.PrepararMesas = { contenedor: contenedor, activar: activar, mostrar: pintar, repartir: repartir, material: material,
-        _pruebas: { sanear: sanear, mal: mal, colocar: colocar, huella: huella, cuerpo: cuerpo, sillasFisicas: sillasFisicas, svgSala: svgSala, repartirYColocar: repartirYColocar, ponerDatos: function (d) { datos = sanear(d); } } };
+        _pruebas: { sanear: sanear, mal: mal, colocar: colocar, huella: huella, cuerpo: cuerpo, sillasFisicas: sillasFisicas, svgSala: svgSala, repartirYColocar: repartirYColocar, cfg: cfg, imanMedir: imanMedir, puntoB: puntoB, rectsMedir: rectsMedir, textoMedida: textoMedida, ui: ui, ponerDatos: function (d) { datos = sanear(d); } } };
 })();
