@@ -17,7 +17,7 @@
     var S = window.EDITOR_SITIO;
     if (!S) return;
     window.APP_VERSIONS = window.APP_VERSIONS || {};
-    window.APP_VERSIONS.sugHistorial = '1.1.0'; // 20 nov (2): al entrar en la pestaña siempre empieza en «Ahora»; barra más ancha y fina (una línea); flechas ← → del teclado para cambiar de momento (Inicio = el 1º, Fin = Ahora). 1.0.0: 20 nov: hoja de Sugerencias con ◀ fecha ▶ (cada guardado en que cambian las sugerencias) y "Aplicar esta configuración y guardar en la web" (solo quedan activas esas; las que ya no existen se vuelven a crear con sus idiomas e Info)
+    window.APP_VERSIONS.sugHistorial = '1.2.0'; // 22 nov: «🗑 Eliminar esta guardada» (borra ese momento de sugerencias-historial.json; la carta no cambia) y aviso en los momentos guardados de que ✕ / ➕ solo van en «Ahora». 1.1.0: 20 nov (2): al entrar en la pestaña siempre empieza en «Ahora»; barra más ancha y fina (una línea); flechas ← → del teclado para cambiar de momento (Inicio = el 1º, Fin = Ahora). 1.0.0: 20 nov: hoja de Sugerencias con ◀ fecha ▶ (cada guardado en que cambian las sugerencias) y "Aplicar esta configuración y guardar en la web" (solo quedan activas esas; las que ya no existen se vuelven a crear con sus idiomas e Info)
 
     var REPO = 'https://api.github.com/repos/' + S.repo;
     var DIR = S.ruta.indexOf('/') >= 0 ? S.ruta.slice(0, S.ruta.lastIndexOf('/') + 1) : '';
@@ -123,6 +123,8 @@
         '#sh-barra button:disabled{opacity:.4;cursor:default}' +
         '#sh-fecha{font-weight:700;min-width:190px;text-align:center}' +
         '#sh-aplicar{background:#0d5c63!important;color:#fff;border-color:#0d5c63!important;font-weight:600}' +
+        '#sh-borrar{color:#b91c1c!important;border-color:#fca5a5!important;background:#fef2f2!important}' +
+        '#sh-estado .sh-nota{color:#64748b;font-style:italic}' +
         '#sh-barra.sh-pasado{background:#fff7ed;border-color:#fdba74}' +
         '#sh-tecla{color:#94a3b8;font-size:12px}' +
         '#sh-estado{line-height:1.4;font-size:12.5px}#sh-estado:not(:empty){padding:2px 0 4px;border-top:1px dashed #fdba74;margin-top:2px}' +
@@ -136,12 +138,13 @@
         b.innerHTML = '<div class="sh-fila">🕘 <b>Sugerencias guardadas:</b>' +
             '<button id="sh-ant" title="Momento anterior">◀</button><span id="sh-fecha">Ahora</span><button id="sh-sig" title="Momento siguiente">▶</button>' +
             '<button id="sh-ahora" title="Volver a la carta de ahora (tecla Fin)">⏭ Ahora</button><span id="sh-cuenta" style="color:#64748b"></span>' +
-            '<span id="sh-tecla">· teclas ← →</span><span style="flex:1"></span><button id="sh-aplicar" hidden>✔ Aplicar esta configuración y guardar en la web</button></div><div id="sh-estado"></div>';
+            '<span id="sh-tecla">· teclas ← →</span><span style="flex:1"></span><button id="sh-borrar" hidden title="Borra esta hoja guardada del historial (la carta no cambia)">🗑 Eliminar esta guardada</button><button id="sh-aplicar" hidden>✔ Aplicar esta configuración y guardar en la web</button></div><div id="sh-estado"></div>';
         cont.parentNode.insertBefore(b, cont);
         $('sh-ant').onclick = function () { mover(pos === -1 ? hist.cambios.length - 1 : pos - 1); };
         $('sh-sig').onclick = function () { mover(pos >= hist.cambios.length - 1 ? -1 : pos + 1); };
         $('sh-ahora').onclick = function () { mover(-1); };
         $('sh-aplicar').onclick = aplicar;
+        $('sh-borrar').onclick = borrarGuardada;
         $('sh-estado').addEventListener('change', function (e) {
             var c = e.target.closest && e.target.closest('input[data-mismo]');
             if (!c) return;
@@ -158,6 +161,7 @@
         $('sh-ahora').disabled = pos === -1;
         $('sh-barra').classList.toggle('sh-pasado', pos !== -1);
         $('sh-aplicar').hidden = pos === -1;
+        $('sh-borrar').hidden = pos === -1;
         if (pos === -1) {
             $('sh-fecha').textContent = 'Ahora (la carta de hoy)';
             $('sh-cuenta').textContent = n ? n + ' guardada' + (n > 1 ? 's' : '') : 'aún no hay ninguna: se apuntan al guardar en la web';
@@ -178,7 +182,7 @@
                 ' <label><input type="checkbox" data-mismo="' + x.id + '"> es el mismo plato</label>');
             else if (x.estado === 'falta') li.push('<span class="sh-aviso">✖ ' + nom + ': ya no existe → se volverá a crear (con sus idiomas, Info y foto de entonces)</span>');
         });
-        var h = '<div>✔ ' + iguales + ' igual' + (iguales === 1 ? '' : 'es') + ' que ahora' + (an.apagar.length ? ' · se desactivarán ' + an.apagar.length + ': ' + an.apagar.map(function (p) { return esc(corto(p.es)); }).join(', ') : '') + '</div>';
+        var h = '<div class="sh-nota">Hoja guardada (solo para ver o volver a ella): ✕ / ➕ para quitar o añadir platos solo salen en ⏭ Ahora.</div><div>✔ ' + iguales + ' igual' + (iguales === 1 ? '' : 'es') + ' que ahora' + (an.apagar.length ? ' · se desactivarán ' + an.apagar.length + ': ' + an.apagar.map(function (p) { return esc(corto(p.es)); }).join(', ') : '') + '</div>';
         if (li.length) h += '<ul>' + li.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>';
         if (!an.lista.length) h += '<div class="sh-aviso">En ese momento no había ninguna sugerencia activa.</div>';
         $('sh-estado').innerHTML = h;
@@ -239,6 +243,51 @@
             ocupado = false; $('sh-aplicar').disabled = false;
             var g = $('sh-guardando'); if (g) g.remove();
             alert('❌ No se pudieron aplicar: ' + err.message);
+        }
+    }
+
+    // ---------- borrar un momento guardado (22 nov) ----------
+    // Solo toca sugerencias-historial.json: quita ese cambio (y su conjunto si nadie más lo usa). La carta no cambia.
+    function serializar(h) {
+        var J = JSON.stringify, cs = Object.keys(h.conjuntos || {});
+        return '{\n  "formato": 1,\n  "conjuntos": {\n' + cs.map(function (k) { return '    ' + J(k) + ': ' + J(h.conjuntos[k]); }).join(',\n') + '\n  },\n' +
+            '  "cambios": [\n' + (h.cambios || []).map(function (c) { return '    ' + J(c); }).join(',\n') + '\n  ]\n}\n';
+    }
+    var b64a = function (t) { return btoa(unescape(encodeURIComponent(t))); };
+    var deB64 = function (t) { return decodeURIComponent(escape(atob(String(t || '').replace(/\s/g, '')))); };
+    async function borrarGuardada() {
+        if (pos === -1 || ocupado || !hist) return;
+        var c = hist.cambios[pos], n = (hist.conjuntos[c.c] || []).length;
+        var texto = '¿Eliminar la hoja de Sugerencias guardada del ' + fechaTxt(c.t) + ' (' + n + ' sugerencia' + (n === 1 ? '' : 's') + ')?\n\n' +
+            'Solo se borra de «Sugerencias guardadas»: la carta, los platos y la hoja de ahora NO cambian.\nNo se puede deshacer.';
+        var ok = await (window.confirmarEditor ? window.confirmarEditor(texto, { si: 'Sí, eliminar esta guardada', no: 'Cancelar' }) : Promise.resolve(confirm(texto)));
+        if (!ok) return;
+        ocupado = true; $('sh-borrar').disabled = true; $('sh-borrar').textContent = '⏳ Eliminando…';
+        var ruta = '/contents/' + ARCHIVO.split('/').map(encodeURIComponent).join('/');
+        try {
+            for (var intento = 0; intento < 3; intento++) {
+                var j = await api(ruta);
+                if (!j) throw new Error('no hay historial en GitHub');
+                var h = JSON.parse(deB64(j.content));
+                h.conjuntos = h.conjuntos || {}; h.cambios = h.cambios || [];
+                var i = h.cambios.findIndex(function (x) { return x.t === c.t && x.c === c.c; });
+                if (i < 0) { hist = h; break; }   // ya no estaba (borrado desde otro sitio)
+                h.cambios.splice(i, 1);
+                var usados = {}; h.cambios.forEach(function (x) { usados[x.c] = 1; });
+                Object.keys(h.conjuntos).forEach(function (k) { if (!usados[k]) delete h.conjuntos[k]; });
+                var r = await fetch(REPO + ruta, { method: 'PUT', headers: { Authorization: 'Bearer ' + token(), Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'Editor: eliminar sugerencias guardadas del ' + fechaTxt(c.t), content: b64a(serializar(h)), sha: j.sha }) });
+                if (r.status === 401 && window.AccesoEditor) window.AccesoEditor.caducado();
+                if (r.status === 409 || r.status === 422) continue;   // otro guardado a la vez: releer y repetir
+                if (!r.ok) throw new Error('GitHub HTTP ' + r.status);
+                hist = h; break;
+            }
+            leido = Date.now();
+            mover(pos >= hist.cambios.length ? hist.cambios.length - 1 : pos);   // se queda en la siguiente (o la anterior si era la última)
+        } catch (err) {
+            alert('❌ No se pudo eliminar: ' + err.message);
+        } finally {
+            ocupado = false; $('sh-borrar').disabled = false; $('sh-borrar').textContent = '🗑 Eliminar esta guardada';
         }
     }
 
